@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee — help, fast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="walvee-ui.css" />
+<style>
+  :root {
+    --bg: #eef2f7; --surface: #fff; --surface-2: #f6f8fc;
+    --ink: #15233b; --ink-2: #5b6b82; --ink-3: #95a2b6;
+    --line: #e7ecf3; --accent: #ff6a3d; --accent-2: #ffb23e;
+    --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
+    --accent-soft: #fff0ea; --ok: #12b981;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Manrope", system-ui, sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.5; }
+  .lp a { color: inherit; text-decoration: none; }
+  .lp-wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+  .lp h1, .lp h2, .lp h3 { letter-spacing: -.03em; margin: 0; font-weight: 800; }
+  .lp-eyebrow { font-size: 12.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+
+  .lp-nav { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .lp-nav .lp-wrap { display: flex; align-items: center; gap: 14px; height: 72px; }
+  .lp-logo { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 22px; letter-spacing: -.03em; }
+  .lp-logo .lp-mk { width: 38px; height: 38px; border-radius: 12px; background: var(--grad); display: flex; align-items: center; justify-content: center; flex: none; }
+  .lp-links { display: flex; gap: 30px; margin-left: 26px; font-weight: 700; font-size: 14.5px; color: var(--ink-2); }
+  .lp-links a:hover { color: var(--ink); }
+  .lp-spacer { flex: 1; }
+  .lp-btn { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; padding: 13px 22px; border-radius: 999px; border: none; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .lp-btn.grad { background: var(--grad); color: #fff; }
+  .lp-btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  .lp-btn.lg { padding: 16px 28px; font-size: 16px; }
+  .lp-btn.light { background: #fff; color: var(--ink); }
+
+  .lp-hero { position: relative; overflow: hidden; }
+  .lp-hero .lp-wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 30px; align-items: center; padding-top: 56px; padding-bottom: 64px; }
+  .lp-hero h1 { font-size: clamp(44px, 6vw, 76px); line-height: .98; }
+  .lp-sub { font-size: 19px; color: var(--ink-2); max-width: 30ch; margin: 22px 0 30px; font-weight: 500; }
+  .lp-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .lp-meta { display: flex; gap: 28px; margin-top: 34px; }
+  .lp-meta .v { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+  .lp-meta .k { font-size: 12.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+  .lp-phonewrap { position: relative; display: flex; justify-content: center; }
+  .lp-glow { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: var(--grad); filter: blur(80px); opacity: .22; top: 40px; right: -20px; z-index: 0; }
+  .lp-phonewrap .phone { box-shadow: 0 50px 90px -40px rgba(20,30,50,.5); z-index: 1; }
+
+  .lp-sec { padding: 76px 0; }
+  .lp-sechead { text-align: center; max-width: 640px; margin: 0 auto 48px; }
+  .lp-sechead h2 { font-size: clamp(30px, 4vw, 44px); margin-top: 12px; }
+  .lp-sechead p { color: var(--ink-2); font-size: 17px; margin-top: 14px; }
+
+  .lp-svcgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .lp-svc { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 26px; box-shadow: 0 12px 34px -22px rgba(20,35,59,.26); }
+  .lp-svc .lp-ic { width: 56px; height: 56px; border-radius: 16px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .lp-svc h3 { font-size: 20px; }
+  .lp-svc p { color: var(--ink-2); font-size: 14.5px; margin: 7px 0 14px; }
+  .lp-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .lp-tag { font-size: 12.5px; font-weight: 700; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; }
+
+  .lp-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .lp-step .n { width: 46px; height: 46px; border-radius: 14px; background: var(--grad); color: #fff; font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+  .lp-step h3 { font-size: 21px; }
+  .lp-step p { color: var(--ink-2); font-size: 15px; margin-top: 8px; }
+
+  .lp-proband { background: var(--grad); border-radius: 30px; padding: 56px; color: #fff; display: grid; grid-template-columns: 1.2fr .8fr; gap: 30px; align-items: center; position: relative; overflow: hidden; }
+  .lp-proband .lp-blob { position: absolute; border-radius: 50%; background: rgba(255,255,255,.13); }
+  .lp-proband h2 { font-size: clamp(28px, 3.5vw, 40px); position: relative; }
+  .lp-proband p { font-size: 17px; opacity: .94; margin: 16px 0 26px; max-width: 38ch; position: relative; }
+  .lp-prostats { display: flex; flex-direction: column; gap: 14px; position: relative; }
+  .lp-prostat { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.25); border-radius: 16px; padding: 16px 18px; }
+  .lp-prostat .v { font-size: 22px; font-weight: 800; }
+  .lp-prostat .k { font-size: 13px; opacity: .9; font-weight: 600; }
+
+  .lp-footer { border-top: 1px solid var(--line); padding: 46px 0 60px; }
+  .lp-footer .lp-wrap { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-start; }
+  .lp-col h4 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 0 0 12px; }
+  .lp-col a { display: block; color: var(--ink-2); font-weight: 600; font-size: 14.5px; margin-bottom: 9px; cursor: pointer; transition: color .15s; }
+  .lp-col a:hover { color: var(--accent); }
+  .lp-badges { display: flex; gap: 10px; }
+  .lp-store { display: inline-flex; align-items: center; gap: 9px; background: var(--ink); color: #fff; border-radius: 12px; padding: 10px 16px; font-weight: 700; }
+  .lp-store .s1 { font-size: 10px; opacity: .8; font-weight: 600; display: block; line-height: 1; }
+  .lp-store .s2 { font-size: 15px; line-height: 1.2; }
+
+  /* ---- reveal on scroll ---- */
+  .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ---- trust strip ---- */
+  .lp-trust { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); }
+  .lp-trust .lp-wrap { display: flex; align-items: center; justify-content: space-between; gap: 30px; flex-wrap: wrap; padding: 26px 28px; }
+  .lp-trust .ti { display: flex; align-items: center; gap: 12px; }
+  .lp-trust .ti .tn { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+  .lp-trust .ti .tk { font-size: 13px; font-weight: 700; color: var(--ink-3); max-width: 14ch; line-height: 1.25; }
+  .lp-trust .ti .tic { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+
+  /* ---- feature split ---- */
+  .lp-feat { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+  .lp-featlist { display: flex; flex-direction: column; }
+  .lp-fitem { display: flex; gap: 16px; padding: 22px 0; border-top: 1px solid var(--line); }
+  .lp-fitem:first-child { border-top: none; }
+  .lp-fitem .fic { width: 48px; height: 48px; border-radius: 14px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+  .lp-fitem h3 { font-size: 19px; }
+  .lp-fitem p { color: var(--ink-2); font-size: 14.5px; margin-top: 5px; }
+  .lp-featvis { position: relative; display: flex; justify-content: center; }
+  .lp-featvis .card-demo { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 30px 60px -30px rgba(20,35,59,.4); padding: 22px; width: 100%; max-width: 380px; }
+
+  /* ---- testimonials ---- */
+  .lp-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .lp-quote { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 26px; box-shadow: 0 12px 34px -22px rgba(20,35,59,.26); display: flex; flex-direction: column; gap: 14px; }
+  .lp-quote .stars { color: var(--accent-2); display: flex; gap: 3px; }
+  .lp-quote p { font-size: 15.5px; color: var(--ink); margin: 0; line-height: 1.55; }
+  .lp-quote .who { display: flex; align-items: center; gap: 11px; margin-top: auto; }
+  .lp-quote .who .av { width: 40px; height: 40px; border-radius: 12px; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
+  .lp-quote .who .nm { font-weight: 800; font-size: 14.5px; }
+  .lp-quote .who .rl { font-size: 12.5px; color: var(--ink-3); font-weight: 700; }
+
+  /* ---- FAQ ---- */
+  .lp-faq { max-width: 780px; margin: 0 auto; }
+  .lp-faqitem { border-bottom: 1px solid var(--line); }
+  .lp-faqq { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 4px; cursor: pointer; font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
+  .lp-faqq .chev { color: var(--ink-3); transition: transform .25s; flex: none; }
+  .lp-faqa { color: var(--ink-2); font-size: 15.5px; line-height: 1.6; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s ease; padding: 0 4px; }
+  .lp-faqitem.open .lp-faqa { max-height: 240px; padding: 0 4px 24px; }
+  .lp-faqitem.open .chev { transform: rotate(180deg); }
+
+  /* ---- interest form ---- */
+  .lp-join { background: var(--surface); border-top: 1px solid var(--line); }
+  .lp-joingrid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: center; }
+  .lp-joinaside .lp-pt { display: flex; gap: 13px; align-items: flex-start; margin-top: 18px; }
+  .lp-joinaside .lp-pt .pc { width: 26px; height: 26px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+  .lp-joinaside .lp-pt span { font-size: 15px; color: var(--ink-2); font-weight: 600; }
+  .lp-formcard { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 34px; box-shadow: 0 30px 70px -36px rgba(20,35,59,.4); }
+  .lp-seg2 { display: flex; gap: 10px; margin-bottom: 6px; }
+  .lp-rolebtn { flex: 1; padding: 14px 10px; border: 1.5px solid var(--line); border-radius: 14px; font-weight: 800; font-size: 14.5px; cursor: pointer; background: var(--surface-2); color: var(--ink-2); display: flex; align-items: center; justify-content: center; gap: 9px; transition: .15s; font-family: inherit; }
+  .lp-rolebtn.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .lp-fl { font-size: 13px; font-weight: 800; color: var(--ink-2); display: block; margin: 14px 0 7px; }
+  .lp-input { width: 100%; padding: 14px 15px; border: 1.5px solid var(--line); border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 600; background: var(--surface-2); color: var(--ink); transition: .15s; }
+  .lp-input::placeholder { color: var(--ink-3); font-weight: 500; }
+  .lp-input:focus { border-color: var(--accent); outline: none; background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .lp-input.err { border-color: #e11d48; }
+  select.lp-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2395a2b6' stroke-width='2'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px; }
+  .lp-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .lp-errmsg { color: #e11d48; font-size: 12.5px; font-weight: 700; margin-top: 6px; display: none; }
+  .lp-errmsg.show { display: block; }
+  .lp-submit { width: 100%; margin-top: 20px; justify-content: center; }
+  .lp-fineprint { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 14px; }
+  .lp-success { text-align: center; padding: 26px 10px; }
+  .lp-success .sc-ic { width: 76px; height: 76px; border-radius: 24px; background: var(--grad); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
+  .lp-success h3 { font-size: 26px; }
+  .lp-success p { color: var(--ink-2); font-size: 16px; margin-top: 10px; }
+
+  /* ---- hero carousel ---- */
+  .hero-carousel { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .hero-stage { position: relative; width: 328px; height: 709px; }
+  .hero-slide { position: absolute; top: 0; left: 0; transform: scale(.84); transform-origin: top left; animation: heroFade .55s ease; }
+  @keyframes heroFade { from { opacity: 0; } to { opacity: 1; } }
+  .hero-dots { display: flex; gap: 8px; }
+  .hero-dots .hd { width: 8px; height: 8px; border-radius: 50%; background: var(--line); border: none; padding: 0; cursor: pointer; transition: .2s; }
+  .hero-dots .hd.on { width: 24px; border-radius: 4px; background: var(--accent); }
+
+  /* ---- plans ---- */
+  .lp-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; align-items: stretch; }
+  .lp-plan { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 30px 26px; display: flex; flex-direction: column; box-shadow: 0 12px 34px -22px rgba(20,35,59,.26); }
+  .lp-plan.pop { border: 1.5px solid var(--accent); box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--accent) 45%, transparent); position: relative; }
+  .lp-plan .pbadge { position: absolute; top: -13px; left: 26px; background: var(--grad); color: #fff; font-size: 12px; font-weight: 800; padding: 6px 14px; border-radius: 999px; }
+  .lp-plan .pname { font-size: 14px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+  .lp-plan.pop .pname { color: var(--accent); }
+  .lp-plan .pprice { font-size: 42px; font-weight: 800; letter-spacing: -.03em; margin: 12px 0 2px; }
+  .lp-plan .pprice .pm { font-size: 16px; font-weight: 700; color: var(--ink-3); }
+  .lp-plan .pcomm { display: inline-flex; align-items: baseline; gap: 7px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px; margin: 16px 0 20px; }
+  .lp-plan.pop .pcomm { background: var(--accent-soft); border-color: transparent; }
+  .lp-plan .pcomm .cv { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+  .lp-plan.pop .pcomm .cv { color: var(--accent); }
+  .lp-plan .pcomm .cl { font-size: 12.5px; font-weight: 700; color: var(--ink-3); }
+  .lp-plan .pfeat { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; font-size: 14.5px; color: var(--ink-2); font-weight: 600; }
+  .lp-plan .pfeat .pc { width: 20px; height: 20px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px; }
+  .lp-plan .lp-btn { margin-top: auto; justify-content: center; width: 100%; }
+  .lp-plantable { margin-top: 26px; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); }
+  .lp-plantable table { width: 100%; border-collapse: collapse; }
+  .lp-plantable th, .lp-plantable td { padding: 15px 20px; text-align: left; font-size: 15px; }
+  .lp-plantable thead th { background: var(--surface-2); font-weight: 800; color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+  .lp-plantable td { border-top: 1px solid var(--line); font-weight: 700; }
+  .lp-plantable td:first-child { color: var(--ink); }
+  .lp-plantable td:not(:first-child) { color: var(--ink-2); }
+
+  @media (max-width: 880px) {
+    .lp-hero .lp-wrap, .lp-proband, .lp-feat, .lp-joingrid { grid-template-columns: 1fr; }
+    .lp-phonewrap { margin-top: 8px; }
+    .lp-svcgrid, .lp-steps, .lp-quotes, .lp-row2, .lp-plans { grid-template-columns: 1fr; }
+    .lp-links { display: none; }
+    .lp-trust .lp-wrap { gap: 20px; }
+  }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#eef2f7">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#eef2f7"/>
+    <rect x="430" y="250" width="340" height="300" rx="56" fill="url(#g)"/>
+    <path d="M548 372l104-49-49 104-11-44-44-11z" fill="#fff"/>
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ff8a4c"/>
+        <stop offset="0.55" stop-color="#ff5a6e"/>
+        <stop offset="1" stop-color="#ffb23e"/>
+      </linearGradient>
+    </defs>
+  </svg>
+</template>
+<div class="lp">
+
+<nav class="lp-nav"><div class="lp-wrap">
+  <a class="lp-logo" href="#"><span class="lp-mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></span>walvee</a>
+  <div class="lp-links"><a href="walvee Servicos.html">Serviços</a><a href="walvee Planos.html">Planos</a><a href="walvee Prestador.html">Seja prestador</a><a href="walvee Sobre.html">Sobre</a></div>
+  <span class="lp-spacer"></span>
+  <a class="lp-btn grad" href="#join">Acesso antecipado</a>
+</div></nav>
+
+<header class="lp-hero">
+  <div class="lp-glow"></div>
+  <div class="lp-wrap">
+    <div>
+      <span class="lp-eyebrow">Gestão de manutenção de ativos</span>
+      <h1>Toda a manutenção<br/>dos seus ativos<br/>em um só lugar.</h1>
+      <p class="lp-sub">Do primeiro chamado ao histórico completo de manutenção, conectamos clientes, ativos e prestadores de serviço em um único ecossistema.</p>
+      <div class="lp-cta">
+        <a class="lp-btn grad lg" href="#join">Acesso antecipado</a>
+        <a class="lp-btn ghost lg" href="#pro">Seja prestador</a>
+      </div>
+      <div class="lp-meta">
+        <div><div class="v">6&nbsp;min</div><div class="k">1ª proposta</div></div>
+        <div><div class="v">4,9&nbsp;★</div><div class="k">Nota dos profissionais</div></div>
+        <div><div class="v">12k+</div><div class="k">Atendimentos</div></div>
+      </div>
+    </div>
+    <div class="lp-phonewrap" id="heroPhone"></div>
+  </div>
+</header>
+
+<div class="lp-trust">
+  <div class="lp-wrap">
+    <div class="ti"><span class="tic" data-ic="flash"></span><div><div class="tn">6 min</div><div class="tk">até a 1ª proposta</div></div></div>
+    <div class="ti"><span class="tic" data-ic="shieldCheck"></span><div><div class="tn">100%</div><div class="tk">profissionais verificados</div></div></div>
+    <div class="ti"><span class="tic" data-ic="star"></span><div><div class="tn">4.9 / 5</div><div class="tk">em 12k+ serviços</div></div></div>
+    <div class="ti"><span class="tic" data-ic="pin"></span><div><div class="tn">São Paulo</div><div class="tk">ativa agora, mais cidades em breve</div></div></div>
+  </div>
+</div>
+
+<section class="lp-sec" id="services">
+  <div class="lp-wrap">
+    <div class="lp-sechead"><span class="lp-eyebrow">O que cobrimos</span><h2>Uma plataforma para toda manutenção</h2><p>Do socorro veicular ao reparo predial — chame um profissional verificado em segundos e mantenha o histórico de cada ativo.</p></div>
+    <div class="lp-svcgrid">
+      <div class="lp-svc"><div class="lp-ic" data-ic="car"></div><h3>Veicular</h3><p>De volta à estrada, rápido.</p><div class="lp-tags"><span class="lp-tag">Pneu furado</span><span class="lp-tag">Bateria</span><span class="lp-tag">Guincho</span><span class="lp-tag">Sem chave</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="drop"></div><h3>Casa & imóvel</h3><p>Reparos e manutenção sob demanda.</p><div class="lp-tags"><span class="lp-tag">Encanamento</span><span class="lp-tag">Elétrica</span><span class="lp-tag">Limpeza</span><span class="lp-tag">Chaveiro</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="paw"></div><h3>Pets</h3><p>Cuidado que vem até você.</p><div class="lp-tags"><span class="lp-tag">Passeio</span><span class="lp-tag">Banho & tosa</span><span class="lp-tag">Veterinário</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec lp-join" id="join">
+  <div class="lp-wrap">
+    <div class="lp-joingrid">
+      <div class="lp-joinaside reveal">
+        <span class="lp-eyebrow">Acesso antecipado</span>
+        <h2 style="font-size:clamp(30px,4vw,44px);margin-top:12px">Seja o primeiro quando a walvee chegar perto de você.</h2>
+        <p style="color:var(--ink-2);font-size:17px;margin-top:14px">Entre na lista e avisamos assim que lançarmos na sua cidade — com vantagens para os primeiros.</p>
+        <div class="lp-pt"><span class="pc" data-ic="check"></span><span>Acesso prioritário no lançamento</span></div>
+        <div class="lp-pt"><span class="pc" data-ic="check"></span><span>Créditos de fundador nos primeiros serviços</span></div>
+        <div class="lp-pt"><span class="pc" data-ic="check"></span><span>Sem spam — só um e-mail de lançamento</span></div>
+      </div>
+
+      <div class="lp-formcard reveal">
+        <form id="joinForm" novalidate>
+          <div class="lp-seg2">
+            <button type="button" class="lp-rolebtn on" data-role="customer"><span data-ic="search"></span> Preciso de ajuda</button>
+            <button type="button" class="lp-rolebtn" data-role="pro"><span data-ic="briefcase"></span> Quero trabalhar</button>
+          </div>
+
+          <label class="lp-fl">Nome completo</label>
+          <input class="lp-input" name="name" placeholder="Mateus Almeida" autocomplete="name" />
+          <div class="lp-errmsg" data-err="name">Informe seu nome.</div>
+
+          <div class="lp-row2">
+            <div><label class="lp-fl">Email</label><input class="lp-input" name="email" type="email" placeholder="you@email.com" autocomplete="email" /></div>
+            <div><label class="lp-fl">Telefone (opcional)</label><input class="lp-input" name="phone" placeholder="+55 11 ..." autocomplete="tel" /></div>
+          </div>
+          <div class="lp-errmsg" data-err="email">Informe um e-mail válido.</div>
+
+          <div class="lp-row2">
+            <div><label class="lp-fl">Cidade</label><input class="lp-input" name="city" placeholder="São Paulo" value="São Paulo" /></div>
+            <div><label class="lp-fl" data-svc-label>Tenho interesse em</label>
+              <select class="lp-input" name="service">
+                <option>Veicular</option><option>Casa & imóvel</option><option>Pets</option><option>Qualquer um / não sei</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="lp-btn grad lg lp-submit">Entrar na lista <span data-ic="arrowR"></span></button>
+          <div class="lp-fineprint">Ao entrar você aceita os Termos e a Política de Privacidade.</div>
+        </form>
+        <div class="lp-success" id="joinSuccess" style="display:none">
+          <div class="sc-ic"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
+          <h3>Você está na lista!</h3>
+          <p id="joinSuccessMsg">Avisaremos por e-mail assim que a walvee chegar perto de você.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" id="why">
+  <div class="lp-wrap">
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">A plataforma</span><h2>Clientes, ativos e prestadores conectados.</h2><p>Centralize chamados, acompanhe cada serviço e mantenha o histórico completo de manutenção de cada ativo — tudo em um só lugar.</p></div>
+    <div class="lp-feat">
+      <div class="lp-featlist reveal">
+        <div class="lp-fitem"><span class="fic" data-ic="dollar"></span><div><h3>Você define o orçamento</h3><p>Diga quanto quer pagar. O medidor mostra a média da região para uma proposta justa.</p></div></div>
+        <div class="lp-fitem"><span class="fic" data-ic="star"></span><div><h3>Profissionais verificados</h3><p>Todo prestador é verificado e aprovado. A avaliação é mútua, mantendo a qualidade.</p></div></div>
+        <div class="lp-fitem"><span class="fic" data-ic="navigate"></span><div><h3>Acompanhe em tempo real</h3><p>Veja o profissional chegando no mapa e converse pelo app.</p></div></div>
+        <div class="lp-fitem"><span class="fic" data-ic="pix"></span><div><h3>Pague como quiser</h3><p>Pix, cartão ou dinheiro — só após o serviço concluído.</p></div></div>
+      </div>
+      <div class="lp-featvis reveal">
+        <div class="card-demo">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center" data-ic="car"></span><div><div style="font-weight:800;font-size:15px">Pneu furado · Av. Paulista</div><div style="font-size:12.5px;color:var(--ink-3);font-weight:700">3 propostas · urgente</div></div><span style="margin-left:auto;font-size:11.5px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:5px 10px;border-radius:999px">LIVE</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:11px;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:13px 14px">
+              <span style="width:38px;height:38px;border-radius:11px;background:#3b82f6;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px">RC</span>
+              <div style="flex:1"><div style="font-weight:800;font-size:14px">Rafael C.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.9 · 8 min de distância</div></div>
+              <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$120</div><div style="font-size:10.5px;font-weight:800;color:var(--accent)">Melhor opção</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:16px;padding:13px 14px">
+              <span style="width:38px;height:38px;border-radius:11px;background:#12b981;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px">JS</span>
+              <div style="flex:1"><div style="font-weight:800;font-size:14px">João S.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.7 · 12 min de distância</div></div>
+              <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$95</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" id="how" style="background:var(--surface)">
+  <div class="lp-wrap">
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">Como funciona</span><h2>Três passos até pronto</h2></div>
+    <div class="lp-steps">
+      <div class="lp-step reveal"><div class="n">1</div><h3>Peça ajuda</h3><p>Escolha a categoria, dê alguns detalhes e a localização. Urgente ou agendado.</p></div>
+      <div class="lp-step reveal"><div class="n">2</div><h3>Compare propostas</h3><p>Profissionais próximos enviam ofertas com preço, prazo e nota. Escolha a ideal.</p></div>
+      <div class="lp-step reveal"><div class="n">3</div><h3>Acompanhe & pague</h3><p>Acompanhe no mapa e pague por Pix, cartão ou dinheiro ao concluir.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" id="reviews">
+  <div class="lp-wrap">
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">Quem usa, recomenda</span><h2>Histórias reais com a walvee</h2></div>
+    <div class="lp-quotes">
+      <div class="lp-quote reveal"><div class="stars" data-stars></div><p>"Pneu furado de noite na Marginal. Em dois minutos veio proposta e em vinte eu estava rodando. Salvou."</p><div class="who"><span class="av" style="background:#ff6a3d">CA</span><div><div class="nm">Camila A.</div><div class="rl">Cliente · São Paulo</div></div></div></div>
+      <div class="lp-quote reveal"><div class="stars" data-stars></div><p>"Defini meu preço e vi a média da área — sem pechincha. O encanador veio na mesma tarde."</p><div class="who"><span class="av" style="background:#3b82f6">DR</span><div><div class="nm">Diego R.</div><div class="rl">Cliente · Pinheiros</div></div></div></div>
+      <div class="lp-quote reveal"><div class="stars" data-stars></div><p>"Como profissional, pego trabalhos perto e fico com 97%. As fotos de antes/depois geram confiança."</p><div class="who"><span class="av" style="background:#12b981">RC</span><div><div class="nm">Rafael C.</div><div class="rl">profissional walvee · 213 trabalhos</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" id="planos">
+  <div class="lp-wrap">
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">Planos para prestadores</span><h2>Comece grátis, cresça quando quiser.</h2><p>Quanto mais avançado o plano, menor a comissão por serviço. Sem fidelidade — mude de plano a qualquer momento.</p></div>
+    <div class="lp-plans">
+      <div class="lp-plan reveal">
+        <div class="pname">Free</div>
+        <div class="pprice">R$ 0<span class="pm">/mês</span></div>
+        <div class="pcomm"><span class="cv">5%</span><span class="cl">de comissão por serviço</span></div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Receba trabalhos na sua região</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Perfil verificado e avaliações</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Pagamento seguro via Pix</div>
+        <a class="lp-btn ghost" href="#join">Começar grátis</a>
+      </div>
+      <div class="lp-plan pop reveal">
+        <div class="pbadge">Mais popular</div>
+        <div class="pname">Pro</div>
+        <div class="pprice">R$ 99<span class="pm">/mês</span></div>
+        <div class="pcomm"><span class="cv">2,5%</span><span class="cl">de comissão por serviço</span></div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Tudo do Free</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Destaque nas buscas e propostas</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Raio de cobertura ampliado</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Relatórios de ganhos</div>
+        <a class="lp-btn grad" href="#join">Assinar Pro</a>
+      </div>
+      <div class="lp-plan reveal">
+        <div class="pname">Enterprise</div>
+        <div class="pprice">R$ 299<span class="pm">/mês</span></div>
+        <div class="pcomm"><span class="cv">1%</span><span class="cl">de comissão por serviço</span></div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Tudo do Pro</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Múltiplos profissionais e equipes</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Gestão de ativos e histórico</div>
+        <div class="pfeat"><span class="pc" data-ic="check"></span> Gerente de conta dedicado</div>
+        <a class="lp-btn ghost" href="#join">Falar com vendas</a>
+      </div>
+    </div>
+    <div class="lp-plantable reveal">
+      <table>
+        <thead><tr><th>Plano</th><th>Mensalidade</th><th>Comissão</th></tr></thead>
+        <tbody>
+          <tr><td>Free</td><td>R$ 0</td><td>5%</td></tr>
+          <tr><td>Pro</td><td>R$ 99</td><td>2,5%</td></tr>
+          <tr><td>Enterprise</td><td>R$ 299</td><td>1%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" id="pro">
+  <div class="lp-wrap">
+    <div class="lp-proband reveal">
+      <div class="lp-blob" style="width:260px;height:260px;top:-90px;right:-60px"></div>
+      <div class="lp-blob" style="width:160px;height:160px;bottom:-70px;left:30%"></div>
+      <div>
+        <h2>Ganhe no seu ritmo como profissional walvee.</h2>
+        <p>Receba trabalhos na sua região, defina suas propostas e construa uma reputação. Planos a partir de 1% de comissão.</p>
+        <a class="lp-btn light lg" href="#join">Começar a ganhar</a>
+      </div>
+      <div class="lp-prostats">
+        <div class="lp-prostat"><div class="v">A partir de 1%</div><div class="k">Comissão por serviço · escolha seu plano</div></div>
+        <div class="lp-prostat"><div class="v">Sua área, seu horário</div><div class="k">Defina raio e disponibilidade</div></div>
+        <div class="lp-prostat"><div class="v">Receba rápido</div><div class="k">Pagamento seguro a cada serviço</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" id="faq">
+  <div class="lp-wrap">
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">Bom saber</span><h2>Perguntas frequentes</h2></div>
+    <div class="lp-faq">
+      <div class="lp-faqitem"><div class="lp-faqq">Em quanto tempo o profissional chega?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Em chamados urgentes em São Paulo, a primeira proposta chega em poucos minutos e o profissional em ~6. Em serviços agendados você escolhe dia e horário.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Como é definido o preço?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Os profissionais são verificados?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Como eu pago?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Pix, cartão ou dinheiro — sua escolha, só após o serviço. Peças extras são detalhadas e aprovadas por você.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Quanto custa trabalhar como prestador?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">O cadastro é grátis. Há planos de 5% a 1% de comissão — peças repassadas a custo — e pagamento seguro a cada serviço.</div></div>
+    </div>
+  </div>
+</section>
+
+
+
+<footer class="lp-footer"><div class="lp-wrap">
+  <div class="lp-col" style="max-width:240px">
+    <a class="lp-logo" href="#" style="margin-bottom:12px"><span class="lp-mk"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></span>walvee</a>
+    <p style="color:var(--ink-3);font-size:13.5px;margin:0">Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.</p>
+  </div>
+  <span class="lp-spacer"></span>
+  <div class="lp-col"><h4>Empresa</h4><a href="walvee Sobre.html">Sobre</a><a href="walvee Sobre.html#equipe">Carreiras</a><a href="walvee Suporte.html">Contato</a></div>
+  <div class="lp-col"><h4>Serviços</h4><a href="walvee Servicos.html#veicular">Veicular</a><a href="walvee Servicos.html#casa">Casa</a><a href="walvee Servicos.html#pets">Pets</a></div>
+  <div class="lp-col"><h4>Prestadores</h4><a href="walvee Prestador.html">Seja prestador</a><a href="walvee Planos.html">Planos</a><a href="walvee Suporte.html">Suporte</a></div>
+  <div class="lp-col"><h4>Jurídico</h4><a href="walvee Legal.html#termos">Termos</a><a href="walvee Legal.html#privacidade">Privacidade</a></div>
+</div></footer>
+
+</div>
+<script type="text/babel" src="walvee-kit.jsx"></script>
+<script type="text/babel" src="walvee-screens-customer.jsx"></script>
+<script type="text/babel" src="walvee-screens-provider.jsx"></script>
+<script type="text/babel">
+  function HeroCarousel() {
+    const screens = [HomeScreen, CategoriesScreen, RequestDetailScreen, TrackingScreen];
+    const [i, setI] = React.useState(0);
+    React.useEffect(() => {
+      const t = setInterval(() => setI((p) => (p + 1) % screens.length), 3000);
+      return () => clearInterval(t);
+    }, []);
+    const Cur = screens[i];
+    return (
+      <div className="hero-carousel">
+        <div className="hero-stage">
+          <div key={i} className="hero-slide"><Phone theme="sunset"><Cur /></Phone></div>
+        </div>
+        <div className="hero-dots">
+          {screens.map((_, k) => (
+            <button key={k} className={"hd" + (k === i ? " on" : "")} onClick={() => setI(k)} aria-label={"Tela " + (k + 1)}></button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("heroPhone")).render(<HeroCarousel />);
+  document.querySelectorAll("[data-ic]").forEach((el) => {
+    ReactDOM.createRoot(el).render(<Icon name={el.dataset.ic} size={el.closest('.lp-faqq') ? 22 : (el.closest('.lp-pt') || el.closest('.lp-rolebtn') || el.closest('[data-svc-label]')) ? 16 : 28} />);
+  });
+  // star rows in testimonials
+  document.querySelectorAll("[data-stars]").forEach((el) => {
+    ReactDOM.createRoot(el).render(<>{[0,1,2,3,4].map(i => <Icon key={i} name="star" size={16} fill="current" />)}</>);
+  });
+</script>
+<script>
+  // reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll(".lp-faqq").forEach((q) => {
+    q.addEventListener("click", () => {
+      const item = q.parentElement;
+      const open = item.classList.contains("open");
+      document.querySelectorAll(".lp-faqitem.open").forEach((i) => i.classList.remove("open"));
+      if (!open) item.classList.add("open");
+    });
+  });
+
+  // interest form
+  const form = document.getElementById("joinForm");
+  let role = "customer";
+  document.querySelectorAll(".lp-rolebtn").forEach((b) => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".lp-rolebtn").forEach((x) => x.classList.remove("on"));
+      b.classList.add("on");
+      role = b.dataset.role;
+      document.querySelector("[data-svc-label]").textContent = role === "pro" ? "I can work in" : "Tenho interesse em";
+    });
+  });
+  const showErr = (key, on) => {
+    const m = form.querySelector('[data-err="' + key + '"]');
+    const inp = form.querySelector('[name="' + key + '"]');
+    if (m) m.classList.toggle("show", on);
+    if (inp) inp.classList.toggle("err", on);
+  };
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const okEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    showErr("name", !name);
+    showErr("email", !okEmail);
+    if (!name || !okEmail) return;
+    try {
+      const list = JSON.parse(localStorage.getItem("walvee_waitlist") || "[]");
+      list.push({ role, name, email, phone: form.phone.value.trim(), city: form.city.value.trim(), service: form.service.value, at: Date.now() });
+      localStorage.setItem("walvee_waitlist", JSON.stringify(list));
+    } catch (err) {}
+    form.style.display = "none";
+    const msg = document.getElementById("joinSuccessMsg");
+    msg.textContent = role === "pro"
+      ? "Valeu, " + name.split(" ")[0] + "! Vamos entrar em contato para te cadastrar como profissional walvee."
+      : "Valeu, " + name.split(" ")[0] + "! Avisaremos por e-mail assim que a walvee chegar perto de você.";
+    document.getElementById("joinSuccess").style.display = "block";
+  });
+</script>
+</body>
+</html>

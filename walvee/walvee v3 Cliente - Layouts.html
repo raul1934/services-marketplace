@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee v3 · Cliente — Layouts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@500;600;700;800&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="walvee-ui.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: #eceef1; }
+  #root { height: 100vh; }
+  /* Gallery fix: let each phone grow to its content so nothing is clipped
+     by the app's fixed 844px shell + overflow:hidden scroll region. */
+  .phone { height: auto !important; min-height: 844px; }
+  .phone .scroll { overflow: visible !important; }
+  .dc-card:has(.phone) { height: auto !important; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="walvee-kit.jsx"></script>
+<script type="text/babel" src="walvee-screens-customer.jsx"></script>
+<script type="text/babel" src="walvee-screens-provider.jsx"></script>
+<script type="text/babel" src="walvee-create-flows.jsx"></script>
+<script type="text/babel" src="walvee-provider-bid-flows.jsx"></script>
+<script type="text/babel" src="walvee-job-flow.jsx"></script>
+<script type="text/babel" src="walvee-v3-customer.jsx"></script>
+<script type="text/babel">
+const ABSTYLE = { borderRadius: 40, background: "transparent", boxShadow: "0 30px 60px -24px rgba(20,30,50,.4)" };
+const T = "sunset";
+
+const art = (id, label, Comp, h = 844) => (
+  <DCArtboard key={id} id={id} label={label} width={390} height={h} style={ABSTYLE}>
+    <Phone theme={T}>{typeof Comp === "function" ? <Comp /> : Comp}</Phone>
+  </DCArtboard>
+);
+
+const RS = window.FLOWS.roadside.steps; // [label, Comp, h]
+
+function App() {
+  return (
+    <DesignCanvas>
+
+      <DCSection id="bom-inicio" title="Caminho bom · 1 — Pede ajuda" subtitle="Início, escolhe o serviço e cria o pedido nomeando o preço (com faixa de referência da região).">
+        {art("home", "Início", HomeScreen)}
+        {art("cats", "Escolhe serviço", CategoriesScreen)}
+        {RS.map(([label, Step, h], i) => art("create-" + i, "Criar pedido · " + label.replace(/^Step \d+ · /, ""), Step, h || 844))}
+      </DCSection>
+
+      <DCSection id="bom-propostas" title="Caminho bom · 2 — Publica & escolhe" subtitle="Pedido publicado (lance cego) → profissionais pedem detalhes → cliente responde → propostas chegam → vê o detalhe → escolhe por nota + histórico + distância.">
+        {art("pub", "Pedido publicado", V3PedidoPublicado)}
+        {art("perguntas", "Profissionais pediram detalhes", V3PerguntasPendentes)}
+        {art("answer", "Responde ao profissional", CustomerAnswerInfo)}
+        {art("bids", "Recebe propostas", RequestDetailScreen)}
+        {art("proposta", "Detalhe da proposta", V3PropostaDetalhe)}
+        {art("escolhe", "Confirma o profissional", V3EscolheProposta)}
+      </DCSection>
+
+      <DCSection id="bom-servico" title="Caminho bom · 3 — Serviço acontece" subtitle="Acompanha → (acréscimo na chegada, se houver) → libera o atendimento → execução → (peça, se houver) → pagamento → avalia.">
+        {art("track", "A caminho", TrackingScreen)}
+        {art("acrescimo", "Acréscimo na chegada · se houver", V3Acrescimo)}
+        {art("code", "Libera atendimento", CustomerJobCode)}
+        {art("servico", "Serviço em execução", V3EmServico, 1180)}
+        {art("peca", "Aprovar peça · se houver", V3AprovaPeca)}
+        {art("pgto-ok", "Pagamento + recibo", V3PagamentoOk)}
+        {art("rate", "Avalia o profissional", RateScreen)}
+      </DCSection>
+
+      <DCSection id="bom-fosso" title="Caminho bom · 4 — Histórico do ativo (o fosso)" subtitle="O serviço entra no histórico do bem → abra um registro para ver o detalhe completo. É o que traz o cliente de volta.">
+        {art("assets", "Meus ativos", AssetsScreen)}
+        {art("asset-civic", "Histórico do veículo", () => <AssetDetailScreen id="civic" />, 980)}
+        {art("servico-detalhe", "Detalhe de um serviço", V3ServicoDetalhe, 1060)}
+      </DCSection>
+
+      <DCSection id="ref-peca" title="De onde vem a peça · lado prestador (referência)" subtitle="O valor da peça é lançado pelo profissional em “Trabalho ativo” → “Adicionar peça”. Daí vira a aprovação no app do cliente.">
+        {art("prov-ativo", "Trabalho ativo · peças + valor", ProviderActiveJob, 1000)}
+        {art("prov-addpeca", "Adicionar peça (lança o valor)", () => <ProviderActiveJob sheet />, 1000)}
+      </DCSection>
+
+      <DCSection id="ruim-acompanha" title="Não fecha · a — Acompanhar o pedido" subtitle="Entra por: aba Pedidos. Abre o chamado — uma só tela com abas Informações · Propostas · Histórico.">
+        {art("meus-pedidos", "Meus pedidos (listagem)", V3MeusPedidos)}
+        {art("ped-info", "Detalhe · aba Informações", () => <V3PedidoDetalhe tab="info" />)}
+        {art("ped-props", "Detalhe · aba Propostas", () => <V3PedidoDetalhe tab="props" />)}
+        {art("ped-hist", "Detalhe · aba Histórico", () => <V3PedidoDetalhe tab="hist" />)}
+      </DCSection>
+
+      <DCSection id="ruim-decisao" title="Não fecha · b — Ninguém aceita no prazo" subtitle="Entra por: janela expira sem propostas. A mesma tela de detalhe, agora encerrada → 3 saídas na aba Informações.">
+        {art("exp-info", "Detalhe encerrado · Informações (decisão)", () => <V3PedidoDetalhe tab="info" expired />)}
+        {art("exp-props", "Detalhe encerrado · Propostas (vazio)", () => <V3PedidoDetalhe tab="props" expired />)}
+        {art("exp-hist", "Detalhe encerrado · Histórico", () => <V3PedidoDetalhe tab="hist" expired />)}
+        {art("op-subir", "Saída A · subir valor → republicado", V3Republicado)}
+        {art("op-lance", "Saída B · abrir lance → disputa", V3LanceAberto)}
+        {art("op-esperar", "Saída C · manter e esperar mais", V3JanelaReaberta)}
+      </DCSection>
+
+      <DCSection id="ruim-cancela" title="Não fecha · c — Cancelar" subtitle="Entra por: link “cancelar” na espera ou na decisão.">
+        {art("cancelar", "Toca em cancelar", V3Cancelar)}
+        {art("cancelado", "Confirmado · sem custo", V3CanceladoOk)}
+      </DCSection>
+
+      <DCSection id="ruim-servico" title="Caminho ruim · serviço & cobrança" subtitle="No-show → reabre com reembolso. Bait-and-switch → disputa em mediação. Falha de pagamento → troca o método e conclui.">
+        {art("noshow", "Profissional não aparece", V3NoShow)}
+        {art("reaberto", "Reaberto + reembolso", V3Reaberto)}
+        {art("disputa", "Disputa (valor ≠ combinado)", V3Disputa)}
+        {art("disputa-status", "Disputa em mediação", V3DisputaStatus)}
+        {art("falha-pgto", "Falha de pagamento", V3FalhaPagamento)}
+        {art("pgto-refeito", "Pago após trocar método", V3PagamentoOk)}
+      </DCSection>
+
+      <DCSection id="ruim-garantia" title="Caminho ruim · pós-serviço" subtitle="Serviço ruim aciona a garantia → refazer ou reembolso → acompanha a resolução.">
+        {art("garantia", "Garantia / reembolso", V3Garantia)}
+        {art("garantia-status", "Garantia em andamento", V3GarantiaStatus)}
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

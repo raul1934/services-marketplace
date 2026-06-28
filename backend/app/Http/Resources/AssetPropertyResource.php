@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class AssetPropertyResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'property_type_id' => $this->property_type_id,
+            'kind' => $this->propertyType?->name, // resolved name for display
+            'unit' => $this->unit,
+            'size' => $this->size,
+            'address' => $this->address,
+            'floor' => $this->floor,
+            'condo' => $this->condo,
+        ];
+    }
+}

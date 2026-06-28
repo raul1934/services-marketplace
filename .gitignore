@@ -1,0 +1,74 @@
+### Node
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Runtime data
+*.pid
+*.pid.lock
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output
+
+# Build output
+dist/
+build/Release
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Framework build output and caches
+.cache
+.parcel-cache
+.next
+out/
+.nuxt
+
+# dotenv environment variable files
+.env
+.env.local
+.env.*.local
+
+# npm cache directory
+.npm
+*.tgz
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/install-state.gz
+.pnp.*
+
+### Windows
+# Windows thumbnail cache files
+Thumbs.db
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows shortcuts
+*.lnk
+
+# NTFS "mark of the web" alternate-data-stream artifacts
+*Zone.Identifier
+
+### Project-specific
+# Local archives (not source)
+*.zip
+
+# Claude Code session/plan files
+.claude/
+
+# Playwright auth state — regenerated per run, contains live session tokens
+e2e/.auth/
+
+# Retired Ionic/Angular frontend — superseded by the Expo apps in frontend/,
+# kept locally for reference but no longer tracked
+frontend-ionic-legacy/

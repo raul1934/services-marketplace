@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee — Suporte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="walvee-pages.css" />
+</head>
+<body class="lp" data-page="support">
+<div id="wv-nav"></div>
+
+<header class="lp-phead">
+  <div class="lp-glow"></div>
+  <div class="lp-wrap">
+    <span class="lp-eyebrow">Suporte &amp; contato</span>
+    <h1>Como podemos ajudar?</h1>
+    <p>Tire dúvidas, fale com nosso time ou consulte as perguntas frequentes. Respondemos em até um dia útil.</p>
+  </div>
+</header>
+
+<section class="lp-sec" style="padding-top:16px">
+  <div class="lp-wrap">
+    <div class="lp-contact">
+      <div class="lp-cinfo reveal">
+        <h2 style="font-size:24px">Fale com a gente</h2>
+        <div class="ci"><span class="cc" data-ic="mail" data-sz="20"></span><div><div class="ct">E-mail</div><div class="cs">ajuda@walvee.app</div></div></div>
+        <div class="ci"><span class="cc" data-ic="chat" data-sz="20"></span><div><div class="ct">Chat no app</div><div class="cs">Disponível para clientes e prestadores</div></div></div>
+        <div class="ci"><span class="cc" data-ic="headset" data-sz="20"></span><div><div class="ct">Atendimento</div><div class="cs">Seg a sáb · 8h às 20h</div></div></div>
+        <div class="ci"><span class="cc" data-ic="pin" data-sz="20"></span><div><div class="ct">Onde estamos</div><div class="cs">São Paulo · SP</div></div></div>
+      </div>
+
+      <div class="lp-formcard reveal">
+        <form id="supportForm" novalidate>
+          <div class="lp-row2">
+            <div><label class="lp-fl">Nome</label><input class="lp-input" name="name" placeholder="Seu nome" /></div>
+            <div><label class="lp-fl">E-mail</label><input class="lp-input" name="email" type="email" placeholder="voce@email.com" /></div>
+          </div>
+          <label class="lp-fl">Assunto</label>
+          <select class="lp-input" name="topic">
+            <option>Sou cliente — preciso de ajuda</option>
+            <option>Sou prestador — preciso de ajuda</option>
+            <option>Quero falar com vendas</option>
+            <option>Trabalhe conosco</option>
+            <option>Outro</option>
+          </select>
+          <label class="lp-fl">Mensagem</label>
+          <textarea class="lp-input" name="msg" placeholder="Conte o que precisa…"></textarea>
+          <button type="submit" class="lp-btn grad lg" style="width:100%;justify-content:center;margin-top:18px">Enviar mensagem</button>
+          <div id="supportNote" style="text-align:center;font-size:12.5px;color:var(--ink-3);margin-top:12px">Respondemos em até 1 dia útil.</div>
+        </form>
+        <div class="lp-success" id="supportOk" style="display:none;text-align:center;padding:20px 6px">
+          <div style="width:70px;height:70px;border-radius:22px;background:var(--grad);display:flex;align-items:center;justify-content:center;margin:0 auto 16px"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
+          <h3 style="font-size:24px">Mensagem enviada!</h3>
+          <p style="color:var(--ink-2);margin-top:8px" id="supportOkMsg">Obrigado pelo contato. Em breve retornamos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" style="padding-top:0">
+  <div class="lp-wrap">
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">Bom saber</span><h2>Perguntas frequentes</h2></div>
+    <div class="lp-faq">
+      <div class="lp-faqitem"><div class="lp-faqq">Quão rápido um profissional chega?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Em chamados urgentes em São Paulo, a primeira proposta costuma chegar em poucos minutos e o profissional em cerca de 6, em média. Serviços agendados deixam você escolher dia e janela de horário.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Como funciona o preço?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Você define um orçamento e recebe propostas concorrentes. Um medidor mostra a média da região para você saber o que é justo — sem tabela fixa.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Os profissionais são verificados?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Sim. Cada profissional envia documento, comprovante e selfie, e é aprovado pela nossa equipe antes de atender. Avaliações de mão dupla mantêm a qualidade.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Como faço o pagamento?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Pix, cartão de crédito ou dinheiro — você escolhe, e só após o serviço concluído. Peças adicionais são detalhadas e aprovadas por você antes.</div></div>
+    </div>
+  </div>
+</section>
+
+<div id="wv-footer"></div>
+<script src="walvee-chrome.js"></script>
+<script>
+  (function () {
+    var f = document.getElementById("supportForm");
+    f.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = (f.name.value || "").trim();
+      if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.value)) { f.email.style.borderColor = "var(--danger)"; return; }
+      document.getElementById("supportOkMsg").textContent = "Obrigado, " + name.split(" ")[0] + "! Em breve retornamos no seu e-mail.";
+      f.style.display = "none";
+      document.getElementById("supportOk").style.display = "block";
+    });
+  })();
+</script>
+</body>
+</html>

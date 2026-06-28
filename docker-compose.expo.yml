@@ -1,0 +1,58 @@
+# Optional: run the two Expo (Metro) dev servers in Docker.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.expo.yml up customer provider
+#
+# These containers serve only the JavaScript bundle (Metro). The app on your
+# phone must be a DEVELOPMENT BUILD (Expo Go won't work — the apps use
+# react-native-maps). Build it once on the host or via EAS, then point it at
+# the URL Metro prints.
+#
+# Connection mode (pick one):
+#  • Tunnel (default, easiest behind Docker/WSL/NAT): EXPO_HOST=tunnel
+#      Routes through Expo's servers — no LAN/port config needed. Slower.
+#  • LAN (fastest): EXPO_HOST=lan and EXPO_LAN_IP=<your machine's LAN IP>.
+#      Device must be on the same network; ports 19181/19182 are published.
+#
+# Set these in a .env file next to this compose file, e.g.:
+#   EXPO_HOST=lan
+#   EXPO_LAN_IP=192.168.0.10
+
+services:
+  customer:
+    image: node:22-bookworm
+    container_name: walvee-customer
+    working_dir: /app
+    command: >
+      sh -lc '[ -d node_modules ] || npm install;
+              cd apps/customer &&
+              npx expo start --port 19181 --host ${EXPO_HOST:-tunnel}'
+    environment:
+      EXPO_NO_TELEMETRY: "1"
+      # Used in LAN mode so the bundle URL points at your machine, not the container.
+      REACT_NATIVE_PACKAGER_HOSTNAME: ${EXPO_LAN_IP:-}
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "19181:19181"
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  provider:
+    image: node:22-bookworm
+    container_name: walvee-provider
+    working_dir: /app
+    command: >
+      sh -lc '[ -d node_modules ] || npm install;
+              cd apps/provider &&
+              npx expo start --port 19182 --host ${EXPO_HOST:-tunnel}'
+    environment:
+      EXPO_NO_TELEMETRY: "1"
+      REACT_NATIVE_PACKAGER_HOSTNAME: ${EXPO_LAN_IP:-}
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "19182:19182"
+    stdin_open: true
+    tty: true
+    restart: unless-stopped

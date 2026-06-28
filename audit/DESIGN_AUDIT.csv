@@ -1,0 +1,19 @@
+ID,Screen,Component,Category,Severity,Issue,Expected,Recommended Fix,Design Tokens
+RESP-01,All,Screen,Responsive,High,"Phone-frame UI not constrained; stretches edge-to-edge >=768px (no maxWidth)","Centered phone-width column (~390-430px) or true desktop layout","Add maxWidth+alignSelf center to Screen container",layout
+DS-02,All,Alert.alert,Design System,High,"Errors/success use native window.alert/confirm on web (unstyled, blocking)","Branded toast + in-context error banner","Add shared Toast/Snackbar; replace Alert for non-destructive feedback","surface,danger,ok,dangerSoft,okSoft"
+A11Y-01,All,Text/containers,Accessibility,High,"No semantic headings/landmarks (RN-web divs); h1/h3 visual only","Heading hierarchy + nav/main/header landmarks","accessibilityRole=header + role landmarks/aria",none
+A11Y-02,All,"Button(grad),caption(ink3)",Accessibility,High,"White-on-accent ~2.5:1, ink3 captions ~2.4:1 fail WCAG AA",">=4.5:1 text / >=3:1 large/UI","Darker ink on accent or darker accent; caption -> ink2","accent,accentInk,ink2,ink3,ok,danger"
+A11Y-03,All,"Button,IconButton,Card,Chip,text-link",Accessibility,Medium,"No visible focus ring; text-as-link not keyboard-focusable","Visible focus + keyboard operable","focus-visible outline; accessibilityRole=button",accent
+A11Y-04,"create-request,auth,assets,dispute,warranty",Field,Accessibility,Medium,"Errors via Alert; not tied to inputs (no aria-describedby/role=alert)","Programmatic label/error association + live region","Route validation into Field error; aria-describedby; liveRegion",danger
+INT-01,All,"Button,Card,Chip,nav",Interaction,Medium,"No hover state on web (only pressed)","Hover feedback on pointer devices","Add RNW hover styles","surface2,accentSoft"
+INT-02,home/dashboard,AppDrawer,Interaction,Medium,"Drawer is fade Modal; no slide/edge-swipe","Slide-from-left + optional edge-swipe","Animate translateX or use @react-navigation/drawer","bg,line,shadow"
+VIS-01,"customer track,provider nearby map",react-native-maps,Visual,Medium,"Map shows placeholder on web (no web support)","Live map with pins/ETA","Web map fallback (Leaflet/Google JS) or hide Mapa tab on web",none
+FUNC-01,"lists/detail",React Query screens,Functional,Medium,"No in-screen error/retry state on fetch failure","Error card + retry","Render query.isError state",surface,danger
+FUNC-03,provider edit-profile,insurance,Functional,Medium,"'com seguro' badge shows but no toggle UI to enable coverage","Opt-in insurance toggle in profile","Add Toggle calling updateProfile({insured})","ok,accent"
+FUNC-02,home/dashboard drawer,AppDrawer,Functional,Low,"Drawer omits spec items (Enderecos,Pagamentos,Notificacoes,Ajuda,Avaliacoes)","All spec items or explicit 'em breve'","Build missing screens or mark coming-soon",none
+DS-03,multiple,"AssetCard,sheets,KV rows,initialsOf",Design System,Medium,"Duplicated UI patterns across screens","Shared AssetRow/BottomSheet/KeyValueRow/initials","Extract to @walvee/shared",none
+VIS-02,All,Icon,Design System,Low,"Icon set swapped to lucide; glyph drift vs prototype; pix->QrCode approx","Prototype icon style","Acceptable; restore custom set if pixel-match required",none
+RESP-02,All tabs,"TabBar,nearby toggle,FAB",Responsive,Medium,"Mobile chrome (84px tab bar, FAB, floating toggle) stranded on desktop","Constrained phone column or desktop nav","Resolve via RESP-01",none
+TYPO-01,All,fonts,Visual,Low,"FOUT / blank until fonts load (_layout returns null)","Preload + font-display swap; splash not blank","Preload fonts; show splash",font
+A11Y-05,various,Text onPress,Accessibility,Low,"Some actions are <44px text links, no button role","44x44 targets + button semantics","Wrap in Pressable hitSlop + role=button",none
+VIS-03,native launch,Expo Go,Visual,Low,"Android 17 emulator 16KB compat dialog over app","No system dialog","Environment-only; use dev/native build on stable image",none

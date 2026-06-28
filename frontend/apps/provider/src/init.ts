@@ -1,0 +1,17 @@
+import { configureApi, configureRealtime, setupWeb } from '@walvee/shared';
+import { config } from './config';
+
+let done = false;
+export function initServices() {
+  if (done) return;
+  done = true;
+  setupWeb();
+  configureApi({ baseUrl: config.apiUrl, tokenKey: config.tokenKey });
+  configureRealtime({
+    appKey: config.reverb.appKey,
+    wsHost: config.reverb.wsHost,
+    wsPort: config.reverb.wsPort,
+    forceTLS: config.reverb.forceTLS,
+    authBaseUrl: config.apiHost,
+  });
+}

@@ -1,0 +1,559 @@
+==============================================================================
+ walvee — ESPECIFICAÇÃO DE TELAS E FUNCIONALIDADES
+ Rede credenciada de serviços · sistema "sunset" (light + dark)
+==============================================================================
+
+Documento de referência. Lista, nos mínimos detalhes, o que cada tela faz,
+separando as duas pontas do marketplace:
+
+   [C] CLIENTE   — quem pede o serviço
+   [P] PRESTADOR — quem executa o serviço
+   [♦] COMPARTILHADO / SISTEMA
+
+Princípios do produto que aparecem nas telas:
+ - O cliente NOMEIA o preço; vê uma FAIXA DE REFERÊNCIA da região.
+ - Lances são CEGOS: um prestador não vê o lance do outro.
+ - Escolha NUNCA é só por preço: nota + histórico + distância.
+ - Pagamento por SPLIT: prestador e walvee recebem na hora.
+ - O "fosso": cada serviço vira REGISTRO no histórico do ativo (carro, casa…).
+ - Avaliação MÚTUA: cliente avalia prestador e vice-versa.
+ - Escopo CONGELADO: o pedido vale o que foi combinado (anti bait-and-switch).
+
+
+==============================================================================
+ PARTE 1 — APP DO CLIENTE  [C]
+==============================================================================
+
+------------------------------------------------------------------------------
+ 1.1  ENTRADA E CONTA
+------------------------------------------------------------------------------
+
+[C] CADASTRO · TELEFONE
+   - Cria conta usando número de telefone (campo com DDD).
+   - Opção de continuar com Google.
+   - Valida formato; segue para verificação por código.
+
+[C] CADASTRO · E-MAIL
+   - Mesma tela em modo e-mail (e-mail + senha).
+   - Alterna entre telefone/e-mail; Google disponível.
+
+[C] LOGIN
+   - Entrar com telefone/e-mail já cadastrado.
+   - Link "esqueci a senha"; opção Google.
+
+[C] VERIFICAR CÓDIGO
+   - Entrada de código OTP (6 dígitos) enviado por SMS/e-mail.
+   - Reenviar código com contador; avança ao confirmar.
+
+[C] TUTORIAL (3 slides)
+   - Mostrado no primeiro login.
+   - Explica: pedir ajuda, nomear preço, acompanhar e histórico.
+   - Pode pular; indicadores de progresso.
+
+------------------------------------------------------------------------------
+ 1.2  PEDIR AJUDA
+------------------------------------------------------------------------------
+
+[C] INÍCIO (Home)
+   - Saudação + avatar; menu hambúrguer à esquerda; sino de notificações.
+   - Card do pedido ativo (se houver) com status.
+   - Atalhos de "ajuda rápida" (categorias mais usadas).
+   - CTA principal "pedir serviço".
+   - Barra de navegação inferior (Início, Pedidos, Ativos, Conta).
+
+[C] CATEGORIAS
+   - Escolhe o que precisa: Veicular, Casa, Pets (e subníveis).
+   - Cada categoria com ícone e descrição curta.
+
+[C] CRIAR PEDIDO · VEICULAR (3 passos)
+   Passo 1 — Problema & veículo: descreve o problema, seleciona o veículo,
+             adiciona OBSERVAÇÕES e FOTOS (1 ou mais).
+   Passo 2 — Localização: define onde está (mapa + endereço).
+   Passo 3 — Confirma: nomeia o preço, vê a FAIXA DE REFERÊNCIA da região,
+             revisa e publica.
+
+[C] CRIAR PEDIDO · CASA / ENCANAMENTO (4 passos)
+   Passo 1 — Problema: descrição + fotos.
+   Passo 2 — Acesso: quem libera a entrada (eu, porteiro, terceiro).
+   Passo 3 — Agendamento: janelas de data/horário disponíveis.
+   Passo 4 — Confirma: nomeia preço + faixa de referência + publica.
+
+------------------------------------------------------------------------------
+ 1.3  PUBLICA, ESCLARECE E ESCOLHE
+------------------------------------------------------------------------------
+
+[C] PEDIDO PUBLICADO (aguardando propostas)
+   - Estado "aguardando" com CONTAGEM REGRESSIVA da janela de propostas.
+   - Mini stepper: Publicado › Propostas › Escolha › Match.
+   - Reexibe a faixa de referência e o valor nomeado.
+   - Aviso: só prestadores verificados veem; lances são cegos.
+   - Contador de profissionais avisados e "X vendo agora".
+   - Acesso a EDITAR e a CANCELAR SOLICITAÇÃO.
+
+[C] PROFISSIONAIS PEDIRAM DETALHES
+   - Aviso de que prestadores querem mais informação antes de propor.
+   - Lista quem perguntou (nome, nota) e o que pediu (perguntas / fotos).
+   - CTA "responder agora".
+
+[C] RESPONDE AO PROFISSIONAL
+   - Responde perguntas (texto) e anexa as FOTOS pedidas.
+   - Perguntas podem ser padrão da categoria.
+
+[C] RECEBE PROPOSTAS (detalhe + lances)
+   - Lista de propostas; cada uma com nota, distância/ETA e valor.
+   - Selos: "melhor nota", "mais barato".
+   - Mensagem-guia: escolha por nota + histórico + distância, não só preço.
+
+[C] DETALHE DA PROPOSTA (perfil)
+   - Perfil do profissional: nota, nº de serviços, selo verificado.
+   - O QUE ESTÁ INCLUSO no valor (mão de obra, deslocamento; peças à parte
+     ou inclusas — explicitado).
+   - Histórico do profissional NAQUELA categoria.
+   - Avaliações recentes.
+   - CTA "escolher este profissional"; atalho de chat.
+
+[C] CONFIRMA O PROFISSIONAL (match)
+   - Resumo final: profissional escolhido + serviço + quando + peças.
+   - Slide-to-confirm "arraste para confirmar · R$ X".
+   - Ao confirmar, o profissional é avisado e inicia o deslocamento.
+
+------------------------------------------------------------------------------
+ 1.4  SERVIÇO ACONTECE
+------------------------------------------------------------------------------
+
+[C] A CAMINHO (live tracking)
+   - Mapa com o profissional a caminho, ETA e progresso.
+   - Card do profissional com ligar / mensagem.
+
+[C] ACRÉSCIMO NA CHEGADA (se houver)
+   - Disparada quando o profissional, JÁ NO LOCAL e ANTES de iniciar,
+     reavalia e propõe um acréscimo.
+   - Mostra motivo + fotos + breakdown (combinado + acréscimo = novo total).
+   - Slide-to-confirm para aprovar; botão recusar (mantém o combinado).
+
+[C] LIBERA ATENDIMENTO
+   - Cliente libera o início (código/QR) — confirma presença do profissional.
+
+[C] SERVIÇO EM EXECUÇÃO
+   - Card do profissional (ligar / mensagem).
+   - Stepper: Aceito › A caminho › Em serviço › Concluído.
+   - Checklist do que está sendo feito (itens concluídos x pendentes).
+   - Tempo decorrido.
+   - Bloco VALORES: serviço contratado + peças aprovadas = total até agora;
+     sinaliza peça pendente.
+   - LISTA DE PEÇAS DO SERVIÇO, com status por linha:
+        • aprovada (✓ + horário + valor)
+        • aguardando aprovação (em destaque + botão "Aprovar" na própria linha)
+
+[C] APROVAR PEÇA (durante a execução)
+   - Aberta a partir da peça pendente.
+   - Mostra a peça específica, custo, e breakdown com o NOVO TOTAL
+     (serviço + peça já aprovada + esta peça).
+   - A peça entra no histórico do ativo com nota fiscal e garantia.
+   - Botões aprovar / recusar.
+
+[C] PAGAMENTO + RECIBO (sucesso)
+   - Confirmação "serviço concluído".
+   - Breakdown (serviço + taxa walvee = total pago).
+   - SPLIT detalhado: quanto vai ao profissional e à walvee.
+   - Forma de pagamento usada (ex.: Pix) + recibo por e-mail.
+   - CTA "avaliar profissional".
+
+[C] AVALIA O PROFISSIONAL
+   - Estrelas + tags rápidas (pontual, limpo…) + comentário + gorjeta.
+   - Ao enviar, atualiza o histórico do ativo.
+
+------------------------------------------------------------------------------
+ 1.5  HISTÓRICO DO ATIVO (O FOSSO)
+------------------------------------------------------------------------------
+
+[C] MEUS ATIVOS
+   - Lista de bens do cliente (carro, apartamento, ar-condicionado…).
+   - Cada ativo: ícone, identificação, nº de registros e último serviço.
+   - Adicionar ativo.
+
+[C] HISTÓRICO DO ATIVO (linha do tempo de manutenções)
+   - Topo: nº de serviços, total investido, nº de garantias.
+   - Callout de manutenção próxima a vencer ("Agendar").
+   - Timeline de serviços: data, km/cômodo, profissional + nota, custo,
+     badge de garantia.
+   - Existe para Honda Civic, Apartamento e Ar-condicionado.
+
+[C] DETALHE DE UM SERVIÇO (registro do histórico)
+   - Cabeçalho: serviço, data, km, badges (garantia, local).
+   - Profissional (nota + sua avaliação) + "contratar de novo".
+   - Peças & materiais (item, qtd, valor; itens inclusos marcados).
+   - Valores: mão de obra + peças + taxa = total pago.
+   - Comprovantes: nota fiscal, fotos.
+   - Ações: garantia / repetir serviço.
+
+------------------------------------------------------------------------------
+ 1.6  MEUS PEDIDOS (gestão)
+------------------------------------------------------------------------------
+
+[C] MEUS PEDIDOS (listagem)
+   - Em andamento: cada pedido com status (aguardando, a caminho…) e valor,
+     tocável para abrir.
+   - Anteriores: serviços concluídos com valor e selo "concluído".
+
+[C] DETALHE DO PEDIDO — TELA COM ABAS
+   Uma só tela com três abas reais:
+   • INFORMAÇÕES — status/contagem, resumo (serviço, local, quando),
+     faixa de preço, aviso de verificação, cancelar.
+   • PROPOSTAS — lista de profissionais (nota, distância, valor); contador.
+   • HISTÓRICO — linha do tempo do pedido com horários:
+        10:00 pedido criado · 10:01 publicado · 10:03 prestador perguntou ·
+        10:08 você respondeu · 10:14 propostas recebidas …
+   Estado "encerrado" (quando ninguém aceita) muda as abas:
+   • INFORMAÇÕES vira a DECISÃO (ver 1.7); PROPOSTAS fica vazia;
+     HISTÓRICO termina em "12:00 janela encerrada sem propostas".
+
+------------------------------------------------------------------------------
+ 1.7  CAMINHO RUIM · NÃO FECHA
+------------------------------------------------------------------------------
+
+[C] NINGUÉM ACEITA → DECISÃO (aba Informações no estado encerrado)
+   - "Ninguém aceitou R$ X" + faixa mostrando que ficou abaixo.
+   - Três SAÍDAS selecionáveis (clicar muda destaque e o botão de ação):
+        A) Subir para R$ Y (dentro da faixa) → botão "Republicar por R$ Y"
+        B) Abrir etapa de lance            → botão "Abrir etapa de lance"
+        C) Manter e esperar mais (+30 min) → botão "Esperar mais 30 min"
+   - Rodapé com DOIS botões: Cancelar solicitação (ghost) + ação escolhida.
+
+[C] SAÍDA A · REPUBLICADO
+   - Confirma republicação por novo valor (anterior x novo).
+   - Reavisa profissionais; nova janela de propostas.
+
+[C] SAÍDA B · LANCE ABERTO (disputa)
+   - Profissionais dão lance cego pelo serviço; contagem regressiva.
+   - Lista de lances (nota + valor); selos melhor avaliado / mais barato.
+   - CTA "escolher profissional".
+
+[C] SAÍDA C · JANELA REABERTA
+   - Espera +30 min mantendo o valor; contador grande.
+   - Aviso de menor procura; atalhos "subir valor" / "abrir lance".
+   - Cancelar disponível.
+
+[C] CANCELAR SOLICITAÇÃO
+   - Resumo do pedido.
+   - POLÍTICA: grátis se nenhum profissional a caminho; taxa após o match.
+   - Motivos (chips): resolvi sozinho, demorou, mudei de ideia, achei outro.
+   - Aviso: se a janela expirar sem decisão, fecha com o melhor avaliado.
+
+[C] CANCELADO · SEM CUSTO
+   - Confirmação "pedido cancelado"; taxa = grátis / R$ 0.
+   - CTA "publicar de novo".
+
+------------------------------------------------------------------------------
+ 1.8  CAMINHO RUIM · SERVIÇO & COBRANÇA
+------------------------------------------------------------------------------
+
+[C] PROFISSIONAL NÃO APARECE (no-show)
+   - Mapa + "ETA estourou" (atraso além do limite).
+   - Card do profissional "sem movimento há X min".
+   - Aviso: se não comparecer, reabre sem custo + penalidade ao prestador.
+   - Opções: aguardar +10 min / reabrir para outro / cancelar com reembolso.
+
+[C] REABERTO + REEMBOLSO
+   - "Procurando outro profissional" (sem custo).
+   - Penalidade aplicada ao anterior.
+   - Breakdown do reembolso (pago antes → reembolso → saldo retido R$ 0).
+
+[C] DISPUTA (valor ≠ combinado / bait-and-switch)
+   - Aviso: escopo congelado; o pedido vale o combinado.
+   - Breakdown combinado x cobrado = diferença em disputa.
+   - Campo "o que aconteceu" + evidências (fotos).
+   - Aviso: walvee retém o split até a mediação concluir.
+
+[C] DISPUTA EM MEDIAÇÃO (status)
+   - "Pagamento retido"; você não é cobrado enquanto isso.
+   - Timeline: disputa aberta › em análise › resolução (até 48h).
+   - Valores retidos; "falar com a walvee".
+
+[C] FALHA DE PAGAMENTO
+   - "Cartão recusado" (ou split incompleto).
+   - Trocar forma: Pix (na hora) / outro cartão / dinheiro no local.
+   - Breakdown do total; "tentar novamente".
+
+[C] PAGO APÓS TROCAR MÉTODO
+   - Reaproveita a tela de pagamento + recibo (sucesso) após nova tentativa.
+
+------------------------------------------------------------------------------
+ 1.9  CAMINHO RUIM · PÓS-SERVIÇO
+------------------------------------------------------------------------------
+
+[C] GARANTIA / REEMBOLSO
+   - Vinculada a um serviço mal avaliado.
+   - O que a garantia cobre: refazer o serviço / reembolso até teto R$ X.
+   - Prazo de acionamento (ex.: até 7 dias).
+   - Resolver: refazer (outro profissional, sem custo) / pedir reembolso.
+
+[C] GARANTIA EM ANDAMENTO (status)
+   - "Garantia aceita"; novo profissional designado sem custo.
+   - Timeline: acionada › profissional designado › reparo agendado.
+   - Card do novo profissional; "acompanhar reparo".
+
+
+==============================================================================
+ PARTE 2 — APP DO PRESTADOR  [P]
+==============================================================================
+
+------------------------------------------------------------------------------
+ 2.1  CREDENCIAMENTO
+------------------------------------------------------------------------------
+
+[P] TORNAR-SE PRO (cadastro)
+   - Início do credenciamento do profissional.
+
+[P] SETUP (conta → categorias → área → documentos → enviar)
+   - Conta: dados pessoais.
+   - Categorias: serviços que oferece.
+   - Área de serviço: raio/região de atendimento.
+   - Documentos: envio para verificação (antecedentes/curadoria).
+   - Enviar: submete para aprovação do admin.
+
+[P] AGUARDANDO APROVAÇÃO (bloqueado)
+   - Estado pendente; o profissional NÃO pode trabalhar até aprovar.
+   - Versões light e dark.
+   - (Curadoria + selo Verificado é o que sustenta o cold-start de quem
+     ainda não tem nota.)
+
+------------------------------------------------------------------------------
+ 2.2  ENCONTRAR & PROPOR
+------------------------------------------------------------------------------
+
+[P] PAINEL (dashboard)
+   - Botão ONLINE/offline; estatísticas do dia; trabalhos e próximos.
+   - Menu hambúrguer do prestador; sino.
+
+[P] SOLICITAÇÕES PRÓXIMAS · LISTA
+   - Pedidos perto, com abas Lista / Mapa / Calendário.
+   - IMPORTANTE: o prestador vê a MÉDIA DA ÁREA, não o valor que o cliente
+     nomeou.
+   - Perfil do cliente verificado.
+
+[P] PRÓXIMAS · MAPA
+   - Pins dos pedidos no mapa, marcados com o preço mediano da área.
+
+[P] AGENDADAS · CALENDÁRIO
+   - Pedidos agendados ainda sem dono, agrupados pelas datas em que o
+     cliente está disponível.
+
+[P] PERGUNTAR AO CLIENTE
+   - Antes de cotar, envia perguntas de esclarecimento.
+   - Pode usar PERGUNTAS PADRÃO da categoria e PEDIR 1+ FOTOS.
+   - Se for da MESMA categoria, vê o HISTÓRICO do ativo antes de propor.
+
+[P] FORMULÁRIO DO CLIENTE
+   - Monta/recebe um formulário estruturado de respostas do cliente.
+
+[P] ENVIAR PROPOSTA (bid)
+   - Define o preço num dial, ancorado à média da área (lance cego).
+   - DEFINE SE O VALOR INCLUI OU NÃO peças/materiais.
+   - Fluxos por categoria (veicular, casa).
+
+[P] PROPOSTA ENVIADA · STATUS
+   - Acompanha a proposta enviada (vista pelo cliente, etc.).
+
+[P] PROPOSTA ACEITA · STATUS
+   - Cliente escolheu este profissional; inicia o atendimento.
+
+[P] AGENDA (propostos + fechados)
+   - Visão dos pedidos em que propôs e dos serviços fechados.
+
+------------------------------------------------------------------------------
+ 2.3  EXECUTAR & RECEBER
+------------------------------------------------------------------------------
+
+[P] A CAMINHO (en route)
+   - Deslocamento até o local; navegação.
+
+[P] LIBERAR ATENDIMENTO (QR / código)
+   - Faz check-in escaneando o código do cliente para liberar o início.
+   - (Aqui também cabe o ACRÉSCIMO ANTES DE INICIAR: se reavaliar e achar
+     que ficará mais caro, abre o acréscimo no chamado; cliente aceita ou não.)
+
+[P] TRABALHO ATIVO (+ peças)
+   - Em serviço: fotos antes/depois, notas do trabalho.
+   - PEÇAS & MATERIAIS que o cliente aprova: lista com subtotal.
+   - Botão "Pedir aprovação · R$ Y" (mão de obra + peças).
+
+[P] ADICIONAR PEÇA (sheet)
+   - Folha para lançar a peça: peças comuns, nome, quantidade e PREÇO UNIT.
+   - Botão "Adicionar ao trabalho · R$ X" (aqui o VALOR é lançado).
+   - É a origem do que vira "Aprovar peça" no app do cliente.
+
+[P] AVALIAR O CLIENTE
+   - Outro lado da avaliação mútua: estrelas, tags e marcar como
+     cliente preferido.
+
+------------------------------------------------------------------------------
+ 2.4  CONTA DO PRESTADOR
+------------------------------------------------------------------------------
+
+[P] HUB DA CONTA
+   - Central do perfil (light + dark).
+
+[P] EDITAR PERFIL
+   - Dados profissionais, foto, descrição.
+
+[P] MEUS SERVIÇOS
+   - Gerencia os serviços oferecidos e preços-base.
+
+[P] GANHOS & SAQUES
+   - Saldo, histórico de ganhos (split) e saques (light + dark).
+
+
+==============================================================================
+ PARTE 3 — VERTICAL "ROTAS" (equipes / contratos)  [P]
+==============================================================================
+
+Módulo que estende o walvee do on-demand (chamados avulsos) para o
+atendimento RECORRENTE: equipes que visitam os mesmos ativos em rota, com
+serviços obrigatórios, checklists e relatório por cliente. Telas:
+
+[P] INÍCIO DO TURNO · EQUIPE
+   - "Olá, Rafael" / começar turno.
+   - Define o LÍDER do turno e SELECIONA a equipe (técnicos disponíveis,
+     com função e foto).
+   - Segue para a seleção de equipamentos.
+
+[P] EQUIPAMENTOS DO TURNO
+   - Lista de equipamentos a levar (kit de teste, ferramentas…), cada um
+     marcável como incluído.
+   - Garante que a equipe sai com o material certo para a rota.
+
+[P] MINHAS ROTAS
+   - Data + "turno ativo".
+   - Lista das rotas atribuídas ao turno (cada uma com nº de paradas e
+     progresso).
+
+[P] TURNO ATIVO · EQUIPE
+   - Resumo do turno em andamento: equipe selecionada + equipamentos.
+   - Aberto pelo ícone da equipe; mostra quem está no turno e suas funções.
+
+[P] DETALHE DA ROTA
+   - Paradas ORDENADAS da rota (ex.: Edifício Aurora, …).
+   - Cada parada com status (concluída/pendente), endereço, nº de serviços
+     e ativos.
+
+[P] FICHA DO ATIVO (LOCAL)
+   - Dados do ativo fixo no local (ex.: piscina/equipamento do prédio):
+     equipamento, histórico de visitas e fotos de referência.
+
+[P] VISITA EM EXECUÇÃO
+   - Hub da visita ativa em um local.
+   - Lista de serviços da visita com status (concluído/pendente) e horário.
+   - Acesso a adicionar serviço extra.
+
+[P] ADICIONAR SERVIÇO EXTRA
+   - Folha (catálogo) sobre a visita para incluir um serviço fora do
+     previsto (ex.: troca de filtro), categorizado.
+
+[P] SERVIÇO · PASSOS
+   - Detalhe de um serviço: notas do cliente, fotos de referência e os
+     PASSOS a seguir (cada um marcável).
+
+[P] EXECUÇÃO GUIADA · LEITURA
+   - Passos empilhados com o atual expandido; passo de LEITURA/MEDIÇÃO
+     (ex.: medir pH e cloro com o kit).
+
+[P] EXECUÇÃO GUIADA · CONSUMÍVEL
+   - Mesmo formato guiado, no passo de TROCA DE CONSUMÍVEL.
+
+[P] EXECUÇÃO (CHECKLIST)
+   - Checklist de conclusão da parada (serviços + equipamentos + consumíveis).
+
+[P] ATIVO MÓVEL (CARRO)
+   - Ficha de ativo móvel (veículo) com contrato em aberto — equivalente
+     ao ativo fixo, para frotas.
+
+[P] RELATÓRIO DO CLIENTE
+   - Relatório gerado ao final para o cliente do contrato: o que foi feito,
+     leituras, consumíveis trocados e fotos.
+
+
+==============================================================================
+ PARTE 4 — COMPARTILHADO / SISTEMA  [♦]
+==============================================================================
+
+[♦] MENU HAMBÚRGUER
+   - Drawer lateral compartilhado entre cliente e prestador.
+   - Cabeçalho com avatar/nome/nota; itens agrupados (Conta, Atividade, Mais);
+     badges de notificação; "Sair".
+   - Cliente: Meu perfil, Meus pedidos, Endereços, Pagamentos, Meus ativos,
+     Notificações, Quero ser prestador, Ajuda & garantia, Configurações.
+   - Prestador: Perfil profissional, Meus serviços, Ganhos & saques, Agenda,
+     Avaliações, Notificações, Ajuda & garantia, Configurações.
+   - Variações: largura (estreito/padrão/largo), densidade (confortável/
+     compacto) e ícones on/off.
+
+[♦] FOUNDATIONS
+   - Sistema "sunset" em light e dark: cor, tipografia, componentes
+     (cards, badges, botões, slide-to-confirm, faixa de preço, breakdown).
+
+[♦] TEMA
+   - Alternância light/dark (sunset/night) em todas as telas.
+
+[♦] BIBLIOTECA DE ÍCONES
+   - Ícones via Lucide, consistentes em todas as telas.
+
+[♦] AVALIAÇÃO MÚTUA
+   - Cliente avalia o prestador (1.4) e o prestador avalia o cliente (2.3).
+
+
+==============================================================================
+ PARTE 5 — SITE INSTITUCIONAL (web)  [♦]
+==============================================================================
+
+Páginas de marketing/suporte. Não são telas de app; rodam no navegador.
+
+[♦] LANDING (walvee Landing.html)
+   - "Toda a manutenção dos seus ativos em um só lugar."
+   - Hero com carrossel de telas do app (Phone), proposta de valor,
+     planos resumidos e CTAs. Conecta clientes, ativos e prestadores.
+
+[♦] SERVIÇOS (walvee Servicos.html)
+   - "Tudo para os imprevistos do dia a dia."
+   - O que a walvee cobre (veicular, casa…), urgente ou agendado;
+     profissionais verificados.
+
+[♦] PLANOS (walvee Planos.html)
+   - "Escolha seu plano. Quanto menor a comissão, melhor."
+   - Para clientes é sempre grátis; profissionais escolhem plano por
+     comissão conforme o volume.
+
+[♦] SEJA PRESTADOR (walvee Prestador.html)
+   - "Suas regras. Seu horário. Seu preço."
+   - Recrutamento de profissionais: receber trabalhos perto, definir
+     propostas, reputação recorrente; comissão a partir de 1%.
+
+[♦] SOBRE (walvee Sobre.html)
+   - "Ajuda de confiança, a um toque." História e missão da walvee.
+
+[♦] SUPORTE (walvee Suporte.html)
+   - "Como podemos ajudar?" Dúvidas, contato com o time e FAQ
+     (resposta em até um dia útil).
+
+[♦] LEGAL (walvee Legal.html)
+   - "Termos & Privacidade." Como a walvee funciona e tratamento de dados.
+
+[♦] ADS (walvee Ads.html)
+   - Peças de anúncio para Instagram/Facebook (criativos de marketing).
+
+
+==============================================================================
+ ARQUIVOS DOS PROTÓTIPOS
+==============================================================================
+
+ walvee Customer.html             — galeria do app do cliente (light + dark)
+ walvee Pro.html                  — galeria do app do prestador (light + dark)
+ walvee Prototipo.html            — protótipo navegável (router de telas)
+ walvee v3 Cliente - Layouts.html — jornada completa do cliente (bom + ruim)
+ walvee v3 - Mapa de fluxo.html   — mapa de fluxo (bom + ruim, conectado)
+ walvee v2 Rotas.html             — vertical Rotas
+ walvee Landing / Servicos / Planos / Sobre / Suporte / Legal / Ads — site
+
+==============================================================================
+ FIM
+==============================================================================

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>walvee · Rotas — Especificação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #fff; }
+  .doc {
+    box-sizing: border-box; max-width: 8.5in; margin: 0 auto;
+    background: inherit;
+    padding: 48px clamp(24px, 5vw, 0.75in) 96px;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    color: #1c2530; font-size: 15px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  .doc-frame { width: 100%; border-collapse: collapse; }
+  .doc-frame td { padding: 0; }
+  .running-hdr, .running-ftr, .hdr-space, .ftr-space { display: none; }
+
+  /* ---- type ---- */
+  h1 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 600;
+    font-size: 40px; line-height: 1.08; letter-spacing: -0.02em;
+    margin: 0 0 8px; color: #11181f;
+  }
+  .lede { font-size: 17px; color: #5a6573; margin: 0 0 6px; line-height: 1.55; max-width: 38em; }
+  h2 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 600;
+    font-size: 25px; letter-spacing: -0.015em; line-height: 1.15;
+    margin: 46px 0 4px; color: #11181f;
+    padding-bottom: 9px; border-bottom: 1px solid #e7eaee;
+  }
+  h3 {
+    font-size: 16px; font-weight: 700; letter-spacing: -0.005em;
+    margin: 26px 0 6px; color: #11181f;
+  }
+  h1, h2, h3 { text-wrap: balance; }
+  p, li { text-wrap: pretty; }
+  p { margin: 0 0 13px; }
+  strong { font-weight: 700; color: #11181f; }
+  a { color: inherit; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin: 0 0 6px; }
+  li::marker { color: #c3641f; }
+
+  .eyebrow {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.13em;
+    text-transform: uppercase; color: #c3641f; margin: 0 0 16px;
+    display: flex; align-items: center; gap: 9px;
+  }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: #ecdcce; }
+
+  .meta {
+    display: flex; flex-wrap: wrap; gap: 6px 26px;
+    margin: 22px 0 4px; padding: 15px 0 0; border-top: 1px solid #e7eaee;
+    font-size: 13px; color: #5a6573;
+  }
+  .meta b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: #97a1ad; font-weight: 700; margin-bottom: 2px; }
+
+  /* callout */
+  .note {
+    background: #fbf3ec; border: 1px solid #f0ddcc; border-radius: 12px;
+    padding: 15px 18px; margin: 18px 0; font-size: 14px; color: #6b4421;
+  }
+  .note b { color: #8a4f17; }
+
+  /* state pills */
+  .pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; vertical-align: middle; }
+  .pill.green { background: #e3f4ea; color: #1f7a47; }
+  .pill.amber { background: #fdeccf; color: #9a6212; }
+  .pill.red   { background: #fbe3e3; color: #b13838; }
+  .pill.blue  { background: #e4edfb; color: #2b5fb0; }
+
+  /* table */
+  table.t { width: 100%; border-collapse: collapse; margin: 12px 0 18px; font-size: 13.5px; }
+  table.t th, table.t td { text-align: left; padding: 10px 13px; border-bottom: 1px solid #e7eaee; vertical-align: top; }
+  table.t th { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: #8a94a0; font-weight: 700; border-bottom: 1.5px solid #d9dee4; }
+  table.t tr td:first-child { font-weight: 600; color: #11181f; white-space: nowrap; }
+
+  /* step list */
+  ol.steps { counter-reset: s; list-style: none; padding-left: 0; }
+  ol.steps li { position: relative; padding-left: 38px; margin-bottom: 11px; }
+  ol.steps li::before {
+    counter-increment: s; content: counter(s);
+    position: absolute; left: 0; top: -1px; width: 25px; height: 25px;
+    background: #f4ece4; color: #c3641f; border-radius: 50%;
+    font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0 18px; }
+  .card { border: 1px solid #e7eaee; border-radius: 12px; padding: 16px 18px; }
+  .card h3 { margin-top: 0; }
+  .card p:last-child { margin-bottom: 0; }
+
+  @page { size: letter; margin: 0; }
+  @media print {
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { margin: 0; padding: 0; }
+    .doc { max-width: none !important; margin: 0 !important; padding: 0 0.75in !important; box-shadow: none !important; border: none !important; }
+    .hdr-space, .ftr-space { display: table-cell; height: 0.7in !important; }
+    .running-hdr, .running-ftr {
+      display: flex !important; justify-content: space-between; align-items: baseline;
+      position: fixed !important; left: 0; right: 0; margin: 0 !important;
+      font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: #97a1ad;
+    }
+    .running-hdr { top: 0; padding: 0.32in 0.75in 0 !important; }
+    .running-ftr { bottom: 0; padding: 0 0.75in 0.32in !important; }
+    h1, h2, h3, h4 { break-after: avoid; }
+    figure, pre, blockquote, table, tr, .card, .note { break-inside: avoid; }
+    p, li { orphans: 3; widows: 3; }
+    .twocol { grid-template-columns: 1fr 1fr; }
+    .screen-only { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="doc">
+  <table class="doc-frame" role="presentation">
+    <thead><tr><td class="hdr-space"></td></tr></thead>
+    <tbody><tr><td>
+
+      <div class="running-hdr"><span>walvee · Rotas</span><span>Especificação de funcionalidade</span></div>
+      <div class="running-ftr"><span>walvee</span><span>Confidencial</span></div>
+
+      <p class="eyebrow">walvee · Especificação de produto</p>
+      <h1>Rotas: serviços recorrentes por ativo</h1>
+      <p class="lede">Módulo que estende o walvee do modelo on-demand (chamados avulsos) para o atendimento recorrente — equipes que visitam os mesmos ativos em rota, com serviços obrigatórios, contrato por período e execução guiada em campo.</p>
+
+      <div class="meta">
+        <div><b>Produto</b>walvee</div>
+        <div><b>Módulo</b>Rotas (add-on)</div>
+        <div><b>Versão do doc</b>v1 · rascunho</div>
+        <div><b>Data</b>Junho 2026</div>
+      </div>
+
+      <h2>1 · Visão geral</h2>
+      <p>O walvee já conecta clientes a prestadores por <strong>chamados avulsos</strong>. Rotas adiciona o caso recorrente: uma empresa/equipe de serviço atende uma carteira de <strong>ativos</strong> em visitas programadas, agrupadas em rotas diárias.</p>
+      <p>É vendido como <strong>add-on</strong>: ativado por conta, libera um modo "Rotas" no app do prestador e um console de gestão na web. A identidade visual e os componentes são os mesmos do produto principal — o usuário não percebe que é outro produto.</p>
+
+      <div class="note"><b>Princípio central:</b> a unidade de trabalho é o <b>ativo</b>, não o lugar. O vínculo prestador↔cliente vive no ativo (não na rota). A rota é só um agrupamento logístico das visitas do dia.</div>
+
+      <h2>2 · Conceitos</h2>
+      <table class="t">
+        <thead><tr><th>Conceito</th><th>Definição</th></tr></thead>
+        <tbody>
+          <tr><td>Ativo</td><td>O que é atendido. Tem tipo, histórico, fotos, serviços obrigatórios e contrato. Pode ser <strong>fixo</strong> (piscina, prédio, condomínio — com endereço) ou <strong>móvel</strong> (carro, equipamento portátil — local definido por visita).</td></tr>
+          <tr><td>Serviço obrigatório</td><td>Serviço recorrente exigido no ativo, com frequência (toda visita / mensal / trimestral…). Faz parte do contrato.</td></tr>
+          <tr><td>Serviço extra</td><td>Serviço avulso que o técnico adiciona durante a visita (ex: resolveu um problema na hora). Fora dos obrigatórios; pode exigir aprovação/valor do cliente.</td></tr>
+          <tr><td>Contrato</td><td>Vínculo de um prestador a um ativo por um período. Ao expirar, o ativo pode ser renovado ou aberto como chamado.</td></tr>
+          <tr><td>Rota</td><td>Agrupamento das visitas do dia para um técnico, otimizado por logística/geografia.</td></tr>
+          <tr><td>Visita</td><td>Uma ocorrência de atendimento a um ativo, dentro de uma parada da rota.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>3 · Estados do ativo</h2>
+      <p>O estado de contrato de cada ativo define como ele aparece na operação e quem pode atendê-lo.</p>
+      <table class="t">
+        <thead><tr><th>Estado</th><th>Significado</th><th>Ação do gestor</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill green">Contratado</span></td><td>Prestador fixo atende por um período definido.</td><td>Acompanhar / renovar</td></tr>
+          <tr><td><span class="pill red">Em aberto</span></td><td>Contrato encerrado — o ativo está sem prestador.</td><td>Atribuir a um pro ou publicar como chamado</td></tr>
+          <tr><td><span class="pill amber">Cobertura</span></td><td>Visita pontual que o prestador fixo não cobre, sem quebrar o contrato.</td><td>Abrir a visita como chamado avulso</td></tr>
+        </tbody>
+      </table>
+      <div class="note"><b>Regra:</b> abrir/atribuir/renovar contrato é ação do <b>gestor</b> (console web). O técnico no app apenas <b>vê</b> o estado — nunca abre um ativo como chamado.</div>
+
+      <h2>4 · App do técnico — fluxo</h2>
+      <p>O técnico percorre a rota do dia, parada a parada. As telas principais, em ordem:</p>
+      <ol class="steps">
+        <li><strong>Início do turno</strong> — slide <span class="pill green">verde</span> "Arraste para iniciar o turno".</li>
+        <li><strong>Rotas do dia</strong> — lista das rotas atribuídas.</li>
+        <li><strong>Detalhe da rota</strong> — paradas em ordem; cada parada mostra a contagem de serviços obrigatórios e sinaliza exceções (<span class="pill red">Em aberto</span> / <span class="pill amber">Cobertura</span>).</li>
+        <li><strong>Ficha do local (ativo)</strong> — referência: contrato, serviços obrigatórios, equipamentos no local, histórico de atendimentos e fotos de acesso. Botão "Iniciar visita".</li>
+        <li><strong>Visita em execução</strong> — hub da visita: info curta, acesso à ficha do local, fotos antes/depois, observação e a lista de serviços prestados.</li>
+        <li><strong>Execução guiada do serviço</strong> — passo a passo de cada serviço.</li>
+        <li><strong>Concluir a parada</strong> — slide <span class="pill red">vermelho</span> "Arraste para concluir a parada".</li>
+      </ol>
+
+      <h3>Ficha do local × Visita em execução</h3>
+      <p>São duas telas separadas, propositalmente:</p>
+      <div class="twocol">
+        <div class="card">
+          <h3>Ficha do local</h3>
+          <p>Referência estática do ativo: contrato, serviços obrigatórios, equipamentos, histórico e fotos do local. Consultável a qualquer momento.</p>
+        </div>
+        <div class="card">
+          <h3>Visita em execução</h3>
+          <p>O que acontece agora: fotos antes/depois, observação da visita, serviços prestados (com progresso) e a ação de concluir a parada.</p>
+        </div>
+      </div>
+
+      <h2>5 · Execução guiada</h2>
+      <p>Ao iniciar um serviço, o técnico entra num modo de <strong>passos empilhados</strong>: todos os passos ficam à vista para ele não perder a sequência.</p>
+      <ul>
+        <li>O <strong>passo atual</strong> fica expandido com o controle certo embutido — leitura numérica (pH/cloro), stepper de consumível (quantidade usada do estoque), foto, etc.</li>
+        <li>Os <strong>passos concluídos</strong> colapsam mostrando o resultado registrado (ex: "pH 7.4 · Cloro 0.6 ppm").</li>
+        <li>Os <strong>próximos</strong> ficam esmaecidos, só com o título.</li>
+        <li>Barra de progresso no topo; "Concluir serviço" no rodapé, ativado ao terminar todos os passos.</li>
+      </ul>
+      <p>Cada dado capturado (leitura, consumível, foto, duração) alimenta diretamente o relatório do cliente.</p>
+
+      <h3>Adicionar serviço extra</h3>
+      <p>Durante a visita, na seção "Serviços prestados", o técnico pode <strong>+ Adicionar serviço extra</strong>. Abre um bottom-sheet com busca no catálogo, opção de criar serviço novo e a lista do catálogo. O serviço entra marcado como extra (fora dos obrigatórios) e pode exigir aprovação/valor do cliente.</p>
+
+      <h2>6 · Ativo móvel (caso especial)</h2>
+      <p>Um ativo móvel (ex: um carro) não tem endereço fixo. A ficha indica explicitamente "Ativo móvel — local de atendimento definido a cada visita". Isso afeta se e como ele entra numa rota geográfica.</p>
+      <p><strong>Decisão em aberto:</strong> o prestador vai até o ativo, ou o ativo vai até o prestador (oficina)? Isso define o agrupamento logístico do ativo móvel.</p>
+
+      <h2>7 · Integração com o core</h2>
+      <ul>
+        <li><strong>Ativos ⇄ clientes:</strong> um ativo de rota é um cliente recorrente — reaproveita o cadastro existente.</li>
+        <li><strong>Serviços ⇄ catálogo:</strong> serviços obrigatórios e extras vêm do catálogo de serviços do walvee.</li>
+        <li><strong>Abrir como chamado ⇄ fluxo de propostas:</strong> a "virada" de contrato → chamado reusa o fluxo de lances/propostas já existente no app do prestador.</li>
+        <li><strong>Relatório ⇄ notificações:</strong> usa o mesmo sistema de relatório/e-mail do fluxo on-demand.</li>
+        <li><strong>Ativação:</strong> flag por conta libera o tab "Rotas" no app + o console web; precisa de tela de upsell.</li>
+      </ul>
+
+      <h2>8 · Questões em aberto</h2>
+      <ul>
+        <li>Granularidade de contrato: rota inteira vs. parada/visita individual.</li>
+        <li>Ativo móvel: prestador vai ao ativo ou vice-versa?</li>
+        <li>Serviço extra: exige aprovação do cliente em tempo real ou entra no relatório para faturamento posterior?</li>
+        <li>Console web: filtro por estado de contrato e tela de transição quando o prazo expira (ainda não desenhados).</li>
+      </ul>
+
+    </td></tr>
+    <tfoot><tr><td class="ftr-space"></td></tr></tfoot>
+  </table>
+</main>
+</body>
+</html>

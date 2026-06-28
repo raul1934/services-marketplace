@@ -1,0 +1,46 @@
+# Walvee — local reverse proxy (HTTP only). Published on host port 19088 (NOT
+# :80) so it coexists with the lula stack, whose Caddy owns :80/:443. Add the
+# *.walvee.local hosts to your hosts file pointing at 127.0.0.1, then open them
+# WITH the port, e.g.:
+#   http://customer.walvee.local:19088 · http://provider.walvee.local:19088
+#   http://api.walvee.local:19088 · http://admin.walvee.local:19088
+#   http://reverb.walvee.local:19088 · http://walvee.local:19088 (landing)
+# Caddy still listens on :80 inside the container; compose maps host 19088 -> 80.
+# The mobile apps bypass this proxy and hit localhost:19000 (API) and
+# localhost:19080 (Reverb) directly.
+
+{
+	auto_https off
+}
+
+# Laravel API
+http://api.walvee.local {
+	reverse_proxy backend:8000
+}
+
+# Filament admin
+http://admin.walvee.local {
+	reverse_proxy backend:8000
+}
+
+# Reverb WebSocket (Pusher protocol) — Caddy proxies ws transparently.
+http://reverb.walvee.local {
+	reverse_proxy reverb:8080
+}
+
+# Customer Expo web app (Metro dev server, published on host :19083).
+http://customer.walvee.local {
+	reverse_proxy host.docker.internal:19083
+}
+
+# Provider Expo web app (Metro dev server, published on host :19082).
+http://provider.walvee.local {
+	reverse_proxy host.docker.internal:19082
+}
+
+# Marketing landing page (static, served from the mounted folder).
+http://walvee.local, http://www.walvee.local {
+	root * /srv/landing
+	encode gzip
+	file_server
+}

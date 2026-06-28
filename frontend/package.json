@@ -1,0 +1,17 @@
+{
+  "name": "walvee-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Walvee marketplace — React Native (Expo) monorepo: customer + provider apps sharing a design system, API client and types.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "customer": "npm run start --workspace @walvee/customer",
+    "provider": "npm run start --workspace @walvee/provider",
+    "android:customer": "npm run android --workspace @walvee/customer",
+    "android:provider": "npm run android --workspace @walvee/provider",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

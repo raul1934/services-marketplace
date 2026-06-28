@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee · Pro app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@500;600;700;800&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="walvee-ui.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: #eceef1; }
+  #root { height: 100vh; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="walvee-kit.jsx"></script>
+<script type="text/babel" src="walvee-auth.jsx"></script>
+<script type="text/babel" src="walvee-screens-customer.jsx"></script>
+<script type="text/babel" src="walvee-screens-provider.jsx"></script>
+<script type="text/babel" src="walvee-create-flows.jsx"></script>
+<script type="text/babel" src="walvee-provider-bid-flows.jsx"></script>
+<script type="text/babel" src="walvee-provider-onboarding.jsx"></script>
+<script type="text/babel" src="walvee-provider-account.jsx"></script>
+<script type="text/babel" src="walvee-job-flow.jsx"></script>
+<script type="text/babel">
+const THEMES = [["sunset", "Light"], ["night", "Dark mode"]];
+const ABSTYLE = { borderRadius: 40, background: "transparent", boxShadow: "0 30px 60px -24px rgba(20,30,50,.4)" };
+
+function ScreenRow({ id, title, subtitle, Comp, h = 844 }) {
+  return (
+    <DCSection id={id} title={title} subtitle={subtitle}>
+      {THEMES.map(([t, label]) => (
+        <DCArtboard key={t} id={id + "-" + t} label={label} width={390} height={h} style={ABSTYLE}>
+          <Phone theme={t} height={h}><Comp /></Phone>
+        </DCArtboard>
+      ))}
+    </DCSection>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="foundations" title="walvee · Pro — foundations" subtitle="The sunset system in light and dark mode — color, type, components.">
+        {[["sunset", "Light", "Manrope", "Warm & human"], ["night", "Dark mode", "Manrope", "Low-light"]].map(([t, label, font, mood]) => (
+          <DCArtboard key={t} id={"found-" + t} label={label} width={390} height={980} style={ABSTYLE}>
+            <div className={"t-" + t} style={{ height: "100%" }}><Foundations name={mood} tagline="Travel true" fonts={font} /></div>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="prov-onb" title="Sign up & setup" subtitle="Account → categories → service area → documents → submit. Admin must approve before they can work.">
+        <DCArtboard id="prov-signup" label="Become a pro" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><ProviderSignUpScreen /></Phone></DCArtboard>
+        {PROVIDER_ONB.steps.map(([label, Step, h], i) => (
+          <DCArtboard key={i} id={"prov-onb-" + i} label={label} width={390} height={h || 844} style={ABSTYLE}><Phone theme="sunset" height={h}><Step /></Phone></DCArtboard>
+        ))}
+        <DCArtboard id="prov-pending" label="Pending approval (locked)" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><ProviderPendingScreen /></Phone></DCArtboard>
+        <DCArtboard id="prov-pending-night" label="Pending · Dark mode" width={390} height={844} style={ABSTYLE}><Phone theme="night"><ProviderPendingScreen /></Phone></DCArtboard>
+      </DCSection>
+
+      <ScreenRow id="dash" title="Dashboard" subtitle="Go online, today's stats, jobs & nearby." Comp={ProviderDashboard} />
+      <ScreenRow id="nearby" title="Nearby jobs (list)" subtitle="List view with List/Map/Calendar tabs — pros see the area average, not the customer's budget." Comp={NearbyScreen} />
+      <ScreenRow id="nearbymap" title="Nearby jobs (map)" subtitle="Map view — job pins tagged with the area median price." Comp={NearbyMapScreen} />
+      <ScreenRow id="nearbycal" title="Scheduled jobs (calendar)" subtitle="Unclaimed scheduled jobs grouped by the dates the customer is available." Comp={NearbyCalendarScreen} h={1120} />
+
+      <DCSection id="reqinfo-p" title="Ask the client for details" subtitle="Before quoting, a pro can ask the client clarifying questions.">
+        <DCArtboard id="reqinfo-provider" label="Ask the client" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><ProviderRequestInfo /></Phone></DCArtboard>
+        <DCArtboard id="reqinfo-provider-night" label="Dark mode" width={390} height={844} style={ABSTYLE}><Phone theme="night"><ProviderRequestInfo /></Phone></DCArtboard>
+      </DCSection>
+
+      <ScreenRow id="pbid" title="Send a bid (overview)" subtitle="The pro sets their price on the dial, anchored to the area average." Comp={ProviderBidScreen} />
+
+      {["roadside", "home"].map((key) => {
+        const flow = BID_FLOWS[key];
+        return (
+          <DCSection key={"bid-" + key} id={"bid-" + key} title={flow.title} subtitle={flow.subtitle}>
+            {flow.steps.map(([label, Step, h], i) => (
+              <DCArtboard key={i} id={"bid-" + key + "-" + i} label={label} width={390} height={h || 844} style={ABSTYLE}>
+                <Phone theme="sunset" height={h}><Step /></Phone>
+              </DCArtboard>
+            ))}
+          </DCSection>
+        );
+      })}
+
+      <DCSection id="jobstart" title={JOB_START.title} subtitle={JOB_START.subtitle}>
+        {JOB_START.steps.map(([label, Step], i) => (
+          <DCArtboard key={i} id={"jobstart-" + i} label={label} width={390} height={844} style={ABSTYLE}>
+            <Phone theme="sunset"><Step /></Phone>
+          </DCArtboard>
+        ))}
+        <DCArtboard id="jobstart-night" label="Escanear QR · Dark" width={390} height={844} style={ABSTYLE}><Phone theme="night"><ProviderVerifyStart mode="scan" /></Phone></DCArtboard>
+      </DCSection>
+
+      <ScreenRow id="pactive" title="Active job — add parts" subtitle="Mid-job: before/after photos, work notes, and parts & materials the client approves." Comp={ProviderActiveJob} h={1340} />
+      <DCSection id="pactive-sheet" title="Add a part (sheet)" subtitle="The add-part bottom sheet: common parts, name, quantity and unit price.">
+        {THEMES.map(([t, label]) => (
+          <DCArtboard key={t} id={"pactive-sheet-" + t} label={label} width={390} height={844} style={ABSTYLE}>
+            <Phone theme={t}><ProviderActiveJob sheet /></Phone>
+          </DCArtboard>
+        ))}
+      </DCSection>
+      <ScreenRow id="prate" title="Rate the client" subtitle="The other side of the two-sided rating — stars, tags, preferred-client toggle." Comp={ProviderRateClient} />
+
+      <DCSection id="account" title="Account" subtitle="Profile hub divided into screens — edit profile, my services, service area, earnings & payouts.">
+        <DCArtboard id="acct-hub" label="Account hub" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><ProviderAccountScreen /></Phone></DCArtboard>
+        <DCArtboard id="acct-hub-night" label="Account · Dark" width={390} height={844} style={ABSTYLE}><Phone theme="night"><ProviderAccountScreen /></Phone></DCArtboard>
+        <DCArtboard id="acct-profile" label="Edit profile" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><ProviderEditProfileScreen /></Phone></DCArtboard>
+        <DCArtboard id="acct-services" label="My services" width={390} height={980} style={ABSTYLE}><Phone theme="sunset" height={980}><ProviderServicesManage /></Phone></DCArtboard>
+        <DCArtboard id="acct-earn" label="Earnings & payouts" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><ProviderEarningsScreen /></Phone></DCArtboard>
+        <DCArtboard id="acct-earn-night" label="Earnings · Dark" width={390} height={844} style={ABSTYLE}><Phone theme="night"><ProviderEarningsScreen /></Phone></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee v3 · Mapa de fluxo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#1d2433; --ink-2:#5a6678; --ink-3:#93a0b2; --line:#d9dfe8;
+    --paper:#eef1f5; --card:#ffffff;
+    --spine:#28415f;
+    --c-client:#0e9e8e;   /* cliente lane */
+    --c-prov:#3b6fe0;     /* prestador lane */
+    --amber:#e8920c; --red:#e0463a; --teal:#0e9e8e; --blue:#3b6fe0; --green:#1f9d57;
+    --mono:'Space Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:var(--paper);font-family:Manrope,system-ui,sans-serif;color:var(--ink);overflow:hidden;}
+  /* ---- top bar ---- */
+  .topbar{position:fixed;top:0;left:0;right:0;height:56px;z-index:30;display:flex;align-items:center;gap:14px;
+    padding:0 18px;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+  .brand{font-weight:800;font-size:16px;letter-spacing:-.02em;display:flex;align-items:center;gap:9px;}
+  .brand .v3{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--spine);color:#fff;padding:3px 7px;border-radius:6px;letter-spacing:.04em;}
+  .brand small{font-weight:600;color:var(--ink-3);font-size:12.5px;letter-spacing:0;}
+  .legend{display:flex;align-items:center;gap:16px;margin-left:8px;flex-wrap:wrap;}
+  .lg{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--ink-2);}
+  .lg .sw{width:22px;height:0;border-top:3px solid var(--spine);border-radius:2px;}
+  .lg .sw.dash{border-top-style:dashed;}
+  .lg .dot{width:11px;height:11px;border-radius:3px;}
+  .spacer{flex:1;}
+  .zoom{display:flex;align-items:center;gap:6px;}
+  .zbtn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);
+    font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+  .zbtn:hover{background:var(--paper);}
+  .zbtn.wide{width:auto;padding:0 12px;font-size:12.5px;font-weight:800;gap:6px;}
+  /* ---- canvas ---- */
+  #viewport{position:fixed;inset:56px 0 0 0;overflow:hidden;cursor:grab;
+    background-image:radial-gradient(var(--line) 1.1px,transparent 1.1px);background-size:30px 30px;}
+  #viewport.drag{cursor:grabbing;}
+  #world{position:absolute;top:0;left:0;transform-origin:0 0;}
+  #edges{position:absolute;top:0;left:0;pointer-events:none;}
+  /* ---- lane labels ---- */
+  .laneband{position:absolute;left:0;border-radius:16px;}
+  .lanetag{position:absolute;font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:#fff;padding:6px 12px;border-radius:8px;white-space:nowrap;}
+  .stage-h{position:absolute;font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;}
+  /* ---- node (wireframe screen) ---- */
+  .node{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:13px;
+    box-shadow:0 2px 0 rgba(40,65,95,.04),0 10px 22px -16px rgba(30,45,70,.4);overflow:hidden;}
+  .node .bar{height:22px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 9px;background:#fbfcfe;}
+  .node .bar i{width:6px;height:6px;border-radius:50%;background:var(--line);display:block;}
+  .node .bar .nx{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--ink-3);letter-spacing:.02em;}
+  .node .bd{padding:10px 11px 11px;}
+  .node .ttl{font-weight:800;font-size:13px;line-height:1.18;letter-spacing:-.01em;text-wrap:balance;}
+  .node .sub{font-size:10.5px;line-height:1.3;color:var(--ink-2);font-weight:600;margin-top:4px;}
+  .node .pill{display:inline-flex;align-items:center;gap:5px;margin-top:9px;font-family:var(--mono);font-size:9.5px;font-weight:700;
+    padding:3px 8px;border-radius:999px;background:var(--paper);color:var(--ink-2);letter-spacing:.02em;}
+  .node .reentry{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:10px;font-weight:800;color:var(--ink-3);}
+  /* accent by lane/tone */
+  .node.client{border-top:3px solid var(--c-client);}
+  .node.prov{border-top:3px solid var(--c-prov);}
+  .node.key{box-shadow:0 0 0 2px var(--c-client),0 12px 26px -14px rgba(14,158,142,.55);}
+  .node .pill.hot{background:#fff0ea;color:#d2541f;}
+  .node .pill.ok{background:#e6f6ee;color:var(--green);}
+  /* strip tones */
+  .node.t-amber{border-top:3px solid var(--amber);}
+  .node.t-red{border-top:3px solid var(--red);}
+  .node.t-teal{border-top:3px solid var(--teal);}
+  .node.t-blue{border-top:3px solid var(--blue);}
+  /* decision / terminal */
+  .node.dec{background:#fff9ee;border-color:#f0d39a;}
+  .node.dec .bar{background:#fef4df;border-color:#f0d39a;}
+  .node.dec .ttl::before{content:"◇ ";color:var(--amber);}
+  .node.end-bad{background:#fdf0ef;border-color:#eebab4;}
+  .node.end-bad .ttl::before{content:"✕ ";color:var(--red);}
+  .node.end-ok{background:#eef8f1;border-color:#b6dcc3;}
+  .node.end-ok .ttl::before{content:"✓ ";color:var(--green);}
+  /* strip header label */
+  .striphead{position:absolute;border-radius:12px;padding:12px 13px;color:#fff;display:flex;flex-direction:column;justify-content:center;
+    box-shadow:0 10px 22px -14px rgba(30,45,70,.5);}
+  .striphead .k{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;opacity:.85;text-transform:uppercase;}
+  .striphead .t{font-weight:800;font-size:14px;line-height:1.15;margin-top:3px;letter-spacing:-.01em;}
+  .striphead .o{font-size:10px;font-weight:700;opacity:.9;margin-top:7px;display:flex;align-items:center;gap:5px;}
+  .striphead .optag{font-family:var(--mono);font-size:8.5px;font-weight:700;margin-top:6px;opacity:.95;letter-spacing:.04em;}
+  .wholbl{position:absolute;top:-8px;left:9px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.06em;
+    color:#fff;padding:2px 6px;border-radius:5px;z-index:2;}
+  .wholbl.c{background:var(--c-client);}
+  .wholbl.p{background:var(--c-prov);}
+  .node.who-C,.node.who-P{overflow:visible;}
+  .edge-label{position:absolute;transform:translate(-50%,-50%);background:#fff;border:1px solid var(--line);border-radius:6px;
+    padding:2px 7px;font-family:var(--mono);font-size:9px;font-weight:700;color:var(--ink-2);white-space:nowrap;letter-spacing:.02em;pointer-events:none;}
+  .hint{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:30;background:rgba(29,36,51,.9);color:#fff;
+    font-size:11.5px;font-weight:600;padding:7px 14px;border-radius:999px;letter-spacing:.01em;display:flex;gap:10px;align-items:center;}
+  .hint b{font-weight:800;}
+  .hint kbd{font-family:var(--mono);font-size:10px;background:rgba(255,255,255,.16);padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">walvee <span class="v3">v3</span> <small>Mapa de fluxo — caminho bom &amp; caminho ruim</small></div>
+  <div class="legend">
+    <span class="lg"><span class="sw"></span> Caminho bom</span>
+    <span class="lg"><span class="sw dash" style="border-color:var(--red)"></span> Caminho ruim</span>
+    <span class="lg"><span class="dot" style="background:var(--c-client)"></span> Cliente</span>
+    <span class="lg"><span class="dot" style="background:var(--c-prov)"></span> Prestador</span>
+    <span class="lg"><span class="sw" style="border-color:var(--c-client)"></span> Esclarecimento</span>
+    <span class="lg" style="color:var(--amber)">◇ decisão</span>
+  </div>
+  <span class="spacer"></span>
+  <div class="zoom">
+    <button class="zbtn" id="zout">–</button>
+    <button class="zbtn" id="zin">+</button>
+    <button class="zbtn wide" id="zfit">Ajustar</button>
+  </div>
+</div>
+
+<div id="viewport">
+  <div id="world">
+    <svg id="edges"></svg>
+  </div>
+</div>
+<div class="hint"><span><b>Arraste</b> para mover</span><span><kbd>scroll</kbd> zoom</span><span><b>Ajustar</b> reenquadra</span></div>
+
+<script>
+/* ============================================================
+   walvee v3 — flow-map model + render engine
+   ============================================================ */
+const NW = 230, NH = 142;          // happy node size
+const SW_ = 210, SH = 132;         // strip node size
+const COLX = c => 96 + c*300;
+const CLIENT_Y = 150, PROV_Y = 432;
+const STRIP_Y0 = 792, STRIP_STEP = 214;
+const SHEAD_X = 40, SHEAD_W = 196;
+const SNODE_X0 = 258, SNODE_STEP = 236;
+
+const STAGES = ["Entrada","Escolhe","Cria pedido","Publicado","Propostas","Match","A caminho","Execução","Pagamento","Avaliação"];
+
+/* ---- happy path: CLIENTE ---- */
+const CLIENT = [
+  {col:0,t:"Início",s:"Home · meus ativos",p:"app"},
+  {col:1,t:"Escolhe serviço",s:"Carro · Casa · Pets",p:"categoria"},
+  {col:2,t:"Cria pedido",s:"Descreve + observações & fotos · nomeia preço · vê faixa de referência",p:"nomeia R$120",key:true},
+  {col:3,t:"Pedido publicado",s:"Só prestadores curados veem · lance cego",p:"aguardando ⏱"},
+  {col:4,t:"Recebe propostas",s:"Nunca só por preço: nota + histórico + distância · vê se inclui peças",p:"3 propostas"},
+  {col:5,t:"Escolhe profissional",s:"Confirma o match",p:"match ✓",hot:true},
+  {col:6,t:"Acompanha",s:"Mapa · profissional a caminho",p:"a caminho"},
+  {col:7,t:"Serviço em execução",s:"Em andamento no local",p:"em serviço"},
+  {col:8,t:"Pagamento",s:"Split direto · comissão walvee",p:"pago ✓",ok:true},
+  {col:9,t:"Avalia o prestador",s:"Nota + tags · atualiza o histórico do ativo (o fosso)",p:"avaliado",ok:true},
+];
+/* ---- happy path: PRESTADOR ---- */
+const PROV = [
+  {col:0,t:"Painel",s:"Online · credenciado",p:"online"},
+  {col:3,t:"Recebe solicitação",s:"Próximas · perfil verificado",p:"nova perto"},
+  {col:4,t:"Envia proposta",s:"Aceita o valor · lance cego · define se inclui peças/materiais",p:"R$120 · s/ peças"},
+  {col:5,t:"Proposta aceita",s:"Cliente escolheu você",p:"aceita ✓",hot:true},
+  {col:6,t:"Desloca",s:"A caminho do local",p:"a caminho"},
+  {col:7,t:"Check-in + executa",s:"Libera atendimento e realiza",p:"executando"},
+  {col:8,t:"Recebe líquido",s:"Split direto na conta",p:"recebido ✓",ok:true},
+  {col:9,t:"Avalia o cliente",s:"Nota mútua · reputação do cliente",p:"avaliado",ok:true},
+];
+
+/* ---- clarification loop (optional) + bad paths (8) ---- */
+const STRIPS = [
+  {tone:"teal", kind:"clarify", solid:true, opt:true, k:"Antes da proposta", head:"Esclarecimento: perguntas, observações & fotos", origin:"P3", color:"--c-client",
+   nodes:[
+     {t:"Cliente: observações + fotos",s:"anexa no pedido (1 ou mais fotos)",who:"C"},
+     {t:"Histórico + perguntas",s:"vê histórico do ativo se for da mesma categoria · pergunta + pede fotos",who:"P"},
+     {t:"Cliente responde",s:"responde e envia as fotos pedidas",who:"C"},
+     {t:"Tudo claro → cota",s:"proposta pode incluir ou não peças/materiais",who:"P"},
+   ], reentry:"Envia proposta"},
+
+  {tone:"blue", k:"Prestador · entrada", head:"Cold-start: prestador novo", origin:"P3", color:"--blue",
+   nodes:[
+     {t:"Prestador novo",s:"sem histórico de notas"},
+     {t:"Selo Verificado",s:"curadoria + antecedentes — não só ⭐",},
+     {t:"Boost inicial",s:"destaque nos primeiros serviços"},
+   ], reentry:"Envia proposta"},
+
+  {tone:"amber", k:"de: Publicado", head:"Ninguém aceita o preço", origin:"C3", color:"--amber",
+   nodes:[
+     {t:"Janela sem aceite",s:"acabou o tempo, zero aceites",k:"dec"},
+     {t:"Sem propostas",s:"no valor que você nomeou"},
+     {t:"Subir valor ou abrir lance",s:"R$120 → R$150 · plano B"},
+     {t:"Etapa de lance",s:"prestadores dão lance cego"},
+   ], reentry:"Recebe propostas"},
+
+  {tone:"amber", k:"de: Propostas / Match", head:"Cliente cancela ou janela expira", origin:"C4", color:"--amber",
+   nodes:[
+     {t:"Janela de escolha expira",s:"fecha com o melhor avaliado → Match",k:"dec"},
+     {t:"Ou: cliente cancela",s:"antes ou depois do match"},
+     {t:"Política de taxa",s:"grátis sem match · taxa após"},
+     {t:"Pedido cancelado",s:"encerrado",k:"end-bad"},
+   ], reentry:"Match (auto)"},
+
+  {tone:"red", k:"de: A caminho", head:"Prestador não aparece (no-show)", origin:"C6", color:"--red",
+   nodes:[
+     {t:"ETA estourou?",s:"atraso além do limite",k:"dec"},
+     {t:"Não compareceu",s:"prestador ausente",k:"end-bad"},
+     {t:"Reabrir p/ outro",s:"+ reembolso e penalidade ao prestador"},
+   ], reentry:"Recebe propostas"},
+
+  {tone:"amber", k:"de: Chegada / Check-in", head:"Acréscimo antes de iniciar", origin:"P7", color:"--amber",
+   nodes:[
+     {t:"Chega e reavalia",s:"antes de iniciar: serviço maior que o previsto",who:"P"},
+     {t:"Abre acréscimo no chamado",s:"informa valor adicional + motivo",who:"P"},
+     {t:"Cliente aceita?",s:"aceita, recusa ou cancela sem custo",who:"C",k:"dec"},
+     {t:"Aceita → inicia",s:"novo total · segue p/ execução e pagamento",k:"end-ok"},
+   ], reentry:"Execução"},
+
+  {tone:"amber", k:"de: Execução", head:"Peça/material muda o preço", origin:"C7", color:"--amber",
+   nodes:[
+     {t:"Precisa de peça",s:"item fora do orçamento inicial",who:"P"},
+     {t:"Adiciona peça + valor",s:"tela “Adicionar peça” · custo do material",who:"P"},
+     {t:"Cliente aprova na hora?",s:"orçamento extra em tempo real · ou recusa",who:"C",k:"dec"},
+     {t:"Aprovado → conclui",s:"total atualizado segue p/ pagamento",k:"end-ok"},
+   ], reentry:"Pagamento (novo total)"},
+
+  {tone:"red", k:"de: Execução / Pagamento", head:"Bait-and-switch → disputa", origin:"C7", color:"--red",
+   nodes:[
+     {t:"Valor ≠ combinado",s:"escopo mudou no local",k:"dec"},
+     {t:"Escopo congelado",s:"preço preso ao pedido original"},
+     {t:"Abrir disputa",s:"cliente contesta a cobrança"},
+     {t:"Mediação walvee",s:"retém o split até resolver",k:"end-ok"},
+   ], reentry:""},
+
+  {tone:"red", k:"de: Pagamento", head:"Falha de pagamento (cartão / split)", origin:"C8", color:"--red",
+   nodes:[
+     {t:"Cartão recusado",s:"ou split não completou",k:"end-bad"},
+     {t:"Trocar método",s:"Pix ou outro cartão"},
+     {t:"Reprocessou?",s:"nova tentativa",k:"dec"},
+     {t:"Pago",s:"split refeito com sucesso",k:"end-ok"},
+   ], reentry:"Pagamento"},
+
+  {tone:"teal", k:"de: Avaliação", head:"Serviço ruim → garantia / reembolso", origin:"C9", color:"--teal",
+   nodes:[
+     {t:"Avaliação baixa",s:"problema relatado no serviço"},
+     {t:"Acionar garantia",s:"abre solicitação de cobertura"},
+     {t:"Cobertura (teto R$X)",s:"refazer o serviço ou reembolso"},
+     {t:"Status da garantia",s:"acompanha a resolução",k:"end-ok"},
+   ], reentry:""},
+
+  {tone:"blue", k:"Prestador · contínuo", head:"Queda de qualidade → descredenciamento", origin:"P9", color:"--blue",
+   nodes:[
+     {t:"Nota < mínimo?",s:"avaliação contínua",k:"dec"},
+     {t:"Aviso + plano",s:"melhoria com prazo definido"},
+     {t:"Melhorou?",s:"reavaliação no prazo",k:"dec"},
+     {t:"Suspenso / fora",s:"descredenciado da rede",k:"end-bad"},
+   ], reentry:"Online"},
+];
+
+/* ============================================================ build node index + DOM */
+const world = document.getElementById('world');
+const svg = document.getElementById('edges');
+const pos = {}; // id -> {x,y,w,h}
+
+function mkNode(id, x, y, w, h, cls, html){
+  pos[id] = {x,y,w,h};
+  const d = document.createElement('div');
+  d.className = 'node ' + cls;
+  d.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;`;
+  d.innerHTML = html;
+  world.appendChild(d);
+  return d;
+}
+function screenInner(t, s, pill, pillCls, reentry){
+  let h = `<div class="bar"><i></i><i></i><i></i><span class="nx"></span></div><div class="bd"><div class="ttl">${t}</div>`;
+  if(s) h += `<div class="sub">${s}</div>`;
+  if(pill) h += `<div class="pill ${pillCls||''}">${pill}</div>`;
+  if(reentry) h += `<div class="reentry">↩ volta: ${reentry}</div>`;
+  return h + `</div>`;
+}
+
+/* lane tags */
+function laneTag(text,color,y){
+  const e=document.createElement('div'); e.className='lanetag';
+  e.style.cssText=`left:0px;top:${y}px;background:var(${color});`; e.textContent=text;
+  world.appendChild(e);
+}
+laneTag('CLIENTE','--c-client',CLIENT_Y-30);
+laneTag('PRESTADOR','--c-prov',PROV_Y-30);
+
+/* stage headers across the top */
+STAGES.forEach((s,i)=>{
+  const e=document.createElement('div'); e.className='stage-h';
+  e.style.cssText=`left:${COLX(i)}px;top:${CLIENT_Y-58}px;width:${NW}px;`;
+  e.textContent=(i+1)+' · '+s; world.appendChild(e);
+});
+
+/* happy nodes */
+CLIENT.forEach((n,i)=>{
+  mkNode('C'+n.col, COLX(n.col), CLIENT_Y, NW, NH,
+    'client'+(n.key?' key':''),
+    screenInner(n.t,n.s,n.p,n.hot?'hot':(n.ok?'ok':'')));
+});
+PROV.forEach((n,i)=>{
+  mkNode('P'+n.col, COLX(n.col), PROV_Y, NW, NH,
+    'prov',
+    screenInner(n.t,n.s,n.p,n.hot?'hot':(n.ok?'ok':'')));
+});
+
+/* strips */
+STRIPS.forEach((st,idx)=>{
+  const y = STRIP_Y0 + idx*STRIP_STEP;
+  // header
+  const hid='H'+idx; pos[hid]={x:SHEAD_X,y,w:SHEAD_W,h:SH};
+  const hd=document.createElement('div'); hd.className='striphead';
+  hd.style.cssText=`left:${SHEAD_X}px;top:${y}px;width:${SHEAD_W}px;height:${SH}px;background:var(${st.color});`;
+  hd.innerHTML=`<div class="k">${st.k}</div><div class="t">${st.head}</div>`+(st.opt?`<div class="optag">● opcional · loop</div>`:'')+`<div class="o">⤷ ${st.opt?'liga em':'ramifica de'} <b>&nbsp;${st.origin}</b></div>`;
+  world.appendChild(hd);
+  // nodes
+  st.nodes.forEach((nd,j)=>{
+    const x=SNODE_X0 + j*SNODE_STEP;
+    const last = j===st.nodes.length-1;
+    const tone = nd.who ? (nd.who==='C'?'teal':'blue') : st.tone;
+    mkNode('S'+idx+'_'+j, x, y, SW_, SH,
+      't-'+tone+(nd.k?(' '+nd.k):'')+(nd.who?(' who-'+nd.who):''),
+      (nd.who?`<span class="wholbl ${nd.who==='C'?'c':'p'}">${nd.who==='C'?'CLIENTE':'PRESTADOR'}</span>`:'')+
+      screenInner(nd.t,nd.s,null,null, last?st.reentry:null));
+  });
+});
+
+/* ============================================================ edges */
+const NS='http://www.w3.org/2000/svg';
+const COLORS={spine:getC('--spine'),amber:getC('--amber'),red:getC('--red'),teal:getC('--teal'),blue:getC('--blue'),client:getC('--c-client'),prov:getC('--c-prov')};
+function getC(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+function rc(id){const p=pos[id];return {x:p.x+p.w,y:p.y+p.h/2};}      // right-center
+function lc(id){const p=pos[id];return {x:p.x,y:p.y+p.h/2};}          // left-center
+function bc(id){const p=pos[id];return {x:p.x+p.w/2,y:p.y+p.h};}      // bottom-center
+function tc(id){const p=pos[id];return {x:p.x+p.w/2,y:p.y};}          // top-center
+function rb(id){const p=pos[id];return {x:p.x+p.w-22,y:p.y+p.h};}     // bottom-right-ish
+
+let defs=document.createElementNS(NS,'defs'); svg.appendChild(defs);
+const markers={};
+function marker(color){
+  if(markers[color])return markers[color];
+  const id='arw'+Object.keys(markers).length;
+  const m=document.createElementNS(NS,'marker');
+  m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');
+  m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');
+  const p=document.createElementNS(NS,'path');p.setAttribute('d','M0,0 L10,5 L0,10 z');p.setAttribute('fill',color);
+  m.appendChild(p);defs.appendChild(m);markers[color]=id;return id;
+}
+function path(d,color,dash,width,both){
+  const p=document.createElementNS(NS,'path');
+  p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke',color);
+  p.setAttribute('stroke-width',width||2.4);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');
+  if(dash)p.setAttribute('stroke-dasharray',dash);
+  p.setAttribute('marker-end','url(#'+marker(color)+')');
+  if(both)p.setAttribute('marker-start','url(#'+marker(color)+')');
+  svg.appendChild(p);
+}
+function poly(pts){return 'M'+pts.map(p=>p.x+','+p.y).join(' L');}
+function label(x,y,text){
+  const e=document.createElement('div');e.className='edge-label';e.style.cssText=`left:${x}px;top:${y}px;`;e.textContent=text;world.appendChild(e);
+}
+
+/* happy spine — sequential */
+function spine(ids,color){
+  for(let i=0;i<ids.length-1;i++){
+    const a=rc(ids[i]),b=lc(ids[i+1]);
+    // straight if same row & adjacent; else gentle step
+    if(Math.abs(a.y-b.y)<1){ path(poly([a,{x:b.x-4,y:b.y}]),color,null,2.6); }
+    else { const mx=(a.x+b.x)/2; path(poly([a,{x:mx,y:a.y},{x:mx,y:b.y},{x:b.x-4,y:b.y}]),color,null,2.6); }
+  }
+}
+spine(CLIENT.map(n=>'C'+n.col),COLORS.spine);
+spine(PROV.map(n=>'P'+n.col),COLORS.spine);
+
+/* cross edges client <-> provider */
+function vlink(aId,bId,text,color,both){
+  const a=bc(aId), b=tc(bId);
+  path(poly([{x:a.x,y:a.y+(both?5:0)},{x:b.x,y:b.y-(both?5:4)}]),color,null,2.6,both);
+  if(text) label((a.x+b.x)/2, (a.y+b.y)/2, text);
+}
+vlink('C3','P3','pedido',COLORS.spine);     // publica -> prestador recebe
+// proposta: prestador -> cliente (upward)
+(function(){const a=tc('P4'),b=bc('C4');path(poly([a,{x:b.x,y:b.y+4}]),COLORS.spine,null,2.6);label((a.x+b.x)/2,(a.y+b.y)/2,'proposta');})();
+vlink('C5','P5','MATCH',COLORS.spine,true);
+vlink('C8','P8','split',COLORS.spine);
+vlink('C9','P9','avaliação mútua',COLORS.spine,true);
+
+/* branch connectors: origin happy node -> strip header (left bus, orthogonal) */
+STRIPS.forEach((st,idx)=>{
+  const color=COLORS[st.tone];
+  const o=st.origin;                       // e.g. C3 / P9
+  const op=pos[o];
+  const start={x:op.x+op.w-22,y:op.y+op.h}; // bottom-right of origin
+  const gutterX=op.x+op.w+14+(idx%4)*8;
+  const y=STRIP_Y0+idx*STRIP_STEP;
+  const busY=y-44;
+  const railX=20+idx*3.0;
+  const head=lc('H'+idx);
+  const pts=[start,{x:gutterX,y:start.y+12},{x:gutterX,y:busY},{x:railX,y:busY},{x:railX,y:head.y},{x:head.x-4,y:head.y}];
+  path(poly(pts),color, st.solid?null:'2 7', st.solid?2.8:2.2);
+});
+
+/* strip internal edges header -> n0 -> n1 ... */
+STRIPS.forEach((st,idx)=>{
+  const color=COLORS[st.tone];
+  const ids=['H'+idx].concat(st.nodes.map((_,j)=>'S'+idx+'_'+j));
+  for(let i=0;i<ids.length-1;i++){
+    const a=rc(ids[i]),b=lc(ids[i+1]);
+    path(poly([a,{x:b.x-4,y:b.y}]),color,null,2.3);
+  }
+});
+
+/* ============================================================ size svg + world */
+let maxX=0,maxY=0;
+Object.values(pos).forEach(p=>{maxX=Math.max(maxX,p.x+p.w);maxY=Math.max(maxY,p.y+p.h);});
+const CW=maxX+120, CH=maxY+90;
+svg.setAttribute('width',CW);svg.setAttribute('height',CH);
+world.style.width=CW+'px';world.style.height=CH+'px';
+
+/* ============================================================ pan + zoom */
+const vp=document.getElementById('viewport');
+let scale=1,tx=0,ty=0;
+function apply(){world.style.transform=`translate(${tx}px,${ty}px) scale(${scale})`;}
+function fit(){
+  const r=vp.getBoundingClientRect();
+  const pad=60;
+  const s=Math.min((r.width-pad)/CW,(r.height-pad)/CH);
+  scale=Math.min(s,1);
+  tx=(r.width-CW*scale)/2; ty=18;
+  if(tx<10)tx=10;
+  apply();
+}
+document.getElementById('zin').onclick=()=>{zoomAt(1.2);};
+document.getElementById('zout').onclick=()=>{zoomAt(1/1.2);};
+document.getElementById('zfit').onclick=fit;
+function zoomAt(f,cx,cy){
+  const r=vp.getBoundingClientRect();
+  cx=(cx==null?r.width/2:cx); cy=(cy==null?r.height/2:cy);
+  const wx=(cx-tx)/scale, wy=(cy-ty)/scale;
+  scale=Math.max(.18,Math.min(2.4,scale*f));
+  tx=cx-wx*scale; ty=cy-wy*scale; apply();
+}
+vp.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1.12:1/1.12,e.clientX-vp.getBoundingClientRect().left,e.clientY-vp.getBoundingClientRect().top);},{passive:false});
+let dragging=false,sx,sy,stx,sty;
+vp.addEventListener('pointerdown',e=>{dragging=true;vp.classList.add('drag');sx=e.clientX;sy=e.clientY;stx=tx;sty=ty;vp.setPointerCapture(e.pointerId);});
+vp.addEventListener('pointermove',e=>{if(!dragging)return;tx=stx+(e.clientX-sx);ty=sty+(e.clientY-sy);apply();});
+vp.addEventListener('pointerup',e=>{dragging=false;vp.classList.remove('drag');});
+fit();
+requestAnimationFrame(fit);
+setTimeout(fit,250);
+window.addEventListener('load',fit);
+let firstFitDone=false;
+</script>
+</body>
+</html>

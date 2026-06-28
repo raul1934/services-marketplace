@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee · Customer app</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@500;600;700;800&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="walvee-ui.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: #eceef1; }
+  #root { height: 100vh; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="walvee-kit.jsx"></script>
+<script type="text/babel" src="walvee-auth.jsx"></script>
+<script type="text/babel" src="walvee-screens-customer.jsx"></script>
+<script type="text/babel" src="walvee-screens-provider.jsx"></script>
+<script type="text/babel" src="walvee-create-flows.jsx"></script>
+<script type="text/babel" src="walvee-provider-bid-flows.jsx"></script>
+<script type="text/babel">
+const THEMES = [["sunset", "Light"], ["night", "Dark mode"]];
+const ABSTYLE = { borderRadius: 40, background: "transparent", boxShadow: "0 30px 60px -24px rgba(20,30,50,.4)" };
+
+function ScreenRow({ id, title, subtitle, Comp, h = 844 }) {
+  return (
+    <DCSection id={id} title={title} subtitle={subtitle}>
+      {THEMES.map(([t, label]) => (
+        <DCArtboard key={t} id={id + "-" + t} label={label} width={390} height={h} style={ABSTYLE}>
+          <Phone theme={t} height={h}><Comp /></Phone>
+        </DCArtboard>
+      ))}
+    </DCSection>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="foundations" title="walvee · Customer — foundations" subtitle="The sunset system in light and dark mode — color, type, components.">
+        {[["sunset", "Light", "Manrope", "Warm & human"], ["night", "Dark mode", "Manrope", "Low-light"]].map(([t, label, font, mood]) => (
+          <DCArtboard key={t} id={"found-" + t} label={label} width={390} height={980} style={ABSTYLE}>
+            <div className={"t-" + t} style={{ height: "100%" }}><Foundations name={mood} tagline="Travel true" fonts={font} /></div>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="onboarding" title="Sign up & log in" subtitle="Phone or email required, plus Google.">
+        <DCArtboard id="auth-signup-phone" label="Sign up · Phone" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><SignUpScreen mode="phone" /></Phone></DCArtboard>
+        <DCArtboard id="auth-signup-email" label="Sign up · Email" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><SignUpScreen mode="email" /></Phone></DCArtboard>
+        <DCArtboard id="auth-login" label="Log in" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><LoginScreen mode="phone" /></Phone></DCArtboard>
+        <DCArtboard id="auth-verify" label="Verify code" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><VerifyScreen /></Phone></DCArtboard>
+      </DCSection>
+
+      <DCSection id="tutorial" title="First-login tutorial" subtitle="A 3-slide onboarding shown the first time a customer logs in.">
+        {[0, 1, 2].map((i) => (
+          <DCArtboard key={i} id={"tut-" + i} label={"Slide " + (i + 1)} width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><TutorialScreen i={i} /></Phone></DCArtboard>
+        ))}
+      </DCSection>
+
+      <ScreenRow id="home" title="Home" subtitle="Active request, fast-help shortcuts, request CTA." Comp={HomeScreen} />
+      <ScreenRow id="categories" title="Categories" subtitle="Pick what's wrong — roadside, home, pets." Comp={CategoriesScreen} />
+
+      {["roadside", "home"].map((key) => {
+        const flow = FLOWS[key];
+        return (
+          <DCSection key={key} id={"flow-" + key} title={flow.title} subtitle={flow.subtitle}>
+            {flow.steps.map(([label, Step, h], i) => (
+              <DCArtboard key={i} id={"flow-" + key + "-" + i} label={label} width={390} height={h || 844} style={ABSTYLE}>
+                <Phone theme="sunset" height={h}><Step /></Phone>
+              </DCArtboard>
+            ))}
+          </DCSection>
+        );
+      })}
+
+      <ScreenRow id="bids" title="Request detail + bids" subtitle="Compare incoming provider proposals." Comp={RequestDetailScreen} />
+      <DCSection id="reqinfo-c" title="Answer provider questions" subtitle="Before quoting, a pro may ask for details — the client answers pre-bid.">
+        <DCArtboard id="reqinfo-customer" label="Answer questions" width={390} height={844} style={ABSTYLE}><Phone theme="sunset"><CustomerAnswerInfo /></Phone></DCArtboard>
+        <DCArtboard id="reqinfo-customer-night" label="Dark mode" width={390} height={844} style={ABSTYLE}><Phone theme="night"><CustomerAnswerInfo /></Phone></DCArtboard>
+      </DCSection>
+      <ScreenRow id="track" title="Live tracking" subtitle="Provider en route on the map, with progress." Comp={TrackingScreen} />
+      <ScreenRow id="rate" title="Rate the provider" subtitle="Stars, quick tags, comment, tip." Comp={RateScreen} />
+
+      <ScreenRow id="assets" title="Meus ativos — histórico" subtitle="O fosso: cada bem (carro, casa, equipamento) com seu histórico de manutenções." Comp={AssetsScreen} />
+      <DCSection id="asset-detail" title="Histórico de manutenções" subtitle="Linha do tempo de serviços por ativo — data, prestador, custo e garantia.">
+        <DCArtboard id="asset-civic-light" label="Honda Civic · Light" width={390} height={980} style={ABSTYLE}><Phone theme="sunset" height={980}><AssetDetailScreen id="civic" /></Phone></DCArtboard>
+        <DCArtboard id="asset-civic-night" label="Honda Civic · Dark" width={390} height={980} style={ABSTYLE}><Phone theme="night" height={980}><AssetDetailScreen id="civic" /></Phone></DCArtboard>
+        <DCArtboard id="asset-apto-light" label="Apartamento · Light" width={390} height={980} style={ABSTYLE}><Phone theme="sunset" height={980}><AssetDetailScreen id="apto" /></Phone></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

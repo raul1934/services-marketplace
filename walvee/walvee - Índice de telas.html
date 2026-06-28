@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee · Índice de telas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#1d2433; --ink-2:#5a6678; --ink-3:#97a3b4; --line:#e3e8ef;
+    --paper:#f4f6f9; --card:#fff; --accent:#e0683a; --accent-soft:#fcefe9;
+    --bom:#1f9d57; --bom-soft:#e7f6ee; --ruim:#e0463a; --ruim-soft:#fdecea;
+    --mono:'Space Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:56px 40px 80px;}
+  header.head{margin-bottom:40px;}
+  .kicker{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);}
+  h1{font-size:38px;font-weight:800;letter-spacing:-.025em;margin:10px 0 8px;}
+  .lead{font-size:15.5px;line-height:1.55;color:var(--ink-2);max-width:620px;}
+  .tally{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+  .tally .t{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 16px;}
+  .tally .n{font-size:24px;font-weight:800;letter-spacing:-.02em;}
+  .tally .k{font-size:11.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
+
+  .proto{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 28px;margin-top:22px;box-shadow:0 1px 0 rgba(20,30,50,.03),0 18px 40px -34px rgba(20,30,50,.4);}
+  .proto-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:6px;}
+  .proto-head h2{font-size:21px;font-weight:800;letter-spacing:-.02em;margin:0;}
+  .file{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--ink-3);}
+  .badge{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:7px;}
+  .b-app{background:#eef2fb;color:#3b6fe0;}
+  .b-flow{background:#fff4e2;color:#c5811a;}
+  .b-web{background:#eef7f1;color:var(--bom);}
+  .proto-sub{font-size:13.5px;color:var(--ink-2);line-height:1.5;margin:14px 0 4px;}
+
+  .grp{margin-top:20px;}
+  .grp-h{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin-bottom:11px;}
+  .grp-h .dot{width:9px;height:9px;border-radius:3px;background:var(--accent);}
+  .grp-h.bom .dot{background:var(--bom);} .grp-h.ruim .dot{background:var(--ruim);}
+  .grp-h .cnt{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-3);}
+  ol.screens{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:7px 22px;counter-reset:s;}
+  ol.screens.one{grid-template-columns:1fr;}
+  ol.screens li{counter-increment:s;display:flex;gap:10px;align-items:baseline;font-size:13.5px;line-height:1.4;padding:3px 0;}
+  ol.screens li::before{content:counter(s,decimal-leading-zero);font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink-3);flex:none;min-width:20px;}
+  ol.screens li b{font-weight:700;}
+  ol.screens li .muted{color:var(--ink-3);font-weight:600;font-size:12px;}
+  .note{font-size:12.5px;color:var(--ink-3);font-style:italic;margin-top:10px;}
+  footer.foot{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3);}
+  @media print{ html,body{background:#fff;} .proto{box-shadow:none;break-inside:avoid;} .wrap{padding:0;max-width:none;} }
+  @media(max-width:640px){ ol.screens{grid-template-columns:1fr;} .wrap{padding:32px 20px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="head">
+    <div class="kicker">walvee · Documentação</div>
+    <h1>Índice de telas</h1>
+    <p class="lead">Todas as telas dos protótipos walvee, agrupadas por app e por jornada. Cobre o app do cliente, o app do prestador, o protótipo navegável, a vertical Rotas e os layouts v3 (caminho bom &amp; ruim).</p>
+    <div class="tally">
+      <div class="t"><div class="n">6</div><div class="k">Protótipos</div></div>
+      <div class="t"><div class="n">~120</div><div class="k">Telas no total</div></div>
+      <div class="t"><div class="n">2</div><div class="k">Pontas (cliente · prestador)</div></div>
+      <div class="t"><div class="n">8</div><div class="k">Caminhos ruins</div></div>
+    </div>
+  </header>
+
+  <!-- ============ CUSTOMER APP ============ -->
+  <section class="proto">
+    <div class="proto-head"><h2>App do Cliente</h2><span class="badge b-app">Galeria</span><span class="file">walvee Customer.html</span></div>
+    <p class="proto-sub">Galeria de telas do app do cliente no sistema sunset (light + dark).</p>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Fundamentos &amp; entrada <span class="cnt">6</span></div>
+      <ol class="screens">
+        <li><b>Foundations</b> <span class="muted">· light + dark</span></li>
+        <li><b>Cadastro · telefone</b></li>
+        <li><b>Cadastro · e-mail</b></li>
+        <li><b>Login</b></li>
+        <li><b>Verificar código</b></li>
+        <li><b>Tutorial</b> <span class="muted">· 3 slides</span></li>
+      </ol>
+    </div>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Pedir &amp; acompanhar <span class="cnt">11</span></div>
+      <ol class="screens">
+        <li><b>Início</b></li>
+        <li><b>Categorias</b></li>
+        <li><b>Criar · Veicular</b> <span class="muted">· 3 passos</span></li>
+        <li><b>Criar · Casa</b> <span class="muted">· 4 passos</span></li>
+        <li><b>Detalhe + propostas</b></li>
+        <li><b>Responder perguntas</b></li>
+        <li><b>Acompanhar (ao vivo)</b></li>
+        <li><b>Avaliar prestador</b></li>
+      </ol>
+    </div>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Histórico do ativo (o fosso) <span class="cnt">4</span></div>
+      <ol class="screens">
+        <li><b>Meus ativos</b></li>
+        <li><b>Histórico · Honda Civic</b></li>
+        <li><b>Histórico · Apartamento</b></li>
+        <li><b>Histórico · dark mode</b></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ PROVIDER APP ============ -->
+  <section class="proto">
+    <div class="proto-head"><h2>App do Prestador</h2><span class="badge b-app">Galeria</span><span class="file">walvee Pro.html</span></div>
+    <p class="proto-sub">Galeria do app do profissional — credenciamento, trabalho on-demand e conta.</p>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Credenciamento <span class="cnt">7</span></div>
+      <ol class="screens">
+        <li><b>Foundations</b> <span class="muted">· light + dark</span></li>
+        <li><b>Tornar-se pro</b></li>
+        <li><b>Conta → categorias → área → documentos</b></li>
+        <li><b>Aguardando aprovação</b> <span class="muted">· bloqueado</span></li>
+        <li><b>Aguardando · dark</b></li>
+      </ol>
+    </div>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Encontrar &amp; propor <span class="cnt">7</span></div>
+      <ol class="screens">
+        <li><b>Painel</b></li>
+        <li><b>Próximas · lista</b></li>
+        <li><b>Próximas · mapa</b></li>
+        <li><b>Agendadas · calendário</b></li>
+        <li><b>Perguntar ao cliente</b></li>
+        <li><b>Enviar proposta</b></li>
+        <li><b>Fluxos de lance</b> <span class="muted">· veicular + casa</span></li>
+      </ol>
+    </div>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Executar &amp; receber <span class="cnt">5</span></div>
+      <ol class="screens">
+        <li><b>Liberar atendimento</b> <span class="muted">· QR</span></li>
+        <li><b>Trabalho ativo + peças</b></li>
+        <li><b>Adicionar peça</b> <span class="muted">· sheet</span></li>
+        <li><b>Avaliar o cliente</b></li>
+      </ol>
+    </div>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Conta <span class="cnt">5</span></div>
+      <ol class="screens">
+        <li><b>Hub da conta</b> <span class="muted">· + dark</span></li>
+        <li><b>Editar perfil</b></li>
+        <li><b>Meus serviços</b></li>
+        <li><b>Ganhos &amp; saques</b> <span class="muted">· + dark</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ NAVEGÁVEL ============ -->
+  <section class="proto">
+    <div class="proto-head"><h2>Protótipo navegável</h2><span class="badge b-app">Router</span><span class="file">walvee Prototipo.html</span></div>
+    <p class="proto-sub">Telefone único com roteador de telas, alternância de tema e menu de telas. Reúne o on-demand do prestador, a vertical Rotas e os ativos do cliente.</p>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>On-demand (prestador) <span class="cnt">20</span></div>
+      <ol class="screens">
+        <li><b>Painel do prestador</b></li>
+        <li><b>Solicitações próximas</b></li>
+        <li><b>Próximas · mapa</b></li>
+        <li><b>Solicitações · calendário</b></li>
+        <li><b>Agenda</b> <span class="muted">· propostos + fechados</span></li>
+        <li><b>Enviar proposta</b></li>
+        <li><b>Proposta enviada · status</b></li>
+        <li><b>Proposta aceita · status</b></li>
+        <li><b>A caminho</b></li>
+        <li><b>Liberar atendimento</b></li>
+        <li><b>Trabalho ativo</b></li>
+        <li><b>Adicionar peça</b></li>
+        <li><b>Avaliar o cliente</b></li>
+        <li><b>Perguntar ao cliente</b></li>
+        <li><b>Formulário do cliente</b></li>
+        <li><b>Conta</b></li>
+        <li><b>Editar perfil</b></li>
+        <li><b>Meus serviços</b></li>
+        <li><b>Ganhos &amp; saques</b></li>
+      </ol>
+    </div>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Rotas (equipes / contratos) <span class="cnt">14</span></div>
+      <ol class="screens">
+        <li><b>Início do turno · equipe</b></li>
+        <li><b>Equipamentos do turno</b></li>
+        <li><b>Minhas rotas</b></li>
+        <li><b>Turno ativo · equipe</b></li>
+        <li><b>Detalhe da rota</b></li>
+        <li><b>Ficha do ativo (local)</b></li>
+        <li><b>Visita em execução</b></li>
+        <li><b>Adicionar serviço extra</b></li>
+        <li><b>Serviço · passos</b></li>
+        <li><b>Execução guiada · leitura</b></li>
+        <li><b>Execução guiada · consumível</b></li>
+        <li><b>Execução (checklist)</b></li>
+        <li><b>Ativo móvel (carro)</b></li>
+        <li><b>Relatório do cliente</b></li>
+      </ol>
+    </div>
+
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Cliente · ativos <span class="cnt">4</span></div>
+      <ol class="screens">
+        <li><b>Meus ativos</b></li>
+        <li><b>Histórico · Honda Civic</b></li>
+        <li><b>Histórico · Apartamento</b></li>
+        <li><b>Histórico · Ar-condicionado</b></li>
+      </ol>
+    </div>
+    <p class="note">Inclui o menu hambúrguer compartilhado (cliente · prestador) com variações de largura, densidade e ícones.</p>
+  </section>
+
+  <!-- ============ V3 MAPA ============ -->
+  <section class="proto">
+    <div class="proto-head"><h2>v3 · Mapa de fluxo</h2><span class="badge b-flow">Diagrama</span><span class="file">walvee v3 - Mapa de fluxo.html</span></div>
+    <p class="proto-sub">Quadro navegável: a espinha do caminho bom (cliente + prestador) e os ramos do caminho ruim, conectados. Não são telas — é o mapa que orienta os layouts v3.</p>
+    <div class="grp"><div class="grp-h bom"><span class="dot"></span>Espinha do caminho bom</div>
+      <ol class="screens">
+        <li>Cliente: cria → publica → esclarece → escolhe → acompanha → paga → avalia → histórico</li>
+        <li>Prestador: recebe → propõe → desloca → executa → recebe → avalia</li>
+        <li>Loop de esclarecimento (perguntas, fotos, histórico, peças)</li>
+      </ol>
+    </div>
+    <div class="grp"><div class="grp-h ruim"><span class="dot"></span>Ramos do caminho ruim <span class="cnt">10</span></div>
+      <ol class="screens">
+        <li>Cold-start do prestador novo</li>
+        <li>Ninguém aceita → lance</li>
+        <li>Cancela / janela expira</li>
+        <li>No-show</li>
+        <li>Acréscimo na chegada</li>
+        <li>Peça muda o preço</li>
+        <li>Bait-and-switch → disputa</li>
+        <li>Falha de pagamento</li>
+        <li>Serviço ruim → garantia</li>
+        <li>Queda de qualidade → descredenciamento</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ V3 LAYOUTS ============ -->
+  <section class="proto">
+    <div class="proto-head"><h2>v3 · Cliente — Layouts</h2><span class="badge b-app">Galeria</span><span class="file">walvee v3 Cliente - Layouts.html</span></div>
+    <p class="proto-sub">A jornada completa do cliente em hi-fi — caminho bom e caminho ruim, com cada etapa costurada e seu ponto de entrada.</p>
+
+    <div class="grp"><div class="grp-h bom"><span class="dot"></span>Bom 1 — Pede ajuda <span class="cnt">5</span></div>
+      <ol class="screens"><li><b>Início</b></li><li><b>Escolhe serviço</b></li><li><b>Criar pedido</b> <span class="muted">· 3 passos</span></li></ol>
+    </div>
+    <div class="grp"><div class="grp-h bom"><span class="dot"></span>Bom 2 — Publica &amp; escolhe <span class="cnt">6</span></div>
+      <ol class="screens">
+        <li><b>Pedido publicado</b></li>
+        <li><b>Profissionais pediram detalhes</b></li>
+        <li><b>Responde ao profissional</b></li>
+        <li><b>Recebe propostas</b></li>
+        <li><b>Detalhe da proposta</b></li>
+        <li><b>Confirma o profissional</b></li>
+      </ol>
+    </div>
+    <div class="grp"><div class="grp-h bom"><span class="dot"></span>Bom 3 — Serviço acontece <span class="cnt">7</span></div>
+      <ol class="screens">
+        <li><b>A caminho</b></li>
+        <li><b>Acréscimo na chegada</b> <span class="muted">· se houver</span></li>
+        <li><b>Libera atendimento</b></li>
+        <li><b>Serviço em execução</b></li>
+        <li><b>Aprovar peça</b> <span class="muted">· se houver</span></li>
+        <li><b>Pagamento + recibo</b></li>
+        <li><b>Avalia o profissional</b></li>
+      </ol>
+    </div>
+    <div class="grp"><div class="grp-h bom"><span class="dot"></span>Bom 4 — Histórico do ativo <span class="cnt">3</span></div>
+      <ol class="screens"><li><b>Meus ativos</b></li><li><b>Histórico do veículo</b></li><li><b>Detalhe de um serviço</b></li></ol>
+    </div>
+    <div class="grp"><div class="grp-h"><span class="dot"></span>Referência · lado prestador <span class="cnt">2</span></div>
+      <ol class="screens"><li><b>Trabalho ativo · peças + valor</b></li><li><b>Adicionar peça</b> <span class="muted">· lança o valor</span></li></ol>
+    </div>
+
+    <div class="grp"><div class="grp-h ruim"><span class="dot"></span>Não fecha · a — Acompanhar <span class="cnt">4</span></div>
+      <ol class="screens">
+        <li><b>Meus pedidos</b> <span class="muted">· listagem</span></li>
+        <li><b>Detalhe · Informações</b></li>
+        <li><b>Detalhe · Propostas</b></li>
+        <li><b>Detalhe · Histórico</b></li>
+      </ol>
+    </div>
+    <div class="grp"><div class="grp-h ruim"><span class="dot"></span>Não fecha · b — Ninguém aceita <span class="cnt">6</span></div>
+      <ol class="screens">
+        <li><b>Encerrado · Informações</b> <span class="muted">· decisão</span></li>
+        <li><b>Encerrado · Propostas</b> <span class="muted">· vazio</span></li>
+        <li><b>Encerrado · Histórico</b></li>
+        <li><b>Saída A · republicado</b></li>
+        <li><b>Saída B · lance aberto</b></li>
+        <li><b>Saída C · janela reaberta</b></li>
+      </ol>
+    </div>
+    <div class="grp"><div class="grp-h ruim"><span class="dot"></span>Não fecha · c — Cancelar <span class="cnt">2</span></div>
+      <ol class="screens"><li><b>Toca em cancelar</b></li><li><b>Confirmado · sem custo</b></li></ol>
+    </div>
+    <div class="grp"><div class="grp-h ruim"><span class="dot"></span>Serviço &amp; cobrança <span class="cnt">6</span></div>
+      <ol class="screens">
+        <li><b>Profissional não aparece</b></li>
+        <li><b>Reaberto + reembolso</b></li>
+        <li><b>Disputa</b> <span class="muted">· valor ≠ combinado</span></li>
+        <li><b>Disputa em mediação</b></li>
+        <li><b>Falha de pagamento</b></li>
+        <li><b>Pago após trocar método</b></li>
+      </ol>
+    </div>
+    <div class="grp"><div class="grp-h ruim"><span class="dot"></span>Pós-serviço <span class="cnt">2</span></div>
+      <ol class="screens"><li><b>Garantia / reembolso</b></li><li><b>Garantia em andamento</b></li></ol>
+    </div>
+  </section>
+
+  <!-- ============ SITE ============ -->
+  <section class="proto">
+    <div class="proto-head"><h2>Site institucional</h2><span class="badge b-web">Web</span><span class="file">walvee *.html</span></div>
+    <p class="proto-sub">Páginas de marketing e suporte (web, não telas de app).</p>
+    <ol class="screens">
+      <li><b>Landing</b></li>
+      <li><b>Serviços</b></li>
+      <li><b>Planos</b></li>
+      <li><b>Sobre</b></li>
+      <li><b>Suporte</b></li>
+      <li><b>Legal</b></li>
+      <li><b>Ads</b></li>
+    </ol>
+  </section>
+
+  <footer class="foot">walvee · índice gerado a partir dos protótipos do projeto · {sunset design system}</footer>
+</div>
+</body>
+</html>

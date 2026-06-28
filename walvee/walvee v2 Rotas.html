@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>walvee v2 · Rotas (add-on)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Sora:wght@500;600;700;800&family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="walvee-ui.css" />
+<link rel="stylesheet" href="walvee-v2.css" />
+<style>
+  html, body { margin: 0; height: 100%; background: #eceef1; }
+  #root { height: 100vh; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="browser-window.jsx"></script>
+<script type="text/babel" src="walvee-kit.jsx"></script>
+<script type="text/babel" src="walvee-screens-customer.jsx"></script>
+<script type="text/babel" src="walvee-screens-provider.jsx"></script>
+<script type="text/babel" src="walvee-v2-field.jsx"></script>
+<script type="text/babel" src="walvee-v2-web.jsx"></script>
+<script type="text/babel" src="walvee-v2-report.jsx"></script>
+<script type="text/babel">
+const ABP = { borderRadius: 40, background: "transparent", boxShadow: "0 30px 60px -24px rgba(20,30,50,.4)" };
+const ABW = { background: "transparent" };
+
+/* ---------- Variation B · Route detail (map-first) ---------- */
+function V2RouteDetailMapB() {
+  const stops = [["done","Edifício Aurora","08:40"],["done","Residência Lima","09:15"],["now","Condomínio Vista","agora"],["","Edifício Sol","10:30"],["","Praça Central","11:10"]];
+  return (
+    <>
+      <div className="scroll" style={{ position: "relative" }}>
+        <div className="map" style={{ height: 360, position: "relative" }}>
+          <svg className="streets" viewBox="0 0 390 360" preserveAspectRatio="xMidYMid slice">
+            <g stroke="currentColor" strokeWidth="12" opacity="0.06" fill="none" strokeLinecap="round"><path d="M-20 90H410M-20 200H410M-20 300H410M90 -20V380M250 -20V380" /></g>
+            <path d="M70 300 C 120 300, 130 210, 190 200 S 270 110, 300 96" fill="none" stroke="var(--accent)" strokeWidth="5" strokeLinecap="round" strokeDasharray="1 11" />
+          </svg>
+          <div className="map-tag sel" style={{ left: "48%", top: "55%" }}><span className="mt-ic"><Icon name="navigate" size={14} /></span>Vista</div>
+          <div className="map-me" style={{ left: "18%", top: "84%" }} />
+          <div className="backbtn" style={{ position: "absolute", top: 50, left: 16 }}><Icon name="back" size={20} /></div>
+        </div>
+        <div className="sheet" style={{ position: "static", margin: "-24px 12px 0", boxShadow: "var(--shadow)" }}>
+          <div className="handle" />
+          <div className="row"><div className="grow"><div style={{ fontWeight: 800, fontSize: 16 }}>Rota Norte · Neve</div><div className="muted" style={{ fontSize: 12.5 }}>Próxima: Condomínio Vista · 1,2 km</div></div><span className="badge b-live dot">2/6</span></div>
+          <button className="btn grad" style={{ width: "100%", marginTop: 12 }}>Navegar até a parada <Icon name="navigate" size={17} /></button>
+          <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+            {stops.map(([st, n, w], i) => (
+              <div key={i} className="row" style={{ gap: 11 }}>
+                <span className={"node " + st} style={{ width: 26, height: 26, fontSize: 12 }}>{st === "done" ? <Icon name="check" size={12} sw={3} /> : i + 1}</span>
+                <span className="grow" style={{ fontWeight: 700, fontSize: 13.5, color: st ? "var(--ink)" : "var(--ink-2)" }}>{n}</span>
+                <span className="faint" style={{ fontSize: 12, fontWeight: 700 }}>{w}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Stage({ children }) { return children; }
+
+function App() {
+  return (
+    <DesignCanvas>
+      <DCSection id="intro" title="walvee · Rotas (add-on v2)" subtitle="Módulo de gestão de rotas de serviço — vendido como add-on. App do técnico (mobile), console de gestão (web) e relatório do cliente.">
+        <DCArtboard id="intro-card" label="O que é" width={460} height={520} style={{ background: "transparent" }}>
+          <div className="t-sunset" style={{ height: "100%", background: "var(--bg)", borderRadius: 24, padding: 28, fontFamily: "var(--font)", display: "flex", flexDirection: "column", gap: 14 }}>
+            <span className="v2-badge"><Icon name="route" size={13} /> Add-on Rotas</span>
+            <div style={{ fontFamily: "var(--font-head)", fontWeight: 800, fontSize: 26, letterSpacing: "-.02em", lineHeight: 1.05 }}>Gestão de rotas de serviço</div>
+            <div style={{ color: "var(--ink-2)", fontSize: 14.5, lineHeight: 1.5 }}>Para operações recorrentes — piscinas, limpeza, manutenção, remoção de neve. Funcionalidade contratada à parte da walvee.</div>
+            <div style={{ height: 1, background: "var(--line)" }} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+              {[["route","Rota","tem várias paradas (sites) em ordem"],["home-outline","Site","equipamentos, histórico e fotos (antes/depois)"],["clipboard","Serviço","executado na parada; pode ter equipamentos + consumíveis"],["users","Equipe","líder seleciona o crew no início do turno"]].map(([ic,t,d],i)=>(
+                <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  <span className="cat-ic" style={{ width: 38, height: 38, borderRadius: 11, flex: "none" }}><Icon name={ic} size={19} /></span>
+                  <div><div style={{ fontWeight: 800, fontSize: 14 }}>{t}</div><div style={{ color: "var(--ink-2)", fontSize: 12.5 }}>{d}</div></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="field" title={V2_FIELD.title} subtitle={V2_FIELD.subtitle}>
+        {V2_FIELD.steps.map(([label, S, h], i) => (
+          <DCArtboard key={i} id={"f-" + i} label={label} width={390} height={h || 844} style={ABP}><Phone theme="sunset" height={h}><S /></Phone></DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="field-dark" title="App do técnico · Dark mode" subtitle="As mesmas telas no tema escuro (uso noturno / neve).">
+        <DCArtboard id="fd-1" label="Detalhe da rota" width={390} height={844} style={ABP}><Phone theme="night"><V2RouteDetail /></Phone></DCArtboard>
+        <DCArtboard id="fd-2" label="Detalhe do ativo · local" width={390} height={1480} style={ABP}><Phone theme="night" height={1480}><V2SiteDetail /></Phone></DCArtboard>
+        <DCArtboard id="fd-3" label="Execução da parada" width={390} height={844} style={ABP}><Phone theme="night"><V2Execution /></Phone></DCArtboard>
+      </DCSection>
+
+      <DCSection id="variations" title="Variações · Detalhe da rota" subtitle="Duas direções para a tela-chave: timeline de paradas vs. mapa-primeiro.">
+        <DCArtboard id="var-a" label="A · Timeline de paradas" width={390} height={844} style={ABP}><Phone theme="sunset"><V2RouteDetail /></Phone></DCArtboard>
+        <DCArtboard id="var-b" label="B · Mapa-primeiro" width={390} height={844} style={ABP}><Phone theme="sunset"><V2RouteDetailMapB /></Phone></DCArtboard>
+      </DCSection>
+
+      <DCSection id="asset" title="Ativo · contrato & estados" subtitle="O vínculo pro↔cliente vive no ativo (site fixo ou móvel). Pode ser contratado por um período e, ao expirar, aberto como chamado para outros pros.">
+        <DCArtboard id="as-1" label="Ativo fixo · ficha do local" width={390} height={1480} style={ABP}><Phone theme="sunset" height={1480}><V2SiteDetail /></Phone></DCArtboard>
+        <DCArtboard id="as-1b" label="Ativo fixo · visita em execução" width={390} height={1180} style={ABP}><Phone theme="sunset" height={1180}><V2VisitDetail /></Phone></DCArtboard>
+        <DCArtboard id="as-1c" label="Adicionar serviço extra (sheet)" width={390} height={844} style={ABP}><Phone theme="sunset"><V2AddService /></Phone></DCArtboard>
+        <DCArtboard id="as-2" label="Ativo móvel (carro) · em aberto" width={390} height={1060} style={ABP}><Phone theme="sunset" height={1060}><V2AssetVehicle /></Phone></DCArtboard>
+      </DCSection>
+
+      <DCSection id="guided" title="Execução guiada · passos empilhados" subtitle="Todos os passos ficam à vista: o atual expandido com o controle certo (leitura, consumível), os concluídos colapsados com o resultado. O técnico não perde a sequência.">
+        <DCArtboard id="g-1" label="Passo 1 ativo · leitura" width={390} height={760} style={ABP}><Phone theme="sunset" height={760}><V2Guided at={0} /></Phone></DCArtboard>
+        <DCArtboard id="g-2" label="Passo 3 ativo · consumível" width={390} height={820} style={ABP}><Phone theme="sunset" height={820}><V2Guided at={1} /></Phone></DCArtboard>
+      </DCSection>
+
+      <DCSection id="web" title={V2_WEB.title} subtitle={V2_WEB.subtitle}>
+        {V2_WEB.screens.map(([label, S], i) => (
+          <DCArtboard key={i} id={"w-" + i} label={label} width={1180} height={760} style={ABW}>
+            <ChromeWindow width={1180} height={760} url={"app.walvee.com/rotas"}><S /></ChromeWindow>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      <DCSection id="report" title="Relatório do cliente" subtitle="Após a visita, o cliente recebe o que foi feito, consumíveis, fotos antes/depois e a próxima visita.">
+        <DCArtboard id="rep-1" label="Relatório · Light" width={390} height={844} style={ABP}><Phone theme="sunset"><V2ReportScreen /></Phone></DCArtboard>
+        <DCArtboard id="rep-2" label="Relatório · Dark" width={390} height={844} style={ABP}><Phone theme="night"><V2ReportScreen /></Phone></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

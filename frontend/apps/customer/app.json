@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Walvee",
+    "slug": "walvee-customer",
+    "scheme": "walvee",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ff6a3d"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.walvee.customer"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "android": {
+      "package": "com.walvee.customer",
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#ff6a3d" },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_MEDIA_IMAGES"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-location",
+      "expo-image-picker",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "O Walvee usa o microfone para ditar textos por voz.",
+          "speechRecognitionPermission": "O Walvee usa reconhecimento de fala para transcrever o que você ditar.",
+          "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ]
+    ],
+    "extra": {
+      "router": { "origin": false }
+    }
+  }
+}
