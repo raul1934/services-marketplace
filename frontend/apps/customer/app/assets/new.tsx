@@ -6,7 +6,8 @@ import { BackBar, Button, Field, Icon, Screen, SectionLabel, Segment, Text, useT
 import { useCreateAsset } from '../../src/queries';
 import { setCreatedAsset } from '../../src/assetPick';
 import { ASSET_FIELDS, ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
-import { AssetDetailInput } from '../../src/api';
+import { AssetDetailInput, GeoPoint } from '../../src/api';
+import { AssetLocationField } from '../../src/components/AssetLocationField';
 import { MakeModelPicker } from '../../src/components/MakeModelPicker';
 import { PetSpeciesBreedPicker } from '../../src/components/PetSpeciesBreedPicker';
 import { PropertyTypePicker } from '../../src/components/PropertyTypePicker';
@@ -139,6 +140,18 @@ export default function AddAsset() {
             />
           ),
         )}
+
+        {type === 'property' ? (
+          <>
+            <SectionLabel>{tr('assets.locationLabel')}</SectionLabel>
+            <AssetLocationField
+              latitude={detail.latitude as number | undefined}
+              longitude={detail.longitude as number | undefined}
+              geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
+              onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
+            />
+          </>
+        ) : null}
 
         {type === 'vehicle' ? (
           <Field

@@ -132,8 +132,8 @@ export const providerApi = {
 
   nearby: (radiusKm = 30, page = 1) =>
     http.get<Paginated<ServiceRequest>>('provider/requests/nearby', { query: { radius_km: radiusKm, page } }).then(unwrapPage),
-  scheduled: (radiusKm = 30, page = 1) =>
-    http.get<Paginated<ServiceRequest>>('provider/requests/scheduled', { query: { radius_km: radiusKm, page } }).then(unwrapPage),
+  scheduled: (radiusKm = 30, page = 1, perPage?: number) =>
+    http.get<Paginated<ServiceRequest>>('provider/requests/scheduled', { query: { radius_km: radiusKm, page, per_page: perPage } }).then(unwrapPage),
   getJob: (id: number) => http.get<{ data: ServiceRequest }>(`provider/requests/${id}`).then(unwrap),
   myJobs: (page = 1, status?: 'active') => http.get<Paginated<ServiceRequest>>('provider/jobs', { query: { page, status } }).then(unwrapPage),
   myBids: (page = 1) => http.get<Paginated<ServiceRequest>>('provider/bids', { query: { page } }).then(unwrapPage),

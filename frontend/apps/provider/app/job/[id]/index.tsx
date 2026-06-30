@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -131,6 +131,9 @@ export default function JobScreen() {
             initialRegion={{ latitude: request.latitude!, longitude: request.longitude!, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
           >
             <Marker coordinate={{ latitude: request.latitude!, longitude: request.longitude! }} pinColor={t.colors.accent} />
+            {request.asset?.detail?.geofence && request.asset.detail.geofence.length >= 2 && (
+              <Polygon coordinates={request.asset.detail.geofence} strokeColor={t.colors.accent} fillColor={`${t.colors.accent}33`} strokeWidth={2} />
+            )}
           </MapView>
         </View>
         {!!request.address && (

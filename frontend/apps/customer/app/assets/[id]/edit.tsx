@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Field, Icon, NotFoundView, Screen, SectionLabel, Text, useTheme } from '@walvee/shared';
 import { useArchiveAsset, useAsset, useUpdateAsset } from '../../../src/queries';
 import { ASSET_FIELDS, AssetTypeKey } from '../../../src/assetFields';
-import { AssetDetailInput } from '../../../src/api';
+import { AssetDetailInput, GeoPoint } from '../../../src/api';
+import { AssetLocationField } from '../../../src/components/AssetLocationField';
 import { MakeModelPicker } from '../../../src/components/MakeModelPicker';
 import { PetSpeciesBreedPicker } from '../../../src/components/PetSpeciesBreedPicker';
 import { PropertyTypePicker } from '../../../src/components/PropertyTypePicker';
@@ -157,6 +158,18 @@ export default function EditAsset() {
             />
           ),
         )}
+
+        {type === 'property' ? (
+          <>
+            <SectionLabel>{tr('assets.locationLabel')}</SectionLabel>
+            <AssetLocationField
+              latitude={detail.latitude as number | undefined}
+              longitude={detail.longitude as number | undefined}
+              geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
+              onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
+            />
+          </>
+        ) : null}
 
         <Button title={tr('assets.save')} full loading={update.isPending} onPress={save} style={{ marginTop: 4 }} />
         <Button title={tr('assets.archive')} variant="ghost" full onPress={confirmArchive} />

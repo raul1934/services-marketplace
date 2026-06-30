@@ -30,8 +30,10 @@ import { CategoryIcon } from '../../src/components/CategoryIcon';
 import { Scheduler, Availability } from '../../src/components/Scheduler';
 import { getCurrentCoords, Coords } from '../../src/location';
 import { pickPhotos, uploadPhotos, PickedPhoto } from '../../src/photos';
+import { assetsApi } from '../../src/api';
 
-const TOTAL = 6;
+const STEP_KEYS = ['details', 'photos', 'location', 'when', 'money', 'review'] as const;
+type StepKey = (typeof STEP_KEYS)[number];
 
 export default function NewRequest() {
   const t = useTheme();
@@ -76,6 +78,28 @@ export default function NewRequest() {
     if (assetType) router.push(`/assets/new?pick=1&type=${assetType}`);
   };
 
+  // A property asset carries its own location → derive it and skip the GPS step.
+  const detail = selectedAsset?.detail;
+  const assetLocation =
+    assetType === 'property' && detail?.latitude != null && detail?.longitude != null
+      ? { latitude: detail.latitude as number, longitude: detail.longitude as number, address: (detail.address as string | null | undefined) ?? undefined }
+      : null;
+
+  // Hide category questions the selected asset already answers (no double entry).
+  const visibleQuestions = questions.filter((q) => {
+    const field = ({ floor: 'floor', unit: 'unit', address: 'address' } as Record<string, string>)[q.key];
+    return !(field && detail && (detail as Record<string, unknown>)[field]);
+  });
+
+  // The active step list (location is dropped when derived from the asset).
+  const stepKeys = useMemo<StepKey[]>(() => STEP_KEYS.filter((k) => k !== 'location' || !assetLocation), [assetLocation]);
+  const TOTAL = stepKeys.length;
+  const stepKey = stepKeys[Math.min(step, TOTAL) - 1];
+  const goTo = (key: StepKey) => {
+    const i = stepKeys.indexOf(key);
+    if (i >= 0) setStep(i + 1);
+  };
+
   const locate = async () => {
     setLocating(true);
     try {
@@ -99,7 +123,8 @@ export default function NewRequest() {
   };
 
   const submit = async () => {
-    if (!coords) return;
+    const loc = assetLocation ?? coords;
+    if (!loc) return;
     try {
       // Upload-first: upload the photos, then attach them via media_ids on create.
       let mediaIds: number[] | undefined;
@@ -115,9 +140,9 @@ export default function NewRequest() {
         service_category_id: Number(categoryId),
         asset_id: assetId ?? undefined,
         description: description.trim(),
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-        address: address.trim() || undefined,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        address: assetLocation ? assetLocation.address : (address.trim() || undefined),
         budget_max: budget,
         payment_method: payment,
         answers: Object.entries(answers)
@@ -130,34 +155,33 @@ export default function NewRequest() {
         media_ids: mediaIds,
       });
 
+      // Remember the captured location on the property asset for next time.
+      if (!assetLocation && assetType === 'property' && selectedAsset && coords) {
+        assetsApi
+          .update(selectedAsset.id, { detail: { latitude: coords.latitude, longitude: coords.longitude, address: address.trim() || undefined } })
+          .catch(() => {});
+      }
+
       router.replace(`/request/${req.id}`);
     } catch (e) {
       Alert.alert(tr('common.error'), e instanceof ApiError ? e.message : (e as Error).message);
     }
   };
 
-  const titles = [
-    tr('createRequest.wizProblemTitle'),
-    tr('createRequest.wizPhotosTitle'),
-    tr('createRequest.wizLocationTitle'),
-    tr('createRequest.wizWhenTitle'),
-    tr('createRequest.wizMoneyTitle'),
-    tr('createRequest.wizReviewTitle'),
-  ];
-  const subs = [
-    tr('createRequest.wizProblemSub'),
-    tr('createRequest.wizPhotosSub'),
-    tr('createRequest.wizLocationSub'),
-    tr('createRequest.wizWhenSub'),
-    tr('createRequest.wizMoneySub'),
-    tr('createRequest.wizReviewSub'),
-  ];
+  const META: Record<StepKey, { title: string; sub: string }> = {
+    details: { title: tr('createRequest.wizProblemTitle'), sub: tr('createRequest.wizProblemSub') },
+    photos: { title: tr('createRequest.wizPhotosTitle'), sub: tr('createRequest.wizPhotosSub') },
+    location: { title: tr('createRequest.wizLocationTitle'), sub: tr('createRequest.wizLocationSub') },
+    when: { title: tr('createRequest.wizWhenTitle'), sub: tr('createRequest.wizWhenSub') },
+    money: { title: tr('createRequest.wizMoneyTitle'), sub: tr('createRequest.wizMoneySub') },
+    review: { title: tr('createRequest.wizReviewTitle'), sub: tr('createRequest.wizReviewSub') },
+  };
   const canContinue =
-    (step === 1 && description.trim().length >= 5 && (assetType == null || assetId != null)) ||
-    step === 2 || // photos optional
-    (step === 3 && !!coords) ||
-    (step === 4 && (urgency === RequestUrgency.Urgent || availabilities.length > 0)) ||
-    step === 5; // budget/payment have defaults
+    (stepKey === 'details' && description.trim().length >= 5 && (assetType == null || assetId != null)) ||
+    stepKey === 'photos' || // optional
+    (stepKey === 'location' && !!coords) ||
+    (stepKey === 'when' && (urgency === RequestUrgency.Urgent || availabilities.length > 0)) ||
+    stepKey === 'money'; // budget/payment have defaults
 
   const footer =
     step < TOTAL
@@ -168,18 +192,37 @@ export default function NewRequest() {
     ? `${tr('enums.receptionType.entry_code')}${entryCode.trim() ? ` · ${entryCode.trim()}` : ''}`
     : tr('enums.receptionType.adult_key');
 
+  // "Who receives the pro" — lives in the location step, or in step 1 when that
+  // step is skipped (asset-derived location), so it's never lost.
+  const accessBlock = (
+    <>
+      <SectionLabel>{tr('createRequest.accessLabel')}</SectionLabel>
+      <Segment
+        items={[
+          { value: ReceptionType.AdultKey, label: tr('enums.receptionType.adult_key') },
+          { value: ReceptionType.EntryCode, label: tr('enums.receptionType.entry_code') },
+        ]}
+        value={reception}
+        onChange={setReception}
+      />
+      {reception === ReceptionType.EntryCode && (
+        <Field label={tr('createRequest.entryCodeLabel')} value={entryCode} onChangeText={setEntryCode} placeholder={tr('createRequest.entryCodePlaceholder')} />
+      )}
+    </>
+  );
+
   return (
     <Wiz
       cat={category?.name ?? tr('createRequest.title')}
       step={step}
       total={TOTAL}
-      title={titles[step - 1]}
-      sub={subs[step - 1]}
+      title={META[stepKey].title}
+      sub={META[stepKey].sub}
       onBack={() => (step === 1 ? router.back() : setStep(step - 1))}
       footer={footer}
     >
       {/* STEP 1 — details (asset + description + questions) */}
-      {step === 1 && (
+      {stepKey === 'details' && (
         <>
           <Row style={{ gap: 12 }}>
             <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
@@ -203,21 +246,22 @@ export default function NewRequest() {
             />
           )}
           <Field label={tr('createRequest.whatHappened')} value={description} onChangeText={setDescription} placeholder={tr('createRequest.whatHappenedPlaceholder')} multiline voiceInput style={{ height: 84, textAlignVertical: 'top' }} />
-          {questions.length > 0 && (
+          {visibleQuestions.length > 0 && (
             <>
               <SectionLabel>{tr('createRequest.detailsLabel')}</SectionLabel>
               <DynamicFields
-                questions={questions}
+                questions={visibleQuestions}
                 values={answers}
                 onChange={(id, value) => setAnswers((s) => ({ ...s, [id]: value }))}
               />
             </>
           )}
+          {assetLocation && accessBlock}
         </>
       )}
 
       {/* STEP 2 — photos (optional) */}
-      {step === 2 && (
+      {stepKey === 'photos' && (
         <>
           <SectionLabel>{tr('createRequest.photos')}</SectionLabel>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
@@ -243,7 +287,7 @@ export default function NewRequest() {
       )}
 
       {/* STEP 3 — location & access */}
-      {step === 3 && (
+      {stepKey === 'location' && (
         <>
           <Card padded={false} style={{ overflow: 'hidden' }}>
             {coords ? (
@@ -263,23 +307,12 @@ export default function NewRequest() {
             </Row>
           </Card>
           <Field label={tr('createRequest.addressLabel')} value={address} onChangeText={setAddress} placeholder={tr('createRequest.addressPlaceholder')} />
-          <SectionLabel>{tr('createRequest.accessLabel')}</SectionLabel>
-          <Segment
-            items={[
-              { value: ReceptionType.AdultKey, label: tr('enums.receptionType.adult_key') },
-              { value: ReceptionType.EntryCode, label: tr('enums.receptionType.entry_code') },
-            ]}
-            value={reception}
-            onChange={setReception}
-          />
-          {reception === ReceptionType.EntryCode && (
-            <Field label={tr('createRequest.entryCodeLabel')} value={entryCode} onChangeText={setEntryCode} placeholder={tr('createRequest.entryCodePlaceholder')} />
-          )}
+          {accessBlock}
         </>
       )}
 
       {/* STEP 4 — when */}
-      {step === 4 && (
+      {stepKey === 'when' && (
         <>
           <SectionLabel>{tr('createRequest.when')}</SectionLabel>
           <Segment
@@ -302,7 +335,7 @@ export default function NewRequest() {
       )}
 
       {/* STEP 5 — budget & payment */}
-      {step === 5 && (
+      {stepKey === 'money' && (
         <>
           <BudgetMeter
             value={budget}
@@ -337,34 +370,34 @@ export default function NewRequest() {
       )}
 
       {/* STEP 6 — review (read-only synthesis) */}
-      {step === 6 && (
+      {stepKey === 'review' && (
         <Card>
-          <SumRow icon="list" k={tr('createRequest.summaryService')} v={category?.name ?? '—'} onPress={() => setStep(1)} />
+          <SumRow icon="list" k={tr('createRequest.summaryService')} v={category?.name ?? '—'} onPress={() => goTo('details')} />
           {selectedAsset && (
             <SumRow
               icon={ICON[selectedAsset.type] ?? 'car'}
               k={tr(`assets.type.${selectedAsset.type}`)}
               v={[selectedAsset.nickname, assetCaption(selectedAsset, tr)].filter(Boolean).join(' · ')}
-              onPress={() => setStep(1)}
+              onPress={() => goTo('details')}
             />
           )}
           {description.trim() !== '' && (
-            <SumRow icon="edit" k={tr('createRequest.summaryDescription')} v={description.trim()} onPress={() => setStep(1)} />
+            <SumRow icon="edit" k={tr('createRequest.summaryDescription')} v={description.trim()} onPress={() => goTo('details')} />
           )}
-          {questions
+          {visibleQuestions
             .filter((q) => (answers[q.id] ?? '').trim() !== '')
-            .map((q) => <SumRow key={q.id} icon="check" k={q.label} v={answers[q.id]} onPress={() => setStep(1)} />)}
-          <SumRow icon="camera" k={tr('createRequest.photos')} v={tr('createRequest.summaryPhotos', { count: photos.length })} onPress={() => setStep(2)} />
-          <SumRow icon="location" k={tr('createRequest.addressLabel')} v={address || tr('createRequest.gpsCaptured')} onPress={() => setStep(3)} />
-          <SumRow icon="key" k={tr('createRequest.accessLabel')} v={accessLabel} onPress={() => setStep(3)} />
+            .map((q) => <SumRow key={q.id} icon="check" k={q.label} v={answers[q.id]} onPress={() => goTo('details')} />)}
+          <SumRow icon="camera" k={tr('createRequest.photos')} v={tr('createRequest.summaryPhotos', { count: photos.length })} onPress={() => goTo('photos')} />
+          <SumRow icon="location" k={tr('createRequest.addressLabel')} v={assetLocation?.address || address || tr('createRequest.gpsCaptured')} onPress={() => (assetLocation ? goTo('details') : goTo('location'))} />
+          <SumRow icon="key" k={tr('createRequest.accessLabel')} v={accessLabel} onPress={() => (assetLocation ? goTo('details') : goTo('location'))} />
           <SumRow
             icon="calendar"
             k={tr('createRequest.when')}
             v={urgency === RequestUrgency.Urgent ? tr('enums.urgency.urgent') : tr('createRequest.windowsCount', { count: availabilities.length })}
-            onPress={() => setStep(4)}
+            onPress={() => goTo('when')}
           />
-          <SumRow icon="dollar" k={tr('createRequest.summaryBudget')} v={`${tr('common.currency')} ${budget}`} onPress={() => setStep(5)} />
-          <SumRow icon={payment} k={tr('createRequest.summaryPayment')} v={tr(`payment.${payment}`)} onPress={() => setStep(5)} last />
+          <SumRow icon="dollar" k={tr('createRequest.summaryBudget')} v={`${tr('common.currency')} ${budget}`} onPress={() => goTo('money')} />
+          <SumRow icon={payment} k={tr('createRequest.summaryPayment')} v={tr(`payment.${payment}`)} onPress={() => goTo('money')} last />
         </Card>
       )}
     </Wiz>

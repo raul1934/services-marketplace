@@ -33,6 +33,48 @@ class AssetCatalogTest extends TestCase
         $this->assertDatabaseHas('asset_properties', ['property_type_id' => $type->id, 'unit' => 'Apto 502']);
     }
 
+    public function test_property_stores_location_and_geofence(): void
+    {
+        $client = User::factory()->create();
+        Sanctum::actingAs($client, ['client']);
+
+        $geofence = [
+            ['latitude' => -20.80, 'longitude' => -49.30],
+            ['latitude' => -20.80, 'longitude' => -49.29],
+            ['latitude' => -20.79, 'longitude' => -49.29],
+            ['latitude' => -20.79, 'longitude' => -49.30],
+        ];
+
+        $res = $this->postJson('/api/customer/v1/assets', [
+            'type' => 'property',
+            'nickname' => 'Apê',
+            'detail' => ['latitude' => -20.8, 'longitude' => -49.3, 'geofence' => $geofence],
+        ])->assertStatus(201);
+
+        $res->assertJsonCount(4, 'data.detail.geofence');
+
+        $asset = \App\Models\Asset::find($res->json('data.id'));
+        $this->assertEqualsWithDelta(-20.8, (float) $asset->detailable->latitude, 0.0001);
+        $this->assertEqualsWithDelta(-49.3, (float) $asset->detailable->longitude, 0.0001);
+        $this->assertCount(4, $asset->detailable->geofence);
+    }
+
+    public function test_geofence_requires_at_least_four_points(): void
+    {
+        $client = User::factory()->create();
+        Sanctum::actingAs($client, ['client']);
+
+        $this->postJson('/api/customer/v1/assets', [
+            'type' => 'property',
+            'nickname' => 'Apê',
+            'detail' => ['geofence' => [
+                ['latitude' => -20.80, 'longitude' => -49.30],
+                ['latitude' => -20.79, 'longitude' => -49.29],
+                ['latitude' => -20.78, 'longitude' => -49.28],
+            ]],
+        ])->assertStatus(422);
+    }
+
     public function test_create_pet_with_species_and_breed_ids_resolves_names(): void
     {
         $client = User::factory()->create();

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
+import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Card, EmptyState, FieldDisplay, Icon, NotFoundView, Row, Screen, SectionLabel, Text, useTheme } from '@walvee/shared';
@@ -120,6 +121,32 @@ export default function AssetDetail() {
                 </View>
               ))}
             </View>
+          </View>
+        ) : null}
+
+        {/* Location + footprint (properties) */}
+        {type === 'property' && detail.latitude != null && detail.longitude != null ? (
+          <View style={{ gap: 10 }}>
+            <SectionLabel>{tr('assets.locationLabel')}</SectionLabel>
+            <Card padded={false} style={{ overflow: 'hidden' }}>
+              <View pointerEvents="none">
+                <MapView
+                  style={{ height: 180 }}
+                  region={{ latitude: detail.latitude, longitude: detail.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
+                >
+                  <Marker coordinate={{ latitude: detail.latitude, longitude: detail.longitude }} pinColor={t.colors.accent} />
+                  {detail.geofence && detail.geofence.length >= 2 ? (
+                    <Polygon coordinates={detail.geofence} strokeColor={t.colors.accent} fillColor={`${t.colors.accent}33`} strokeWidth={2} />
+                  ) : null}
+                </MapView>
+              </View>
+              {detail.address ? (
+                <Row style={{ padding: 14, gap: 8 }}>
+                  <Icon name="location" size={16} color={t.colors.accent} />
+                  <Text style={{ flex: 1, fontSize: 13 }}>{String(detail.address)}</Text>
+                </Row>
+              ) : null}
+            </Card>
           </View>
         ) : null}
 

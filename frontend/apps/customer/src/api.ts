@@ -47,6 +47,11 @@ export const categoriesApi = {
 
 export type AssetType = 'vehicle' | 'property' | 'pet';
 
+export interface GeoPoint {
+  latitude: number;
+  longitude: number;
+}
+
 /** Typed per-type detail (the polymorphic `detailable`). All fields optional —
  *  the screens read whichever keys apply to the asset's type. */
 export interface AssetDetail {
@@ -69,6 +74,9 @@ export interface AssetDetail {
   address?: string | null;
   floor?: string | null;
   condo?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  geofence?: GeoPoint[] | null;
   // pet
   pet_species_id?: number | null;
   pet_breed_id?: number | null;
@@ -92,8 +100,9 @@ export interface Asset {
   detail?: AssetDetail;
 }
 
-/** Values written by the form into `detail` (ids for make/model, strings/ints otherwise). */
-export type AssetDetailInput = Record<string, string | number | null | undefined>;
+/** Values written by the form into `detail` (ids for make/model, strings/ints,
+ *  plus the property geofence polygon). */
+export type AssetDetailInput = Record<string, string | number | null | undefined | GeoPoint[]>;
 
 export interface CreateAssetPayload {
   type: AssetType;

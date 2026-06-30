@@ -41,6 +41,13 @@ const DATE_OPTIONS: DateFilter[] = ['any', 'today', 'tomorrow', 'week'];
 const matchCat = (r: ServiceRequest, c: Filter) => c === 'all' || r.category?.type === c;
 const matchDist = (r: ServiceRequest, km: number) => r.distance_km == null || r.distance_km <= km;
 
+/** Whether a request falls within the map's current viewport (+10% padding). */
+const inView = (r: ServiceRequest, reg: Region) => {
+  const dLat = (reg.latitudeDelta / 2) * 1.1;
+  const dLng = (reg.longitudeDelta / 2) * 1.1;
+  return Math.abs(r.latitude - reg.latitude) <= dLat && Math.abs(r.longitude - reg.longitude) <= dLng;
+};
+
 export default function Nearby() {
   const t = useTheme();
   const router = useRouter();
@@ -52,6 +59,7 @@ export default function Nearby() {
   const [selected, setSelected] = useState<ServiceRequest | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [draft, setDraft] = useState<Draft>({ category: 'all', radiusKm: DEFAULT_RADIUS, date: 'any' });
+  const [mapRegion, setMapRegion] = useState<Region | null>(null);
 
   // Map control: track the current center so a tapped marker can be panned into
   // the middle (without changing zoom) and the previous center restored on close.
@@ -77,7 +85,9 @@ export default function Nearby() {
   // feed (agenda tab). Fetched at the widest radius; distance/category/date are
   // refined client-side so the sheet can show a live match count.
   const now = useNearby(MAX_RADIUS);
-  const sched = useScheduled(MAX_RADIUS, view === 'agenda');
+  // Scheduled feed also powers the map; fetch a wider page there so distant
+  // scheduled jobs (ordered by distance) aren't stuck on page 2.
+  const sched = useScheduled(MAX_RADIUS, view === 'agenda' || view === 'map', view === 'map' ? 50 : undefined);
   const nowItems = useMemo(() => flattenPages(now.data?.pages), [now.data]);
   const schedItems = useMemo(() => flattenPages(sched.data?.pages), [sched.data]);
 
@@ -89,7 +99,38 @@ export default function Nearby() {
     () => schedItems.filter((r) => matchCat(r, filter) && matchDist(r, radiusKm) && matchesDate(r, dateFilter)),
     [schedItems, filter, radiusKm, dateFilter],
   );
-  const center = feed[0] ?? nowItems[0];
+  // The map shows everything loaded (urgent + scheduled, category-filtered) that
+  // falls in the current viewport — the zoom governs what's visible, not the
+  // distance chip (which still applies to the list/agenda).
+  const mapItems = useMemo(
+    () => [...nowItems.filter((r) => matchCat(r, filter)), ...schedItems.filter((r) => matchCat(r, filter))],
+    [nowItems, schedItems, filter],
+  );
+  const visibleOnMap = useMemo(
+    () => (mapRegion ? mapItems.filter((r) => inView(r, mapRegion)) : mapItems),
+    [mapItems, mapRegion],
+  );
+  const center = feed[0] ?? scheduled[0] ?? nowItems[0] ?? schedItems[0];
+
+  // Frame the map to fit all loaded requests on open; zooming in then narrows
+  // what's shown (the viewport filter above).
+  const mapInitialRegion = useMemo(() => {
+    if (!mapItems.length) {
+      return center ? { latitude: center.latitude, longitude: center.longitude, latitudeDelta: 0.08, longitudeDelta: 0.08 } : undefined;
+    }
+    const lats = mapItems.map((r) => r.latitude);
+    const lngs = mapItems.map((r) => r.longitude);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    return {
+      latitude: (minLat + maxLat) / 2,
+      longitude: (minLng + maxLng) / 2,
+      latitudeDelta: Math.max((maxLat - minLat) * 1.3, 0.05),
+      longitudeDelta: Math.max((maxLng - minLng) * 1.3, 0.05),
+    };
+  }, [mapItems, center]);
 
   // Live count for the sheet's "Apply" button, against the current tab's data.
   const draftCount = useMemo(() => {
@@ -187,15 +228,18 @@ export default function Nearby() {
             <MapView
               ref={mapRef}
               style={{ flex: 1 }}
-              initialRegion={{ latitude: center.latitude, longitude: center.longitude, latitudeDelta: 0.08, longitudeDelta: 0.08 }}
-              onRegionChangeComplete={(reg) => { regionRef.current = reg; }}
+              initialRegion={mapInitialRegion}
+              onRegionChangeComplete={(reg) => { regionRef.current = reg; setMapRegion(reg); }}
             >
-              {feed.map((r) => {
-                const color = r.urgency === RequestUrgency.Urgent ? t.colors.danger : t.colors.accent;
+              {visibleOnMap.map((r) => {
+                const urgent = r.urgency === RequestUrgency.Urgent;
+                const color = urgent ? t.colors.danger : t.colors.accent;
                 const price = r.area_avg_price ?? r.budget_max;
+                // Scheduled pins show the date; urgent pins show the price hint.
+                const label = urgent ? (price != null ? brl(price) : '') : shortDate(r);
                 return (
                   <Marker key={r.id} coordinate={{ latitude: r.latitude, longitude: r.longitude }} onPress={() => selectAndCenter(r)}>
-                    <RequestMarker color={color} label={price != null ? brl(price) : ''} iconName={categoryIconName(r.category)} />
+                    <RequestMarker color={color} label={label} iconName={categoryIconName(r.category)} />
                   </Marker>
                 );
               })}
@@ -216,7 +260,11 @@ export default function Nearby() {
                   <Text weight="800" style={{ fontSize: 15 }} numberOfLines={1}>{selected.category?.name}</Text>
                   <Text variant="caption" numberOfLines={1}>{[selected.address, distanceLabel(selected.distance_km)].filter(Boolean).join(' · ')}</Text>
                 </View>
-                {selected.urgency === RequestUrgency.Urgent && <Badge label={tr('enums.urgency.urgent')} tone="urgent" dot />}
+                {selected.urgency === RequestUrgency.Urgent ? (
+                  <Badge label={tr('enums.urgency.urgent')} tone="urgent" dot />
+                ) : shortDate(selected) ? (
+                  <Badge label={[shortDate(selected), windowLabel(selected)].filter(Boolean).join(' · ')} tone="open" />
+                ) : null}
                 <Pressable onPress={closeSelected} hitSlop={8}><Icon name="close" size={18} color={t.colors.ink3} /></Pressable>
               </Row>
               <Row>
@@ -424,6 +472,13 @@ function NearbyJob({ request, onBid, scheduledWindow }: { request: ServiceReques
 function formatDateHeader(key: string): string {
   const d = new Date(`${key}T00:00:00`);
   return d.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+}
+
+/** Soonest availability as a short "29 jun" label for a scheduled map pin. */
+function shortDate(r: ServiceRequest): string {
+  const starts = (r.availabilities ?? []).map((a) => a.starts_at).filter(Boolean).sort();
+  if (!starts.length) return '';
+  return new Date(starts[0] as string).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
 /** "08:00–12:00" window from the request's first availability, if any. */

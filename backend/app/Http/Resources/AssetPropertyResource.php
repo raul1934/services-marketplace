@@ -17,6 +17,9 @@ class AssetPropertyResource extends JsonResource
             'address' => $this->address,
             'floor' => $this->floor,
             'condo' => $this->condo,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'geofence' => $this->geofence,
         ];
     }
 }

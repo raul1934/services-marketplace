@@ -146,9 +146,24 @@ function MapViewImpl(
     React.Children.forEach(children, (child) => {
       if (!React.isValidElement(child)) return;
       const p = child.props as {
-        coordinate?: LatLng; pinColor?: string; title?: string; description?: string;
+        coordinate?: LatLng; coordinates?: LatLng[]; pinColor?: string; title?: string; description?: string;
         onPress?: () => void; onCalloutPress?: () => void; children?: React.ReactNode;
+        strokeColor?: string; fillColor?: string; strokeWidth?: number; fillOpacity?: number;
       };
+
+      // Polygon (read-only geofence / footprint)
+      if (Array.isArray(p.coordinates)) {
+        if (p.coordinates.length < 2) return;
+        const pts = p.coordinates.map((c) => [c.latitude, c.longitude] as [number, number]);
+        L.polygon(pts, {
+          color: p.strokeColor ?? '#4f46e5',
+          weight: p.strokeWidth ?? 2,
+          fillColor: p.fillColor ?? p.strokeColor ?? '#4f46e5',
+          fillOpacity: p.fillOpacity ?? 1,
+        }).addTo(layer);
+        return;
+      }
+
       if (!p.coordinate) return;
       const ll: [number, number] = [p.coordinate.latitude, p.coordinate.longitude];
 
@@ -189,6 +204,16 @@ export function Marker(_props: {
   onPress?: () => void;
   onCalloutPress?: () => void;
   children?: React.ReactNode;
+}) {
+  return null;
+}
+
+export function Polygon(_props: {
+  coordinates: LatLng[];
+  strokeColor?: string;
+  fillColor?: string;
+  strokeWidth?: number;
+  fillOpacity?: number;
 }) {
   return null;
 }

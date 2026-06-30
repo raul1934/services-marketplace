@@ -252,6 +252,9 @@ export interface AssetDetail {
   address?: string | null;
   floor?: string | null;
   condo?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  geofence?: { latitude: number; longitude: number }[] | null;
   pet_species_id?: number | null;
   pet_breed_id?: number | null;
   species?: string | null;

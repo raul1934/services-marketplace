@@ -48,10 +48,10 @@ export const useNearby = (radiusKm: number, enabled = true) =>
     enabled,
   });
 
-export const useScheduled = (radiusKm: number, enabled = true) =>
+export const useScheduled = (radiusKm: number, enabled = true, perPage?: number) =>
   useInfiniteQuery({
-    queryKey: ['scheduled', radiusKm],
-    queryFn: ({ pageParam }) => providerApi.scheduled(radiusKm, pageParam),
+    queryKey: ['scheduled', radiusKm, perPage ?? null],
+    queryFn: ({ pageParam }) => providerApi.scheduled(radiusKm, pageParam, perPage),
     initialPageParam: 1,
     getNextPageParam: nextPageParam,
     enabled,

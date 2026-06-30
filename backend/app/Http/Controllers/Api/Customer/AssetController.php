@@ -250,6 +250,11 @@ class AssetController extends Controller
                 'detail.property_type_id' => ['nullable', 'integer', 'exists:property_types,id'],
                 'detail.unit' => $str, 'detail.size' => $str,
                 'detail.address' => $str, 'detail.floor' => $str, 'detail.condo' => $str,
+                'detail.latitude' => ['nullable', 'numeric', 'between:-90,90'],
+                'detail.longitude' => ['nullable', 'numeric', 'between:-180,180'],
+                'detail.geofence' => ['nullable', 'array', 'min:4'],
+                'detail.geofence.*.latitude' => ['required', 'numeric', 'between:-90,90'],
+                'detail.geofence.*.longitude' => ['required', 'numeric', 'between:-180,180'],
             ],
             AssetType::Pet => [
                 'detail.pet_species_id' => ['nullable', 'integer', 'exists:pet_species,id'],
@@ -265,7 +270,7 @@ class AssetController extends Controller
     {
         $keys = match ($type) {
             AssetType::Vehicle => ['vehicle_make_id', 'vehicle_model_id', 'plate', 'color', 'year', 'fuel', 'chassis'],
-            AssetType::Property => ['property_type_id', 'unit', 'size', 'address', 'floor', 'condo'],
+            AssetType::Property => ['property_type_id', 'unit', 'size', 'address', 'floor', 'condo', 'latitude', 'longitude', 'geofence'],
             AssetType::Pet => ['pet_species_id', 'pet_breed_id', 'size', 'birthdate', 'weight', 'vaccines', 'microchip'],
         };
 
