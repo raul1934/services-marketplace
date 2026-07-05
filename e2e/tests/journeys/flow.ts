@@ -66,7 +66,14 @@ export async function uploadPhoto(page: Page, labelRe: RegExp) {
 }
 
 // ── lifecycle bootstrap — every step is a real UI action; `shot` captures each ──
-export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitação de teste E2E', shot?: Shot, urgency: 'urgent' | 'scheduled' = 'urgent') {
+export async function createRequest(
+  c: Page,
+  categoryId = 1,
+  desc = 'Solicitação de teste E2E',
+  shot?: Shot,
+  urgency: 'urgent' | 'scheduled' = 'urgent',
+  photos?: string[],
+) {
   await go(c, `${CUSTOMER}/request/new?categoryId=${categoryId}`);
   await shot?.(c, 'create — step 1 details');
   await c.getByText(/Civic do pai/i).first().click().catch(() => {});
@@ -76,6 +83,20 @@ export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitaç�
   await tap(c, /use my location|usar minha/i); await c.waitForTimeout(2500);
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 3 questions');
+  // Answer the tow-truck intake (best-effort — other categories just skip):
+  // destination free-text + "does it start / wheels locked / where is it" chips.
+  try {
+    const dest = c.getByPlaceholder(/shop, home|oficina/i).first();
+    if (await dest.count()) {
+      await dest.fill('Oficina Central — Rua Augusta, 500');
+      await c.getByText(/^sometimes$/i).first().click().catch(() => {});
+      const no = c.getByText(/^no$/i);
+      if ((await no.count()) > 1) await no.last().click(); // wheels locked → No
+      await c.getByText(/^street$/i).first().click().catch(() => {});
+      await c.waitForTimeout(400);
+      await shot?.(c, 'create — step 3 questions answered');
+    }
+  } catch { /* category without this intake — move on */ }
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 4 schedule');
   if (urgency === 'scheduled') {
@@ -89,8 +110,28 @@ export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitaç�
   }
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 5 photos');
+  // Attach photos one by one (the picker's file input is single-select).
+  for (const photo of photos ?? []) {
+    try {
+      const add = c.getByText(/^add( photo)?$|^adicionar( foto)?$/i).first();
+      if (!(await add.count())) break;
+      const [fc] = await Promise.all([c.waitForEvent('filechooser', { timeout: 8000 }), add.click()]);
+      await fc.setFiles(photo);
+      await c.waitForTimeout(1200);
+    } catch { break; }
+  }
+  if (photos?.length) await shot?.(c, 'create — step 5 photos attached');
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 6 budget & payment');
+  // Play with the money step: raise the budget and flip the payment method
+  // (Card → back to Pix) so the segment interaction shows in the video.
+  try {
+    const amount = c.locator('input').first();
+    if (await amount.count()) { await amount.fill('150'); await c.waitForTimeout(500); }
+    await tap(c, /^card$/i); await c.waitForTimeout(700);
+    await tap(c, /^pix$/i); await c.waitForTimeout(500);
+    await shot?.(c, 'create — step 6 budget raised, payment picked');
+  } catch { /* decorative — move on */ }
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 7 review');
   await slide(c); await c.waitForTimeout(3500);
@@ -100,7 +141,7 @@ export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitaç�
   return Number(m[1]);
 }
 
-export async function providerBid(p: Page, id: number, shot?: Shot) {
+export async function providerBid(p: Page, id: number, shot?: Shot, ask?: string) {
   await go(p, `${PROVIDER}/job/${id}`);
   await shot?.(p, 'provider — open job (send proposal)');
   await tap(p, /send proposal|enviar proposta/i);
@@ -108,9 +149,36 @@ export async function providerBid(p: Page, id: number, shot?: Shot) {
   await shot?.(p, 'provider — bid wizard');
   // 4-step wizard: review → questions → price → summary. Advance to the last
   // step, then slide to send.
-  for (let i = 0; i < 3; i++) { await tap(p, /^(continue|continuar)$/i); await p.waitForTimeout(900); }
+  await tap(p, /^(continue|continuar)$/i); await p.waitForTimeout(900);
+  if (ask) {
+    // Step 2 (questions): compose a pre-bid question for the client. The
+    // "Send question" button opens the sheet; the sheet's CTA reuses the label,
+    // so tap() (last text match) hits the right one each time.
+    try {
+      await tap(p, /send question|enviar pergunta/i);
+      await p.waitForTimeout(700);
+      await p.getByPlaceholder(/can you send a photo|foto do problema/i).first().fill(ask);
+      await tap(p, /send question|enviar pergunta/i);
+      await p.waitForTimeout(1500);
+      await shot?.(p, 'provider — asked the client a question');
+    } catch { /* Q&A unavailable — bid without asking */ }
+  }
+  for (let i = 0; i < 2; i++) { await tap(p, /^(continue|continuar)$/i); await p.waitForTimeout(900); }
   await slide(p); await p.waitForTimeout(2500);
   await shot?.(p, 'provider — bid sent');
+}
+
+/** Best-effort: answer the pro's pre-bid question on the proposals screen. */
+export async function customerAnswerQuestion(c: Page, id: number, text: string, shot?: Shot) {
+  await go(c, `${CUSTOMER}/request/${id}/proposals`);
+  const inp = c.getByPlaceholder(/your answer|sua resposta/i).first();
+  try {
+    await inp.waitFor({ state: 'visible', timeout: 8000 });
+    await inp.fill(text);
+    await tap(c, /^(answer|responder)$/i);
+    await c.waitForTimeout(1500);
+    await shot?.(c, 'customer — answered the pro question');
+  } catch { /* question not surfaced — skip the beat */ }
 }
 
 export async function customerAccept(c: Page, id: number, shot?: Shot) {

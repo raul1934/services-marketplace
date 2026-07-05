@@ -1,7 +1,7 @@
 import { Browser, Page, test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
-import { CUSTOMER, expect, go, shooter, createRequest, providerBid, customerAccept, providerStart, providerComplete } from './flow';
+import { CUSTOMER, expect, go, shooter, createRequest, providerBid, customerAnswerQuestion, customerAccept, providerStart, providerComplete } from './flow';
 import { tap } from '../helpers/auth';
 import { attachCaptions, attachRoleBanner, caption, cueTracker, CueTracker } from '../helpers/caption';
 
@@ -33,6 +33,40 @@ const ROLES = {
   [new URL(PROVIDER).origin]: { label: 'App do Prestador', color: '#6366f1' },
 };
 
+// The job is at Av. Paulista; the provider reports from Praça da Sé (~4 km
+// away) so the tracking maps have a real road route to draw. The provider app
+// only shares location while a job is active — without geolocation granted on
+// the provider context, no position is ever sent and no route shows (the "map
+// doesn't show the way" bug).
+const JOB_GEO = { latitude: -23.5614, longitude: -46.6559 };
+const PROVIDER_GEO = { latitude: -23.5505, longitude: -46.6333 };
+
+/**
+ * Two staged "phone photos" (gradient + emoji + label) rendered in a throwaway
+ * page, for the wizard's photo step. Nicer on video than a 1×1 fixture pixel.
+ */
+async function makeDemoPhotos(browser: Browser): Promise<string[]> {
+  const dir = path.join(process.cwd(), '.tmp');
+  fs.mkdirSync(dir, { recursive: true });
+  const page = await browser.newPage({ viewport: { width: 640, height: 480 } });
+  const mk = async (file: string, emoji: string, label: string, grad: string) => {
+    await page.setContent(
+      `<div style="width:640px;height:480px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:${grad};font-family:system-ui">
+         <div style="font-size:120px">${emoji}</div>
+         <div style="color:#fff;font-weight:700;font-size:26px;text-shadow:0 2px 8px rgba(0,0,0,.5)">${label}</div>
+         <div style="color:rgba(255,255,255,.75);font-size:14px">foto enviada pelo cliente · demo</div>
+       </div>`,
+    );
+    const out = path.join(dir, file);
+    await page.screenshot({ path: out });
+    return out;
+  };
+  const a = await mk('demo-photo-battery.png', '🔋', 'Bateria descarregada', 'linear-gradient(135deg,#1f2937,#111827)');
+  const b = await mk('demo-photo-car.png', '🚗', 'Carro parado na avenida', 'linear-gradient(135deg,#374151,#0b1220)');
+  await page.close();
+  return [a, b];
+}
+
 /**
  * Boot the app at its root and let the stored session hydrate before any deep
  * link. A fresh context downloads the whole Expo bundle, so the first deep
@@ -52,11 +86,12 @@ async function recordingPages(browser: Browser, journey: string) {
   // Manual contexts don't inherit the project-level video setting — ask here.
   const cc = await browser.newContext({
     viewport: phone, storageState: '.auth/customer.json',
-    geolocation: { latitude: -23.5614, longitude: -46.6559 }, permissions: ['geolocation'],
+    geolocation: JOB_GEO, permissions: ['geolocation'],
     recordVideo: { dir, size: phone },
   });
   const pc = await browser.newContext({
     viewport: phone, storageState: '.auth/provider.json',
+    geolocation: PROVIDER_GEO, permissions: ['geolocation'],
     recordVideo: { dir, size: phone },
   });
   const c = await cc.newPage();
@@ -103,23 +138,35 @@ test('demo recording: urgent request — create, accept & perform', async ({ bro
   const t = cueTracker();
   const say = async (page: Page, text: string) => { t.mark(text); await caption(page, text); };
 
+  const photos = await makeDemoPhotos(browser);
+
   await say(c, 'App do cliente — tela inicial');
   await warm(c, CUSTOMER);
   await warm(p, PROVIDER);
 
-  await say(c, 'Cliente cria uma solicitação URGENTE — descreve o problema, localização e orçamento');
-  const id = await createRequest(c, 1, 'Bateria descarregada, preciso de partida agora', shot);
+  await say(c, 'Cliente cria uma solicitação URGENTE — problema, fotos, detalhes e orçamento');
+  const id = await createRequest(c, 1, 'Bateria descarregada, preciso de partida agora', shot, 'urgent', photos);
 
-  await say(p, 'Prestador abre o chamado próximo e envia uma proposta');
-  await providerBid(p, id, shot);
+  await say(p, 'Prestador abre o chamado, pergunta ao cliente e envia uma proposta');
+  await providerBid(p, id, shot, 'O carro está em garagem coberta? Chego em ~12 min.');
+
+  await say(c, 'Cliente responde a pergunta do prestador');
+  await customerAnswerQuestion(c, id, 'Está na rua, em frente ao nº 1578. Pode vir!', shot);
 
   await say(c, 'Cliente recebe a proposta e desliza para aceitar');
   await customerAccept(c, id, shot);
 
-  await say(c, 'Solicitação aceita — o código de início aparece para o cliente');
+  await say(p, 'Prestador a caminho — a rota até o cliente aparece no mapa');
+  await go(p, `${PROVIDER}/job/${id}`);
+  await expect(p.locator('path.leaflet-interactive').first()).toBeVisible({ timeout: 20_000 });
+  await p.waitForTimeout(2000);
+  await shot(p, 'provider — en route, road route on map');
+
+  await say(c, 'Cliente acompanha o prestador chegando em tempo real — e vê o código de início');
   await go(c, `${CUSTOMER}/request/${id}`);
   await expect(c.getByText(/código de início|start code/i).first()).toBeVisible();
-  await shot(c, 'customer — start code visible');
+  await expect(c.locator('path.leaflet-interactive').first()).toBeVisible({ timeout: 20_000 });
+  await shot(c, 'customer — live tracking with route + start code');
 
   await say(p, 'Prestador chega, digita o código do cliente e inicia o serviço');
   await providerStart(c, p, id, shot);
@@ -146,9 +193,10 @@ test('demo recording: single video alternating between the apps', async ({ brows
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
 
+  const photos = await makeDemoPhotos(browser);
   const ctx = await browser.newContext({
     viewport: phone, storageState: mergedAuthState(),
-    geolocation: { latitude: -23.5614, longitude: -46.6559 }, permissions: ['geolocation'],
+    geolocation: JOB_GEO, permissions: ['geolocation'],
     recordVideo: { dir, size: phone },
   });
   const page = await ctx.newPage();
@@ -161,22 +209,36 @@ test('demo recording: single video alternating between the apps', async ({ brows
   await warm(page, CUSTOMER);
   await warm(page, PROVIDER);
 
-  await say('Cliente cria uma solicitação URGENTE — problema, localização e orçamento');
-  const id = await createRequest(page, 1, 'Pneu furado na avenida, preciso de troca', shot);
+  await say('Cliente cria uma solicitação URGENTE — problema, fotos, detalhes e orçamento');
+  const id = await createRequest(page, 1, 'Pneu furado na avenida, preciso de troca', shot, 'urgent', photos);
 
-  await say('Prestador abre o chamado próximo e envia uma proposta');
-  await providerBid(page, id, shot);
+  // From here on, the browser "is" the provider whenever the provider app is
+  // on screen — report its position from across town so the maps get a route.
+  await ctx.setGeolocation(PROVIDER_GEO);
+
+  await say('Prestador abre o chamado, pergunta ao cliente e envia uma proposta');
+  await providerBid(page, id, shot, 'O estepe está no porta-malas? Chego em ~12 min.');
+
+  await say('Cliente responde a pergunta do prestador');
+  await customerAnswerQuestion(page, id, 'Está sim, com o macaco junto. Pode vir!', shot);
 
   await say('Cliente recebe a proposta e desliza para aceitar');
   await customerAccept(page, id, shot);
 
+  await say('Prestador a caminho — a rota até o cliente aparece no mapa');
+  await go(page, `${PROVIDER}/job/${id}`);
+  await expect(page.locator('path.leaflet-interactive').first()).toBeVisible({ timeout: 20_000 });
+  await page.waitForTimeout(2000);
+  await shot(page, 'provider — en route, road route on map');
+
   // providerStart() flips between two pages to fetch the code — with a single
   // page, read the code from the customer screen first, then enter it.
-  await say('Solicitação aceita — o código de início aparece para o cliente');
+  await say('Cliente acompanha o prestador no mapa — e vê o código de início');
   await go(page, `${CUSTOMER}/request/${id}`);
   const code = (await page.locator('text=/^\\d{4}$/').first().textContent())?.trim();
   if (!code) throw new Error('start code not found on customer screen');
-  await shot(page, 'customer — start code visible');
+  await expect(page.locator('path.leaflet-interactive').first()).toBeVisible({ timeout: 20_000 });
+  await shot(page, 'customer — live tracking with route + start code');
 
   await say('Prestador chega, digita o código do cliente e inicia o serviço');
   await go(page, `${PROVIDER}/job/${id}`);
@@ -212,12 +274,14 @@ test('demo recording: scheduled request — create, accept & perform', async ({ 
   const t = cueTracker();
   const say = async (page: Page, text: string) => { t.mark(text); await caption(page, text); };
 
+  const photos = await makeDemoPhotos(browser);
+
   await say(c, 'App do cliente — tela inicial');
   await warm(c, CUSTOMER);
   await warm(p, PROVIDER);
 
   await say(c, 'Cliente cria uma solicitação AGENDADA — escolhe o dia e o período no calendário');
-  const id = await createRequest(c, 1, 'Revisão da bateria, pode ser amanhã de manhã', shot, 'scheduled');
+  const id = await createRequest(c, 1, 'Revisão da bateria, pode ser amanhã de manhã', shot, 'scheduled', photos);
 
   await say(p, 'Prestador abre o chamado agendado e envia uma proposta');
   await providerBid(p, id, shot);
