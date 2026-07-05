@@ -45,6 +45,11 @@ class ProviderService
             ],
         );
 
+        // Providers move — recompute which Market (city) they're currently in
+        // on every ping, unlike a request's market_id which is fixed at creation.
+        $market = app(MatchingService::class)->marketFor((float) $location['latitude'], (float) $location['longitude']);
+        $user->providerProfile?->update(['market_id' => $market?->id]);
+
         // Live tracking: push the new position to every active job's channel.
         ServiceRequest::where('accepted_provider_id', $user->id)
             ->whereIn('status', [RequestStatus::Accepted->value, RequestStatus::InProgress->value])

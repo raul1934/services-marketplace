@@ -2,22 +2,32 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\RequestStatus;
+use App\Filament\Concerns\ScopedToMarkets;
 use App\Filament\Resources\ServiceRequestResource\Pages;
-use App\Filament\Resources\ServiceRequestResource\RelationManagers;
 use App\Models\ServiceRequest;
+use App\Support\LucideIcon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Collection;
 
 class ServiceRequestResource extends Resource
 {
+    use ScopedToMarkets;
+
     protected static ?string $model = ServiceRequest::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static function scopeToMarkets(Builder $query, Collection $marketIds): Builder
+    {
+        return $query->whereIn('market_id', $marketIds);
+    }
 
     public static function form(Form $form): Form
     {
@@ -70,19 +80,20 @@ class ServiceRequestResource extends Resource
                 Tables\Columns\TextColumn::make('client.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('service_category_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('market.name')
+                    ->label('Market')
+                    ->sortable(),
+                Tables\Columns\ViewColumn::make('category_icon')
+                    ->label('')
+                    ->view('filament.tables.columns.icon-svg')
+                    ->getStateUsing(fn (ServiceRequest $record): ?string => LucideIcon::svg($record->category?->icon)),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Category')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('acceptedProposal.id')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('accepted_provider_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('latitude')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('longitude')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('address')
@@ -118,9 +129,32 @@ class ServiceRequestResource extends Resource
                     ->searchable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('market_id')
+                    ->label('Market')
+                    ->relationship('market', 'name'),
+                SelectFilter::make('status')
+                    ->options(collect(RequestStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->name])),
             ])
             ->actions([
+                Tables\Actions\Action::make('map')
+                    ->label('Map')
+                    ->icon('heroicon-o-map-pin')
+                    ->color('gray')
+                    ->modalHeading(fn (ServiceRequest $record): string => "Request #{$record->id}")
+                    ->modalContent(fn (ServiceRequest $record) => view('filament.tables.actions.request-map', [
+                        'record' => [
+                            'id' => $record->id,
+                            'lat' => $record->latitude,
+                            'lng' => $record->longitude,
+                            'status' => $record->status->value,
+                            'icon' => $record->category?->icon,
+                            'label' => $record->client?->name,
+                        ],
+                        'icons' => LucideIcon::svgMap([$record->category?->icon, 'truck', 'user']),
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelAction(false)
+                    ->modalWidth('lg'),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

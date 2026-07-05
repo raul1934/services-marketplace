@@ -8,13 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class WalletTransaction extends Model
 {
     public const TYPE_CREDIT = 'credit';
+
     public const TYPE_PAYOUT = 'payout';
 
     public const STATUS_COMPLETED = 'completed';
+
     /** Split retained while a dispute is open (R-SPLIT) — excluded from balance. */
     public const STATUS_HELD = 'held';
 
-    protected $fillable = ['provider_id', 'type', 'amount', 'description', 'service_request_id', 'status'];
+    /** A self-served payout awaiting manual reconciliation (staff sends the real Pix transfer, then marks it paid). */
+    public const STATUS_PENDING = 'pending';
+
+    protected $fillable = ['provider_id', 'market_id', 'type', 'amount', 'description', 'service_request_id', 'status'];
 
     protected $casts = [
         'amount' => 'decimal:2',
@@ -23,6 +28,11 @@ class WalletTransaction extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'provider_id');
+    }
+
+    public function market(): BelongsTo
+    {
+        return $this->belongsTo(Market::class);
     }
 
     /**

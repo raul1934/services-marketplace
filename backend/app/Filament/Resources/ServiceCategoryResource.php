@@ -3,15 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ServiceCategoryResource\Pages;
-use App\Filament\Resources\ServiceCategoryResource\RelationManagers;
 use App\Models\ServiceCategory;
+use App\Support\LucideIcon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ServiceCategoryResource extends Resource
 {
@@ -21,24 +19,34 @@ class ServiceCategoryResource extends Resource
 
     public static function form(Form $form): Form
     {
+        // Only is_active is meant to change after creation — the rest is the
+        // category's identity (slug/type especially are referenced by live
+        // requests), so lock it down on edit rather than remove it from view.
+        $readOnlyAfterCreate = fn (string $operation): bool => $operation !== 'create';
+
         return $form
             ->schema([
                 Forms\Components\TextInput::make('type')
                     ->required()
                     ->maxLength(255)
-                    ->default('roadside'),
+                    ->default('roadside')
+                    ->disabled($readOnlyAfterCreate),
                 Forms\Components\TextInput::make('slug')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->disabled($readOnlyAfterCreate),
                 Forms\Components\TextInput::make('name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->disabled($readOnlyAfterCreate),
                 Forms\Components\TextInput::make('icon')
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->disabled($readOnlyAfterCreate),
                 Forms\Components\TextInput::make('sort_order')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(0)
+                    ->disabled($readOnlyAfterCreate),
                 Forms\Components\Toggle::make('is_active')
                     ->required(),
             ]);
@@ -48,6 +56,10 @@ class ServiceCategoryResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ViewColumn::make('icon_preview')
+                    ->label('')
+                    ->view('filament.tables.columns.icon-svg')
+                    ->getStateUsing(fn (ServiceCategory $record): ?string => LucideIcon::svg($record->icon)),
                 Tables\Columns\TextColumn::make('type')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
@@ -55,6 +67,7 @@ class ServiceCategoryResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('icon')
+                    ->label('Icon key')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->numeric()
@@ -75,11 +88,6 @@ class ServiceCategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
