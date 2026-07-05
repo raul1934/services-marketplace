@@ -26,18 +26,17 @@ async function apply(page: Page, text: string) {
         document.head.appendChild(style);
         el = document.createElement('div');
         el.id = 'e2e-caption';
+        // Full-width bar above the footer CTA; height grows with the text.
         Object.assign(el.style, {
           position: 'fixed',
-          left: '50%',
+          left: '0',
+          right: '0',
           bottom: '96px',
-          transform: 'translateX(-50%)',
-          maxWidth: '86%',
           zIndex: '2147483647',
-          padding: '9px 16px',
-          borderRadius: '12px',
+          padding: '10px 18px',
           background: 'rgba(10,12,18,0.82)',
           color: '#fff',
-          font: '600 14.5px/1.35 system-ui, -apple-system, sans-serif',
+          font: '600 14.5px/1.4 system-ui, -apple-system, sans-serif',
           textAlign: 'center',
           pointerEvents: 'none',
         } as Partial<CSSStyleDeclaration>);
