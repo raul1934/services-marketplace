@@ -72,6 +72,23 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  scheduler:
+    build: ./backend
+    container_name: guincho-scheduler
+    working_dir: /app
+    # Runs the Laravel scheduler loop (routes/console.php) — e.g. the hourly
+    # orphan-media sweep and the per-minute stale-request expiry.
+    command: php artisan schedule:work
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
   # NOTE: the mobile apps are now React Native (Expo) and run on the host with
   # Metro (`npm run customer` / `npm run provider` in ./frontend), connecting to
   # this API over the LAN — they are no longer served as web containers here.

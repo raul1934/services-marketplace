@@ -72,3 +72,9 @@ e2e/.auth/
 # Retired Ionic/Angular frontend — superseded by the Expo apps in frontend/,
 # kept locally for reference but no longer tracked
 frontend-ionic-legacy/
+# Self-hosted OSRM graph + OSM extract (large, generated)
+osrm-data/
+
+# Playwright HTML report + trace viewer assets — regenerated per run
+e2e/playwright-report/
+e2e/test-results/

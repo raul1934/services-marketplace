@@ -1,0 +1,51 @@
+# Self-hosted OSRM (Open Source Routing Machine) for production road routing —
+# replaces the public demo (router.project-osrm.org), which is rate-limited and
+# not for production traffic. Used by the en-route map route (see useRoute.ts).
+#
+# ── One-time setup ────────────────────────────────────────────────────────────
+# 1. Download an OSM extract for your region into ./osrm-data/region.osm.pbf.
+#    Southeast Brazil (covers São Paulo state) from Geofabrik:
+#        mkdir -p osrm-data
+#        curl -L -o osrm-data/region.osm.pbf \
+#          https://download.geofabrik.de/south-america/brazil/sudeste-latest.osm.pbf
+#    (For a lighter graph + less RAM, use a smaller custom extract from
+#     https://extract.bbbike.org/ — e.g. just the São José do Rio Preto area.)
+#
+# 2. Build the routing graph once (MLD pipeline: extract → partition → customize).
+#    Needs RAM roughly proportional to the extract size (sudeste ≈ a few GB):
+#        docker compose -f docker-compose.osrm.yml run --rm osrm-prep
+#
+# 3. Start the routing server (published on host port 5050):
+#        docker compose -f docker-compose.osrm.yml up -d osrm
+#        # sanity check:
+#        curl "http://localhost:5050/route/v1/driving/-49.36,-20.79;-49.38,-20.82?overview=false"
+#
+# 4. Point the apps at it and recreate the web containers:
+#        EXPO_PUBLIC_OSRM_URL=http://localhost:5050 \
+#          docker compose -f docker-compose.web.yml up -d --force-recreate customer-web provider-web
+#
+# The image is also published at ghcr.io/project-osrm/osrm-backend if Docker Hub
+# pulls are throttled.
+
+services:
+  # One-shot graph builder. Re-run whenever you swap in a new region.osm.pbf.
+  osrm-prep:
+    image: osrm/osrm-backend:latest
+    volumes:
+      - ./osrm-data:/data
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "osrm-extract -p /opt/car.lua /data/region.osm.pbf &&
+       osrm-partition /data/region.osrm &&
+       osrm-customize /data/region.osrm"
+
+  # The routing server consumed by the apps' useRoute() hook.
+  osrm:
+    image: osrm/osrm-backend:latest
+    container_name: guincho-osrm
+    command: osrm-routed --algorithm mld /data/region.osrm
+    volumes:
+      - ./osrm-data:/data
+    ports:
+      - "5050:5000"
+    restart: unless-stopped
