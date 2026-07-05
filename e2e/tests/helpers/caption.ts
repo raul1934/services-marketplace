@@ -77,12 +77,17 @@ async function applyBanner(page: Page) {
     .evaluate((m) => {
       const info = m[location.origin];
       if (!info) return;
+      const BANNER_H = 24;
       let el = document.getElementById('e2e-role') as HTMLDivElement | null;
       if (!el) {
         // Same ::after trick as the caption: visible in the video, invisible
-        // to Playwright text locators.
+        // to Playwright text locators. The #root rule pushes the whole app
+        // down by the banner height so nothing is covered (!important beats
+        // the framework's inline height on the mount node).
         const style = document.createElement('style');
-        style.textContent = '#e2e-role::after{content:attr(data-role);}';
+        style.textContent =
+          '#e2e-role::after{content:attr(data-role);}' +
+          `#root{margin-top:${BANNER_H}px !important;height:calc(100% - ${BANNER_H}px) !important;}`;
         document.head.appendChild(style);
         el = document.createElement('div');
         el.id = 'e2e-role';
@@ -91,10 +96,10 @@ async function applyBanner(page: Page) {
           left: '0',
           right: '0',
           top: '0',
+          height: `${BANNER_H}px`,
           zIndex: '2147483647',
-          padding: '3px 0',
           color: '#fff',
-          font: '800 11px/1.4 system-ui, -apple-system, sans-serif',
+          font: `800 11px/${BANNER_H}px system-ui, -apple-system, sans-serif`,
           letterSpacing: '2px',
           textAlign: 'center',
           textTransform: 'uppercase',
