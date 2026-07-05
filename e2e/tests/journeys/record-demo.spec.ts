@@ -2,16 +2,22 @@ import { Browser, Page, test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CUSTOMER, expect, go, shooter, createRequest, providerBid, customerAccept, providerStart, providerComplete } from './flow';
-import { attachCaptions, caption, cueTracker, CueTracker } from '../helpers/caption';
+import { tap } from '../helpers/auth';
+import { attachCaptions, attachRoleBanner, caption, cueTracker, CueTracker } from '../helpers/caption';
 
 /**
  * Demo recordings: drive the full request lifecycle (urgent + scheduled) with
- * video capture on and an on-page caption narrating each step, so the saved
- * .webm files are ready to trim into a feature video. Each journey writes:
+ * video capture on, a top banner naming the app on screen, and a caption
+ * narrating each step, so the saved .webm files are ready to trim into a
+ * feature video. Each journey writes:
  *
  *   recordings/<journey>/customer.webm   the customer app, captioned
  *   recordings/<journey>/provider.webm   the provider app, captioned
  *   recordings/<journey>/narrative.srt   the same cues with timestamps
+ *
+ * The single-video journey drives ONE page that alternates between the two
+ * apps (their sessions are merged into one context), producing one demo.webm
+ * that switches apps exactly when the flow does.
  *
  * Run with: npm run test:record  (stack up via docker-compose.web.yml first)
  */
@@ -19,6 +25,13 @@ import { attachCaptions, caption, cueTracker, CueTracker } from '../helpers/capt
 const phone = { width: 420, height: 900 };
 const recDir = (journey: string) => path.join(process.cwd(), 'recordings', journey);
 const PROVIDER = process.env.PROVIDER_URL || 'http://localhost:19082';
+
+// Top banner: which app is on screen, resolved by origin (works on the
+// single alternating page too).
+const ROLES = {
+  [new URL(CUSTOMER).origin]: { label: 'App do Cliente', color: '#f97316' },
+  [new URL(PROVIDER).origin]: { label: 'App do Prestador', color: '#6366f1' },
+};
 
 /**
  * Boot the app at its root and let the stored session hydrate before any deep
@@ -50,7 +63,20 @@ async function recordingPages(browser: Browser, journey: string) {
   const p = await pc.newPage();
   attachCaptions(c);
   attachCaptions(p);
+  attachRoleBanner(c, ROLES);
+  attachRoleBanner(p, ROLES);
   return { cc, pc, c, p };
+}
+
+/** Merge both apps' saved sessions so ONE context is logged into both origins. */
+function mergedAuthState(): string {
+  const read = (f: string) => JSON.parse(fs.readFileSync(path.join('.auth', f), 'utf8'));
+  const a = read('customer.json');
+  const b = read('provider.json');
+  const merged = { cookies: [...(a.cookies ?? []), ...(b.cookies ?? [])], origins: [...(a.origins ?? []), ...(b.origins ?? [])] };
+  const out = path.join('.auth', 'both.json');
+  fs.writeFileSync(out, JSON.stringify(merged));
+  return out;
 }
 
 /** Close both contexts (flushes the videos), then name the artifacts. */
@@ -108,6 +134,73 @@ test('demo recording: urgent request — create, accept & perform', async ({ bro
   await c.waitForTimeout(2500); // hold the final frame
 
   await finalize(journey, ctxs, t);
+});
+
+// One continuous video: a single page hops between the customer and provider
+// apps as the flow demands — the top banner flips with each hop.
+test('demo recording: single video alternating between the apps', async ({ browser }) => {
+  test.setTimeout(240_000);
+  const journey = 'full-demo';
+  const shot = shooter(journey);
+  const dir = recDir(journey);
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+
+  const ctx = await browser.newContext({
+    viewport: phone, storageState: mergedAuthState(),
+    geolocation: { latitude: -23.5614, longitude: -46.6559 }, permissions: ['geolocation'],
+    recordVideo: { dir, size: phone },
+  });
+  const page = await ctx.newPage();
+  attachCaptions(page);
+  attachRoleBanner(page, ROLES);
+  const t = cueTracker();
+  const say = async (text: string) => { t.mark(text); await caption(page, text); };
+
+  await say('Dois apps, um fluxo — cliente pede, prestador atende');
+  await warm(page, CUSTOMER);
+  await warm(page, PROVIDER);
+
+  await say('Cliente cria uma solicitação URGENTE — problema, localização e orçamento');
+  const id = await createRequest(page, 1, 'Pneu furado na avenida, preciso de troca', shot);
+
+  await say('Prestador abre o chamado próximo e envia uma proposta');
+  await providerBid(page, id, shot);
+
+  await say('Cliente recebe a proposta e desliza para aceitar');
+  await customerAccept(page, id, shot);
+
+  // providerStart() flips between two pages to fetch the code — with a single
+  // page, read the code from the customer screen first, then enter it.
+  await say('Solicitação aceita — o código de início aparece para o cliente');
+  await go(page, `${CUSTOMER}/request/${id}`);
+  const code = (await page.locator('text=/^\\d{4}$/').first().textContent())?.trim();
+  if (!code) throw new Error('start code not found on customer screen');
+  await shot(page, 'customer — start code visible');
+
+  await say('Prestador chega, digita o código do cliente e inicia o serviço');
+  await go(page, `${PROVIDER}/job/${id}`);
+  await page.getByText(/^(start the job|iniciar atendimento)$/i).last().click();
+  await page.waitForTimeout(500);
+  await page.keyboard.type(code);
+  await tap(page, /confirm & start|confirmar e iniciar/i);
+  await page.waitForTimeout(1500);
+  await shot(page, 'provider — job started');
+
+  await say('Serviço executado — prestador desliza para concluir');
+  await providerComplete(page, id, shot);
+
+  await say('Cliente confere o recibo do serviço');
+  await go(page, `${CUSTOMER}/request/${id}/receipt`);
+  await expect(page.getByText(/total/i)).toBeVisible();
+  await shot(page, 'customer — receipt');
+  await page.waitForTimeout(2500); // hold the final frame
+
+  const video = page.video();
+  await ctx.close();
+  await video?.saveAs(path.join(dir, 'demo.webm'));
+  await video?.delete();
+  fs.writeFileSync(path.join(dir, 'narrative.srt'), t.toSrt());
 });
 
 test('demo recording: scheduled request — create, accept & perform', async ({ browser }) => {

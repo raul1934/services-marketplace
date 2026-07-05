@@ -57,6 +57,66 @@ export function attachCaptions(page: Page) {
   });
 }
 
+// ── role banner ──────────────────────────────────────────────────────────────
+// A slim strip pinned to the top of the app naming which side is on screen.
+// The role is resolved from the page's origin on every document load, so a
+// single page that alternates between the customer and provider apps swaps
+// the banner automatically.
+
+export interface RoleInfo {
+  label: string;
+  color: string;
+}
+
+const ROLE_MAPS = new WeakMap<Page, Record<string, RoleInfo>>();
+
+async function applyBanner(page: Page) {
+  const byOrigin = ROLE_MAPS.get(page);
+  if (!byOrigin) return;
+  await page
+    .evaluate((m) => {
+      const info = m[location.origin];
+      if (!info) return;
+      let el = document.getElementById('e2e-role') as HTMLDivElement | null;
+      if (!el) {
+        // Same ::after trick as the caption: visible in the video, invisible
+        // to Playwright text locators.
+        const style = document.createElement('style');
+        style.textContent = '#e2e-role::after{content:attr(data-role);}';
+        document.head.appendChild(style);
+        el = document.createElement('div');
+        el.id = 'e2e-role';
+        Object.assign(el.style, {
+          position: 'fixed',
+          left: '0',
+          right: '0',
+          top: '0',
+          zIndex: '2147483647',
+          padding: '3px 0',
+          color: '#fff',
+          font: '800 11px/1.4 system-ui, -apple-system, sans-serif',
+          letterSpacing: '2px',
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          pointerEvents: 'none',
+        } as Partial<CSSStyleDeclaration>);
+        document.body.appendChild(el);
+      }
+      el.style.background = info.color;
+      el.setAttribute('data-role', info.label);
+    }, byOrigin)
+    .catch(() => {
+      /* page mid-navigation — the domcontentloaded hook re-applies */
+    });
+}
+
+/** Call once per page; `byOrigin` maps app origin → banner label/color. */
+export function attachRoleBanner(page: Page, byOrigin: Record<string, RoleInfo>) {
+  ROLE_MAPS.set(page, byOrigin);
+  page.on('domcontentloaded', () => void applyBanner(page));
+  void applyBanner(page);
+}
+
 /** Show (or replace) the caption on a page. */
 export async function caption(page: Page, text: string) {
   CURRENT.set(page, text);
