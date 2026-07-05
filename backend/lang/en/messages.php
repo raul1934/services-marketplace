@@ -30,4 +30,6 @@ return [
     'dispute_closed' => 'This dispute has already been resolved.',
     'warranty_only_completed' => 'Warranty only applies to completed services.',
     'warranty_window_closed' => 'The warranty window for this service has expired.',
+    'proposal_not_pending' => 'This proposal is no longer pending.',
+    'counter_offer_not_pending' => 'This counter-offer has already been answered.',
 ];

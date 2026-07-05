@@ -15,6 +15,7 @@ class JobPartResource extends JsonResource
             'action' => $this->action,
             'quantity' => (int) $this->quantity,
             'unit_price' => $this->unit_price !== null ? (float) $this->unit_price : null,
+            'approved_at' => $this->approved_at,
         ];
     }
 }

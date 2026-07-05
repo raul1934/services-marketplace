@@ -8,12 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JobPart extends Model
 {
-    protected $fillable = ['service_request_id', 'name', 'action', 'quantity', 'unit_price'];
+    protected $fillable = ['service_request_id', 'name', 'action', 'quantity', 'unit_price', 'approved_at'];
 
     protected $casts = [
         'action' => PartAction::class,
         'quantity' => 'integer',
         'unit_price' => 'decimal:2',
+        'approved_at' => 'datetime',
     ];
 
     public function request(): BelongsTo

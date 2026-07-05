@@ -74,6 +74,8 @@ Route::prefix('customer/v1')->group(function () {
         Route::get('requests/{serviceRequest}/provider-location', [TrackingController::class, 'show']);
         Route::post('requests/{serviceRequest}/review', [ReviewController::class, 'store']);
         Route::post('proposals/{proposal}/accept', [ProposalController::class, 'accept']);
+        Route::post('proposals/{proposal}/decline', [ProposalController::class, 'decline']);
+        Route::post('proposals/{proposal}/counter', [ProposalController::class, 'counter']);
 
         // Surcharge (acréscimo) — client approves/refuses the provider's proposal.
         Route::post('surcharges/{surcharge}/approve', [SurchargeController::class, 'approve']);
@@ -103,5 +105,6 @@ Route::prefix('customer/v1')->group(function () {
         // Job report (timeline + parts) for the client's own requests.
         Route::get('requests/{serviceRequest}/updates', [JobUpdateController::class, 'index']);
         Route::get('requests/{serviceRequest}/parts', [JobPartController::class, 'index']);
+        Route::post('parts/{jobPart}/approve', [JobPartController::class, 'approve']);
     });
 });

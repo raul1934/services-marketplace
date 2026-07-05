@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Customer;
 
+use App\Enums\ProposalStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RequestQuestionResource;
 use App\Models\RequestQuestion;
@@ -20,8 +21,18 @@ class QuestionController extends Controller
     {
         abort_unless($serviceRequest->client_id === $request->user()->id, 403);
 
+        // A provider's questions become visible to the client only once that
+        // provider has published a bid (a live proposal on this request).
+        $bidderIds = $serviceRequest->proposals()
+            ->whereIn('status', [ProposalStatus::Pending->value, ProposalStatus::Accepted->value])
+            ->pluck('provider_id');
+
         return RequestQuestionResource::collection(
-            $serviceRequest->questions()->with(['provider', 'answerPhotos'])->latest()->get()
+            $serviceRequest->questions()
+                ->whereIn('provider_id', $bidderIds)
+                ->with(['provider', 'answerPhotos'])
+                ->latest()
+                ->get()
         );
     }
 
@@ -29,6 +40,14 @@ class QuestionController extends Controller
     public function answer(Request $request, RequestQuestion $question): JsonResponse
     {
         abort_unless($question->request->client_id === $request->user()->id, 403);
+
+        // Mirror the index gate: a question is answerable only after its provider
+        // has published a bid (a live proposal) on the request.
+        $hasBid = $question->request->proposals()
+            ->where('provider_id', $question->provider_id)
+            ->whereIn('status', [ProposalStatus::Pending->value, ProposalStatus::Accepted->value])
+            ->exists();
+        abort_unless($hasBid, 422, 'This question is not answerable until the provider has placed a bid.');
 
         $data = $request->validate([
             'answer' => ['required', 'string', 'max:500'],

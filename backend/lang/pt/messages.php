@@ -30,4 +30,6 @@ return [
     'dispute_closed' => 'Esta disputa já foi resolvida.',
     'warranty_only_completed' => 'A garantia só vale para serviços concluídos.',
     'warranty_window_closed' => 'O prazo de garantia deste serviço expirou.',
+    'proposal_not_pending' => 'Esta proposta não está mais pendente.',
+    'counter_offer_not_pending' => 'Esta contraproposta já foi respondida.',
 ];

@@ -7,6 +7,7 @@ use App\Enums\ReceptionType;
 use App\Enums\RequestStatus;
 use App\Enums\RequestUrgency;
 use App\Models\Concerns\HasMedia;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,10 +19,10 @@ class ServiceRequest extends Model
     use HasMedia;
 
     protected $fillable = [
-        'client_id', 'service_category_id', 'asset_id', 'accepted_proposal_id', 'accepted_provider_id',
+        'client_id', 'market_id', 'service_category_id', 'asset_id', 'accepted_proposal_id', 'accepted_provider_id',
         'description', 'latitude', 'longitude', 'address', 'reception_type', 'entry_code', 'start_code', 'budget_max',
         'payment_method',
-        'urgency', 'status',
+        'urgency', 'max_wait_minutes', 'status',
         'cancelled_reason', 'accepted_at', 'started_at', 'completed_at', 'cancelled_at',
         'parts_approval_requested_at', 'parts_approved_at',
         'no_show_at', 'no_show_reason',
@@ -30,6 +31,7 @@ class ServiceRequest extends Model
     protected $casts = [
         'status' => RequestStatus::class,
         'urgency' => RequestUrgency::class,
+        'max_wait_minutes' => 'integer',
         'reception_type' => ReceptionType::class,
         'payment_method' => PaymentMethod::class,
         'latitude' => 'float',
@@ -47,6 +49,11 @@ class ServiceRequest extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
+    }
+
+    public function market(): BelongsTo
+    {
+        return $this->belongsTo(Market::class);
     }
 
     public function provider(): BelongsTo
@@ -162,5 +169,20 @@ class ServiceRequest extends Model
     public function warrantyClaims(): HasMany
     {
         return $this->hasMany(WarrantyClaim::class);
+    }
+
+    /**
+     * Live/actionable requests (open/accepted/in_progress), scoped to a
+     * Market Admin's assigned market(s) or unrestricted for a Super Admin —
+     * shared by the ops dashboard table, the live map, and its marker feed
+     * so all three agree on exactly what counts as "active".
+     */
+    public static function activeInMarketScope(User $user): Builder
+    {
+        $activeStatuses = [RequestStatus::Open->value, RequestStatus::Accepted->value, RequestStatus::InProgress->value];
+
+        return static::query()
+            ->whereIn('status', $activeStatuses)
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereIn('market_id', $user->marketIds()));
     }
 }

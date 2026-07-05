@@ -87,9 +87,11 @@ class WalletController extends Controller
 
         WalletTransaction::create([
             'provider_id' => $providerId,
+            'market_id' => $request->user()->providerProfile?->market_id,
             'type' => WalletTransaction::TYPE_PAYOUT,
             'amount' => $amount,
             'description' => __('messages.payout_pix'),
+            'status' => WalletTransaction::STATUS_PENDING,
         ]);
 
         return response()->json([

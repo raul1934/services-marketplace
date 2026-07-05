@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\CounterOfferStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -43,6 +44,7 @@ class ServiceRequestResource extends JsonResource
                 'answer' => $a->answer,
             ])->values()),
             'urgency' => $this->urgency,
+            'max_wait_minutes' => $this->max_wait_minutes,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'asset' => new AssetResource($this->whenLoaded('asset')),
             'photos' => MediaResource::collection($this->whenLoaded('photos')),
@@ -56,18 +58,32 @@ class ServiceRequestResource extends JsonResource
             'accepted_proposal' => new ProposalResource($this->whenLoaded('acceptedProposal')),
             'my_proposal' => $this->whenLoaded('proposals', function () {
                 $p = $this->proposals->first();
+                if (! $p) {
+                    return null;
+                }
+                $pendingCounter = $p->relationLoaded('counterOffers')
+                    ? $p->counterOffers->firstWhere('status', CounterOfferStatus::Pending)
+                    : null;
 
-                return $p ? [
+                return [
                     'id' => $p->id,
                     'price' => (float) $p->price,
                     'eta_minutes' => $p->eta_minutes,
                     'status' => $p->status,
-                ] : null;
+                    'pending_counter_offer' => $pendingCounter ? [
+                        'id' => $pendingCounter->id,
+                        'price' => (float) $pendingCounter->price,
+                        'message' => $pendingCounter->message,
+                    ] : null,
+                ];
             }),
             'client' => $this->whenLoaded('client', fn () => [
                 'id' => $this->client->id,
                 'name' => $this->client->name,
                 'phone' => $this->client->phone,
+                // Uber-passenger-style: shown to providers only, never to the client themselves.
+                'rating_avg' => (float) $this->client->rating_avg,
+                'rating_count' => (int) $this->client->rating_count,
             ]),
             'provider' => $this->whenLoaded('provider', fn () => [
                 'id' => $this->provider->id,

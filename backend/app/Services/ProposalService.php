@@ -12,6 +12,8 @@ use App\Events\ProposalReceived;
 use App\Events\RequestStatusUpdated;
 use App\Notifications\NewProposalForClient;
 use App\Notifications\ProposalAccepted;
+use App\Notifications\ProposalDeclined;
+use App\Notifications\ProposalNotAccepted;
 use Illuminate\Support\Facades\DB;
 
 class ProposalService
@@ -42,6 +44,8 @@ class ProposalService
             ],
         );
 
+        // Same signal whether this is a brand-new bid or the provider editing
+        // a previous one (updateOrCreate above) — the client should see it either way.
         $request->client->notify(new NewProposalForClient(
             $request->id,
             $proposal->id,
@@ -54,20 +58,46 @@ class ProposalService
         return $proposal;
     }
 
+    /** Provider withdraws their own pending bid. */
+    public function withdraw(Proposal $proposal): void
+    {
+        $proposal->update(['status' => ProposalStatus::Withdrawn->value]);
+    }
+
+    /**
+     * Customer explicitly dismisses one bid without accepting another. Distinct
+     * from the silent Rejected status the losing bids get on accept() below —
+     * this one is a deliberate customer action, so the provider is told.
+     */
+    public function decline(Proposal $proposal): void
+    {
+        $proposal->update(['status' => ProposalStatus::Declined->value]);
+        $proposal->provider->notify(new ProposalDeclined($proposal->service_request_id));
+    }
+
     /**
      * Accept a proposal: mark it accepted, reject the rest, and move the
      * request to `accepted` with the winning provider denormalized onto it.
      */
     public function accept(Proposal $proposal): ServiceRequest
     {
-        $request = DB::transaction(function () use ($proposal) {
+        [$request, $losingProviderIds] = DB::transaction(function () use ($proposal) {
             /** @var ServiceRequest $request */
             $request = ServiceRequest::whereKey($proposal->service_request_id)->lockForUpdate()->firstOrFail();
 
             $proposal->update(['status' => ProposalStatus::Accepted->value]);
 
+            // Only still-Pending bids are "competing" — a bid the provider already
+            // withdrew, or one the client already declined, keeps its own status
+            // and doesn't need a "you lost" notification.
+            $losing = Proposal::where('service_request_id', $request->id)
+                ->where('id', '!=', $proposal->id)
+                ->where('status', ProposalStatus::Pending->value)
+                ->pluck('provider_id');
+
             Proposal::where('service_request_id', $request->id)
                 ->where('id', '!=', $proposal->id)
+                ->where('status', ProposalStatus::Pending->value)
                 ->update(['status' => ProposalStatus::Rejected->value]);
 
             $request->update([
@@ -83,10 +113,14 @@ class ProposalService
                     : null,
             ]);
 
-            return $request->fresh();
+            return [$request->fresh(), $losing];
         });
 
         $proposal->provider->notify(new ProposalAccepted($request->id));
+
+        foreach (User::whereIn('id', $losingProviderIds)->get() as $losingProvider) {
+            $losingProvider->notify(new ProposalNotAccepted($request->id));
+        }
 
         RequestStatusUpdated::dispatch($request->id, $request->status->value);
 

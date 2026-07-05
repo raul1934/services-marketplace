@@ -164,6 +164,11 @@ class PreBidSuggestionTest extends TestCase
             'question' => 'Pode enviar uma foto?',
             'image_required' => true,
         ]);
+        // A question is answerable only once its provider has published a bid.
+        \App\Models\Proposal::create([
+            'service_request_id' => $request->id, 'provider_id' => $provider->id,
+            'price' => 100, 'eta_minutes' => 20, 'status' => \App\Enums\ProposalStatus::Pending->value,
+        ]);
 
         Sanctum::actingAs($client, ['client']);
 

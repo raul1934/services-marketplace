@@ -53,6 +53,7 @@ class RequestController extends Controller
             'answers.*.question_id' => ['required', 'integer', 'exists:questions,id'],
             'answers.*.answer' => ['required', 'string', 'max:500'],
             'urgency' => ['nullable', Rule::enum(RequestUrgency::class)],
+            'max_wait_minutes' => ['nullable', 'integer', Rule::in([10, 20, 30])],
             'availabilities' => ['array'],
             'availabilities.*.starts_at' => ['required', 'date'],
             'availabilities.*.ends_at' => ['required', 'date'],
@@ -114,6 +115,9 @@ class RequestController extends Controller
         abort_if($serviceRequest->parts_approval_requested_at === null, 422, __('messages.request_not_active'));
 
         $serviceRequest->update(['parts_approved_at' => now()]);
+        // Keep per-line state consistent with the aggregate approval — a part
+        // approved individually or via "approve all" ends up the same way.
+        $serviceRequest->jobParts()->whereNull('approved_at')->update(['approved_at' => now()]);
         if ($serviceRequest->provider) {
             $serviceRequest->provider->notify(new \App\Notifications\PartsApproved($serviceRequest->id));
         }

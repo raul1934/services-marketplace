@@ -26,7 +26,11 @@ class DispatchNewRequestToProviders implements ShouldQueue
             return;
         }
 
-        $providers = $matching->onlineProvidersNear($request);
+        $providers = $matching->onlineProvidersNear(
+            $request,
+            (float) config('matching.radius_km', 30),
+            (int) config('matching.provider_limit', 50),
+        );
 
         foreach ($providers as $provider) {
             $provider->notify(new NewRequestForProviders(

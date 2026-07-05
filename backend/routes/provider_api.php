@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\JobPartController;
 use App\Http\Controllers\Api\JobUpdateController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\Provider\CounterOfferController;
 use App\Http\Controllers\Api\Provider\DashboardController;
 use App\Http\Controllers\Api\Provider\DisputeController;
 use App\Http\Controllers\Api\Provider\JobController;
@@ -80,9 +81,13 @@ Route::prefix('provider/v1')->group(function () {
         Route::get('provider/jobs', [JobController::class, 'index']);
         Route::get('provider/bids', [ProposalController::class, 'bids']);
         Route::post('requests/{serviceRequest}/proposals', [ProposalController::class, 'store']);
+        Route::post('proposals/{proposal}/withdraw', [ProposalController::class, 'withdraw']);
+        Route::post('counter-offers/{counterOffer}/accept', [CounterOfferController::class, 'accept']);
+        Route::post('counter-offers/{counterOffer}/decline', [CounterOfferController::class, 'decline']);
         Route::put('requests/{serviceRequest}/status', [JobController::class, 'updateStatus']);
         Route::post('requests/{serviceRequest}/start', [JobController::class, 'start']);
         Route::post('requests/{serviceRequest}/request-approval', [JobController::class, 'requestApproval']);
+        Route::post('requests/{serviceRequest}/customer-no-show', [JobController::class, 'reportCustomerNoShow']);
         Route::post('requests/{serviceRequest}/client-review', [ReviewController::class, 'store']);
 
         // Surcharge (acréscimo) — provider proposes; client approves/refuses.

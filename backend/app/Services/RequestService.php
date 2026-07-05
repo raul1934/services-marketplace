@@ -4,14 +4,20 @@ namespace App\Services;
 
 use App\Enums\PaymentMethod;
 use App\Enums\PhotoPhase;
+use App\Enums\ProviderPlan;
 use App\Enums\RequestStatus;
 use App\Enums\RequestUrgency;
+use App\Enums\SurchargeStatus;
 use App\Events\RequestStatusUpdated;
 use App\Jobs\DispatchNewRequestToProviders;
 use App\Models\Media;
 use App\Models\Question;
 use App\Models\ServiceRequest;
 use App\Models\User;
+use App\Models\WalletTransaction;
+use App\Notifications\CustomerNoShowReported;
+use App\Notifications\PaymentSettled;
+use App\Notifications\ProviderNoShow;
 use App\Notifications\RequestStatusChanged;
 use App\Support\NearbyLocation;
 use Illuminate\Http\UploadedFile;
@@ -19,7 +25,7 @@ use Illuminate\Http\UploadedFile;
 class RequestService
 {
     /**
-     * @param  array{service_category_id:int,description:string,latitude:float,longitude:float,address?:?string,budget_max?:?float,payment_method?:string,answers?:array<array{question_id:int,answer:string}>,urgency?:string,availabilities?:array<array{starts_at:string,ends_at:string}>}  $data
+     * @param  array{service_category_id:int,description:string,latitude:float,longitude:float,address?:?string,budget_max?:?float,payment_method?:string,answers?:array<array{question_id:int,answer:string}>,urgency?:string,max_wait_minutes?:?int,availabilities?:array<array{starts_at:string,ends_at:string}>}  $data
      */
     public function create(User $client, array $data): ServiceRequest
     {
@@ -30,8 +36,11 @@ class RequestService
             ? NearbyLocation::random()
             : ['latitude' => $data['latitude'], 'longitude' => $data['longitude']];
 
+        $market = app(MatchingService::class)->marketFor($location['latitude'], $location['longitude']);
+
         $request = ServiceRequest::create([
             'client_id' => $client->id,
+            'market_id' => $market?->id,
             'service_category_id' => $data['service_category_id'],
             'asset_id' => $data['asset_id'] ?? null,
             'description' => $data['description'],
@@ -42,6 +51,7 @@ class RequestService
             'budget_max' => $data['budget_max'] ?? null,
             'payment_method' => $data['payment_method'] ?? PaymentMethod::Cash->value,
             'urgency' => $data['urgency'] ?? RequestUrgency::Urgent->value,
+            'max_wait_minutes' => $data['max_wait_minutes'] ?? null,
             'status' => RequestStatus::Open->value,
         ]);
 
@@ -133,8 +143,8 @@ class RequestService
         if (! $request->accepted_provider_id) {
             return;
         }
-        $exists = \App\Models\WalletTransaction::where('service_request_id', $request->id)
-            ->where('type', \App\Models\WalletTransaction::TYPE_CREDIT)->exists();
+        $exists = WalletTransaction::where('service_request_id', $request->id)
+            ->where('type', WalletTransaction::TYPE_CREDIT)->exists();
         if ($exists) {
             return;
         }
@@ -142,24 +152,25 @@ class RequestService
         $labor = (float) ($request->acceptedProposal?->price ?? 0);
         $parts = $request->jobParts()->get()->sum(fn ($p) => (float) ($p->unit_price ?? 0) * $p->quantity);
         $surcharges = (float) $request->surcharges()
-            ->where('status', \App\Enums\SurchargeStatus::Approved->value)
+            ->where('status', SurchargeStatus::Approved->value)
             ->sum('amount');
         $gross = $labor + $parts + $surcharges;
         // Platform fee depends on the provider's plan (Free 5% · Pro 2.5% · Enterprise 1%).
         $rate = $request->provider?->providerProfile?->commissionRate()
-            ?? \App\Enums\ProviderPlan::Free->commissionRate();
+            ?? ProviderPlan::Free->commissionRate();
         $net = round($gross * (1 - $rate), 2);
 
         if ($net > 0) {
-            \App\Models\WalletTransaction::create([
+            WalletTransaction::create([
                 'provider_id' => $request->accepted_provider_id,
-                'type' => \App\Models\WalletTransaction::TYPE_CREDIT,
+                'market_id' => $request->market_id,
+                'type' => WalletTransaction::TYPE_CREDIT,
                 'amount' => $net,
                 'description' => $request->category?->name,
                 'service_request_id' => $request->id,
             ]);
 
-            $request->provider?->notify(new \App\Notifications\PaymentSettled($request->id, $net));
+            $request->provider?->notify(new PaymentSettled($request->id, $net));
         }
 
         $request->provider?->providerProfile?->increment('jobs_completed');
@@ -174,6 +185,10 @@ class RequestService
      */
     public function reportNoShow(ServiceRequest $request, ?string $reason = null): ServiceRequest
     {
+        // Read the outgoing provider's profile before the update below clears
+        // accepted_provider_id, or $request->provider would resolve to nothing.
+        $noShowProfile = $request->provider?->providerProfile;
+
         $request->update([
             'no_show_at' => now(),
             'no_show_reason' => $reason,
@@ -184,9 +199,34 @@ class RequestService
             'started_at' => null,
         ]);
 
-        $request->client->notify(new \App\Notifications\ProviderNoShow($request->id));
+        $request->client->notify(new ProviderNoShow($request->id));
         DispatchNewRequestToProviders::dispatch($request->id);
         RequestStatusUpdated::dispatch($request->id, RequestStatus::Open->value);
+        $noShowProfile?->increment('no_show_count');
+
+        return $request->fresh();
+    }
+
+    /**
+     * Customer no-show (mirror of reportNoShow above, for the other direction):
+     * the provider arrived and the client wasn't there. Unlike a provider
+     * no-show, there's no one else to reassign to — the job just cancels, and
+     * the client's no-show count ticks up as a light reputation signal for the
+     * back-office (no automatic suspension here — see ProviderProfileResource).
+     */
+    public function reportCustomerNoShow(ServiceRequest $request, ?string $reason = null): ServiceRequest
+    {
+        $request->update([
+            'no_show_at' => now(),
+            'no_show_reason' => $reason,
+            'status' => RequestStatus::Cancelled->value,
+            'cancelled_reason' => 'customer_no_show',
+            'cancelled_at' => now(),
+        ]);
+
+        $request->client->notify(new CustomerNoShowReported($request->id));
+        RequestStatusUpdated::dispatch($request->id, RequestStatus::Cancelled->value);
+        $request->client->increment('no_show_count');
 
         return $request->fresh();
     }

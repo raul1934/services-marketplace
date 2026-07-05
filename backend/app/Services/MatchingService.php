@@ -2,8 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\ProposalStatus;
 use App\Enums\RequestStatus;
 use App\Enums\RequestUrgency;
+use App\Models\Market;
+use App\Models\Proposal;
 use App\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -36,7 +39,7 @@ class MatchingService
         $haversine = $this->haversineSql('provider_locations.latitude', 'provider_locations.longitude');
 
         return User::query()
-            ->select('users.*')
+            ->select('users.*', 'provider_profiles.rating_avg')
             ->selectRaw("{$haversine} AS distance_km", [$lat, $lng, $lat])
             ->join('provider_profiles', 'provider_profiles.user_id', '=', 'users.id')
             ->join('provider_locations', 'provider_locations.user_id', '=', 'users.id')
@@ -44,10 +47,19 @@ class MatchingService
             ->where('provider_profiles.is_online', true)
             ->where('provider_categories.service_category_id', $request->service_category_id)
             ->where('users.id', '!=', $request->client_id)
+            // Quality floor: exclude providers with enough history (5+ ratings)
+            // to judge and a clearly poor average — doesn't touch brand-new
+            // providers who haven't been rated yet.
+            ->where(fn ($q) => $q
+                ->where('provider_profiles.rating_count', '<', 5)
+                ->orWhere('provider_profiles.rating_avg', '>=', 2.0))
             ->whereBetween('provider_locations.latitude', [$latMin, $latMax])
             ->whereBetween('provider_locations.longitude', [$lngMin, $lngMax])
             ->whereRaw("{$haversine} <= ?", [$lat, $lng, $lat, $radiusKm])
+            // Distance stays primary — this is proximity-first roadside dispatch.
+            // rating_avg only breaks ties (rare, since distance is a float).
             ->orderBy('distance_km')
+            ->orderByDesc('provider_profiles.rating_avg')
             ->limit($limit)
             ->get();
     }
@@ -121,8 +133,8 @@ class MatchingService
         [$latMin, $latMax, $lngMin, $lngMax] = $this->boundingBox($lat, $lng, $radiusKm);
         $haversine = $this->haversineSql('service_requests.latitude', 'service_requests.longitude');
 
-        $avg = \App\Models\Proposal::query()
-            ->where('proposals.status', \App\Enums\ProposalStatus::Accepted->value)
+        $avg = Proposal::query()
+            ->where('proposals.status', ProposalStatus::Accepted->value)
             ->join('service_requests', 'service_requests.id', '=', 'proposals.service_request_id')
             ->where('service_requests.service_category_id', $categoryId)
             ->whereBetween('service_requests.latitude', [$latMin, $latMax])
@@ -144,6 +156,66 @@ class MatchingService
         return self::EARTH_RADIUS_KM * 2 * asin(min(1, sqrt($a)));
     }
 
+    /**
+     * Which Market (city) a point falls in, by point-in-polygon containment
+     * against each Market's geofence. Nearest centroid wins when two
+     * geofences overlap near a shared border; null when the point is outside
+     * every active Market's boundary.
+     *
+     * Computed in PHP rather than a DB spatial query: this runs on every
+     * single request creation (not behind a queued job), and the markets
+     * table is tiny (dozens of cities at most), so there's no cost to
+     * keeping it portable — see ExpireStaleRequests for the same reasoning.
+     */
+    public function marketFor(float $lat, float $lng): ?Market
+    {
+        return Market::query()
+            ->where('is_active', true)
+            ->whereNotNull('geofence')
+            ->get()
+            ->filter(fn (Market $market) => $this->pointInPolygon($lat, $lng, $market->geofence))
+            ->sortBy(function (Market $market) use ($lat, $lng) {
+                $centroid = $market->centroid();
+
+                return $this->distanceKm($lat, $lng, $centroid['latitude'], $centroid['longitude']);
+            })
+            ->first();
+    }
+
+    /**
+     * Standard ray-casting point-in-polygon test: count how many times a ray
+     * cast from the point to infinity crosses the polygon's edges — odd means
+     * inside, even means outside. $polygon is an array of {latitude,
+     * longitude} points (same shape as AssetProperty's geofence), treating
+     * lng/lat as plane coordinates, which is accurate enough at city scale.
+     *
+     * @param  array<array{latitude:float,longitude:float}>  $polygon
+     */
+    private function pointInPolygon(float $lat, float $lng, array $polygon): bool
+    {
+        $count = count($polygon);
+        if ($count < 3) {
+            return false;
+        }
+
+        $inside = false;
+        for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
+            $latI = (float) $polygon[$i]['latitude'];
+            $lngI = (float) $polygon[$i]['longitude'];
+            $latJ = (float) $polygon[$j]['latitude'];
+            $lngJ = (float) $polygon[$j]['longitude'];
+
+            $intersects = ($latI > $lat) !== ($latJ > $lat)
+                && $lng < ($lngJ - $lngI) * ($lat - $latI) / ($latJ - $latI) + $lngI;
+
+            if ($intersects) {
+                $inside = ! $inside;
+            }
+        }
+
+        return $inside;
+    }
+
     private function haversineSql(string $latCol, string $lngCol): string
     {
         $r = self::EARTH_RADIUS_KM;
@@ -151,7 +223,7 @@ class MatchingService
         return "({$r} * acos(least(1, greatest(-1, "
             ."cos(radians(?)) * cos(radians({$latCol})) * cos(radians({$lngCol}) - radians(?)) "
             ."+ sin(radians(?)) * sin(radians({$latCol}))"
-            ."))))";
+            .'))))';
     }
 
     /**

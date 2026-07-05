@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\CounterOfferStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -11,6 +12,9 @@ class ProposalResource extends JsonResource
     {
         $provider = $this->whenLoaded('provider');
         $profile = $this->provider?->providerProfile;
+        $pendingCounter = $this->relationLoaded('counterOffers')
+            ? $this->counterOffers->firstWhere('status', CounterOfferStatus::Pending)
+            : null;
 
         return [
             'id' => $this->id,
@@ -32,6 +36,10 @@ class ProposalResource extends JsonResource
                 $profile !== null,
                 fn () => $profile->insurance_valid_until !== null && $profile->insurance_valid_until->isFuture(),
             ),
+            'pending_counter_offer' => $this->when($pendingCounter !== null, fn () => [
+                'id' => $pendingCounter->id,
+                'price' => (float) $pendingCounter->price,
+            ]),
         ];
     }
 }

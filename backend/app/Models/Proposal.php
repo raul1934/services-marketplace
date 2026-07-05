@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ProposalStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Proposal extends Model
 {
@@ -30,5 +31,10 @@ class Proposal extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'provider_id');
+    }
+
+    public function counterOffers(): HasMany
+    {
+        return $this->hasMany(ProposalCounterOffer::class, 'proposal_id');
     }
 }

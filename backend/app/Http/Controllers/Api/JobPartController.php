@@ -46,4 +46,16 @@ class JobPartController extends Controller
 
         return response()->json(['ok' => true]);
     }
+
+    /** Client approves a single part (in addition to the request-level "approve all"). */
+    public function approve(Request $request, JobPart $jobPart): JobPartResource
+    {
+        abort_unless($jobPart->request->client_id === $request->user()->id, 403);
+
+        if ($jobPart->approved_at === null) {
+            $jobPart->update(['approved_at' => now()]);
+        }
+
+        return new JobPartResource($jobPart);
+    }
 }

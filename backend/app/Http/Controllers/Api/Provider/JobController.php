@@ -73,6 +73,7 @@ class JobController extends Controller
                 'surcharges.provider', 'surcharges.media', 'rescheduleRequests', 'providerReview',
                 // The provider's own bid, so `my_proposal` reflects the "já enviei" state.
                 'proposals' => fn ($q) => $q->where('provider_id', $provider->id),
+                'proposals.counterOffers',
             ])
         );
     }
@@ -146,6 +147,22 @@ class JobController extends Controller
         );
 
         $updated = $this->service->updateStatus($serviceRequest, $target);
+
+        return new ServiceRequestResource($updated->load(['category', 'client']));
+    }
+
+    /** Provider reports the client wasn't at the agreed location (mirror of the customer's no-show report). */
+    public function reportCustomerNoShow(Request $request, ServiceRequest $serviceRequest): ServiceRequestResource
+    {
+        abort_unless($serviceRequest->accepted_provider_id === $request->user()->id, 403);
+        abort_unless(
+            in_array($serviceRequest->status, [RequestStatus::Accepted, RequestStatus::InProgress], true),
+            422,
+            __('messages.request_not_active'),
+        );
+
+        $data = $request->validate(['reason' => ['nullable', 'string', 'max:255']]);
+        $updated = $this->service->reportCustomerNoShow($serviceRequest, $data['reason'] ?? null);
 
         return new ServiceRequestResource($updated->load(['category', 'client']));
     }
