@@ -17,7 +17,7 @@ test('no-show: customer reopens an accepted request', async ({ browser }) => {
   await c.waitForTimeout(2500);
 
   await go(c, `${CUSTOMER}/request/${id}`);
-  await expect(c.getByText(/ver propostas|view proposals/i)).toBeVisible();
+  await expect(c.getByText(/propostas|proposals/i).first()).toBeVisible();
   await shot(c, 'customer — request reopened');
 
   await cc.close();

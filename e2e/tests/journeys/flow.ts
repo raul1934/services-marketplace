@@ -72,16 +72,18 @@ export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitaç�
   await c.getByText(/Civic do pai/i).first().click().catch(() => {});
   await c.getByPlaceholder(/flat tire|pneu furado/i).first().fill(desc);
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
-  await shot?.(c, 'create — step 2 photos');
-  await tap(c, /^continue$/i); await c.waitForTimeout(900);
-  await shot?.(c, 'create — step 3 location');
+  await shot?.(c, 'create — step 2 location');
   await tap(c, /use my location|usar minha/i); await c.waitForTimeout(2500);
+  await tap(c, /^continue$/i); await c.waitForTimeout(900);
+  await shot?.(c, 'create — step 3 questions');
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 4 schedule');
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
-  await shot?.(c, 'create — step 5 budget & payment');
+  await shot?.(c, 'create — step 5 photos');
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
-  await shot?.(c, 'create — step 6 review');
+  await shot?.(c, 'create — step 6 budget & payment');
+  await tap(c, /^continue$/i); await c.waitForTimeout(900);
+  await shot?.(c, 'create — step 7 review');
   await slide(c); await c.waitForTimeout(3500);
   await shot?.(c, 'create — submitted (request detail)');
   const m = c.url().match(/\/request\/(\d+)/);
@@ -109,10 +111,31 @@ export async function customerAccept(c: Page, id: number, shot?: Shot) {
   await shot?.(c, 'customer — proposal accepted');
 }
 
-export async function providerStart(p: Page, id: number, shot?: Shot) {
+/**
+ * Urgent jobs (the default for categoryId=1) require the customer's 4-digit
+ * start code instead of a plain slide — read it off the customer's request
+ * detail screen, then enter it in the provider's start-code modal. Scheduled
+ * jobs skip the code and slide straight to start.
+ */
+export async function providerStart(c: Page, p: Page, id: number, shot?: Shot) {
   await go(p, `${PROVIDER}/job/${id}`);
   await shot?.(p, 'provider — accepted job (start code)');
-  await slide(p); await p.waitForTimeout(2500);
+
+  const startCodeCta = p.getByText(/start the job|iniciar atendimento/i);
+  if (await startCodeCta.count()) {
+    await go(c, `${CUSTOMER}/request/${id}`);
+    const code = (await c.locator('text=/^\\d{4}$/').first().textContent())?.trim();
+    if (!code) throw new Error('start code not found on customer screen');
+
+    await startCodeCta.last().click();
+    await p.waitForTimeout(500);
+    await p.keyboard.type(code);
+    await tap(p, /confirm & start|confirmar e iniciar/i);
+    await p.waitForTimeout(1500);
+  } else {
+    await slide(p);
+    await p.waitForTimeout(2500);
+  }
   await shot?.(p, 'provider — job started');
 }
 
@@ -130,7 +153,7 @@ export async function toAccepted(c: Page, p: Page, catId = 1, desc = 'E2E', shot
 }
 export async function toInProgress(c: Page, p: Page, catId = 1, desc = 'E2E', shot?: Shot) {
   const id = await toAccepted(c, p, catId, desc, shot);
-  await providerStart(p, id, shot);
+  await providerStart(c, p, id, shot);
   return id;
 }
 export async function toCompleted(c: Page, p: Page, catId = 1, desc = 'E2E', shot?: Shot) {

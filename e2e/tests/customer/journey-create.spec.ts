@@ -9,18 +9,20 @@ test.describe('Journey · customer creates a request (C06→C09)', () => {
     await page.getByText(/Civic do pai/i).first().click().catch(() => {});
     await page.getByPlaceholder(/flat tire|pneu furado/i).first().fill('Pneu furado na marginal, preciso de troca');
     await tap(page, /^continue$/i);
-    // 2 photos
-    await tap(page, /^continue$/i);
-    // 3 location
+    // 2 location
     await tap(page, /use my location|usar minha/i);
     await page.waitForTimeout(2500);
     await tap(page, /^continue$/i);
+    // 3 questions
+    await tap(page, /^continue$/i);
     // 4 when
     await tap(page, /^continue$/i);
-    // 5 budget & payment
+    // 5 photos
     await tap(page, /^continue$/i);
-    // 6 review → slide to submit
-    await expect(page.getByText(/6\s*\/\s*6/i)).toBeVisible();
+    // 6 budget & payment
+    await tap(page, /^continue$/i);
+    // 7 review → slide to submit
+    await expect(page.getByText(/7\s*\/\s*7/i)).toBeVisible();
     await slide(page);
     await page.waitForTimeout(3500);
 

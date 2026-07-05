@@ -16,7 +16,7 @@ test('full lifecycle: create → bid → accept → start → complete → recei
   await expect(c.getByText(/código de início|start code/i)).toBeVisible();
   await shot(c, 'customer — start code visible');
 
-  await providerStart(p, id, shot);
+  await providerStart(c, p, id, shot);
   await providerComplete(p, id, shot);
 
   await go(c, `${CUSTOMER}/request/${id}/receipt`);
