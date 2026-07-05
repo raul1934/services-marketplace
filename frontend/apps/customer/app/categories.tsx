@@ -40,7 +40,7 @@ export default function Categories() {
                         <CategoryIcon category={c} size={24} />
                       </View>
                       <Text center weight="700" style={{ fontSize: 12.5, lineHeight: 14 }} numberOfLines={2}>
-                        {c.name}
+                        {tr(`categories.${c.slug}`, { defaultValue: c.name })}
                       </Text>
                     </Card>
                   ))}

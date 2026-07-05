@@ -23,6 +23,21 @@ export function distanceLabel(km: number | null | undefined): string {
   return `${km.toFixed(1)} km`;
 }
 
+/** Great-circle distance in km between two lat/lng points (Haversine). */
+export function haversineKm(latA: number, lngA: number, latB: number, lngB: number): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(latB - latA);
+  const dLng = toRad(lngB - lngA);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(latA)) * Math.cos(toRad(latB)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/** Rough ETA in minutes for a road trip of `km` at ~35 km/h (matches the backend). */
+export function etaMinutes(km: number): number {
+  return Math.max(1, Math.ceil((km / 35) * 60));
+}
+
 /**
  * Coarse "minutes ago" bucket as a structured value, so the UI can localize it
  * via i18n with a count (e.g. t('time.minutesAgo', { count })). Returns the

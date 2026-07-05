@@ -71,7 +71,7 @@ export default function AssetDetail() {
 
   const readings = (readingsQ.data?.pages ?? []).flatMap((p) => p.data);
   const history = (historyQ.data?.pages ?? []).flatMap((p) => p.data);
-  const services = history.slice(0, 8).map((r) => ({ id: r.id, label: r.category?.name ?? `#${r.id}` }));
+  const services = history.slice(0, 8).map((r) => ({ id: r.id, label: r.category ? tr(`categories.${r.category.slug}`, { defaultValue: r.category.name }) : `#${r.id}` }));
   const fmtKm = (n: number) => `${n.toLocaleString('pt-BR')} km`;
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('pt-BR');
 

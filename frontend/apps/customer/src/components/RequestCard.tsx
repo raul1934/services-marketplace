@@ -43,7 +43,7 @@ export function RequestCard({ request, onPress }: { request: ServiceRequest; onP
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="h3" numberOfLines={1}>
-            {request.category?.name ?? tr('requestDetail.fallbackTitle')}
+            {request.category ? tr(`categories.${request.category.slug}`, { defaultValue: request.category.name }) : tr('requestDetail.fallbackTitle')}
           </Text>
           <Text variant="caption" numberOfLines={1}>
             {request.address ?? request.description}

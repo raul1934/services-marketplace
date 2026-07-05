@@ -182,6 +182,7 @@ export const pushApi = {
 export const jobReportApi = {
   updates: (requestId: number) => http.get<Collection<JobUpdate>>(`requests/${requestId}/updates`).then(unwrapList),
   parts: (requestId: number) => http.get<Collection<JobPart>>(`requests/${requestId}/parts`).then(unwrapList),
+  approvePart: (jobPartId: number) => http.post<{ data: JobPart }>(`parts/${jobPartId}/approve`, {}).then(unwrap),
 };
 
 export type ProposalSort = 'price' | 'eta' | 'rating';
@@ -199,6 +200,7 @@ export interface CreateRequestPayload {
   payment_method?: string;
   answers?: { question_id: number; answer: string }[];
   urgency?: 'normal' | 'urgent' | 'scheduled';
+  max_wait_minutes?: number;
   availabilities?: { starts_at: string; ends_at: string }[];
   /** Ids of media uploaded during the wizard (upload-first), attached on create. */
   media_ids?: number[];
@@ -214,6 +216,9 @@ export const customerApi = {
   proposals: (id: number, sort: ProposalSort = 'price', page = 1) =>
     http.get<Paginated<Proposal>>(`requests/${id}/proposals`, { query: { sort, page } }).then(unwrapPage),
   acceptProposal: (proposalId: number) => http.post<{ data: ServiceRequest }>(`proposals/${proposalId}/accept`).then(unwrap),
+  declineProposal: (proposalId: number) => http.post<{ ok: boolean }>(`proposals/${proposalId}/decline`, {}),
+  counterProposal: (proposalId: number, payload: { price: number; message?: string }) =>
+    http.post<{ id: number; price: number }>(`proposals/${proposalId}/counter`, { body: payload }),
   providerLocation: (id: number) => http.get<ProviderLocationLive>(`requests/${id}/provider-location`),
   submitReview: (id: number, payload: { rating: number; comment?: string; tags?: string[]; tip_amount?: number }) =>
     http.post<{ id: number; rating: number; comment: string | null; tags: string[]; tip_amount: number | null }>(`requests/${id}/review`, { body: payload }),

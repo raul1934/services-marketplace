@@ -164,6 +164,7 @@ export interface ProposalSummary {
   price: number;
   eta_minutes: number;
   status: ProposalStatus;
+  pending_counter_offer?: { id: number; price: number; message?: string | null } | null;
 }
 
 export interface RequestParticipant {
@@ -171,6 +172,7 @@ export interface RequestParticipant {
   name: string;
   phone?: string | null;
   rating_avg?: number;
+  rating_count?: number;
 }
 
 export interface ServiceRequest {
@@ -190,6 +192,7 @@ export interface ServiceRequest {
   settlement?: Settlement | null;
   answers?: RequestAnswer[];
   urgency: RequestUrgency;
+  max_wait_minutes?: number | null;
   category?: ServiceCategory;
   asset?: Asset | null;
   photos?: RequestPhoto[];
@@ -354,6 +357,7 @@ export interface Proposal {
   provider_rating_avg?: number;
   provider_rating_count?: number;
   provider_insured?: boolean;
+  pending_counter_offer?: { id: number; price: number; message?: string | null } | null;
 }
 
 /** A provider's pre-bid question on a request (with the client's answer). */
@@ -431,6 +435,7 @@ export interface JobPart {
   action: PartAction;
   quantity: number;
   unit_price: number | null;
+  approved_at?: string | null;
 }
 
 export interface ProviderLocationLive {

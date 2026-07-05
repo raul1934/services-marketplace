@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, View } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Image, Modal, Pressable, ScrollView, View } from 'react-native';
+import MapView, { Marker, Polyline, Region } from 'react-native-maps';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -13,7 +13,6 @@ import {
   Card,
   Icon,
   NotFoundView,
-  QnaThread,
   RequestStatus,
   RequestUrgency,
   Row,
@@ -25,12 +24,14 @@ import {
   brl,
   distanceLabel,
   etaLabel,
+  etaMinutes,
+  haversineKm,
   isActiveStatus,
   subscribeToRequest,
+  useRoute,
   useTheme,
 } from '@walvee/shared';
-import { keys, useAnswerQuestion, useApproveParts, useQuestions, useRequest, useRequestEvents, useTracking } from '../../../src/queries';
-import { PickedPhoto, pickPhotos } from '../../../src/photos';
+import { keys, useApprovePart, useApproveParts, useJobReport, useRequest, useRequestEvents, useTracking } from '../../../src/queries';
 import { CategoryIcon } from '../../../src/components/CategoryIcon';
 import { EventFeed } from '../../../src/components/EventFeed';
 import { ProposalsList } from '../../../src/components/ProposalsList';
@@ -39,6 +40,11 @@ import { ReviewForm } from '../../../src/components/ReviewForm';
 
 const AV_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ef4444', '#0ea5e9'];
 const initialsOf = (name?: string) => (name ?? '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+
+// Requests the user explicitly dismissed the rating modal for — resets on app
+// reload (intentionally not persisted), just enough to stop nagging every
+// time this screen regains focus in the same session.
+const dismissedRatePrompts = new Set<number>();
 
 export default function RequestDetail() {
   const t = useTheme();
@@ -51,6 +57,8 @@ export default function RequestDetail() {
   const { data: request, isLoading } = useRequest(requestId);
   const isOpen = request?.status === RequestStatus.Open;
   const approve = useApproveParts(requestId);
+  const approvePart = useApprovePart(requestId);
+  const { parts: jobParts } = useJobReport(requestId);
   // Live tracking + event feed (lifted from the former /track screen).
   const trackable = request ? isActiveStatus(request.status) : false;
   const tracking = useTracking(requestId, trackable);
@@ -58,6 +66,22 @@ export default function RequestDetail() {
   const [live, setLive] = useState<{ lat: number; lng: number } | null>(null);
   // ProposalsList wires this; the screen's scroll fires it to page in more bids.
   const proposalsLoadMore = useRef<(() => void) | null>(null);
+
+  // Completed + unrated → rating prompt. Computed before the early returns so the
+  // focus effect can re-open it whenever the screen regains focus.
+  const [rateOpen, setRateOpen] = useState(false);
+  const canReview = request?.status === RequestStatus.Completed && !request?.review;
+
+  // Road route (OSRM) from the provider's live position to the job, for the map.
+  const routeFrom = live
+    ? { latitude: live.lat, longitude: live.lng }
+    : tracking.data?.latitude != null && tracking.data?.longitude != null
+      ? { latitude: tracking.data.latitude, longitude: tracking.data.longitude }
+      : null;
+  const route = useRoute(
+    trackable ? routeFrom : null,
+    trackable && request ? { latitude: request.latitude, longitude: request.longitude } : null,
+  );
 
   useEffect(() => {
     let off: (() => void) | undefined;
@@ -83,6 +107,16 @@ export default function RequestDetail() {
     return () => off?.();
   }, [requestId, qc]);
 
+  // Re-prompt the rating each time a completed, unrated request regains focus.
+  useFocusEffect(useCallback(() => {
+    if (canReview && !dismissedRatePrompts.has(requestId)) setRateOpen(true);
+  }, [canReview, requestId]));
+
+  const dismissRate = () => {
+    dismissedRatePrompts.add(requestId);
+    setRateOpen(false);
+  };
+
   if (isLoading) {
     return (
       <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -105,8 +139,8 @@ export default function RequestDetail() {
     );
   }
 
+  const categoryName = request.category ? tr(`categories.${request.category.slug}`, { defaultValue: request.category.name }) : undefined;
   const active = isActiveStatus(request.status);
-  const canReview = request.status === RequestStatus.Completed && !request.review;
   const isRequote = request.status === RequestStatus.Requote;
   const isCompleted = request.status === RequestStatus.Completed;
   const pendingSurcharge = request.surcharges?.find((s) => s.status === 'pending');
@@ -116,14 +150,35 @@ export default function RequestDetail() {
   // Live-tracking view model (only rendered while the job is active).
   const provLat = live?.lat ?? tracking.data?.latitude;
   const provLng = live?.lng ?? tracking.data?.longitude;
-  const region: Region = { latitude: request.latitude, longitude: request.longitude, latitudeDelta: 0.02, longitudeDelta: 0.02 };
+  // Frame both the job and the provider while en route; otherwise center on the job.
+  const region: Region =
+    provLat != null && provLng != null
+      ? {
+          latitude: (request.latitude + provLat) / 2,
+          longitude: (request.longitude + provLng) / 2,
+          latitudeDelta: Math.max(0.02, Math.abs(request.latitude - provLat) * 2.4),
+          longitudeDelta: Math.max(0.02, Math.abs(request.longitude - provLng) * 2.4),
+        }
+      : { latitude: request.latitude, longitude: request.longitude, latitudeDelta: 0.02, longitudeDelta: 0.02 };
+  // Distance/ETA recomputed from the live position (socket-driven) → no polling needed.
+  const provAvailable = provLat != null && provLng != null;
+  const provKm = provAvailable ? haversineKm(request.latitude, request.longitude, provLat!, provLng!) : null;
+  const provEta = provKm != null ? etaMinutes(provKm) : null;
+  // Prefer the OSRM road distance/duration when the route is available.
+  const showKm = route?.distanceKm ?? provKm;
+  const showEta = route?.durationMin ?? provEta;
   const trackStep = request.status === RequestStatus.InProgress ? 2 : request.status === RequestStatus.Completed ? 3 : 1;
   const trackSteps = [tr('tracking.stepAccepted'), tr('tracking.stepOnWay'), tr('tracking.stepArrived'), tr('tracking.stepDone')];
 
   return (
-    <Screen stickyHeader padded={false} onEndReached={isOpen ? () => proposalsLoadMore.current?.() : undefined}>
+    <Screen
+      stickyHeader
+      padded={false}
+      onEndReached={isOpen ? () => proposalsLoadMore.current?.() : undefined}
+      footer={canReview ? <Button title={tr('rate.promptCta')} full onPress={() => setRateOpen(true)} /> : undefined}
+    >
       <BackBar
-        title={request.category?.name ?? tr('requestDetail.fallbackTitle')}
+        title={categoryName ?? tr('requestDetail.fallbackTitle')}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/requests'))}
         right={<Badge label={statusText} tone={isOpen ? 'open' : active ? 'live' : 'neutral'} dot={active || isOpen} />}
       />
@@ -136,11 +191,17 @@ export default function RequestDetail() {
             </View>
             <View style={{ flex: 1 }}>
               <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>
-                {request.category ? `${tr(`enums.categoryType.${request.category.type}`)} · ${request.category.name}` : tr('requestDetail.fallbackTitle')}
+                {request.category ? `${tr(`enums.categoryType.${request.category.type}`)} · ${categoryName}` : tr('requestDetail.fallbackTitle')}
               </Text>
               {request.address && <Text variant="caption" numberOfLines={1}>{request.address}</Text>}
             </View>
-            {request.urgency === RequestUrgency.Urgent && <Badge label={tr('enums.urgency.urgent')} tone="urgent" dot />}
+            {request.urgency === RequestUrgency.Urgent && (
+              <Badge
+                label={request.max_wait_minutes != null ? tr('enums.urgency.urgentWithWait', { count: request.max_wait_minutes }) : tr('enums.urgency.urgent')}
+                tone="urgent"
+                dot
+              />
+            )}
           </Row>
         </Card>
 
@@ -148,15 +209,22 @@ export default function RequestDetail() {
 
         {(request.before_photos?.length || request.after_photos?.length) ? <JobPhotosView request={request} /> : null}
 
-        {isOpen && <CustomerQna requestId={requestId} />}
-
-        {isOpen && <ProposalsList requestId={requestId} budget={request.budget_max} loadMoreRef={proposalsLoadMore} />}
+        {/* Pre-bid Q&A now renders inside each bid (see ProposalsList / ProposalCard). */}
+        {isOpen && (
+          <ProposalsList
+            requestId={requestId}
+            budget={request.budget_max}
+            maxWaitMinutes={request.urgency === RequestUrgency.Urgent ? request.max_wait_minutes : null}
+            loadMoreRef={proposalsLoadMore}
+          />
+        )}
 
         {active && (
           <View style={{ gap: 14 }}>
             {/* Live map + ETA + progress strip (formerly the /track screen). */}
             <Card padded={false} style={{ overflow: 'hidden' }}>
               <MapView style={{ height: 220 }} region={region}>
+                {route && <Polyline coordinates={route.coords} strokeColor={t.colors.accent} strokeWidth={5} />}
                 <Marker coordinate={{ latitude: request.latitude, longitude: request.longitude }} pinColor={t.colors.accent} title={tr('requestDetail.fallbackTitle')} />
                 {provLat != null && provLng != null && (
                   <Marker coordinate={{ latitude: provLat, longitude: provLng }} pinColor={t.colors.ok} title={request.provider?.name} />
@@ -166,8 +234,8 @@ export default function RequestDetail() {
                 <Row>
                   <Icon name="navigate" size={22} color={t.colors.accent} />
                   <View style={{ flex: 1 }}>
-                    <Text weight="800" style={{ fontSize: 17 }}>{tracking.data?.available ? distanceLabel(tracking.data.distance_km) : tr('tracking.subtitle')}</Text>
-                    <Text variant="caption">{tracking.data?.available ? tr('tracking.arrivingIn', { eta: etaLabel(tracking.data.eta_minutes_approx) }) : tr('tracking.unavailable')}</Text>
+                    <Text weight="800" style={{ fontSize: 17 }}>{provAvailable ? distanceLabel(showKm) : tr('tracking.subtitle')}</Text>
+                    <Text variant="caption">{provAvailable ? tr('tracking.arrivingIn', { eta: etaLabel(showEta) }) : tr('tracking.unavailable')}</Text>
                   </View>
                   <Badge label={tr('tracking.live')} tone="live" dot />
                 </Row>
@@ -218,7 +286,29 @@ export default function RequestDetail() {
                   <Text weight="800" style={{ flex: 1, fontSize: 14.5 }}>{tr('requestDetail.approvalTitle')}</Text>
                 </Row>
                 <Text variant="caption">{tr('requestDetail.approvalBody')}</Text>
-                <Button title={tr('requestDetail.approve')} full loading={approve.isPending} onPress={() => approve.mutate()} />
+                {(jobParts.data ?? []).length > 0 && (
+                  <View style={{ gap: 6 }}>
+                    {(jobParts.data ?? []).map((p) => (
+                      <Row key={p.id} style={{ paddingVertical: 6, borderTopWidth: 1, borderColor: t.colors.line }}>
+                        <View style={{ flex: 1 }}>
+                          <Text weight="700" style={{ fontSize: 13.5 }}>{p.quantity}× {p.name}</Text>
+                          {p.unit_price != null && <Text variant="caption">{brl(p.unit_price * p.quantity)}</Text>}
+                        </View>
+                        {p.approved_at ? (
+                          <Row gap={4}>
+                            <Icon name="check" size={14} color={t.colors.ok} />
+                            <Text variant="caption" weight="700" color={t.colors.ok}>{tr('requestDetail.partApproved')}</Text>
+                          </Row>
+                        ) : (
+                          <Text weight="700" color={t.colors.accent} style={{ fontSize: 12.5 }} onPress={() => approvePart.mutate(p.id)}>
+                            {tr('requestDetail.approve')}
+                          </Text>
+                        )}
+                      </Row>
+                    ))}
+                  </View>
+                )}
+                <Button title={tr('requestDetail.approveAll')} full loading={approve.isPending} onPress={() => approve.mutate()} />
               </Card>
             )}
             {request.parts_approved && (
@@ -258,10 +348,9 @@ export default function RequestDetail() {
           </Card>
         )}
 
-        {/* Completed → receipt + consolidated summary + rating shown inline. */}
+        {/* Completed → receipt + consolidated summary. Rating is prompted on top (modal below). */}
         {isCompleted && <ReceiptView request={request} />}
         {isCompleted && <CompletedSummary request={request} />}
-        {canReview && <ReviewForm requestId={requestId} request={request} />}
         {isCompleted && (
           <Row gap={10}>
             <View style={{ flex: 1 }}>
@@ -275,6 +364,23 @@ export default function RequestDetail() {
 
         <EventFeed events={events ?? []} approvedValue={request.accepted_proposal?.price} />
       </View>
+
+      {/* Rating prompt: opens on top when completed+unrated, re-prompts on focus
+          until dismissed once, closeable. */}
+      <Modal visible={rateOpen} transparent animationType="slide" onRequestClose={dismissRate}>
+        <Pressable onPress={dismissRate} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}>
+          <Pressable onPress={() => {}} style={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 12, maxHeight: '92%' }}>
+            <View style={{ alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: t.colors.line, marginBottom: 6 }} />
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }}>
+              <Row style={{ marginBottom: 8 }}>
+                <Text weight="800" style={{ flex: 1, fontSize: 17 }}>{tr('rate.title')}</Text>
+                <Pressable onPress={dismissRate} hitSlop={8}><Icon name="close" size={22} color={t.colors.ink3} /></Pressable>
+              </Row>
+              <ReviewForm requestId={requestId} request={request} onSubmitted={() => setRateOpen(false)} />
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </Screen>
   );
 }
@@ -391,40 +497,6 @@ function JobPhotosView({ request }: { request: { before_photos?: { id: number; u
         {col(tr('requestDetail.beforeLabel'), request.before_photos ?? [])}
         {col(tr('requestDetail.afterLabel'), request.after_photos ?? [])}
       </Row>
-    </View>
-  );
-}
-
-/** Client reads and answers providers' pre-bid questions. */
-function CustomerQna({ requestId }: { requestId: number }) {
-  const { t: tr } = useTranslation();
-  const { data: questions } = useQuestions(requestId);
-  const answer = useAnswerQuestion(requestId);
-
-  if (!questions?.length) return null;
-
-  return (
-    <View style={{ gap: 10 }}>
-      <Row gap={8}>
-        <SectionLabel count={questions.length}>{tr('requestDetail.qnaLabel')}</SectionLabel>
-        <View style={{ flex: 1 }} />
-        <Badge label={tr('requestDetail.preBid')} tone="open" dot />
-      </Row>
-      <Text variant="caption">{tr('requestDetail.qnaHelper')}</Text>
-      <QnaThread
-        questions={questions}
-        onAnswer={(questionId, value, photo) => answer.mutate({ questionId, answer: value, photo: photo as PickedPhoto | undefined })}
-        answering={answer.isPending}
-        answerCta={tr('requestDetail.answerCta')}
-        answerPlaceholder={tr('requestDetail.answerPlaceholder')}
-        askedByLabel={(name) => tr('requestDetail.askedBy', { name: name ?? tr('requestDetail.fallbackProvider') })}
-        pickPhoto={async () => {
-          const [p] = await pickPhotos(1);
-          return p ?? null;
-        }}
-        attachPhotoCta={tr('requestDetail.attachPhoto')}
-        photoRequiredLabel={tr('requestDetail.photoRequired')}
-      />
     </View>
   );
 }

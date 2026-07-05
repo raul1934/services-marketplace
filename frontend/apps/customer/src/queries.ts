@@ -140,12 +140,13 @@ export const useProposals = (id: number, sort: ProposalSort) =>
     enabled: !!id,
   });
 
+// Fetches the provider's location ONCE for the initial map position; live updates
+// thereafter come from the Reverb socket (`onLocation`), not a poll.
 export const useTracking = (id: number, enabled: boolean) =>
   useQuery({
     queryKey: keys.tracking(id),
     queryFn: () => customerApi.providerLocation(id),
     enabled,
-    refetchInterval: enabled ? 8000 : false,
   });
 
 export const useJobReport = (id: number) => {
@@ -176,11 +177,44 @@ export function useAcceptProposal(requestId: number) {
   });
 }
 
+export function useDeclineProposal(requestId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (proposalId: number) => customerApi.declineProposal(proposalId),
+    onSuccess: () => {
+      // Partial key — matches every sort variant of this request's proposals.
+      qc.invalidateQueries({ queryKey: ['proposals', requestId] });
+    },
+  });
+}
+
+export function useCounterProposal(requestId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: { proposalId: number; price: number; message?: string }) =>
+      customerApi.counterProposal(payload.proposalId, { price: payload.price, message: payload.message }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['proposals', requestId] });
+    },
+  });
+}
+
 export function useApproveParts(requestId: number) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => customerApi.approveParts(requestId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.request(requestId) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.request(requestId) });
+      qc.invalidateQueries({ queryKey: keys.parts(requestId) });
+    },
+  });
+}
+
+export function useApprovePart(requestId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (jobPartId: number) => jobReportApi.approvePart(jobPartId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.parts(requestId) }),
   });
 }
 

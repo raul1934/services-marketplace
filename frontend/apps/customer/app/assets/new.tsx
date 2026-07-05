@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Image, Pressable, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Field, Icon, Screen, SectionLabel, Segment, Text, useTheme } from '@walvee/shared';

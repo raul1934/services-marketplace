@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Alert, Image, View } from 'react-native';
+import { ActivityIndicator, Image, View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {

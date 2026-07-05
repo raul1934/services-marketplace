@@ -134,7 +134,7 @@ export default function Home() {
             {topCats.map((c) => (
               <View key={c.id} style={{ width: '23%' }}>
                 <CatTile
-                  label={c.name}
+                  label={tr(`categories.${c.slug}`, { defaultValue: c.name })}
                   onPress={() => router.push({ pathname: '/request/new', params: { categoryId: c.id } })}
                   icon={
                     <View style={{ width: 60, height: 60, borderRadius: 18, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
@@ -207,7 +207,7 @@ function ActiveRequestCard({ request, onPress }: { request: ServiceRequest; onPr
             <CategoryIcon category={request.category} size={26} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text weight="800" style={{ fontSize: 16 }} numberOfLines={1}>{request.category?.name}</Text>
+            <Text weight="800" style={{ fontSize: 16 }} numberOfLines={1}>{request.category && tr(`categories.${request.category.slug}`, { defaultValue: request.category.name })}</Text>
             <Text variant="caption" numberOfLines={1}>{[request.address, ago].filter(Boolean).join(' · ')}</Text>
           </View>
           {request.urgency === RequestUrgency.Urgent && <Badge label={tr('enums.urgency.urgent')} tone="urgent" dot />}

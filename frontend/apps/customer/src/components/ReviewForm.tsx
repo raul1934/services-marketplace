@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { useTranslation } from 'react-i18next';
 import { AvInit, Button, Card, Chip, Field, SectionLabel, Stars, Text, brl, useTheme } from '@walvee/shared';
 import { useSubmitReview } from '../queries';
@@ -18,7 +19,7 @@ export function ReviewForm({
   onSubmitted,
 }: {
   requestId: number;
-  request?: { provider?: { name?: string } | null; category?: { name: string } | null; started_at?: string | null; completed_at?: string | null } | null;
+  request?: { provider?: { name?: string } | null; category?: { slug: string; name: string } | null; started_at?: string | null; completed_at?: string | null } | null;
   onSubmitted?: () => void;
 }) {
   const t = useTheme();
@@ -55,7 +56,7 @@ export function ReviewForm({
         <View style={{ alignItems: 'center' }}>
           <Text weight="800" style={{ fontSize: 18 }}>{request?.provider?.name ?? tr('requestDetail.fallbackProvider')}</Text>
           <Text variant="caption">
-            {[request?.category?.name, elapsed ? tr('rate.completedIn', { min: elapsed }) : tr('rate.completed')].filter(Boolean).join(' · ')}
+            {[request?.category && tr(`categories.${request.category.slug}`, { defaultValue: request.category.name }), elapsed ? tr('rate.completedIn', { min: elapsed }) : tr('rate.completed')].filter(Boolean).join(' · ')}
           </Text>
         </View>
         <Stars value={rating} size={36} onChange={setRating} />

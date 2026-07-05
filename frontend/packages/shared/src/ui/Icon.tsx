@@ -46,6 +46,7 @@ import {
   Star,
   Truck,
   User,
+  UserX,
   Wifi,
   Wrench,
   X,
@@ -102,6 +103,7 @@ const ICONS: Record<string, LucideIcon> = {
   star: Star,
   truck: Truck,
   user: User,
+  userX: UserX,
   wifi: Wifi,
   wrench: Wrench,
 };

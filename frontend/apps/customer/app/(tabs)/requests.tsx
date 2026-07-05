@@ -2,10 +2,26 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, Icon, PaginatedList, Row, ServiceRequest, Text, flattenPages, useTheme } from '@walvee/shared';
+import { EmptyState, Icon, PaginatedList, RequestStatus, Row, ServiceRequest, Text, flattenPages, useTheme } from '@walvee/shared';
 import { useMyRequests } from '../../src/queries';
 import { RequestCard } from '../../src/components/RequestCard';
 import { RequestFilter, RequestFilterSheet, matchesFilter } from '../../src/components/RequestFilterSheet';
+
+// In progress first, then open to bid, then everything else (completed/cancelled/expired) —
+// keeps whatever's actionable for the customer at the top instead of strict recency.
+const STATUS_PRIORITY: Record<RequestStatus, number> = {
+  [RequestStatus.InProgress]: 0,
+  [RequestStatus.Accepted]: 0,
+  [RequestStatus.Requote]: 0,
+  [RequestStatus.Open]: 1,
+  [RequestStatus.Completed]: 2,
+  [RequestStatus.Cancelled]: 2,
+  [RequestStatus.Expired]: 2,
+};
+
+function byStatusPriority(items: ServiceRequest[]): ServiceRequest[] {
+  return [...items].sort((a, b) => (STATUS_PRIORITY[a.status] ?? 2) - (STATUS_PRIORITY[b.status] ?? 2));
+}
 
 export default function Requests() {
   const t = useTheme();
@@ -87,7 +103,7 @@ export default function Requests() {
     <>
       <PaginatedList<ServiceRequest>
         query={query}
-        selectItems={(items) => items.filter(matches)}
+        selectItems={(items) => byStatusPriority(items.filter(matches))}
         keyExtractor={(r) => String(r.id)}
         renderItem={(r) => <RequestCard request={r} onPress={() => router.push(`/request/${r.id}`)} />}
         header={header}

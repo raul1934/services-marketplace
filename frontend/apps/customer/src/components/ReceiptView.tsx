@@ -14,7 +14,7 @@ export function ReceiptView({
   request,
   header,
 }: {
-  request: { settlement?: Settlement | null; category?: { name: string } | null; completed_at?: string | null };
+  request: { settlement?: Settlement | null; category?: { slug: string; name: string } | null; completed_at?: string | null };
   header?: boolean;
 }) {
   const t = useTheme();
@@ -40,7 +40,7 @@ export function ReceiptView({
             <Icon name="check" size={34} color="#fff" />
           </LinearGradient>
           <Text variant="h2" center>{tr('receipt.paidTitle')}</Text>
-          {request.category && <Text variant="caption" center>{request.category.name}</Text>}
+          {request.category && <Text variant="caption" center>{tr(`categories.${request.category.slug}`, { defaultValue: request.category.name })}</Text>}
         </View>
       )}
 

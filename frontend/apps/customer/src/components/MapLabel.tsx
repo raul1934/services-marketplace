@@ -11,7 +11,7 @@ export function MapLabel({ text, tone = 'edge' }: { text: string; tone?: 'edge' 
   return (
     <View
       style={{
-        backgroundColor: area ? '#ff6a3d' : 'rgba(255,255,255,0.92)',
+        backgroundColor: area ? '#1772d2' : 'rgba(255,255,255,0.92)',
         paddingHorizontal: 6,
         paddingVertical: 2,
         borderRadius: 8,
