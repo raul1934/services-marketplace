@@ -66,7 +66,7 @@ export async function uploadPhoto(page: Page, labelRe: RegExp) {
 }
 
 // ── lifecycle bootstrap — every step is a real UI action; `shot` captures each ──
-export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitação de teste E2E', shot?: Shot) {
+export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitação de teste E2E', shot?: Shot, urgency: 'urgent' | 'scheduled' = 'urgent') {
   await go(c, `${CUSTOMER}/request/new?categoryId=${categoryId}`);
   await shot?.(c, 'create — step 1 details');
   await c.getByText(/Civic do pai/i).first().click().catch(() => {});
@@ -78,6 +78,15 @@ export async function createRequest(c: Page, categoryId = 1, desc = 'Solicitaç�
   await shot?.(c, 'create — step 3 questions');
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 4 schedule');
+  if (urgency === 'scheduled') {
+    // Flip the segment to Scheduled, then pick today in the calendar — today is
+    // never disabled, and selecting a day auto-checks the "morning" window,
+    // which is all the step needs to allow Continue.
+    await tap(c, /^(scheduled|agendado)$/i); await c.waitForTimeout(600);
+    await c.getByText(new RegExp(`^${new Date().getDate()}$`)).last().click();
+    await c.waitForTimeout(600);
+    await shot?.(c, 'create — step 4 scheduled for today (morning)');
+  }
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
   await shot?.(c, 'create — step 5 photos');
   await tap(c, /^continue$/i); await c.waitForTimeout(900);
@@ -121,7 +130,9 @@ export async function providerStart(c: Page, p: Page, id: number, shot?: Shot) {
   await go(p, `${PROVIDER}/job/${id}`);
   await shot?.(p, 'provider — accepted job (start code)');
 
-  const startCodeCta = p.getByText(/start the job|iniciar atendimento/i);
+  // Anchored: the scheduled footer's slide label is "Slide to start the job",
+  // which CONTAINS "start the job" — only the urgent CTA is the exact text.
+  const startCodeCta = p.getByText(/^(start the job|iniciar atendimento)$/i);
   if (await startCodeCta.count()) {
     await go(c, `${CUSTOMER}/request/${id}`);
     const code = (await c.locator('text=/^\\d{4}$/').first().textContent())?.trim();

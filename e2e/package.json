@@ -8,6 +8,7 @@
     "test:customer": "playwright test --project=customer",
     "test:provider": "playwright test --project=provider",
     "test:headed": "playwright test --headed",
+    "test:record": "playwright test tests/journeys/record-demo.spec.ts --project=journeys",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report"
   },
