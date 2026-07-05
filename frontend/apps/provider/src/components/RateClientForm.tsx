@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AvInit, Button, Card, Chip, Field, Icon, Row, SectionLabel, Stars, Text, Toggle, useTheme } from '@walvee/shared';
@@ -19,7 +20,7 @@ export function RateClientForm({
   onSubmitted,
 }: {
   requestId: number;
-  request?: { client?: { name?: string } | null; category?: { name: string } | null } | null;
+  request?: { client?: { name?: string } | null; category?: { slug: string; name: string } | null } | null;
   onSubmitted?: () => void;
 }) {
   const t = useTheme();
@@ -51,7 +52,7 @@ export function RateClientForm({
         <AvInit initials={initialsOf(request?.client?.name ?? undefined)} color="#3b82f6" size={72} />
         <View style={{ alignItems: 'center' }}>
           <Text weight="800" style={{ fontSize: 18 }}>{request?.client?.name ?? '—'}</Text>
-          <Text variant="caption">{request?.category?.name}</Text>
+          <Text variant="caption">{request?.category && tr(`categories.${request.category.slug}`, { defaultValue: request.category.name })}</Text>
         </View>
         <Stars value={rating} size={36} onChange={setRating} />
         <Text weight="800" color={t.colors.accent} style={{ fontSize: 14 }}>{words[rating - 1]}</Text>

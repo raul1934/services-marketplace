@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Icon, Row, ServiceCategory, Text, useTheme } from '@walvee/shared';
 import { CategoryIcon } from './CategoryIcon';
 
@@ -16,6 +17,7 @@ export function CatRow({
   subtitle?: string;
 }) {
   const t = useTheme();
+  const { t: tr } = useTranslation();
   return (
     <Pressable onPress={onPress}>
       <Row
@@ -33,7 +35,7 @@ export function CatRow({
           <CategoryIcon category={category} size={21} color={selected ? '#fff' : t.colors.accent} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text weight="800" style={{ fontSize: 14.5 }} numberOfLines={1}>{category.name}</Text>
+          <Text weight="800" style={{ fontSize: 14.5 }} numberOfLines={1}>{tr(`categories.${category.slug}`, { defaultValue: category.name })}</Text>
           {subtitle ? <Text variant="caption" numberOfLines={1} style={{ marginTop: 1 }}>{subtitle}</Text> : null}
         </View>
         <View style={{ width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: selected ? t.colors.accent : t.colors.line, backgroundColor: selected ? t.colors.accent : 'transparent', alignItems: 'center', justifyContent: 'center' }}>

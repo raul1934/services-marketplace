@@ -100,7 +100,7 @@ export default function Agenda() {
                       <CategoryIcon category={j.category} size={22} />
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Text weight="800" style={{ fontSize: 14.5 }} numberOfLines={1}>{j.category?.name}</Text>
+                      <Text weight="800" style={{ fontSize: 14.5 }} numberOfLines={1}>{j.category && tr(`categories.${j.category.slug}`, { defaultValue: j.category.name })}</Text>
                       <Text variant="caption" numberOfLines={1}>{[j.client?.name, j.address].filter(Boolean).join(' · ')}</Text>
                     </View>
                   </Row>

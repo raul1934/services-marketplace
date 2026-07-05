@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, AvailabilityType, AvailabilityWindow, PartAction, RequestStatus, nextPageParam } from '@walvee/shared';
 import { SubmitProposalPayload, categoriesApi, jobReportApi, providerApi } from './api';
+import { getCurrentCoords } from './location';
 
 export const keys = {
   categories: ['categories'] as const,
@@ -14,6 +16,39 @@ export const keys = {
   questions: (id: number) => ['questions', id] as const,
   questionSuggestions: (id: number) => ['question-suggestions', id] as const,
 };
+
+/**
+ * While `enabled` (a job is active / the pro is en route), report the provider's
+ * foreground location every ~10s so the client's tracking map updates, and return
+ * the latest position so the provider's own job map can show their marker too.
+ */
+export function useLiveLocation(enabled: boolean) {
+  const [pos, setPos] = useState<{ latitude: number; longitude: number } | null>(null);
+  useEffect(() => {
+    if (!enabled) {
+      setPos(null);
+      return;
+    }
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const c = await getCurrentCoords();
+        if (cancelled) return;
+        setPos({ latitude: c.latitude, longitude: c.longitude });
+        providerApi.updateLocation(c.latitude, c.longitude, c.accuracy).catch(() => {});
+      } catch {
+        /* permission denied / unavailable — leave the marker off */
+      }
+    };
+    tick();
+    const iv = setInterval(tick, 10000);
+    return () => {
+      cancelled = true;
+      clearInterval(iv);
+    };
+  }, [enabled]);
+  return pos;
+}
 
 export const useQuestions = (id: number) =>
   useQuery({ queryKey: keys.questions(id), queryFn: () => providerApi.questions(id), enabled: !!id });
@@ -143,6 +178,33 @@ export function useSubmitProposal(requestId: number) {
   });
 }
 
+export function useWithdrawProposal(requestId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (proposalId: number) => providerApi.withdrawProposal(proposalId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.bids });
+      qc.invalidateQueries({ queryKey: keys.job(requestId) });
+    },
+  });
+}
+
+export function useAcceptCounterOffer(requestId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (counterOfferId: number) => providerApi.acceptCounterOffer(counterOfferId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.job(requestId) }),
+  });
+}
+
+export function useDeclineCounterOffer(requestId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (counterOfferId: number) => providerApi.declineCounterOffer(counterOfferId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.job(requestId) }),
+  });
+}
+
 export function useUpdateStatus(requestId: number) {
   const qc = useQueryClient();
   return useMutation({
@@ -178,6 +240,17 @@ export function useRequestApproval(requestId: number) {
   return useMutation({
     mutationFn: () => providerApi.requestApproval(requestId),
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.job(requestId) }),
+  });
+}
+
+export function useReportCustomerNoShow(requestId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (reason?: string) => providerApi.reportCustomerNoShow(requestId, reason),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.job(requestId) });
+      qc.invalidateQueries({ queryKey: keys.jobs });
+    },
   });
 }
 

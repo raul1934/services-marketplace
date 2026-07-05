@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';

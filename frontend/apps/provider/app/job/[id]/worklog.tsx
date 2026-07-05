@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -153,6 +154,12 @@ export default function WorklogScreen() {
                 <View style={{ flex: 1 }}>
                   <Text weight="700" style={{ fontSize: 14 }}>{p.name}</Text>
                   <Text variant="caption">{tr(`enums.partAction.${p.action}`)} · {p.unit_price != null ? brl(p.unit_price) : '—'}</Text>
+                  {p.approved_at && (
+                    <Row gap={4} style={{ marginTop: 2 }}>
+                      <Icon name="check" size={11} color={t.colors.ok} />
+                      <Text variant="caption" weight="700" color={t.colors.ok}>{tr('job.partApproved')}</Text>
+                    </Row>
+                  )}
                 </View>
                 <Text weight="800" style={{ fontSize: 14 }}>{p.unit_price != null ? brl(p.unit_price * p.quantity) : '—'}</Text>
                 <Icon name="close" size={16} color={t.colors.ink3} />

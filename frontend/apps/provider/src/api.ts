@@ -129,6 +129,8 @@ export const providerApi = {
     http.post<{ message: string; balance: number }>('provider/wallet/payout', { body: { amount, pix_key: pixKey } }),
   requestApproval: (requestId: number) =>
     http.post<{ data: ServiceRequest }>(`requests/${requestId}/request-approval`).then(unwrap),
+  reportCustomerNoShow: (requestId: number, reason?: string) =>
+    http.post<{ data: ServiceRequest }>(`requests/${requestId}/customer-no-show`, { body: { reason } }).then(unwrap),
 
   nearby: (radiusKm = 30, page = 1) =>
     http.get<Paginated<ServiceRequest>>('provider/requests/nearby', { query: { radius_km: radiusKm, page } }).then(unwrapPage),
@@ -139,6 +141,10 @@ export const providerApi = {
   myBids: (page = 1) => http.get<Paginated<ServiceRequest>>('provider/bids', { query: { page } }).then(unwrapPage),
   submitProposal: (requestId: number, payload: SubmitProposalPayload) =>
     http.post<{ data: Proposal }>(`requests/${requestId}/proposals`, { body: payload }).then(unwrap),
+  withdrawProposal: (proposalId: number) => http.post<{ ok: boolean }>(`proposals/${proposalId}/withdraw`, {}),
+  acceptCounterOffer: (counterOfferId: number) =>
+    http.post<{ data: Proposal }>(`counter-offers/${counterOfferId}/accept`, {}).then(unwrap),
+  declineCounterOffer: (counterOfferId: number) => http.post<{ ok: boolean }>(`counter-offers/${counterOfferId}/decline`, {}),
   questions: (requestId: number) =>
     http.get<Collection<PreBidQuestion>>(`requests/${requestId}/questions`).then(unwrapList),
   questionSuggestions: (requestId: number) =>

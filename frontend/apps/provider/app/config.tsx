@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {

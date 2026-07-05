@@ -8,6 +8,13 @@ import { useEffect, useImperativeHandle, useRef } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useTheme } from '@walvee/shared';
+
+// CARTO's light/dark basemaps (free, no API key) read much closer to the
+// app's own light/dark theme surfaces than stock OSM's saturated road map.
+const LIGHT_TILES = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+const DARK_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const TILE_ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 // react-dom/server is web-only (this file is the web alias for react-native-maps)
 // and may ship without bundled types; require it with an explicit shape.
@@ -87,9 +94,11 @@ function MapViewImpl(
   },
   ref: React.Ref<MapViewHandle>,
 ) {
+  const t = useTheme();
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const markers = useRef<L.LayerGroup | null>(null);
+  const tileLayer = useRef<L.TileLayer | null>(null);
   // Keep the latest callback so the once-bound listener always calls the current one.
   const onRegionChange = useRef(onRegionChangeComplete);
   onRegionChange.current = onRegionChangeComplete;
@@ -108,7 +117,6 @@ function MapViewImpl(
     if (!el.current || map.current) return;
     const r = region ?? initialRegion ?? { latitude: -23.56, longitude: -46.64, latitudeDelta: 0.05, longitudeDelta: 0.05 };
     const m = L.map(el.current, { attributionControl: false, zoomControl: true, maxZoom: 18 }).setView([r.latitude, r.longitude], zoomFor(r.latitudeDelta));
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(m);
     markers.current = L.layerGroup().addTo(m);
     map.current = m;
     // Report the region using a zoom-derived delta (360 / 2^zoom) so it round-trips
@@ -135,6 +143,18 @@ function MapViewImpl(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Kept separate from the init effect so switching the app's theme (light/dark)
+  // while a map is mounted swaps the basemap in place instead of requiring a remount.
+  useEffect(() => {
+    if (!map.current) return;
+    if (tileLayer.current) map.current.removeLayer(tileLayer.current);
+    tileLayer.current = L.tileLayer(t.dark ? DARK_TILES : LIGHT_TILES, {
+      attribution: TILE_ATTRIBUTION,
+      subdomains: 'abcd',
+      maxZoom: 19,
+    }).addTo(map.current);
+  }, [t.dark]);
+
   useEffect(() => {
     if (map.current && region) map.current.setView([region.latitude, region.longitude], zoomFor(region.latitudeDelta));
   }, [region?.latitude, region?.longitude]);
@@ -151,16 +171,20 @@ function MapViewImpl(
         strokeColor?: string; fillColor?: string; strokeWidth?: number; fillOpacity?: number;
       };
 
-      // Polygon (read-only geofence / footprint)
+      // Polygon (geofence) or Polyline (route)
       if (Array.isArray(p.coordinates)) {
         if (p.coordinates.length < 2) return;
         const pts = p.coordinates.map((c) => [c.latitude, c.longitude] as [number, number]);
-        L.polygon(pts, {
-          color: p.strokeColor ?? '#4f46e5',
-          weight: p.strokeWidth ?? 2,
-          fillColor: p.fillColor ?? p.strokeColor ?? '#4f46e5',
-          fillOpacity: p.fillOpacity ?? 1,
-        }).addTo(layer);
+        if (child.type === Polyline) {
+          L.polyline(pts, { color: p.strokeColor ?? t.colors.accent, weight: p.strokeWidth ?? 5, opacity: 0.9 }).addTo(layer);
+        } else {
+          L.polygon(pts, {
+            color: p.strokeColor ?? t.colors.accent,
+            weight: p.strokeWidth ?? 2,
+            fillColor: p.fillColor ?? p.strokeColor ?? t.colors.accent,
+            fillOpacity: p.fillOpacity ?? 1,
+          }).addTo(layer);
+        }
         return;
       }
 
@@ -177,7 +201,7 @@ function MapViewImpl(
         return;
       }
 
-      const color = p.pinColor ?? '#4f46e5';
+      const color = p.pinColor ?? t.colors.accent;
       const cm = L.circleMarker(ll, { color: '#fff', weight: 2, fillColor: color, fillOpacity: 1, radius: 9 }).addTo(layer);
       // Tapping the pin fires onPress (selection); a popup/callout fires onCalloutPress.
       if (p.onPress) cm.on('click', p.onPress);
@@ -214,6 +238,15 @@ export function Polygon(_props: {
   fillColor?: string;
   strokeWidth?: number;
   fillOpacity?: number;
+}) {
+  return null;
+}
+
+export function Polyline(_props: {
+  coordinates: LatLng[];
+  strokeColor?: string;
+  strokeWidth?: number;
+  lineDashPattern?: number[];
 }) {
   return null;
 }

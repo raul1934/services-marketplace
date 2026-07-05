@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -123,7 +124,7 @@ export default function Dashboard() {
                 <Row>
                   <CatTile category={j.category} />
                   <View style={{ flex: 1 }}>
-                    <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>{j.category?.name}</Text>
+                    <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>{j.category && tr(`categories.${j.category.slug}`, { defaultValue: j.category.name })}</Text>
                     <Text variant="caption" numberOfLines={1}>{[j.client?.name, distanceLabel(j.distance_km)].filter(Boolean).join(' · ')}</Text>
                   </View>
                   <Badge label={tr('enums.requestStatus.in_progress')} tone="live" dot />
@@ -144,7 +145,7 @@ export default function Dashboard() {
               <Row>
                 <CatTile category={r.category} grad />
                 <View style={{ flex: 1 }}>
-                  <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>{r.category?.name}</Text>
+                  <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>{r.category && tr(`categories.${r.category.slug}`, { defaultValue: r.category.name })}</Text>
                   <Text variant="caption" numberOfLines={1}>
                     {[
                       distanceLabel(r.distance_km),

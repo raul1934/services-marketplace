@@ -257,7 +257,7 @@ export default function Nearby() {
                   <CategoryIcon category={selected.category} size={22} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text weight="800" style={{ fontSize: 15 }} numberOfLines={1}>{selected.category?.name}</Text>
+                  <Text weight="800" style={{ fontSize: 15 }} numberOfLines={1}>{selected.category && tr(`categories.${selected.category.slug}`, { defaultValue: selected.category.name })}</Text>
                   <Text variant="caption" numberOfLines={1}>{[selected.address, distanceLabel(selected.distance_km)].filter(Boolean).join(' · ')}</Text>
                 </View>
                 {selected.urgency === RequestUrgency.Urgent ? (
@@ -428,7 +428,7 @@ function NearbyJob({ request, onBid, scheduledWindow }: { request: ServiceReques
           <CategoryIcon category={request.category} size={24} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text weight="800" style={{ fontSize: 15 }} numberOfLines={1}>{request.category?.name}</Text>
+          <Text weight="800" style={{ fontSize: 15 }} numberOfLines={1}>{request.category && tr(`categories.${request.category.slug}`, { defaultValue: request.category.name })}</Text>
           <Text variant="caption" numberOfLines={1} style={{ marginTop: 2 }}>{request.address ?? request.description}</Text>
         </View>
         <View style={{ alignItems: 'flex-end', gap: 5 }}>

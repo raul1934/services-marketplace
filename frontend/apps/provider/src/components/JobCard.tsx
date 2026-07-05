@@ -34,14 +34,17 @@ export function JobCard({
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="h3" numberOfLines={1}>
-            {request.category?.name ?? tr('job.fallbackTitle')}
+            {request.category ? tr(`categories.${request.category.slug}`, { defaultValue: request.category.name }) : tr('job.fallbackTitle')}
           </Text>
           <Text variant="caption" numberOfLines={1}>
             {request.description}
           </Text>
         </View>
         {request.urgency === RequestUrgency.Urgent ? (
-          <Badge label={tr('enums.urgency.urgent')} tone="urgent" />
+          <Badge
+            label={request.max_wait_minutes != null ? tr('enums.urgency.urgentWithWait', { count: request.max_wait_minutes }) : tr('enums.urgency.urgent')}
+            tone="urgent"
+          />
         ) : (
           <Badge label={tr(`enums.requestStatus.${request.status}`)} tone={isOpen ? 'open' : 'live'} />
         )}
@@ -50,6 +53,7 @@ export function JobCard({
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text variant="caption">
           {showDistance && request.distance_km != null ? `📍 ${distanceLabel(request.distance_km)}` : request.address ?? '—'}
+          {request.client?.rating_count ? ` · ★ ${request.client.rating_avg?.toFixed(1)}` : ''}
         </Text>
         {request.my_proposal ? (
           <Text variant="label" color={t.colors.accent}>

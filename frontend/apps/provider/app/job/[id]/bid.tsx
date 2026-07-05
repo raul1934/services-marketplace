@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
+import { Alert } from '@walvee/shared';
 import MapView, { Marker } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +33,7 @@ import {
   useAuth,
   useTheme,
 } from '@walvee/shared';
-import { useAskQuestion, useJob, useQuestionSuggestions, useQuestions, useRemoveQuestion, useSubmitProposal } from '../../../src/queries';
+import { useAcceptCounterOffer, useAskQuestion, useDeclineCounterOffer, useJob, useQuestionSuggestions, useQuestions, useRemoveQuestion, useSubmitProposal, useWithdrawProposal } from '../../../src/queries';
 import { CategoryIcon } from '../../../src/components/CategoryIcon';
 
 const initialsOf = (name?: string) => (name ?? '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -50,6 +51,9 @@ export default function BidScreen() {
   const { data: request, isLoading } = useJob(requestId);
 
   const submit = useSubmitProposal(requestId);
+  const withdraw = useWithdrawProposal(requestId);
+  const acceptCounter = useAcceptCounterOffer(requestId);
+  const declineCounter = useDeclineCounterOffer(requestId);
   // Center the price gauge on the area's average bid for this category, falling
   // back to the client's budget then a sane default.
   const avg = request?.area_avg_price ?? request?.budget_max ?? 120;
@@ -75,16 +79,70 @@ export default function BidScreen() {
     );
   }
 
-  // already bid → simple confirmation screen
-  if (request.my_proposal) {
+  const categoryName = request.category ? tr(`categories.${request.category.slug}`, { defaultValue: request.category.name }) : undefined;
+
+  // already bid → simple confirmation screen. A withdrawn or declined
+  // proposal doesn't count as "already bid" — it should fall through to the
+  // wizard below so the provider can send a fresh one.
+  const activeProposal = request.my_proposal && !['withdrawn', 'declined'].includes(request.my_proposal.status) ? request.my_proposal : null;
+  if (activeProposal) {
     return (
       <Screen stickyHeader padded={false}>
-        <BackBar title={request.category?.name ?? tr('job.fallbackTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/dashboard'))} />
+        <BackBar title={categoryName ?? tr('job.fallbackTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/dashboard'))} />
         <View style={{ paddingHorizontal: 20, paddingTop: 40, alignItems: 'center', gap: 8 }}>
           <Icon name="check" size={44} color={t.colors.ok} />
           <Text variant="h3">{tr('job.alreadyBidTitle')}</Text>
-          <Text variant="caption" center>{tr('job.alreadyBidBody', { value: brl(request.my_proposal.price) })}</Text>
+          <Text variant="caption" center>{tr('job.alreadyBidBody', { value: brl(activeProposal.price) })}</Text>
+          {activeProposal.pending_counter_offer && (
+            <Card style={{ width: '100%', marginTop: 14, gap: 10 }}>
+              <Text weight="800" style={{ fontSize: 14.5 }}>
+                {tr('job.counterReceived', { value: brl(activeProposal.pending_counter_offer.price) })}
+              </Text>
+              {activeProposal.pending_counter_offer.message && (
+                <Text variant="caption" color={t.colors.ink2}>"{activeProposal.pending_counter_offer.message}"</Text>
+              )}
+              <Row style={{ gap: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    title={tr('job.counterDecline')}
+                    variant="ghost"
+                    full
+                    size="sm"
+                    loading={declineCounter.isPending}
+                    onPress={() => declineCounter.mutate(activeProposal.pending_counter_offer!.id)}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Button
+                    title={tr('job.counterAccept')}
+                    variant="grad"
+                    full
+                    size="sm"
+                    loading={acceptCounter.isPending}
+                    onPress={() => acceptCounter.mutate(activeProposal.pending_counter_offer!.id)}
+                  />
+                </View>
+              </Row>
+            </Card>
+          )}
           <Button title={tr('common.back')} variant="ghost" onPress={() => router.back()} style={{ marginTop: 8 }} />
+          <Text
+            weight="700"
+            color={t.colors.danger}
+            style={{ fontSize: 13, marginTop: 14 }}
+            onPress={() =>
+              Alert.alert(tr('job.withdrawConfirmTitle'), tr('job.withdrawConfirmBody'), [
+                { text: tr('common.back'), style: 'cancel' },
+                {
+                  text: tr('job.withdrawCta'),
+                  style: 'destructive',
+                  onPress: () => withdraw.mutate(activeProposal.id, { onSuccess: () => router.back() }),
+                },
+              ])
+            }
+          >
+            {tr('job.withdrawCta')}
+          </Text>
         </View>
       </Screen>
     );
@@ -129,7 +187,7 @@ export default function BidScreen() {
   return (
     <View style={{ flex: 1 }}>
     <Wiz
-      cat={request.category?.name ?? tr('job.fallbackTitle')}
+      cat={categoryName ?? tr('job.fallbackTitle')}
       step={step}
       total={TOTAL_STEPS}
       title={title}
@@ -146,7 +204,7 @@ export default function BidScreen() {
                 <CategoryIcon category={request.category} size={22} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>{request.category?.name}</Text>
+                <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>{categoryName}</Text>
                 <Text variant="caption" numberOfLines={1}>{[request.address, distanceLabel(request.distance_km)].filter(Boolean).join(' · ')}</Text>
               </View>
               {request.urgency === RequestUrgency.Urgent && <Badge label={tr('enums.urgency.urgent')} tone="urgent" dot />}
@@ -220,13 +278,21 @@ export default function BidScreen() {
 
           <SectionLabel>{tr('bid.arrivalTime')}</SectionLabel>
           <Segment items={ETA_PRESETS.map((m) => ({ value: String(m), label: `${m} min` }))} value={String(eta)} onChange={(v) => setEta(Number(v))} />
+          {request.urgency === RequestUrgency.Urgent && request.max_wait_minutes != null && eta > request.max_wait_minutes && (
+            <Row style={{ gap: 8, backgroundColor: t.colors.dangerSoft, borderRadius: 10, paddingVertical: 9, paddingHorizontal: 12 }}>
+              <Icon name="clock" size={14} color={t.colors.danger} />
+              <Text style={{ flex: 1, fontSize: 12, fontWeight: '700' }} color={t.colors.danger}>
+                {tr('bid.etaExceedsWait', { max: request.max_wait_minutes })}
+              </Text>
+            </Row>
+          )}
         </>
       )}
 
       {step === 4 && (
         <>
           <Card>
-            <SumRow icon="briefcase" k={tr('bid.sumJob')} v={request.category?.name ?? '—'} />
+            <SumRow icon="briefcase" k={tr('bid.sumJob')} v={categoryName ?? '—'} />
             <SumRow icon="dollar" k={tr('job.priceLabel')} v={brl(price)} />
             <SumRow icon="clock" k={tr('bid.arrivalTime')} v={`~${eta} min`} />
             {request.distance_km != null && <SumRow icon="pin" k={tr('bid.distance')} v={distanceLabel(request.distance_km)} />}
@@ -286,9 +352,11 @@ function ProviderQna({ requestId }: { requestId: number }) {
   const remove = useRemoveQuestion(requestId);
   const [text, setText] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [tab, setTab] = useState<'your' | 'others'>('your');
 
   const all = questions ?? [];
   const mine = all.filter((q) => q.provider_id === user?.id);
+  const others = all.filter((q) => q.provider_id !== user?.id);
   const atMax = mine.length >= MAX_QUESTIONS;
 
   const asked = new Set(all.map((q) => q.question));
@@ -307,52 +375,70 @@ function ProviderQna({ requestId }: { requestId: number }) {
 
   return (
     <View style={{ gap: 12 }}>
-      {all.length ? (
-        <>
-          <SectionLabel>{tr('bid.qnaLabel')}</SectionLabel>
-          <QnaThread
-            questions={all}
-            askedByLabel={() => tr('bid.youAsked')}
-            onRemove={removeQuestion}
-            canRemove={(q) => q.provider_id === user?.id}
-            photoRequiredLegend={tr('bid.photoRequiredLegend')}
-          />
-        </>
-      ) : null}
+      <Segment
+        value={tab}
+        onChange={setTab}
+        items={[
+          { value: 'your', label: tr('bid.yourQuestions') },
+          { value: 'others', label: tr('bid.otherProsQuestions', { count: others.length }) },
+        ]}
+      />
 
-      {atMax ? (
-        <Text variant="caption" color={t.colors.ink3}>{tr('bid.maxQuestions', { max: MAX_QUESTIONS })}</Text>
-      ) : (
+      {tab === 'your' ? (
         <>
-          {fresh.length ? (
-            <>
-              <SectionLabel>{tr('bid.suggestionsLabel')}</SectionLabel>
-              <View style={{ gap: 8 }}>
-                {fresh.map((s) => (
-                  <Pressable
-                    key={s.id}
-                    disabled={ask.isPending}
-                    onPress={() => ask.mutate({ suggestion_id: s.id })}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: t.colors.line, backgroundColor: t.colors.surface, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12 }}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text weight="600" style={{ fontSize: 14 }}>{s.text}</Text>
-                      {s.image_required && (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 }}>
-                          <Icon name="camera" size={13} color={t.colors.accent} />
-                          <Text variant="caption" color={t.colors.accent}>{tr('bid.photoRequiredLegend')}</Text>
-                        </View>
-                      )}
-                    </View>
-                    <Icon name="plus" size={18} color={t.colors.accent} />
-                  </Pressable>
-                ))}
-              </View>
-            </>
+          {mine.length ? (
+            <QnaThread
+              questions={mine}
+              askedByLabel={() => tr('bid.youAsked')}
+              onRemove={removeQuestion}
+              canRemove={(q) => q.provider_id === user?.id}
+              photoRequiredLegend={tr('bid.photoRequiredLegend')}
+            />
           ) : null}
 
-          <Button title={tr('bid.askCta')} size="sm" variant="soft" onPress={() => setSheetOpen(true)} left={<Icon name="chat" size={16} color={t.colors.accent} />} />
+          {atMax ? (
+            <Text variant="caption" color={t.colors.ink3}>{tr('bid.maxQuestions', { max: MAX_QUESTIONS })}</Text>
+          ) : (
+            <>
+              {fresh.length ? (
+                <>
+                  <SectionLabel>{tr('bid.suggestionsLabel')}</SectionLabel>
+                  <View style={{ gap: 8 }}>
+                    {fresh.map((s) => (
+                      <Pressable
+                        key={s.id}
+                        disabled={ask.isPending}
+                        onPress={() => ask.mutate({ suggestion_id: s.id })}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: t.colors.line, backgroundColor: t.colors.surface, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 12 }}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text weight="600" style={{ fontSize: 14 }}>{s.text}</Text>
+                          {s.image_required && (
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 3 }}>
+                              <Icon name="camera" size={13} color={t.colors.accent} />
+                              <Text variant="caption" color={t.colors.accent}>{tr('bid.photoRequiredLegend')}</Text>
+                            </View>
+                          )}
+                        </View>
+                        <Icon name="plus" size={18} color={t.colors.accent} />
+                      </Pressable>
+                    ))}
+                  </View>
+                </>
+              ) : null}
+
+              <Button title={tr('bid.askCta')} size="sm" variant="soft" onPress={() => setSheetOpen(true)} left={<Icon name="chat" size={16} color={t.colors.accent} />} />
+            </>
+          )}
         </>
+      ) : others.length ? (
+        <QnaThread
+          questions={others}
+          askedByLabel={() => tr('bid.askedByOther')}
+          photoRequiredLegend={tr('bid.photoRequiredLegend')}
+        />
+      ) : (
+        <Text variant="caption" color={t.colors.ink3}>{tr('bid.noOtherQuestions')}</Text>
       )}
 
       <QuestionSheet
