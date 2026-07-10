@@ -1,0 +1,23 @@
+{"journey":"full-demo","order":1,"file":"01-create-step-1-details.png","path":"screens/full-demo/01-create-step-1-details.png","step":"create — step 1 details"}
+{"journey":"full-demo","order":2,"file":"02-create-step-2-location.png","path":"screens/full-demo/02-create-step-2-location.png","step":"create — step 2 location"}
+{"journey":"full-demo","order":3,"file":"03-create-step-3-questions.png","path":"screens/full-demo/03-create-step-3-questions.png","step":"create — step 3 questions"}
+{"journey":"full-demo","order":4,"file":"04-create-step-3-questions-answered.png","path":"screens/full-demo/04-create-step-3-questions-answered.png","step":"create — step 3 questions answered"}
+{"journey":"full-demo","order":5,"file":"05-create-step-4-schedule.png","path":"screens/full-demo/05-create-step-4-schedule.png","step":"create — step 4 schedule"}
+{"journey":"full-demo","order":6,"file":"06-create-step-5-photos.png","path":"screens/full-demo/06-create-step-5-photos.png","step":"create — step 5 photos"}
+{"journey":"full-demo","order":7,"file":"07-create-step-5-photos-attached.png","path":"screens/full-demo/07-create-step-5-photos-attached.png","step":"create — step 5 photos attached"}
+{"journey":"full-demo","order":8,"file":"08-create-step-6-budget-payment.png","path":"screens/full-demo/08-create-step-6-budget-payment.png","step":"create — step 6 budget & payment"}
+{"journey":"full-demo","order":9,"file":"09-create-step-6-budget-raised-payment-picked.png","path":"screens/full-demo/09-create-step-6-budget-raised-payment-picked.png","step":"create — step 6 budget raised, payment picked"}
+{"journey":"full-demo","order":10,"file":"10-create-step-7-review.png","path":"screens/full-demo/10-create-step-7-review.png","step":"create — step 7 review"}
+{"journey":"full-demo","order":11,"file":"11-create-submitted-request-detail.png","path":"screens/full-demo/11-create-submitted-request-detail.png","step":"create — submitted (request detail)"}
+{"journey":"full-demo","order":12,"file":"12-provider-open-job-send-proposal.png","path":"screens/full-demo/12-provider-open-job-send-proposal.png","step":"provider — open job (send proposal)"}
+{"journey":"full-demo","order":13,"file":"13-provider-bid-wizard.png","path":"screens/full-demo/13-provider-bid-wizard.png","step":"provider — bid wizard"}
+{"journey":"full-demo","order":14,"file":"14-provider-asked-the-client-a-question.png","path":"screens/full-demo/14-provider-asked-the-client-a-question.png","step":"provider — asked the client a question"}
+{"journey":"full-demo","order":15,"file":"15-provider-bid-sent.png","path":"screens/full-demo/15-provider-bid-sent.png","step":"provider — bid sent"}
+{"journey":"full-demo","order":16,"file":"16-customer-answered-the-pro-question.png","path":"screens/full-demo/16-customer-answered-the-pro-question.png","step":"customer — answered the pro question"}
+{"journey":"full-demo","order":17,"file":"17-customer-proposals.png","path":"screens/full-demo/17-customer-proposals.png","step":"customer — proposals"}
+{"journey":"full-demo","order":18,"file":"18-customer-proposal-accepted.png","path":"screens/full-demo/18-customer-proposal-accepted.png","step":"customer — proposal accepted"}
+{"journey":"full-demo","order":19,"file":"19-provider-en-route-road-route-on-map.png","path":"screens/full-demo/19-provider-en-route-road-route-on-map.png","step":"provider — en route, road route on map"}
+{"journey":"full-demo","order":20,"file":"20-customer-live-tracking-with-route-start-code.png","path":"screens/full-demo/20-customer-live-tracking-with-route-start-code.png","step":"customer — live tracking with route + start code"}
+{"journey":"full-demo","order":21,"file":"21-provider-job-started.png","path":"screens/full-demo/21-provider-job-started.png","step":"provider — job started"}
+{"journey":"full-demo","order":22,"file":"22-provider-job-completed.png","path":"screens/full-demo/22-provider-job-completed.png","step":"provider — job completed"}
+{"journey":"full-demo","order":23,"file":"23-customer-receipt.png","path":"screens/full-demo/23-customer-receipt.png","step":"customer — receipt"}
