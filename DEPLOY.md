@@ -1,0 +1,159 @@
+# Deploy — chamafacil.app (Amazon Lightsail + CI/CD)
+
+Landing + API Laravel + stack completo (Postgres, queue, reverb, scheduler)
+rodando em Docker Compose numa instância única do Lightsail, atrás do Caddy
+(HTTPS automático), com deploy automático via GitHub Actions a cada push na `main`.
+
+Arquivos que compõem o deploy:
+- `docker-compose.prod.yml` — stack de produção (autônomo).
+- `Caddyfile.prod` — reverse proxy + TLS automático (`chamafacil.app` e subdomínios).
+- `.env.production.example` — vars de banco consumidas pelo compose (copiar para `.env`).
+- `.github/workflows/deploy.yml` — pipeline de deploy por SSH.
+
+> **Segurança:** a chave `LightsailDefaultKey-us-east-1.pem` **nunca** entra no
+> git (`*.pem` está no `.gitignore`). Ela vira um GitHub Secret. Como essa chave
+> já foi exposta, **rotacione-a** no console do Lightsail após o primeiro deploy.
+
+---
+
+## Parte A — Rede e DNS
+
+1. **Static IP** (console Lightsail → aba *Networking* da instância → *Attach static IP*).
+   Sem isso o IP público pode mudar e quebrar o DNS/deploy.
+2. **Firewall** (mesma aba): abrir **HTTP (80)**, **HTTPS (443)** e **SSH (22)**.
+3. **DNS** (no gerenciador do domínio `chamafacil.app`): registros **A** apontando
+   para o Static IP:
+
+   | Host | Tipo | Valor |
+   |------|------|-------|
+   | `chamafacil.app` (`@`) | A | `<STATIC_IP>` |
+   | `www` | A | `<STATIC_IP>` |
+   | `api` | A | `<STATIC_IP>` |
+   | `admin` | A | `<STATIC_IP>` |
+   | `reverb` | A | `<STATIC_IP>` |
+
+   (Ou um único registro wildcard `*` → `<STATIC_IP>`.) O Caddy só consegue emitir
+   o certificado TLS depois que o DNS estiver propagado.
+
+---
+
+## Parte B — Setup único do servidor (via SSH)
+
+Conecte com a chave local (não commitada):
+
+```bash
+ssh -i ~/Downloads/LightsailDefaultKey-us-east-1.pem ec2-user@<STATIC_IP>
+```
+
+### 1. Docker + Compose (Amazon Linux 2023)
+
+```bash
+sudo dnf install -y docker git
+sudo systemctl enable --now docker
+sudo usermod -aG docker ec2-user   # depois faça logout/login para valer
+
+DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+mkdir -p "$DOCKER_CONFIG/cli-plugins"
+curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
+  -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
+chmod +x "$DOCKER_CONFIG/cli-plugins/docker-compose"
+docker compose version   # confirma
+```
+
+### 2. Deploy key + clone (repositório privado)
+
+```bash
+ssh-keygen -t ed25519 -C "lightsail-deploy" -f ~/.ssh/id_ed25519 -N ""
+cat ~/.ssh/id_ed25519.pub
+```
+
+Cole a **chave pública** em GitHub → repo → *Settings → Deploy keys → Add deploy key*
+(marque **somente leitura**). Depois:
+
+```bash
+git clone git@github.com:<ORG>/services-marketplace.git ~/services-marketplace
+cd ~/services-marketplace
+```
+
+### 3. Variáveis de ambiente (não versionadas)
+
+```bash
+# Banco (usado pelo compose de produção)
+cp .env.production.example .env
+nano .env        # defina uma DB_PASSWORD forte
+
+# Laravel
+cp backend/.env.example backend/.env   # se não existir, crie a partir do exemplo
+nano backend/.env
+```
+
+Em `backend/.env`, no mínimo:
+
+```
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://api.chamafacil.app
+APP_KEY=                      # gerado no passo 4
+DB_CONNECTION=pgsql
+# DB_HOST/PORT/DATABASE/USERNAME/PASSWORD vêm do ambiente do compose (.env da raiz)
+# Reverb (WebSockets) — defina se for usar broadcasting:
+REVERB_APP_ID=...
+REVERB_APP_KEY=...
+REVERB_APP_SECRET=...
+```
+
+### 4. Primeiro boot
+
+```bash
+cd ~/services-marketplace
+COMPOSE="docker compose -f docker-compose.prod.yml"
+
+$COMPOSE build
+$COMPOSE run --rm --no-deps backend composer install --no-dev --optimize-autoloader --no-interaction
+$COMPOSE run --rm backend php artisan key:generate   # grava APP_KEY em backend/.env
+$COMPOSE up -d
+$COMPOSE exec -T backend php artisan migrate --force
+$COMPOSE exec -T backend php artisan config:cache
+```
+
+Acompanhe a emissão do certificado: `$COMPOSE logs -f caddy`.
+
+---
+
+## Parte C — GitHub Secrets (para o CI/CD)
+
+GitHub → repo → *Settings → Secrets and variables → Actions → New repository secret*:
+
+| Secret | Valor |
+|--------|-------|
+| `LIGHTSAIL_HOST` | Static IP da instância |
+| `LIGHTSAIL_USER` | `ec2-user` |
+| `LIGHTSAIL_SSH_KEY` | conteúdo **inteiro** do `.pem` (com as linhas `BEGIN/END`) |
+
+A partir daí, todo push na `main` que altere `backend/`, `landing/`,
+`docker-compose.prod.yml` ou `Caddyfile.prod` dispara o deploy automático.
+Também dá para rodar manualmente em *Actions → Deploy to Lightsail → Run workflow*.
+
+---
+
+## Verificação (end-to-end)
+
+```bash
+curl -I https://chamafacil.app          # 200 + certificado válido (Let's Encrypt)
+curl https://api.chamafacil.app/up      # health-check do Laravel
+```
+
+- Abrir `https://admin.chamafacil.app` → tela de login do Filament carrega.
+- Enviar o formulário de waitlist na landing e conferir o registro no banco
+  (`docker compose -f docker-compose.prod.yml exec backend php artisan tinker`).
+- CI/CD: dar um push trivial na `main` e ver o workflow verde em *Actions*.
+
+---
+
+## Follow-ups (fora do escopo inicial)
+
+- `php artisan serve` é servidor de dev (single-thread) — ok para tráfego baixo
+  (landing/waitlist/admin). Para escalar: migrar para **FrankenPHP** ou **php-fpm + nginx**.
+- Restringir CORS de `*` para `https://chamafacil.app` (`backend/config/cors.php`).
+- Backups do volume `guincho-db-data` (snapshot Lightsail ou `pg_dump` agendado).
+- **Rotacionar** a chave SSH exposta e atualizar o Secret `LIGHTSAIL_SSH_KEY`.

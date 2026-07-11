@@ -12,6 +12,7 @@
   },
   "peerDependencies": {
     "expo-linear-gradient": "*",
+    "expo-localization": "*",
     "expo-secure-store": "*",
     "react": "*",
     "react-native": "*",

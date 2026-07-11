@@ -76,8 +76,10 @@ function Gate() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({ Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold, SpaceMono_400Regular, SpaceMono_700Bold });
-  if (!fontsLoaded) return null;
+  const [fontsLoaded, fontError] = useFonts({ Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold, SpaceMono_400Regular, SpaceMono_700Bold });
+  useEffect(() => { if (fontError) console.warn('[fonts] load error:', fontError); }, [fontError]);
+  // Don't block the app forever if fonts fail to load — render with system fonts.
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

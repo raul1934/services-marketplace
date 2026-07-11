@@ -1,0 +1,56 @@
+# Self-contained Android build image for the Walvee Expo apps.
+#
+# Produces a DEV-CLIENT debug APK you install once on a physical phone; the JS
+# then hot-reloads from Metro running on the host (`npx expo start`). Nothing
+# Android (JDK/SDK/NDK) is installed on the host — it all lives in this image.
+#
+# The SDK + `npm install` are baked as cached layers; `expo prebuild` + the
+# Gradle build run at container start (see CMD) so you can rebuild either app
+# (APP=customer | provider) and pull the APK out of the mounted /out volume
+# without rebuilding the heavy SDK layers.
+#
+# Versions track React Native 0.76 / Expo SDK 52: compileSdk 35, build-tools
+# 35.0.0, NDK 27.1.12297006.
+
+FROM eclipse-temurin:17-jdk-jammy
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Node 22 (matches the host) + build tooling.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl unzip git ca-certificates \
+    && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Android SDK via command-line tools (no Android Studio GUI).
+ENV ANDROID_HOME=/opt/android-sdk
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+ENV PATH=$PATH:/opt/android-sdk/cmdline-tools/latest/bin:/opt/android-sdk/platform-tools
+RUN mkdir -p $ANDROID_HOME/cmdline-tools \
+    && curl -fsSL -o /tmp/cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip \
+    && unzip -q /tmp/cmdtools.zip -d $ANDROID_HOME/cmdline-tools \
+    && mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest \
+    && rm /tmp/cmdtools.zip \
+    && yes | sdkmanager --licenses > /dev/null \
+    && sdkmanager --install \
+         "platform-tools" \
+         "platforms;android-35" \
+         "platforms;android-34" \
+         "build-tools;35.0.0" \
+         "ndk;27.1.12297006" \
+         "cmake;3.22.1" > /dev/null
+
+# Larger heap for the New-Architecture codegen + Hermes bytecode step.
+ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx4g -Dorg.gradle.daemon=false"
+
+WORKDIR /app
+COPY . /app
+RUN npm install
+
+# APP selects which workspace app to build (customer | provider). The build steps
+# live in docker-android-build.sh, mounted at /build.sh by the compose file so it
+# can be edited without rebuilding this image. The sed strips any CRLF the script
+# may have on Windows before handing it to sh.
+ENV APP=customer
+CMD ["sh", "-c", "sed 's/\\r$//' /build.sh > /tmp/build.sh && sh /tmp/build.sh"]

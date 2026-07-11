@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { loadSavedLanguage, setApiLocale } from '@walvee/shared';
+import { deviceLanguage, loadSavedLanguage, setApiLocale } from '@walvee/shared';
 import ptBR from './locales/pt-BR.json';
 import enUS from './locales/en-US.json';
 
@@ -9,7 +9,7 @@ i18n.use(initReactI18next).init({
     'pt-BR': { translation: ptBR },
     'en-US': { translation: enUS },
   },
-  lng: 'en-US',
+  lng: deviceLanguage(),
   fallbackLng: 'en-US',
   interpolation: { escapeValue: false },
   // v3 avoids requiring Intl.PluralRules (absent in Hermes/Expo Go); our keys

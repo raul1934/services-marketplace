@@ -1,0 +1,40 @@
+# Walvee / chamafacil.app — reverse proxy de PRODUÇÃO (Lightsail).
+#
+# Diferente do Caddyfile de dev (HTTP em *.walvee.local, porta 19088), aqui o
+# Caddy escuta em :80/:443 e emite certificados TLS automaticamente via
+# Let's Encrypt. O TLD `.app` está na lista de HSTS preload, então o browser
+# SÓ aceita HTTPS — o auto-HTTPS do Caddy cobre exatamente isso.
+#
+# Pré-requisitos no servidor:
+#   - Portas 80 e 443 abertas no firewall do Lightsail.
+#   - Registros DNS A de chamafacil.app / www / api / admin / reverb apontando
+#     para o Static IP da instância (o ACME HTTP/TLS-ALPN precisa resolver).
+#
+# Usado por docker-compose.prod.yml (montado em /etc/caddy/Caddyfile).
+
+{
+	# E-mail para avisos do Let's Encrypt (expiração/renovação de certificado).
+	email admin@chamafacil.app
+}
+
+# Landing page estática (marketing + formulário de waitlist).
+chamafacil.app, www.chamafacil.app {
+	root * /srv/landing
+	encode gzip
+	file_server
+}
+
+# API Laravel.
+api.chamafacil.app {
+	reverse_proxy backend:8000
+}
+
+# Painel administrativo Filament (mesmo container do backend).
+admin.chamafacil.app {
+	reverse_proxy backend:8000
+}
+
+# Reverb — WebSocket (protocolo Pusher); o Caddy faz proxy de ws de forma transparente.
+reverb.chamafacil.app {
+	reverse_proxy reverb:8080
+}

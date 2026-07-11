@@ -1,0 +1,27 @@
+# One-shot Android dev-client APK builder (host stays clean — no local Android SDK).
+#
+#   # build the image once (downloads SDK/NDK — a few GB, slow the first time):
+#   docker compose -f docker-compose.android.yml build
+#
+#   # build the customer APK (default):
+#   docker compose -f docker-compose.android.yml run --rm android-build
+#   # ...or the provider APK:
+#   APP=provider docker compose -f docker-compose.android.yml run --rm -e APP=provider android-build
+#
+# The APK lands in ./frontend/build-output/. Install it on a phone (USB adb or
+# sideload), then run Metro on the host (`npm run customer` in ./frontend) — the
+# dev client loads the JS bundle over the LAN for hot reload. Runtime config
+# (API/Reverb URLs) comes from apps/<app>/.env at Metro bundle time, so the same
+# APK works regardless of LAN IP.
+services:
+  android-build:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.android
+    image: walvee-android-build
+    environment:
+      APP: ${APP:-customer}
+    volumes:
+      - ./frontend/build-output:/out
+      # Build steps mounted (not baked) so they can be edited without an image rebuild.
+      - ./frontend/docker-android-build.sh:/build.sh:ro

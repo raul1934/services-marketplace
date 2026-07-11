@@ -1,0 +1,12 @@
+# Keep the Android build context lean and avoid shipping host-built artifacts
+# (Windows node_modules / generated native projects) into the Linux image.
+node_modules
+**/node_modules
+apps/*/android
+apps/*/ios
+apps/*/.expo
+**/.expo
+build-output
+.git
+.gitignore
+*.log

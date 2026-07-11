@@ -1,0 +1,123 @@
+# Walvee / chamafacil.app — stack de PRODUÇÃO (instância única Lightsail).
+#
+# Arquivo AUTÔNOMO (não é override do docker-compose.yml de dev). Use sozinho:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Diferenças em relação ao dev (docker-compose.yml):
+#   - Nenhum serviço publica porta no host, exceto o Caddy (80/443). O acesso
+#     externo passa só pelo reverse proxy; db/backend/reverb ficam na rede interna.
+#   - Caddy usa Caddyfile.prod (HTTPS automático via Let's Encrypt).
+#   - Sem o container `landing` separado — o Caddy de produção já serve ./landing.
+#   - Segredos (senha do banco) vêm do arquivo .env na raiz (NÃO versionado);
+#     veja .env.production.example. As demais vars do Laravel (APP_KEY, APP_URL,
+#     REVERB_*, ...) vêm de backend/.env no servidor.
+#
+# Variáveis de ambiente reais definidas aqui têm precedência sobre backend/.env
+# no Laravel, então a senha do banco fica num único lugar (o .env da raiz).
+name: guincho
+
+x-php-env: &php-env
+  DB_CONNECTION: pgsql
+  DB_HOST: db
+  DB_PORT: 5432
+  DB_DATABASE: ${DB_DATABASE}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: guincho-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - guincho-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build: ./backend
+    container_name: guincho-backend
+    working_dir: /app
+    command: sh -c "php artisan migrate --force && php artisan storage:link 2>/dev/null; php artisan serve --host=0.0.0.0 --port=8000"
+    environment:
+      <<: *php-env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  queue:
+    build: ./backend
+    container_name: guincho-queue
+    working_dir: /app
+    command: php artisan queue:work --tries=3 --timeout=60
+    environment:
+      <<: *php-env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  reverb:
+    build: ./backend
+    container_name: guincho-reverb
+    working_dir: /app
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    environment:
+      <<: *php-env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  scheduler:
+    build: ./backend
+    container_name: guincho-scheduler
+    working_dir: /app
+    command: php artisan schedule:work
+    environment:
+      <<: *php-env
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: guincho-caddy
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - reverb
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - ./landing:/srv/landing:ro
+      - guincho-caddy-data:/data
+      - guincho-caddy-config:/config
+
+volumes:
+  guincho-db-data:
+  guincho-caddy-data:
+  guincho-caddy-config:
+
+networks:
+  default:
+    name: guincho

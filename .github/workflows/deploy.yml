@@ -1,0 +1,69 @@
+name: Deploy to Lightsail
+
+# Deploy automático em produção (chamafacil.app) a cada push na main que toque
+# o backend, a landing ou a configuração de deploy. Também pode ser disparado
+# manualmente (workflow_dispatch).
+#
+# Pré-requisitos (uma vez):
+#   - Servidor Lightsail já provisionado: Docker + Compose instalados, repositório
+#     clonado em ~/services-marketplace, .env (raiz) e backend/.env criados.
+#     Veja DEPLOY.md, "Parte B".
+#   - Secrets do repositório (Settings -> Secrets and variables -> Actions):
+#       LIGHTSAIL_HOST     -> Static IP da instância
+#       LIGHTSAIL_USER     -> ec2-user
+#       LIGHTSAIL_SSH_KEY  -> conteúdo da chave .pem (NUNCA commitada)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'landing/**'
+      - 'docker-compose.prod.yml'
+      - 'Caddyfile.prod'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# Nunca roda dois deploys ao mesmo tempo; não cancela um deploy em andamento.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.LIGHTSAIL_HOST }}
+          username: ${{ secrets.LIGHTSAIL_USER }}
+          key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            cd ~/services-marketplace
+
+            # Atualiza o código (fast-forward apenas; sem merges surpresa em prod).
+            git fetch origin main
+            git reset --hard origin/main
+
+            COMPOSE="docker compose -f docker-compose.prod.yml"
+
+            # Rebuild das imagens (Dockerfile do backend).
+            $COMPOSE build
+
+            # Instala dependências PHP no volume ./backend antes de subir os
+            # containers (o backend roda `artisan migrate` no boot e precisa do vendor/).
+            $COMPOSE run --rm --no-deps backend \
+              composer install --no-dev --optimize-autoloader --no-interaction
+
+            # Sobe/atualiza o stack.
+            $COMPOSE up -d
+
+            # Migrations e cache de config (idempotentes).
+            $COMPOSE exec -T backend php artisan migrate --force
+            $COMPOSE exec -T backend php artisan config:cache
+
+            # Remove imagens antigas órfãs para não encher o disco da instância.
+            docker image prune -f

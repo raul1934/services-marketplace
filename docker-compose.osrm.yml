@@ -15,13 +15,14 @@
 #    Needs RAM roughly proportional to the extract size (sudeste ≈ a few GB):
 #        docker compose -f docker-compose.osrm.yml run --rm osrm-prep
 #
-# 3. Start the routing server (published on host port 5050):
+# 3. Start the routing server (published on host port 19050 — the guincho stack
+#    keeps all host ports in the 19xxx range; see DOCKER.md):
 #        docker compose -f docker-compose.osrm.yml up -d osrm
 #        # sanity check:
-#        curl "http://localhost:5050/route/v1/driving/-49.36,-20.79;-49.38,-20.82?overview=false"
+#        curl "http://localhost:19050/route/v1/driving/-49.36,-20.79;-49.38,-20.82?overview=false"
 #
 # 4. Point the apps at it and recreate the web containers:
-#        EXPO_PUBLIC_OSRM_URL=http://localhost:5050 \
+#        EXPO_PUBLIC_OSRM_URL=http://localhost:19050 \
 #          docker compose -f docker-compose.web.yml up -d --force-recreate customer-web provider-web
 #
 # The image is also published at ghcr.io/project-osrm/osrm-backend if Docker Hub
@@ -47,5 +48,5 @@ services:
     volumes:
       - ./osrm-data:/data
     ports:
-      - "5050:5000"
+      - "19050:5000"
     restart: unless-stopped

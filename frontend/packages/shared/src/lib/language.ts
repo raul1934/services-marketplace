@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import { getLocales } from 'expo-localization';
 
 /** Supported UI languages (label is the autonym, the same in any language). */
 export const LANGUAGES = [
@@ -9,6 +10,20 @@ export const LANGUAGES = [
 export type LanguageCode = (typeof LANGUAGES)[number]['code'];
 
 const KEY = 'ui_language';
+
+/**
+ * The device's preferred UI language mapped to a supported code. Used as the
+ * initial language before any saved preference is applied. Portuguese devices
+ * get pt-BR; everything else falls back to en-US.
+ */
+export function deviceLanguage(): LanguageCode {
+  try {
+    const code = getLocales()[0]?.languageCode?.toLowerCase();
+    return code === 'pt' ? 'pt-BR' : 'en-US';
+  } catch {
+    return 'en-US';
+  }
+}
 
 /** The user's saved UI language, or null if none was chosen / on error. */
 export async function loadSavedLanguage(): Promise<string | null> {
