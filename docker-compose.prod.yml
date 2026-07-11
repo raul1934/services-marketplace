@@ -18,29 +18,16 @@ name: guincho
 
 x-php-env: &php-env
   DB_CONNECTION: pgsql
-  DB_HOST: db
-  DB_PORT: 5432
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
   DB_DATABASE: ${DB_DATABASE}
   DB_USERNAME: ${DB_USERNAME}
   DB_PASSWORD: ${DB_PASSWORD}
 
+# Banco: usa o Lightsail Managed Database (PostgreSQL) via DB_HOST no .env da raiz.
+# Não há container de banco aqui — o dado vive no serviço gerenciado, com backups
+# próprios do Lightsail. Veja .env.production.example.
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: guincho-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - guincho-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-
   backend:
     build: ./backend
     container_name: guincho-backend
@@ -50,9 +37,6 @@ services:
       <<: *php-env
     volumes:
       - ./backend:/app
-    depends_on:
-      db:
-        condition: service_healthy
     restart: unless-stopped
 
   queue:
@@ -64,9 +48,6 @@ services:
       <<: *php-env
     volumes:
       - ./backend:/app
-    depends_on:
-      db:
-        condition: service_healthy
     restart: unless-stopped
 
   reverb:
@@ -78,9 +59,6 @@ services:
       <<: *php-env
     volumes:
       - ./backend:/app
-    depends_on:
-      db:
-        condition: service_healthy
     restart: unless-stopped
 
   scheduler:
@@ -92,9 +70,6 @@ services:
       <<: *php-env
     volumes:
       - ./backend:/app
-    depends_on:
-      db:
-        condition: service_healthy
     restart: unless-stopped
 
   caddy:
@@ -114,7 +89,6 @@ services:
       - guincho-caddy-config:/config
 
 volumes:
-  guincho-db-data:
   guincho-caddy-data:
   guincho-caddy-config:
 

@@ -1,8 +1,9 @@
 # Deploy — chamafacil.app (Amazon Lightsail + CI/CD)
 
-Landing + API Laravel + stack completo (Postgres, queue, reverb, scheduler)
-rodando em Docker Compose numa instância única do Lightsail, atrás do Caddy
-(HTTPS automático), com deploy automático via GitHub Actions a cada push na `main`.
+Landing + API Laravel + workers (queue, reverb, scheduler) rodando em Docker
+Compose numa instância única do Lightsail, atrás do Caddy (HTTPS automático), com
+deploy automático via GitHub Actions a cada push na `main`. O banco é o **Lightsail
+Managed Database (PostgreSQL)** — fora do Compose, com backups próprios.
 
 Arquivos que compõem o deploy:
 - `docker-compose.prod.yml` — stack de produção (autônomo).
@@ -26,13 +27,13 @@ Arquivos que compõem o deploy:
 
    | Host | Tipo | Valor |
    |------|------|-------|
-   | `chamafacil.app` (`@`) | A | `<STATIC_IP>` |
-   | `www` | A | `<STATIC_IP>` |
-   | `api` | A | `<STATIC_IP>` |
-   | `admin` | A | `<STATIC_IP>` |
-   | `reverb` | A | `<STATIC_IP>` |
+   | `chamafacil.app` (`@`) | A | `32.197.79.197` |
+   | `www` | A | `32.197.79.197` |
+   | `api` | A | `32.197.79.197` |
+   | `admin` | A | `32.197.79.197` |
+   | `reverb` | A | `32.197.79.197` |
 
-   (Ou um único registro wildcard `*` → `<STATIC_IP>`.) O Caddy só consegue emitir
+   (Ou um único registro wildcard `*` → `32.197.79.197`.) O Caddy só consegue emitir
    o certificado TLS depois que o DNS estiver propagado.
 
 ---
@@ -42,7 +43,7 @@ Arquivos que compõem o deploy:
 Conecte com a chave local (não commitada):
 
 ```bash
-ssh -i ~/Downloads/LightsailDefaultKey-us-east-1.pem ec2-user@<STATIC_IP>
+ssh -i ~/Downloads/LightsailDefaultKey-us-east-1.pem ec2-user@32.197.79.197
 ```
 
 ### 1. Docker + Compose (Amazon Linux 2023)
@@ -71,16 +72,19 @@ Cole a **chave pública** em GitHub → repo → *Settings → Deploy keys → A
 (marque **somente leitura**). Depois:
 
 ```bash
-git clone git@github.com:<ORG>/services-marketplace.git ~/services-marketplace
+git clone git@github.com:raul1934/services-marketplace.git ~/services-marketplace
 cd ~/services-marketplace
 ```
 
 ### 3. Variáveis de ambiente (não versionadas)
 
 ```bash
-# Banco (usado pelo compose de produção)
+# Banco: Lightsail Managed Database (PostgreSQL). Pegue endpoint/usuário/senha em
+# Lightsail -> Databases -> (seu banco) -> Connect, e preencha:
 cp .env.production.example .env
-nano .env        # defina uma DB_PASSWORD forte
+nano .env        # DB_HOST=<endpoint>.rds.amazonaws.com, DB_DATABASE=dbmaster,
+                 # DB_USERNAME=dbmasteruser, DB_PASSWORD=<senha do console>
+                 # (Public mode pode ficar OFF: a instância conecta pela rede interna.)
 
 # Laravel
 cp backend/.env.example backend/.env   # se não existir, crie a partir do exemplo
@@ -155,5 +159,6 @@ curl https://api.chamafacil.app/up      # health-check do Laravel
 - `php artisan serve` é servidor de dev (single-thread) — ok para tráfego baixo
   (landing/waitlist/admin). Para escalar: migrar para **FrankenPHP** ou **php-fpm + nginx**.
 - Restringir CORS de `*` para `https://chamafacil.app` (`backend/config/cors.php`).
-- Backups do volume `guincho-db-data` (snapshot Lightsail ou `pg_dump` agendado).
+- Backups: o banco é o Lightsail Managed Database (PostgreSQL), com snapshots
+  automáticos próprios do Lightsail — não há mais volume de banco local.
 - **Rotacionar** a chave SSH exposta e atualizar o Secret `LIGHTSAIL_SSH_KEY`.
