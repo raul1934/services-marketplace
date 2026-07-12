@@ -1,12 +1,12 @@
-# Chama Fácil (Guincho)
+# Chama Fácil
 
 > Roadside-assistance & home-services marketplace — customers post a service
 > request, nearby providers bid on it, and the job runs end-to-end with realtime
 > tracking, a one-time start code, surcharge re-quotes and in-app settlement.
 
-**Chama Fácil** is the product brand; **Guincho** is the name of the local dev stack
-(Portuguese for "tow truck", the original roadside use case). Service categories
-include towing, tyre, mechanic, plumber and more.
+**Chama Fácil** is the product brand; the local dev stack (Docker Compose project)
+is named `chamafacil`. Service categories include towing, tyre, mechanic, plumber
+and more.
 
 ## How it works
 
@@ -63,7 +63,7 @@ docker-compose*.yml, Caddyfile, up.sh / down.sh   local stack
 ```bash
 cp backend/.env.example backend/.env      # tweak if needed
 docker compose up -d                       # db, backend, queue, reverb, caddy, landing
-docker exec guincho-backend php artisan migrate:fresh --seed
+docker exec chamafacil-backend php artisan migrate:fresh --seed
 ```
 
 Host ports (all in the `19xxx` range so the stack can coexist with others):
@@ -101,7 +101,7 @@ need a dev build (`npm run android:customer`) rather than Expo Go. More detail i
 
 ```bash
 # Backend (PHPUnit)
-docker exec guincho-backend php artisan test
+docker exec chamafacil-backend php artisan test
 
 # End-to-end (Playwright) — web builds of the apps
 docker compose -f docker-compose.web.yml up -d        # apps on :19082 / :19083

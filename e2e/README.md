@@ -7,7 +7,7 @@ from the Chama Fácil designs (`walvee/walvee - Índice de telas.html`,
 
 ## Prerequisites
 - The web apps running: `docker compose -f docker-compose.web.yml up -d` (ports 19082/19083).
-- Backend seeded with the dev data: `docker exec guincho-backend php artisan migrate:fresh --seed`
+- Backend seeded with the dev data: `docker exec chamafacil-backend php artisan migrate:fresh --seed`
   (gives the `cliente@chamafacil.test` / `prestador@chamafacil.test` accounts, password `senha123`,
   and requests in every stage that the tests assert against).
 - Node via WSL nvm; Chromium is already in `~/.cache/ms-playwright`.

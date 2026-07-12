@@ -12,7 +12,7 @@ import { getToken } from '../api/client';
 export interface RealtimeConfig {
   /** Reverb app key (REVERB_APP_KEY). */
   appKey: string;
-  /** WebSocket host (no protocol), e.g. 'api.guincho.local' or an IP. */
+  /** WebSocket host (no protocol), e.g. 'api.chamafacil.local' or an IP. */
   wsHost: string;
   wsPort: number;
   /** true in production (wss/https). */

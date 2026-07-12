@@ -14,7 +14,7 @@
 #
 # Variáveis de ambiente reais definidas aqui têm precedência sobre backend/.env
 # no Laravel, então a senha do banco fica num único lugar (o .env da raiz).
-name: guincho
+name: chamafacil
 
 x-php-env: &php-env
   DB_CONNECTION: pgsql
@@ -30,7 +30,7 @@ x-php-env: &php-env
 services:
   backend:
     build: ./backend
-    container_name: guincho-backend
+    container_name: chamafacil-backend
     working_dir: /app
     command: sh -c "php artisan migrate --force && php artisan storage:link 2>/dev/null; php artisan serve --host=0.0.0.0 --port=8000"
     environment:
@@ -41,7 +41,7 @@ services:
 
   queue:
     build: ./backend
-    container_name: guincho-queue
+    container_name: chamafacil-queue
     working_dir: /app
     command: php artisan queue:work --tries=3 --timeout=60
     environment:
@@ -52,7 +52,7 @@ services:
 
   reverb:
     build: ./backend
-    container_name: guincho-reverb
+    container_name: chamafacil-reverb
     working_dir: /app
     command: php artisan reverb:start --host=0.0.0.0 --port=8080
     environment:
@@ -63,7 +63,7 @@ services:
 
   scheduler:
     build: ./backend
-    container_name: guincho-scheduler
+    container_name: chamafacil-scheduler
     working_dir: /app
     command: php artisan schedule:work
     environment:
@@ -74,7 +74,7 @@ services:
 
   caddy:
     image: caddy:2-alpine
-    container_name: guincho-caddy
+    container_name: chamafacil-caddy
     restart: unless-stopped
     depends_on:
       - backend
@@ -85,13 +85,13 @@ services:
     volumes:
       - ./Caddyfile.prod:/etc/caddy/Caddyfile:ro
       - ./landing:/srv/landing:ro
-      - guincho-caddy-data:/data
-      - guincho-caddy-config:/config
+      - chamafacil-caddy-data:/data
+      - chamafacil-caddy-config:/config
 
 volumes:
-  guincho-caddy-data:
-  guincho-caddy-config:
+  chamafacil-caddy-data:
+  chamafacil-caddy-config:
 
 networks:
   default:
-    name: guincho
+    name: chamafacil

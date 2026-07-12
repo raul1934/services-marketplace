@@ -15,7 +15,7 @@
 #    Needs RAM roughly proportional to the extract size (sudeste ≈ a few GB):
 #        docker compose -f docker-compose.osrm.yml run --rm osrm-prep
 #
-# 3. Start the routing server (published on host port 19050 — the guincho stack
+# 3. Start the routing server (published on host port 19050 — the chamafacil stack
 #    keeps all host ports in the 19xxx range; see DOCKER.md):
 #        docker compose -f docker-compose.osrm.yml up -d osrm
 #        # sanity check:
@@ -43,7 +43,7 @@ services:
   # The routing server consumed by the apps' useRoute() hook.
   osrm:
     image: osrm/osrm-backend:latest
-    container_name: guincho-osrm
+    container_name: chamafacil-osrm
     command: osrm-routed --algorithm mld /data/region.osrm
     volumes:
       - ./osrm-data:/data

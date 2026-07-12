@@ -29,8 +29,8 @@ services:
     environment:
       EXPO_NO_TELEMETRY: "1"
       # Routed through Caddy via hostnames on :80 (HTTP only — auto_https off).
-      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_CUSTOMER_API_URL:-http://api.guincho.local:19000/api/customer/v1}
-      EXPO_PUBLIC_API_HOST: ${EXPO_PUBLIC_API_HOST:-http://api.guincho.local:19000}
+      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_CUSTOMER_API_URL:-http://api.chamafacil.local:19000/api/customer/v1}
+      EXPO_PUBLIC_API_HOST: ${EXPO_PUBLIC_API_HOST:-http://api.chamafacil.local:19000}
       EXPO_PUBLIC_REVERB_HOST: ${EXPO_PUBLIC_REVERB_HOST:-localhost}
       EXPO_PUBLIC_REVERB_PORT: ${EXPO_PUBLIC_REVERB_PORT:-19080}
       # Must match backend .env REVERB_APP_KEY for the WebSocket to authenticate.
@@ -56,8 +56,8 @@ services:
     command: sh -lc "npx --no-install expo start --web --port 19082"
     environment:
       EXPO_NO_TELEMETRY: "1"
-      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_PROVIDER_API_URL:-http://api.guincho.local:19000/api/provider/v1}
-      EXPO_PUBLIC_API_HOST: ${EXPO_PUBLIC_API_HOST:-http://api.guincho.local:19000}
+      EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_PROVIDER_API_URL:-http://api.chamafacil.local:19000/api/provider/v1}
+      EXPO_PUBLIC_API_HOST: ${EXPO_PUBLIC_API_HOST:-http://api.chamafacil.local:19000}
       EXPO_PUBLIC_REVERB_HOST: ${EXPO_PUBLIC_REVERB_HOST:-localhost}
       EXPO_PUBLIC_REVERB_PORT: ${EXPO_PUBLIC_REVERB_PORT:-19080}
       # Must match backend .env REVERB_APP_KEY for the WebSocket to authenticate.

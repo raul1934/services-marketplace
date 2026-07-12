@@ -1,31 +1,31 @@
-# Guincho (Chama Fácil) local stack. Designed to run side-by-side with the lula
+# Chama Fácil local stack. Designed to run side-by-side with the lula
 # stack: distinct project name, isolated network/subnet, all host ports in the
 # 19xxx range, and the reverse proxy off :80 (lula's Caddy owns :80/:443).
 # See DOCKER.md for the full coexistence notes.
-name: guincho
+name: chamafacil
 
 services:
   db:
     image: postgres:16-alpine
-    container_name: guincho-db
+    container_name: chamafacil-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: guincho
-      POSTGRES_USER: guincho
+      POSTGRES_DB: chamafacil
+      POSTGRES_USER: chamafacil
       POSTGRES_PASSWORD: secret
     ports:
       - "19432:5432"
     volumes:
-      - guincho-db-data:/var/lib/postgresql/data
+      - chamafacil-db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U guincho -d guincho"]
+      test: ["CMD-SHELL", "pg_isready -U chamafacil -d chamafacil"]
       interval: 10s
       timeout: 5s
       retries: 12
 
   backend:
     build: ./backend
-    container_name: guincho-backend
+    container_name: chamafacil-backend
     working_dir: /app
     command: sh -c "php artisan migrate --force && php artisan storage:link 2>/dev/null; php artisan serve --host=0.0.0.0 --port=8000"
     environment:
@@ -42,7 +42,7 @@ services:
 
   queue:
     build: ./backend
-    container_name: guincho-queue
+    container_name: chamafacil-queue
     working_dir: /app
     command: php artisan queue:work --tries=3 --timeout=60
     environment:
@@ -57,7 +57,7 @@ services:
 
   reverb:
     build: ./backend
-    container_name: guincho-reverb
+    container_name: chamafacil-reverb
     working_dir: /app
     command: php artisan reverb:start --host=0.0.0.0 --port=8080
     environment:
@@ -74,7 +74,7 @@ services:
 
   scheduler:
     build: ./backend
-    container_name: guincho-scheduler
+    container_name: chamafacil-scheduler
     working_dir: /app
     # Runs the Laravel scheduler loop (routes/console.php) — e.g. the hourly
     # orphan-media sweep and the per-minute stale-request expiry.
@@ -96,7 +96,7 @@ services:
 
   caddy:
     image: caddy:2-alpine
-    container_name: guincho-caddy
+    container_name: chamafacil-caddy
     restart: unless-stopped
     depends_on:
       - backend
@@ -110,7 +110,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./landing:/srv/landing:ro
-      - guincho-caddy-data:/data
+      - chamafacil-caddy-data:/data
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -118,7 +118,7 @@ services:
   # whatever else may own :80. Open http://localhost:19090
   landing:
     image: caddy:2-alpine
-    container_name: guincho-landing
+    container_name: chamafacil-landing
     restart: unless-stopped
     command: caddy file-server --root /srv --listen :80
     ports:
@@ -127,15 +127,15 @@ services:
       - ./landing:/srv:ro
 
 volumes:
-  guincho-db-data:
-  guincho-caddy-data:
+  chamafacil-db-data:
+  chamafacil-caddy-data:
 
 # Pin the project's default network to a dedicated name + subnet that does not
 # overlap lula's networks (lula-core 172.18.4.0/24, core-be-network 172.18.3.0/24).
 # All services join this automatically, so both stacks can run at once.
 networks:
   default:
-    name: guincho
+    name: chamafacil
     ipam:
       driver: default
       config:

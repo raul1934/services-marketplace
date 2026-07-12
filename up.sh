@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Bring up the full guincho (Chama Fácil) local stack — Laravel API + both Expo web
+# Bring up the full Chama Fácil local stack — Laravel API + both Expo web
 # apps — wired to the published localhost ports so it runs side-by-side with the
 # lula stack (no :80 conflict; everything on 19xxx).
 #
@@ -29,7 +29,7 @@ echo "▶ Starting API stack (backend, reverb, queue, db, caddy, landing)…"
 docker compose up -d
 
 echo "▶ Waiting for Postgres to be healthy…"
-until [ "$(docker inspect -f '{{.State.Health.Status}}' guincho-db 2>/dev/null)" = "healthy" ]; do
+until [ "$(docker inspect -f '{{.State.Health.Status}}' chamafacil-db 2>/dev/null)" = "healthy" ]; do
   sleep 2
 done
 
