@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiError, AvailabilityType, AvailabilityWindow, PartAction, RequestStatus, nextPageParam } from '@walvee/shared';
+import { ApiError, AvailabilityType, AvailabilityWindow, PartAction, RequestStatus, nextPageParam } from '@chamafacil/shared';
 import { SubmitProposalPayload, categoriesApi, jobReportApi, providerApi } from './api';
 import { getCurrentCoords } from './location';
 

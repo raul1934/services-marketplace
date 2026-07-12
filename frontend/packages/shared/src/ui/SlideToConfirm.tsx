@@ -13,7 +13,7 @@ function alpha(hex: string, a: number): string {
 export type SlideVariant = 'accept' | 'success' | 'error';
 
 /**
- * Drag-to-confirm control (walvee .slide). Track is a translucent accent pill;
+ * Drag-to-confirm control (chamafacil .slide). Track is a translucent accent pill;
  * the thumb travels left→right, a fill follows behind the label, and on
  * completion the track goes solid with the thumb resting on the right.
  */

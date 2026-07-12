@@ -1,5 +1,5 @@
 {
-  "brand": "walvee",
+  "brand": "Chama Fácil",
   "tabs": {
     "home": "Home",
     "requests": "Requests",
@@ -101,7 +101,7 @@
     "passwordPlaceholder": "••••••••",
     "submit": "Continue",
     "toRegister": "No account? Create one",
-    "toRegisterPrefix": "New to walvee?",
+    "toRegisterPrefix": "New to Chama Fácil?",
     "toRegisterLink": "Create account"
   },
   "otp": {
@@ -129,7 +129,7 @@
     "password": "Password",
     "passwordPlaceholder": "at least 6 characters",
     "submit": "Create account",
-    "legal": "By continuing you agree to walvee's Terms and Privacy Policy.",
+    "legal": "By continuing you agree to Chama Fácil's Terms and Privacy Policy.",
     "toLoginPrefix": "Already have an account?",
     "toLoginLink": "Log in"
   },
@@ -277,7 +277,7 @@
     "addressLabel": "Address",
     "addressPlaceholder": "Street, number, landmark",
     "budgetLabel": "Max budget",
-    "suggested": "Suggested by walvee",
+    "suggested": "Suggested by Chama Fácil",
     "budgetInfo": "{{work}} averages R$ {{avg}} in this region. Your budget of R$ {{value}} has a {{chance}} chance of being attended.",
     "chance": {
       "low": "low",

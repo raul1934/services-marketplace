@@ -93,4 +93,4 @@ export function Screen({
   );
 }
 
-// AppBar / BackBar live in ./primitives (walvee-accurate versions).
+// AppBar / BackBar live in ./primitives (chamafacil-accurate versions).

@@ -1,9 +1,9 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Card, Icon, Screen, SlideToConfirm, Text, useTheme } from '@walvee/shared';
+import { BackBar, Card, Icon, Screen, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { useJob, useReportCustomerNoShow } from '../../../src/queries';
 
 /** Provider reports the client wasn't at the agreed location — cancels the job. */

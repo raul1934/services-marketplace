@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { PanResponder, View } from 'react-native';
-import { useTheme } from '@walvee/shared';
+import { useTheme } from '@chamafacil/shared';
 
 /** Minimal range slider (track + fill + thumb) driven by a pan gesture. */
 export function Slider({

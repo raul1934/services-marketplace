@@ -4,7 +4,7 @@ import { useTheme } from '../../theme';
 import { Text } from '../Text';
 import { Icon } from '../Icon';
 
-/** Icon-prefixed text input with focus ring (walvee .input). */
+/** Icon-prefixed text input with focus ring (chamafacil .input). */
 export function AuthField({
   icon,
   prefix,

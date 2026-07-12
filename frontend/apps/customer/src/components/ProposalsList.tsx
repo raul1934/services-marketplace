@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useTranslation } from 'react-i18next';
 import {
   AvInit,
@@ -23,7 +23,7 @@ import {
   etaLabel,
   flattenPages,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { ProposalSort } from '../api';
 import { useAcceptProposal, useAnswerQuestion, useCancelRequest, useCounterProposal, useDeclineProposal, useProposals, useQuestions } from '../queries';
 import { PickedPhoto, pickPhotos } from '../photos';

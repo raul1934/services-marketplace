@@ -1,13 +1,13 @@
-# Walvee — React Native (Expo) frontend
+# Chama Fácil — React Native (Expo) frontend
 
-Monorepo for the two Walvee mobile apps, rebuilt from the previous Angular +
+Monorepo for the two Chama Fácil mobile apps, rebuilt from the previous Angular +
 Ionic apps. Both apps share a design system, API client, types and realtime
 client from `packages/shared`.
 
 ```
 frontend/
 ├── packages/
-│   └── shared/          @walvee/shared — theme (sunset/trust/night), types,
+│   └── shared/          @chamafacil/shared — theme (sunset/trust/night), types,
 │                        API client (Sanctum), Reverb realtime, auth, UI kit
 └── apps/
     ├── customer/        Customer app (Expo, expo-router) — role: client

@@ -1,4 +1,4 @@
-# Self-contained Android build image for the Walvee Expo apps.
+# Self-contained Android build image for the Chama Fácil Expo apps.
 #
 # Produces a DEV-CLIENT debug APK you install once on a physical phone; the JS
 # then hot-reloads from Metro running on the host (`npx expo start`). Nothing

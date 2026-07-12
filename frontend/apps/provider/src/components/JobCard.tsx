@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Badge, Card, RequestStatus, RequestUrgency, ServiceRequest, Text, brl, distanceLabel, useTheme } from '@walvee/shared';
+import { Badge, Card, RequestStatus, RequestUrgency, ServiceRequest, Text, brl, distanceLabel, useTheme } from '@chamafacil/shared';
 import { CategoryIcon } from './CategoryIcon';
 
 /** Request card for the provider side — nearby open requests, bids and jobs. */

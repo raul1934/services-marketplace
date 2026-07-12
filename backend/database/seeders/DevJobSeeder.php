@@ -23,8 +23,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Gives the dev client (cliente@walvee.test) a solicitation in EVERY stage, and
- * matches the dev provider (prestador@walvee.test) on the active ones, so every
+ * Gives the dev client (cliente@chamafacil.test) a solicitation in EVERY stage, and
+ * matches the dev provider (prestador@chamafacil.test) on the active ones, so every
  * flow is reachable out of the box. Each stage uses a distinct category so they
  * coexist; the remaining categories stay "open" for the provider feed.
  *
@@ -52,8 +52,8 @@ class DevJobSeeder extends Seeder
             return;
         }
 
-        $client = User::where('email', 'cliente@walvee.test')->first();
-        $provider = User::where('email', 'prestador@walvee.test')->first();
+        $client = User::where('email', 'cliente@chamafacil.test')->first();
+        $provider = User::where('email', 'prestador@chamafacil.test')->first();
         if (! $client || ! $provider) {
             return;
         }
@@ -188,9 +188,9 @@ class DevJobSeeder extends Seeder
         $this->attachPhoto($request, PhotoPhase::Request, [13, 148, 136], 2);
 
         $bidders = [
-            ['email' => 'joao@walvee.test', 'name' => 'João Mecânico', 'rating' => 4.9, 'count' => 213, 'jobs' => 240, 'price' => 150.0, 'eta' => 15, 'comment' => 'Chego rápido, peças inclusas.'],
-            ['email' => 'maria@walvee.test', 'name' => 'Maria Express', 'rating' => 4.7, 'count' => 98, 'jobs' => 110, 'price' => 175.0, 'eta' => 10, 'comment' => 'Atendimento premium com garantia.'],
-            ['email' => 'carlos@walvee.test', 'name' => 'Carlos 24h', 'rating' => 4.4, 'count' => 41, 'jobs' => 52, 'price' => 130.0, 'eta' => 30, 'comment' => 'Melhor preço da região.'],
+            ['email' => 'joao@chamafacil.test', 'name' => 'João Mecânico', 'rating' => 4.9, 'count' => 213, 'jobs' => 240, 'price' => 150.0, 'eta' => 15, 'comment' => 'Chego rápido, peças inclusas.'],
+            ['email' => 'maria@chamafacil.test', 'name' => 'Maria Express', 'rating' => 4.7, 'count' => 98, 'jobs' => 110, 'price' => 175.0, 'eta' => 10, 'comment' => 'Atendimento premium com garantia.'],
+            ['email' => 'carlos@chamafacil.test', 'name' => 'Carlos 24h', 'rating' => 4.4, 'count' => 41, 'jobs' => 52, 'price' => 130.0, 'eta' => 30, 'comment' => 'Melhor preço da região.'],
         ];
 
         foreach ($bidders as $b) {

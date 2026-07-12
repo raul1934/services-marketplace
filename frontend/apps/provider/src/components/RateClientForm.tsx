@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { AvInit, Button, Card, Chip, Field, Icon, Row, SectionLabel, Stars, Text, Toggle, useTheme } from '@walvee/shared';
+import { AvInit, Button, Card, Chip, Field, Icon, Row, SectionLabel, Stars, Text, Toggle, useTheme } from '@chamafacil/shared';
 import { providerApi } from '../api';
 import { keys } from '../queries';
 

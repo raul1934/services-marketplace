@@ -1,6 +1,6 @@
-# Walvee / chamafacil.app — reverse proxy de PRODUÇÃO (Lightsail).
+# Chama Fácil / chamafacil.app — reverse proxy de PRODUÇÃO (Lightsail).
 #
-# Diferente do Caddyfile de dev (HTTP em *.walvee.local, porta 19088), aqui o
+# Diferente do Caddyfile de dev (HTTP em *.chamafacil.local, porta 19088), aqui o
 # Caddy escuta em :80/:443 e emite certificados TLS automaticamente via
 # Let's Encrypt. O TLD `.app` está na lista de HSTS preload, então o browser
 # SÓ aceita HTTPS — o auto-HTTPS do Caddy cobre exatamente isso.

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Image, ScrollView, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Button, Card, Chip, EmptyState, Icon, PaginatedList, Row, Text, useTheme } from '@walvee/shared';
+import { BackBar, Button, Card, Chip, EmptyState, Icon, PaginatedList, Row, Text, useTheme } from '@chamafacil/shared';
 import { Asset } from '../../src/api';
 import { useAssets } from '../../src/queries';
 import { ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';

@@ -1,4 +1,4 @@
-import { configureApi, configureRealtime, setupWeb } from '@walvee/shared';
+import { configureApi, configureRealtime, setupWeb } from '@chamafacil/shared';
 import { config } from './config';
 
 /** Wire the shared API + realtime clients to this app's config. Call once. */

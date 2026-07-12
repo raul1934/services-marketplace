@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Icon, Row, Text, useTheme } from '@walvee/shared';
+import { Button, Card, Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { GeoPoint } from '../api';
 import { getCurrentCoords } from '../location';
 import { GeofenceEditor } from './GeofenceEditor';

@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Screen } from '@walvee/shared';
+import { BackBar, Screen } from '@chamafacil/shared';
 import { useJob } from '../../../src/queries';
 import { RateClientForm } from '../../../src/components/RateClientForm';
 

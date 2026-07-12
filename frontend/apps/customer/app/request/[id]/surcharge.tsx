@@ -1,11 +1,11 @@
 import React from 'react';
 import { ActivityIndicator, Image, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   BackBar, Badge, Button, Card, EmptyState, Icon, Row, Screen, SectionLabel, SlideToConfirm, Surcharge, Text, brl, useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useRequest, useResolveSurcharge } from '../../../src/queries';
 
 /** V3Acrescimo (C16): client approves/refuses the provider's surcharge. */

@@ -18,7 +18,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.android
-    image: walvee-android-build
+    image: chamafacil-android-build
     environment:
       APP: ${APP:-customer}
     volumes:

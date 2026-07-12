@@ -29,7 +29,7 @@ import {
   User,
   http,
   unwrapPage,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 
 const unwrap = <T>(r: { data: T }): T => r.data;
 const unwrapList = <T>(r: Collection<T>): T[] => r.data;

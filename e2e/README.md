@@ -1,14 +1,14 @@
-# walvee E2E tests (Playwright)
+# Chama Fácil E2E tests (Playwright)
 
 End-to-end tests for the **customer** (`:19083`) and **provider** (`:19082`) web
 apps, driven by [Playwright Test](https://playwright.dev). The flows are derived
-from the walvee designs (`walvee/walvee - Índice de telas.html`,
+from the Chama Fácil designs (`walvee/walvee - Índice de telas.html`,
 `walvee v3 - Mapa de fluxo.html`) and the V5 spec.
 
 ## Prerequisites
 - The web apps running: `docker compose -f docker-compose.web.yml up -d` (ports 19082/19083).
 - Backend seeded with the dev data: `docker exec guincho-backend php artisan migrate:fresh --seed`
-  (gives the `cliente@walvee.test` / `prestador@walvee.test` accounts, password `senha123`,
+  (gives the `cliente@chamafacil.test` / `prestador@chamafacil.test` accounts, password `senha123`,
   and requests in every stage that the tests assert against).
 - Node via WSL nvm; Chromium is already in `~/.cache/ms-playwright`.
 
@@ -29,7 +29,7 @@ npm run report         # open the HTML report
 ```
 
 Override targets/creds with env vars: `CUSTOMER_URL`, `PROVIDER_URL`,
-`CUSTOMER_EMAIL`, `PROVIDER_EMAIL`, `WALVEE_PASSWORD`.
+`CUSTOMER_EMAIL`, `PROVIDER_EMAIL`, `CHAMAFACIL_PASSWORD`.
 
 ## Feature journeys (start → end)
 - **journeys/lifecycle** — the whole V5 happy path across both apps in one test:

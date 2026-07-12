@@ -1,5 +1,5 @@
 {
-  "brand": "walvee",
+  "brand": "Chama Fácil",
   "brandSuffix": "pro",
   "tabs": {
     "dashboard": "Dashboard",
@@ -174,7 +174,7 @@
     "docUploaded": "Uploaded",
     "docAdd": "Add",
     "docError": "Document",
-    "docsBanner": "Documents are reviewed by walvee's team, never shared with clients.",
+    "docsBanner": "Documents are reviewed by Chama Fácil's team, never shared with clients.",
     "step4Title": "Submit for approval",
     "step4Sub": "An admin reviews your profile before you can take jobs.",
     "summaryCategories": "Categories",
@@ -314,7 +314,7 @@
     "withdrawPix": "Withdraw via Pix",
     "month": "This month",
     "jobs": "Jobs",
-    "fee": "walvee fee",
+    "fee": "Chama Fácil fee",
     "recent": "Recent activity",
     "empty": "No activity yet.",
     "creditLabel": "Completed service",
@@ -406,7 +406,7 @@
     "messageLabel": "Message (optional)",
     "messagePlaceholder": "e.g. I'll bring the needed tools",
     "proposalValue": "Bid amount",
-    "fee": "Walvee fee ({{pct}}%)",
+    "fee": "Chama Fácil fee ({{pct}}%)",
     "youReceive": "You receive",
     "submitBid": "Send bid",
     "bidSentTitle": "Sent!",

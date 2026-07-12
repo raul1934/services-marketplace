@@ -26,7 +26,7 @@ class AssetSeeder extends Seeder
             return;
         }
 
-        $client = User::where('email', 'cliente@walvee.test')->first();
+        $client = User::where('email', 'cliente@chamafacil.test')->first();
         if (! $client) {
             return;
         }

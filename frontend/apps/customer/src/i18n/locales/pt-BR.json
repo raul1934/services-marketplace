@@ -1,5 +1,5 @@
 {
-  "brand": "walvee",
+  "brand": "Chama Fácil",
   "tabs": {
     "home": "Início",
     "requests": "Chamados",
@@ -101,7 +101,7 @@
     "passwordPlaceholder": "••••••••",
     "submit": "Continuar",
     "toRegister": "Não tem conta? Criar agora",
-    "toRegisterPrefix": "Novo na walvee?",
+    "toRegisterPrefix": "Novo na Chama Fácil?",
     "toRegisterLink": "Criar conta"
   },
   "otp": {
@@ -129,7 +129,7 @@
     "password": "Senha",
     "passwordPlaceholder": "mínimo 6 caracteres",
     "submit": "Criar conta",
-    "legal": "Ao continuar você concorda com os Termos e a Política de Privacidade da walvee.",
+    "legal": "Ao continuar você concorda com os Termos e a Política de Privacidade da Chama Fácil.",
     "toLoginPrefix": "Já tem conta?",
     "toLoginLink": "Entrar"
   },
@@ -277,7 +277,7 @@
     "addressLabel": "Endereço",
     "addressPlaceholder": "Rua, número, ponto de referência",
     "budgetLabel": "Orçamento máximo",
-    "suggested": "Sugerido pela walvee",
+    "suggested": "Sugerido pela Chama Fácil",
     "budgetInfo": "{{work}} custa em média R$ {{avg}} nesta região. Seu orçamento de R$ {{value}} tem chance {{chance}} de ser atendido.",
     "chance": {
       "low": "baixa",

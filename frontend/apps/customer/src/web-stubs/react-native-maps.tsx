@@ -18,7 +18,7 @@ import React, { useEffect, useRef } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useTheme } from '@walvee/shared';
+import { useTheme } from '@chamafacil/shared';
 
 // CARTO's light/dark basemaps (free, no API key) read much closer to the
 // app's own light/dark theme surfaces than stock OSM's saturated road map.

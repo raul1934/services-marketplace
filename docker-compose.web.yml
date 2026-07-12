@@ -2,7 +2,7 @@
 #
 #   docker compose -f docker-compose.web.yml up
 #
-# Then open (via Caddy):  customer → http://customer.walvee.local   provider → http://provider.walvee.local
+# Then open (via Caddy):  customer → http://customer.chamafacil.local   provider → http://provider.chamafacil.local
 # (direct Metro ports 19083/19082 also stay published as a fallback.)
 #
 # A one-shot `installer` service runs `npm install` once into the shared
@@ -15,7 +15,7 @@
 services:
   installer:
     image: node:22-bookworm
-    container_name: walvee-web-installer
+    container_name: chamafacil-web-installer
     working_dir: /app
     command: sh -lc "npm install"
     volumes:
@@ -23,7 +23,7 @@ services:
 
   customer-web:
     image: node:22-bookworm
-    container_name: walvee-customer-web
+    container_name: chamafacil-customer-web
     working_dir: /app/apps/customer
     command: sh -lc "npx --no-install expo start --web --port 19083"
     environment:
@@ -51,7 +51,7 @@ services:
 
   provider-web:
     image: node:22-bookworm
-    container_name: walvee-provider-web
+    container_name: chamafacil-provider-web
     working_dir: /app/apps/provider
     command: sh -lc "npx --no-install expo start --web --port 19082"
     environment:

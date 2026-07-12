@@ -30,7 +30,7 @@ import {
   subscribeToRequest,
   useRoute,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { keys, useApprovePart, useApproveParts, useJobReport, useRequest, useRequestEvents, useTracking } from '../../../src/queries';
 import { CategoryIcon } from '../../../src/components/CategoryIcon';
 import { EventFeed } from '../../../src/components/EventFeed';

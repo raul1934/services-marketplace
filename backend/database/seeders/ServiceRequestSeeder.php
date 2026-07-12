@@ -23,7 +23,7 @@ class ServiceRequestSeeder extends Seeder
 
     public function run(): void
     {
-        $client = User::where('email', 'cliente@walvee.test')->first();
+        $client = User::where('email', 'cliente@chamafacil.test')->first();
 
         if (! $client) {
             return; // dev customer not present (e.g. production) — nothing to do

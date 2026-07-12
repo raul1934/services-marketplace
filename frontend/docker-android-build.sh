@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Runs inside the walvee-android-build container. Prebuilds the selected Expo app
+# Runs inside the chamafacil-android-build container. Prebuilds the selected Expo app
 # and produces a dev-client debug APK in /out. Mounted at runtime (not baked) so
 # it can be edited without rebuilding the image.
 set -eux
@@ -24,5 +24,5 @@ ABIS="${ABIS:-arm64-v8a}"
 ./gradlew assembleDebug -PreactNativeArchitectures="$ABIS" --no-daemon
 
 mkdir -p /out
-cp app/build/outputs/apk/debug/app-debug.apk "/out/walvee-$APP-debug.apk"
-echo "APK ready -> build-output/walvee-$APP-debug.apk"
+cp app/build/outputs/apk/debug/app-debug.apk "/out/chamafacil-$APP-debug.apk"
+echo "APK ready -> build-output/chamafacil-$APP-debug.apk"

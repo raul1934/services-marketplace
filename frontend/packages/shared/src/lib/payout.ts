@@ -1,5 +1,5 @@
 /**
- * Platform commission Walvee takes from a provider's payout. The real rate
+ * Platform commission Chama Fácil takes from a provider's payout. The real rate
  * depends on the provider's plan and comes from the API
  * (provider_profile.commission_rate); this constant is only the default used
  * when that value isn't available yet (the Free plan: 5%).

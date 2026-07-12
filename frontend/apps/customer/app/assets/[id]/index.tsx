@@ -3,7 +3,7 @@ import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Card, EmptyState, FieldDisplay, Icon, NotFoundView, Row, Screen, SectionLabel, Text, useTheme } from '@walvee/shared';
+import { BackBar, Card, EmptyState, FieldDisplay, Icon, NotFoundView, Row, Screen, SectionLabel, Text, useTheme } from '@chamafacil/shared';
 import { useAddReading, useAsset, useAssetHistory, useAssetReadings } from '../../../src/queries';
 import { ASSET_FIELDS, AssetTypeKey } from '../../../src/assetFields';
 import { RequestCard } from '../../../src/components/RequestCard';

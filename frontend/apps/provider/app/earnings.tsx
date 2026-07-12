@@ -1,10 +1,10 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Button, Card, Icon, Row, Screen, SectionLabel, Text, brl, flattenPages, useTheme } from '@walvee/shared';
+import { BackBar, Button, Card, Icon, Row, Screen, SectionLabel, Text, brl, flattenPages, useTheme } from '@chamafacil/shared';
 import { useWallet, useWalletTransactions, useWithdraw } from '../src/queries';
 import { WalletTxn } from '../src/api';
 

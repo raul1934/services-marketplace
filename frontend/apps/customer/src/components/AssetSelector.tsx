@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Image, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Icon, Row, SectionLabel, Text, useTheme } from '@walvee/shared';
+import { Button, Card, Icon, Row, SectionLabel, Text, useTheme } from '@chamafacil/shared';
 import { Asset } from '../api';
 import { ICON, assetCaption } from '../assetDisplay';
 

@@ -13,7 +13,7 @@ const GRN = '#18b368';
 export type BudgetZone = 'low' | 'fair' | 'high';
 
 /**
- * Traffic-light speedometer budget/bid meter (walvee BudgetMeter). Red/amber/
+ * Traffic-light speedometer budget/bid meter (chamafacil BudgetMeter). Red/amber/
  * green zones around the regional average, a draggable needle, a currency field
  * with ± steppers, and a plain-language likelihood line. `mode` flips which end
  * is green: 'budget' (higher = greener) vs 'bid' (lower = greener).

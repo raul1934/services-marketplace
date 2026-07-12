@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Stop the guincho (walvee) local stack — API + Expo web apps.
+# Stop the guincho (Chama Fácil) local stack — API + Expo web apps.
 # Data is preserved (named volumes are kept). Add --volumes to wipe the DB too.
 #
 # Usage:

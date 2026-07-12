@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,7 @@ import {
   Wiz,
   flattenPages,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useAssets, useCategories, useCreateRequest } from '../../src/queries';
 import { AssetSelector } from '../../src/components/AssetSelector';
 import { ICON, assetCaption } from '../../src/assetDisplay';

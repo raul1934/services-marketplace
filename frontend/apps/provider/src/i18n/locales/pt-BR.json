@@ -1,5 +1,5 @@
 {
-  "brand": "walvee",
+  "brand": "Chama Fácil",
   "brandSuffix": "pro",
   "tabs": {
     "dashboard": "Painel",
@@ -174,7 +174,7 @@
     "docUploaded": "Enviado",
     "docAdd": "Adicionar",
     "docError": "Documento",
-    "docsBanner": "Documentos são revisados pela equipe da walvee, nunca compartilhados com clientes.",
+    "docsBanner": "Documentos são revisados pela equipe da Chama Fácil, nunca compartilhados com clientes.",
     "step4Title": "Enviar para aprovação",
     "step4Sub": "Um admin revisa seu perfil antes de você poder atender.",
     "summaryCategories": "Categorias",
@@ -314,7 +314,7 @@
     "withdrawPix": "Sacar via Pix",
     "month": "Este mês",
     "jobs": "Trabalhos",
-    "fee": "Taxa walvee",
+    "fee": "Taxa Chama Fácil",
     "recent": "Atividade recente",
     "empty": "Sem movimentações ainda.",
     "creditLabel": "Serviço concluído",
@@ -406,7 +406,7 @@
     "messageLabel": "Mensagem (opcional)",
     "messagePlaceholder": "Ex.: Levo as ferramentas necessárias",
     "proposalValue": "Valor da proposta",
-    "fee": "Taxa Walvee ({{pct}}%)",
+    "fee": "Taxa Chama Fácil ({{pct}}%)",
     "youReceive": "Você recebe",
     "submitBid": "Enviar proposta",
     "bidSentTitle": "Enviada!",

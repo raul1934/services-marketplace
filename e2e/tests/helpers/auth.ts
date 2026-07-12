@@ -29,7 +29,7 @@ export async function slide(page: Page, nth = 0) {
   await page.waitForTimeout(800);
 }
 
-const PASSWORD = process.env.WALVEE_PASSWORD || 'senha123';
+const PASSWORD = process.env.CHAMAFACIL_PASSWORD || 'senha123';
 
 /** Robust click for react-native-web Pressables (role=button OR a text node). */
 export async function tap(page: Page, name: RegExp) {
@@ -42,7 +42,7 @@ export async function tap(page: Page, name: RegExp) {
 }
 
 /**
- * Log into a walvee app. Dev creds are pre-filled on /login, but we fill
+ * Log into a Chama Fácil app. Dev creds are pre-filled on /login, but we fill
  * explicitly for determinism. Submit button is "Continue" (customer) / "Sign in"
  * (provider).
  */
@@ -63,8 +63,8 @@ export async function login(page: Page, email: string, submit: RegExp) {
   await page.waitForTimeout(3500);
 }
 
-export const loginCustomer = (page: Page) => login(page, process.env.CUSTOMER_EMAIL || 'cliente@walvee.test', /^continue$/i);
-export const loginProvider = (page: Page) => login(page, process.env.PROVIDER_EMAIL || 'prestador@walvee.test', /^sign in$/i);
+export const loginCustomer = (page: Page) => login(page, process.env.CUSTOMER_EMAIL || 'cliente@chamafacil.test', /^continue$/i);
+export const loginProvider = (page: Page) => login(page, process.env.PROVIDER_EMAIL || 'prestador@chamafacil.test', /^sign in$/i);
 
 /**
  * Navigate to an authenticated route. With a stored session the deep link works

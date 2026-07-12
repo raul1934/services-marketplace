@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { deviceLanguage, loadSavedLanguage, setApiLocale } from '@walvee/shared';
+import { deviceLanguage, loadSavedLanguage, setApiLocale } from '@chamafacil/shared';
 import ptBR from './locales/pt-BR.json';
 import enUS from './locales/en-US.json';
 

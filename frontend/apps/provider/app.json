@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Walvee Pro",
-    "slug": "walvee-provider",
-    "scheme": "walveepro",
+    "name": "Chama Fácil Pro",
+    "slug": "chamafacil-provider",
+    "scheme": "chamafacilpro",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -18,13 +18,13 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.walvee.provider",
+      "bundleIdentifier": "com.chamafacil.provider",
       "infoPlist": {
         "UIBackgroundModes": ["location"]
       }
     },
     "android": {
-      "package": "com.walvee.provider",
+      "package": "com.chamafacil.provider",
       "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#4f46e5" },
       "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"]
     },
@@ -36,8 +36,8 @@
       [
         "expo-speech-recognition",
         {
-          "microphonePermission": "O Walvee usa o microfone para ditar textos por voz.",
-          "speechRecognitionPermission": "O Walvee usa reconhecimento de fala para transcrever o que você ditar.",
+          "microphonePermission": "O Chama Fácil usa o microfone para ditar textos por voz.",
+          "speechRecognitionPermission": "O Chama Fácil usa reconhecimento de fala para transcrever o que você ditar.",
           "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
         }
       ]

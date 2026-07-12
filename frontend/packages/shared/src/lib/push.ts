@@ -8,7 +8,7 @@ import * as SecureStore from 'expo-secure-store';
  * `ExponentPushToken[...]` we register here. Native only — web has no push.
  */
 
-const DEVICE_KEY = 'walvee_device_no';
+const DEVICE_KEY = 'chamafacil_device_no';
 
 export interface PushDevice {
   device_no: string;

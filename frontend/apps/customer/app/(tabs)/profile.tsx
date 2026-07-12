@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Button, Card, Icon, LANGUAGES, Row, Screen, Text, ThemeName, persistLanguage, useAuth, useTheme, useThemeControls } from '@walvee/shared';
+import { Avatar, Button, Card, Icon, LANGUAGES, Row, Screen, Text, ThemeName, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
 
 const THEMES: ThemeName[] = ['yeti', 'sunset', 'trust', 'night'];
 

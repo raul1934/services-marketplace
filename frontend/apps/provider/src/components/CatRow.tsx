@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Icon, Row, ServiceCategory, Text, useTheme } from '@walvee/shared';
+import { Icon, Row, ServiceCategory, Text, useTheme } from '@chamafacil/shared';
 import { CategoryIcon } from './CategoryIcon';
 
-/** One-line category row with optional subtitle + trailing check (walvee .cat-row). */
+/** One-line category row with optional subtitle + trailing check (chamafacil .cat-row). */
 export function CatRow({
   category,
   selected,

@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Screen, useTheme } from '@walvee/shared';
+import { BackBar, Screen, useTheme } from '@chamafacil/shared';
 import { useRequest } from '../../../src/queries';
 import { ReceiptView } from '../../../src/components/ReceiptView';
 

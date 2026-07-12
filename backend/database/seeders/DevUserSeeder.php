@@ -24,7 +24,7 @@ class DevUserSeeder extends Seeder
         }
 
         User::updateOrCreate(
-            ['email' => 'cliente@walvee.test'],
+            ['email' => 'cliente@chamafacil.test'],
             [
                 'name' => 'Cliente Teste',
                 'password' => 'senha123', // 'hashed' cast applies bcrypt
@@ -36,7 +36,7 @@ class DevUserSeeder extends Seeder
         // Full-access dev provider: holds every role (client + provider + admin)
         // so it can exercise any flow in the apps and the Filament panel.
         $provider = User::updateOrCreate(
-            ['email' => 'prestador@walvee.test'],
+            ['email' => 'prestador@chamafacil.test'],
             [
                 'name' => 'Prestador Teste',
                 'password' => 'senha123', // 'hashed' cast applies bcrypt

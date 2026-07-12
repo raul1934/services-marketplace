@@ -13,5 +13,5 @@ export const config = {
     wsPort: Number(process.env.EXPO_PUBLIC_REVERB_PORT ?? 443),
     forceTLS: (process.env.EXPO_PUBLIC_REVERB_TLS ?? 'true') === 'true',
   },
-  tokenKey: 'walvee.customer.token',
+  tokenKey: 'chamafacil.customer.token',
 };

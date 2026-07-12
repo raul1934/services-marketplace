@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { Avatar, BackBar, Button, Card, Field, Icon, Row, Screen, Text, Toggle, useAuth, useTheme } from '@walvee/shared';
+import { Avatar, BackBar, Button, Card, Field, Icon, Row, Screen, Text, Toggle, useAuth, useTheme } from '@chamafacil/shared';
 import { providerApi } from '../src/api';
 import { pickPhotos, uploadPhotos } from '../src/photos';
 

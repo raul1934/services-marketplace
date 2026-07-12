@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Chip, Field, Icon, Row, SectionLabel, Text, useTheme } from '@walvee/shared';
+import { Button, Chip, Field, Icon, Row, SectionLabel, Text, useTheme } from '@chamafacil/shared';
 import { DatePicker } from './DatePicker';
 
 export interface RecordKmPayload {

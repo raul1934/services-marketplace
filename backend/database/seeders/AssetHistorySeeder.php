@@ -31,8 +31,8 @@ class AssetHistorySeeder extends Seeder
             return;
         }
 
-        $client = User::where('email', 'cliente@walvee.test')->first();
-        $provider = User::where('email', 'prestador@walvee.test')->first();
+        $client = User::where('email', 'cliente@chamafacil.test')->first();
+        $provider = User::where('email', 'prestador@chamafacil.test')->first();
         if (! $client || ! $provider) {
             return;
         }

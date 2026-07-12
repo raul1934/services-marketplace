@@ -17,7 +17,7 @@ export function Card({ flat, onPress, padded = true, style, children, ...rest }:
     padding: padded ? 18 : 0,
     borderWidth: flat ? 1 : 0,
     borderColor: t.colors.line,
-    // walvee .card uses the elevated --shadow; .card.flat drops it for a border.
+    // chamafacil .card uses the elevated --shadow; .card.flat drops it for a border.
     ...(flat ? {} : t.shadow),
   };
 

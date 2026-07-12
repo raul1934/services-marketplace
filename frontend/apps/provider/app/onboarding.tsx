@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -14,7 +14,7 @@ import {
   Text,
   useAuth,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { providerApi } from '../src/api';
 import { useCategories, useSetCategories } from '../src/queries';
 import { CatRow } from '../src/components/CatRow';

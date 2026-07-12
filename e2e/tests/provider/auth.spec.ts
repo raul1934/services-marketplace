@@ -7,7 +7,7 @@ test.describe('Provider · auth (P01)', () => {
   test('welcome carousel', async ({ page }) => {
     await page.goto('/welcome', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1500);
-    await expect(page.getByText(/already have an account|work near you|walvee|pro/i).first()).toBeVisible();
+    await expect(page.getByText(/already have an account|work near you|chama fácil|pro/i).first()).toBeVisible();
   });
 
   test('login form', async ({ page }) => {

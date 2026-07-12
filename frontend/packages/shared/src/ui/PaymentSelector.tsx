@@ -13,7 +13,7 @@ export interface PaymentOption {
 }
 
 /**
- * Pix / Card / Cash selector (walvee .segment + detail). A segmented row of
+ * Pix / Card / Cash selector (chamafacil .segment + detail). A segmented row of
  * three options with a detail line describing the selected one.
  */
 export function PaymentSelector({

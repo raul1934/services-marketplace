@@ -8,7 +8,7 @@ import { useEffect, useImperativeHandle, useRef } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useTheme } from '@walvee/shared';
+import { useTheme } from '@chamafacil/shared';
 
 // CARTO's light/dark basemaps (free, no API key) read much closer to the
 // app's own light/dark theme surfaces than stock OSM's saturated road map.
@@ -51,7 +51,7 @@ function iconSvg(name: string, color: string): string {
   if (!iconSvgCache[key]) {
     // Lazy-require shared so this web-only stub (the react-native-maps alias)
     // doesn't pull the whole UI barrel at module-init time.
-    const { Icon, ThemeProvider } = require('@walvee/shared') as {
+    const { Icon, ThemeProvider } = require('@chamafacil/shared') as {
       Icon: React.ComponentType<{ name: string; size?: number; color?: string }>;
       ThemeProvider: React.ComponentType<{ children: React.ReactNode }>;
     };

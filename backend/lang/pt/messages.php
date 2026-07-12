@@ -16,7 +16,7 @@ return [
     'otp_sent' => 'Enviamos um código de verificação para o seu telefone.',
     'otp_invalid' => 'Código de verificação inválido.',
     'otp_expired' => 'O código expirou. Solicite um novo.',
-    'waitlist_joined' => 'Você está na lista! Avisaremos assim que a walvee chegar perto de você.',
+    'waitlist_joined' => 'Você está na lista! Avisaremos assim que a Chama Fácil chegar perto de você.',
     'insufficient_balance' => 'Saldo insuficiente para o saque.',
     'payout_pix' => 'Saque via Pix',
     'payout_done' => 'Saque solicitado. O valor cai na sua conta em instantes.',

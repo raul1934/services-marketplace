@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Badge, Button, Card, Icon, Row, Screen, Text, useAuth, useTheme } from '@walvee/shared';
+import { Badge, Button, Card, Icon, Row, Screen, Text, useAuth, useTheme } from '@chamafacil/shared';
 
 export default function Pending() {
   const t = useTheme();

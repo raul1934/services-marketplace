@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, PaginatedList, Segment, ServiceRequest, Text } from '@walvee/shared';
+import { EmptyState, PaginatedList, Segment, ServiceRequest, Text } from '@chamafacil/shared';
 import { useMyBids, useMyJobs } from '../../src/queries';
 import { JobCard } from '../../src/components/JobCard';
 

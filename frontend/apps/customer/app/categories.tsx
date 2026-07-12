@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, CATEGORY_TYPE_ORDER, Card, Screen, SectionLabel, ServiceCategory, Text, useTheme } from '@walvee/shared';
+import { BackBar, CATEGORY_TYPE_ORDER, Card, Screen, SectionLabel, ServiceCategory, Text, useTheme } from '@chamafacil/shared';
 import { useCategories } from '../src/queries';
 import { CategoryIcon } from '../src/components/CategoryIcon';
 

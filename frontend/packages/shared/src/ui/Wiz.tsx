@@ -17,7 +17,7 @@ export interface WizFooter {
 }
 
 /**
- * Multi-step wizard chrome (walvee Wiz): back/close header with a STEP x/N
+ * Multi-step wizard chrome (chamafacil Wiz): back/close header with a STEP x/N
  * counter, a progress bar, a scrollable body and a sticky footer.
  */
 export function Wiz({

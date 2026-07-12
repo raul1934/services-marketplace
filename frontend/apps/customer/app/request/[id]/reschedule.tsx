@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   BackBar, Button, Card, Field, Icon, RescheduleRequest, Row, Screen, SectionLabel, Segment, Text, useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useRequest, useRequestReschedule, useResolveReschedule } from '../../../src/queries';
 
 const PERIODS: Record<string, [number, number]> = {

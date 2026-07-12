@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useTranslation } from 'react-i18next';
-import { AvInit, Button, Card, Chip, Field, SectionLabel, Stars, Text, brl, useTheme } from '@walvee/shared';
+import { AvInit, Button, Card, Chip, Field, SectionLabel, Stars, Text, brl, useTheme } from '@chamafacil/shared';
 import { useSubmitReview } from '../queries';
 
 const TIP_OPTIONS = [0, 5, 10, 20];

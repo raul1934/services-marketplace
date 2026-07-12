@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Button, Field, Icon, NotFoundView, Screen, SectionLabel, Text, useTheme } from '@walvee/shared';
+import { BackBar, Button, Field, Icon, NotFoundView, Screen, SectionLabel, Text, useTheme } from '@chamafacil/shared';
 import { useArchiveAsset, useAsset, useUpdateAsset } from '../../../src/queries';
 import { ASSET_FIELDS, AssetTypeKey } from '../../../src/assetFields';
 import { AssetDetailInput, GeoPoint } from '../../../src/api';

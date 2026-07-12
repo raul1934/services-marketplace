@@ -1,9 +1,9 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Button, Card, Icon, Row, Screen, Text, useTheme } from '@walvee/shared';
+import { BackBar, Button, Card, Icon, Row, Screen, Text, useTheme } from '@chamafacil/shared';
 import { useRequest, useReportNoShow, useCancelRequest } from '../../../src/queries';
 
 /** V3NoShow (C35): provider didn't show — wait, reopen at no cost, or cancel. */

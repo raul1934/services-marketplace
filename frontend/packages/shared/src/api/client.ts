@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 
 /**
- * Low-level HTTP client for the Walvee Laravel API.
+ * Low-level HTTP client for the Chama Fácil Laravel API.
  *
  * Each app (customer / provider) configures a base URL and a token storage key
  * once at startup. The bearer token is the Sanctum token for that app's role

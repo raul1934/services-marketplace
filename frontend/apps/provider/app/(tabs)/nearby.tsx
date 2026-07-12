@@ -24,7 +24,7 @@ import {
   flattenPages,
   relativeParts,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useNearby, useScheduled } from '../../src/queries';
 import { CategoryIcon, categoryIconName } from '../../src/components/CategoryIcon';
 import { RequestMarker } from '../../src/components/RequestMarker';

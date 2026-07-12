@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, OtpInput, Text, useTheme } from '@walvee/shared';
+import { Button, Card, OtpInput, Text, useTheme } from '@chamafacil/shared';
 import { useStartJob } from '../queries';
 
 /**

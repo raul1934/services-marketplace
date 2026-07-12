@@ -8,7 +8,7 @@ test.describe('Customer · auth (C01–C04)', () => {
   test('C04 welcome/tutorial carousel', async ({ page }) => {
     await page.goto('/welcome', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(1500);
-    await expect(page.getByText(/already have an account|work near you|walvee/i).first()).toBeVisible();
+    await expect(page.getByText(/already have an account|work near you|chama fácil/i).first()).toBeVisible();
   });
 
   test('C02 login form', async ({ page }) => {

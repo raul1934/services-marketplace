@@ -1,5 +1,5 @@
 /**
- * Generates one standalone .svg file per walvee kit icon into ../icons.
+ * Generates one standalone .svg file per chamafacil kit icon into ../icons.
  * Source of truth is the ICONS map (ported in packages/shared/src/ui/Icon.tsx).
  * Each path string is split on " M" into separate <path> elements, matching
  * the runtime <Icon> renderer.

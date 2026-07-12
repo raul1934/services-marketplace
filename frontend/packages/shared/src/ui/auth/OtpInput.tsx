@@ -3,7 +3,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import { useTheme } from '../../theme';
 import { Text } from '../Text';
 
-/** Six-box OTP entry (walvee .otp-row), backed by one hidden numeric input. */
+/** Six-box OTP entry (chamafacil .otp-row), backed by one hidden numeric input. */
 export function OtpInput({
   value,
   onChange,

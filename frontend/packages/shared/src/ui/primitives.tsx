@@ -5,7 +5,7 @@ import { focusRing } from '../lib/a11y';
 import { Text } from './Text';
 import { Icon } from './Icon';
 
-/** Round 40px icon button (walvee .iconbtn). */
+/** Round 40px icon button (chamafacil .iconbtn). */
 export function IconButton({ name, onPress, size = 20, accessibilityLabel }: { name: string; onPress?: () => void; size?: number; accessibilityLabel?: string }) {
   const t = useTheme();
   return (
@@ -25,7 +25,7 @@ export function IconButton({ name, onPress, size = 20, accessibilityLabel }: { n
   );
 }
 
-/** Gradient initials avatar (walvee .avatar) — uses a flat accent fill. */
+/** Gradient initials avatar (chamafacil .avatar) — uses a flat accent fill. */
 export function AvatarGrad({ initials, size = 42 }: { initials: string; size?: number }) {
   const t = useTheme();
   return (
@@ -38,7 +38,7 @@ export function AvatarGrad({ initials, size = 42 }: { initials: string; size?: n
 }
 
 /** App bar with optional leading action, small subtitle + big title, and
- *  trailing actions (walvee .appbar). */
+ *  trailing actions (chamafacil .appbar). */
 export function AppBar({ sub, title, left, right }: { sub?: string; title: string; left?: React.ReactNode; right?: React.ReactNode }) {
   const t = useTheme();
   return (
@@ -55,7 +55,7 @@ export function AppBar({ sub, title, left, right }: { sub?: string; title: strin
   );
 }
 
-/** Back bar: round back button + inline title + optional trailing (walvee .backbar). */
+/** Back bar: round back button + inline title + optional trailing (chamafacil .backbar). */
 export function BackBar({ title, onBack, right }: { title: string; onBack?: () => void; right?: React.ReactNode }) {
   const t = useTheme();
   return (
@@ -74,7 +74,7 @@ export function BackBar({ title, onBack, right }: { title: string; onBack?: () =
   );
 }
 
-/** Uppercase section label, optional accent count (walvee .section-label). */
+/** Uppercase section label, optional accent count (chamafacil .section-label). */
 export function SectionLabel({ children, count, style }: { children: React.ReactNode; count?: React.ReactNode; style?: ViewStyle }) {
   const t = useTheme();
   return (
@@ -89,12 +89,12 @@ export function SectionLabel({ children, count, style }: { children: React.React
   );
 }
 
-/** Horizontal row (walvee .row). */
+/** Horizontal row (chamafacil .row). */
 export function Row({ children, style, gap = 13 }: { children: React.ReactNode; style?: ViewStyle; gap?: number }) {
   return <View style={[{ flexDirection: 'row', alignItems: 'center', gap }, style]}>{children}</View>;
 }
 
-/** Category icon tile (walvee .cat-ic). */
+/** Category icon tile (chamafacil .cat-ic). */
 export function CatIc({ name, size = 52, grad, iconSize }: { name: string; size?: number; grad?: boolean; iconSize?: number }) {
   const t = useTheme();
   return (
@@ -113,7 +113,7 @@ export function CatIc({ name, size = 52, grad, iconSize }: { name: string; size?
   );
 }
 
-/** Vertical category tile with label (walvee CatTile). Accepts a custom icon node. */
+/** Vertical category tile with label (chamafacil CatTile). Accepts a custom icon node. */
 export function CatTile({ icon, label, onPress }: { icon: React.ReactNode; label: string; onPress?: () => void }) {
   return (
     <Pressable onPress={onPress} style={{ alignItems: 'center', gap: 8 }}>
@@ -125,7 +125,7 @@ export function CatTile({ icon, label, onPress }: { icon: React.ReactNode; label
   );
 }
 
-/** Big price with small currency (walvee .price). */
+/** Big price with small currency (chamafacil .price). */
 export function Price({ value, currency = 'R$', size = 22 }: { value: number | string; currency?: string; size?: number }) {
   const t = useTheme();
   return (
@@ -136,7 +136,7 @@ export function Price({ value, currency = 'R$', size = 22 }: { value: number | s
   );
 }
 
-/** Squared initials avatar (walvee .av-init). */
+/** Squared initials avatar (chamafacil .av-init). */
 export function AvInit({ initials, color, size = 44 }: { initials: string; color: string; size?: number }) {
   return (
     <View style={{ width: size, height: size, borderRadius: 14, backgroundColor: color, alignItems: 'center', justifyContent: 'center' }}>
@@ -147,7 +147,7 @@ export function AvInit({ initials, color, size = 44 }: { initials: string; color
   );
 }
 
-/** Read-only display field with tiny label + value (walvee .field .fl/.fv). */
+/** Read-only display field with tiny label + value (chamafacil .field .fl/.fv). */
 export function FieldDisplay({ label, value, placeholder, minHeight }: { label: string; value?: string; placeholder?: string; minHeight?: number }) {
   const t = useTheme();
   const isPh = !value;
@@ -161,7 +161,7 @@ export function FieldDisplay({ label, value, placeholder, minHeight }: { label: 
   );
 }
 
-/** Step progress (nodes + bars) — compact inline variant (walvee .steps). */
+/** Step progress (nodes + bars) — compact inline variant (chamafacil .steps). */
 export function Steps({ total, current }: { total: number; current: number }) {
   const t = useTheme();
   const nodes: React.ReactNode[] = [];
@@ -198,7 +198,7 @@ export function Steps({ total, current }: { total: number; current: number }) {
   return <View style={{ flexDirection: 'row', alignItems: 'center' }}>{nodes}</View>;
 }
 
-/** On/off pill toggle (walvee .toggle). */
+/** On/off pill toggle (chamafacil .toggle). */
 export function Toggle({ on }: { on: boolean }) {
   const t = useTheme();
   return (
@@ -208,7 +208,7 @@ export function Toggle({ on }: { on: boolean }) {
   );
 }
 
-/** "Suggested by walvee" pill (walvee .sugg-pill). */
+/** "Suggested by chamafacil" pill (chamafacil .sugg-pill). */
 export function SuggPill({ label, icon = 'sparkles' }: { label: string; icon?: string }) {
   const t = useTheme();
   return (

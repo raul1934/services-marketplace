@@ -1,6 +1,6 @@
 import * as ImagePicker from 'expo-image-picker';
 import { Platform } from 'react-native';
-import { http } from '@walvee/shared';
+import { http } from '@chamafacil/shared';
 
 export interface PickedPhoto {
   uri: string;

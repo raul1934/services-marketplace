@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, BackBar, Button, OtpInput, Screen, Text, useAuth, useTheme } from '@walvee/shared';
+import { ApiError, BackBar, Button, OtpInput, Screen, Text, useAuth, useTheme } from '@chamafacil/shared';
 
 export default function Verify() {
   const t = useTheme();

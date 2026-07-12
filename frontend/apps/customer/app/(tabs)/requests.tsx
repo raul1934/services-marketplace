@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, Icon, PaginatedList, RequestStatus, Row, ServiceRequest, Text, flattenPages, useTheme } from '@walvee/shared';
+import { EmptyState, Icon, PaginatedList, RequestStatus, Row, ServiceRequest, Text, flattenPages, useTheme } from '@chamafacil/shared';
 import { useMyRequests } from '../../src/queries';
 import { RequestCard } from '../../src/components/RequestCard';
 import { RequestFilter, RequestFilterSheet, matchesFilter } from '../../src/components/RequestFilterSheet';

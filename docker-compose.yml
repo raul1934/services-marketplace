@@ -1,4 +1,4 @@
-# Guincho (walvee) local stack. Designed to run side-by-side with the lula
+# Guincho (Chama Fácil) local stack. Designed to run side-by-side with the lula
 # stack: distinct project name, isolated network/subnet, all host ports in the
 # 19xxx range, and the reverse proxy off :80 (lula's Caddy owns :80/:443).
 # See DOCKER.md for the full coexistence notes.
@@ -101,9 +101,9 @@ services:
     depends_on:
       - backend
       - reverb
-    # Reverse proxy for *.walvee.local. Kept OFF host :80 so it never fights the
+    # Reverse proxy for *.chamafacil.local. Kept OFF host :80 so it never fights the
     # lula Caddy (lula-core-be-caddy / lula-caddy-rev-proxy bind :80 + :443).
-    # Reachable at http://<host>.walvee.local:19088.
+    # Reachable at http://<host>.chamafacil.local:19088.
     # The mobile apps don't need this — they hit localhost:19000 / :19080 directly.
     ports:
       - "19088:80"

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Image, Modal, Pressable, ScrollView, View } from 'react-native';
-import { Field, Icon, Row, Text, useTheme } from '@walvee/shared';
+import { Field, Icon, Row, Text, useTheme } from '@chamafacil/shared';
 
 export interface LinkedItem {
   id: number;

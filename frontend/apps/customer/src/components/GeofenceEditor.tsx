@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, View } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
-import { Button, Icon, Row, Text, useTheme } from '@walvee/shared';
+import { Button, Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { GeoPoint } from '../api';
 import { MapLabel } from './MapLabel';
 

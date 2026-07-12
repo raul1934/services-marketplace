@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Icon, useTheme } from '@walvee/shared';
+import { Icon, useTheme } from '@chamafacil/shared';
 
 export default function TabsLayout() {
   const t = useTheme();

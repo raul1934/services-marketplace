@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiError, nextPageParam } from '@walvee/shared';
+import { ApiError, nextPageParam } from '@chamafacil/shared';
 import { assetsApi, categoriesApi, customerApi, CreateAssetPayload, CreateRequestPayload, ProposalSort, jobReportApi, vehicleCatalogApi, propertyTypesApi, petSpeciesApi, AddReadingPayload, AssetDetailInput } from './api';
 import { PickedPhoto, uploadPhotos } from './photos';
 

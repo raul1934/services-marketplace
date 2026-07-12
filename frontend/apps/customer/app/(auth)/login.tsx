@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Segment, Text, useAuth, useGoogleSignIn, useTheme } from '@walvee/shared';
+import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Segment, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
 
 type Mode = 'phone' | 'email';
 
@@ -14,7 +14,7 @@ export default function Login() {
   const google = useGoogleSignIn();
   const [mode, setMode] = useState<Mode>(__DEV__ ? 'email' : 'phone');
   const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState(__DEV__ ? 'cliente@walvee.test' : '');
+  const [email, setEmail] = useState(__DEV__ ? 'cliente@chamafacil.test' : '');
   const [password, setPassword] = useState(__DEV__ ? 'senha123' : '');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);

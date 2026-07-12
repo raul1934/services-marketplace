@@ -1,8 +1,8 @@
 {
-  "name": "walvee-e2e",
+  "name": "chamafacil-e2e",
   "private": true,
   "version": "1.0.0",
-  "description": "End-to-end tests (Playwright) for the walvee customer + provider web apps.",
+  "description": "End-to-end tests (Playwright) for the Chama Fácil customer + provider web apps.",
   "scripts": {
     "test": "playwright test",
     "test:customer": "playwright test --project=customer",

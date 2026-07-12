@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Icon, Text } from '@walvee/shared';
+import { Icon, Text } from '@chamafacil/shared';
 
 /**
  * Map marker content for a nearby request: the category icon (in a white circle)

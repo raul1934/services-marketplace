@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Icon, Row, Text, useTheme } from '@walvee/shared';
+import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toStr = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;

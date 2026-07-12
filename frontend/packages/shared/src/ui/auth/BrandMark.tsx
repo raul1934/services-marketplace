@@ -2,10 +2,10 @@ import React from 'react';
 import { Image } from 'react-native';
 import { useTheme } from '../../theme';
 
-// Official Walvee wordmark (dolphins + "walvee"). The asset is a single-hue
+// Official Chama Fácil wordmark (dolphins + "Chama Fácil"). The asset is a single-hue
 // mark on transparent bg, so we tint it to the theme accent — matching how the
 // landing page renders the logo. Pass `onAccent` for white (on gradient bgs).
-const MARK = require('../../../../../assets/walvee-mark.png');
+const MARK = require('../../../../../assets/chamafacil-mark.png');
 const RATIO = 773 / 196;
 
 export function BrandMark({

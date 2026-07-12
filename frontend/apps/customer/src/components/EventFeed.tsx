@@ -13,7 +13,7 @@ import {
   brl,
   relativeParts,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 
 /** How many events are visible before the feed is expanded. */
 const COLLAPSED = 5;

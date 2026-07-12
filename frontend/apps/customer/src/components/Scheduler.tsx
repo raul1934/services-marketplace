@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Card, Icon, Row, SectionLabel, Text, useTheme } from '@walvee/shared';
+import { Card, Icon, Row, SectionLabel, Text, useTheme } from '@chamafacil/shared';
 
 export interface Availability {
   starts_at: string;

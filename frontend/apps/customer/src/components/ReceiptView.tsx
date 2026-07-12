@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
-import { Card, Icon, Row, Settlement, Text, brl, useTheme } from '@walvee/shared';
+import { Card, Icon, Row, Settlement, Text, brl, useTheme } from '@chamafacil/shared';
 
 /**
  * Payment receipt for a completed job — the settlement breakdown + the settled

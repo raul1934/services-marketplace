@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Chip, Icon, RequestStatus, Row, Text, useTheme } from '@walvee/shared';
+import { Chip, Icon, RequestStatus, Row, Text, useTheme } from '@chamafacil/shared';
 
 /** Status filter buckets for the My-requests list. */
 export type RequestFilter = 'all' | 'open' | 'active' | 'completed' | 'cancelled';

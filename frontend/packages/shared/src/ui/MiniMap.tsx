@@ -4,7 +4,7 @@ import Svg, { G, Path } from 'react-native-svg';
 import { useTheme } from '../theme';
 
 /**
- * Stylised street map (walvee MiniMap) — decorative grid + dashed accent route
+ * Stylised street map (chamafacil MiniMap) — decorative grid + dashed accent route
  * with a teardrop "me" pin and a moving green puck. Matches the hi-fi mockups
  * (the real map uses react-native-maps elsewhere).
  */

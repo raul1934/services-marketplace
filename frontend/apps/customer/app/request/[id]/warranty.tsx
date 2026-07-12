@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   BackBar, Badge, Button, Card, Field, Icon, Row, Screen, SectionLabel, Segment, Text, WarrantyClaim, WarrantyType, useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useWarrantyClaims, useOpenWarranty } from '../../../src/queries';
 
 /** V3Garantia + V3GarantiaStatus (C41/C42): claim a redo/refund and track it. */

@@ -25,7 +25,7 @@ import {
   relativeParts,
   useAuth,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useCategories, useMyRequests } from '../../src/queries';
 import { CategoryIcon } from '../../src/components/CategoryIcon';
 

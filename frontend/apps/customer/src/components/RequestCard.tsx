@@ -11,7 +11,7 @@ import {
   Text,
   brl,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { CategoryIcon } from './CategoryIcon';
 
 const TONE: Record<string, BadgeTone> = {

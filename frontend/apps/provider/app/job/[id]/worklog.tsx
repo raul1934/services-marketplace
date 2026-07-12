@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -25,7 +25,7 @@ import {
   PLATFORM_FEE_RATE,
   useAuth,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import {
   useAttachJobMedia,
   useAddPart,

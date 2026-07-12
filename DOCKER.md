@@ -1,4 +1,4 @@
-# Guincho (walvee) Docker — running alongside lula
+# Guincho (Chama Fácil) Docker — running alongside lula
 
 The guincho stack is configured to run **side-by-side with the lula stack** on the
 same machine with **no conflicts**. This document explains how, what changed, and
@@ -21,13 +21,13 @@ Both stacks can be up at the same time.
 The lula stack runs a Caddy reverse proxy that binds the host's **:80 and :443**
 (`lula-core-be-caddy` and/or `lula-caddy-rev-proxy`) to serve `*.lula.local`.
 The guincho `docker-compose.yml` previously also bound **:80** for its own
-`*.walvee.local` proxy — so only one of the two stacks could start.
+`*.chamafacil.local` proxy — so only one of the two stacks could start.
 
 Everything else was already conflict-free:
 
 | Concern | lula | guincho | Conflict? |
 |---|---|---|---|
-| Container names | `lula-*` | `guincho-*` / `walvee-*` | No |
+| Container names | `lula-*` | `guincho-*` / `chamafacil-*` | No |
 | DB port | MySQL `3306` | Postgres `19432` | No |
 | Redis | `6379` | — (uses DB queue) | No |
 | App/web | `8080`, `9003`, `3000` | `19000` | No |
@@ -57,23 +57,23 @@ mobile dev flow are unaffected.
 |---|---|---|---|
 | API (Laravel) | `guincho-backend` | **19000** | Mobile apps connect here directly |
 | Reverb (WebSocket) | `guincho-reverb` | **19080** | Mobile apps connect here directly |
-| Proxy (Caddy) | `guincho-caddy` | **19088** | `*.walvee.local` (optional, web only) |
+| Proxy (Caddy) | `guincho-caddy` | **19088** | `*.chamafacil.local` (optional, web only) |
 | Landing page | `guincho-landing` | **19090** | Static marketing site |
 | Postgres | `guincho-db` | **19432** | |
 | Queue worker | `guincho-queue` | — | No host port |
 
 The Expo apps (`docker-compose.expo.yml` / `docker-compose.web.yml`) use `1918x` /
-`1908x` ports and `walvee-*` names — also conflict-free.
+`1908x` ports and `chamafacil-*` names — also conflict-free.
 
 ## Accessing the proxy hostnames
 
-Because the proxy is no longer on `:80`, the `*.walvee.local` URLs need the port:
+Because the proxy is no longer on `:80`, the `*.chamafacil.local` URLs need the port:
 
 1. Add to your hosts file (`/etc/hosts` or `C:\Windows\System32\drivers\etc\hosts`):
    ```
-   127.0.0.1 walvee.local customer.walvee.local provider.walvee.local api.walvee.local admin.walvee.local reverb.walvee.local
+   127.0.0.1 chamafacil.local customer.chamafacil.local provider.chamafacil.local api.chamafacil.local admin.chamafacil.local reverb.chamafacil.local
    ```
-2. Open e.g. `http://api.walvee.local:19088`, `http://walvee.local:19088` (landing).
+2. Open e.g. `http://api.chamafacil.local:19088`, `http://chamafacil.local:19088` (landing).
 
 > The **mobile apps do not use the proxy** — they hit `localhost:19000` (API) and
 > `localhost:19080` (Reverb) directly (see `frontend/apps/*/src/config.ts`), so the

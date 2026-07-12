@@ -4,12 +4,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { AvInit, Button, Icon, MiniMap, Text, useTheme } from '@walvee/shared';
+import { AvInit, Button, Icon, MiniMap, Text, useTheme } from '@chamafacil/shared';
 
 const TMINI_SHADOW = '0 22px 44px -18px rgba(15,23,42,0.55)';
 const FLOAT_SHADOW = '0 14px 30px -10px rgba(15,23,42,0.5)';
 
-/** Floating mini card used inside the tutorial scenes (walvee .tmini). */
+/** Floating mini card used inside the tutorial scenes (chamafacil .tmini). */
 function TMini({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
   const t = useTheme();
   return (
@@ -19,7 +19,7 @@ function TMini({ children, style }: { children: React.ReactNode; style?: ViewSty
   );
 }
 
-/** Small rounded category icon tile (walvee .cat-ic, scene size). */
+/** Small rounded category icon tile (chamafacil .cat-ic, scene size). */
 function CatIc({ name }: { name: string }) {
   const t = useTheme();
   return (
@@ -29,7 +29,7 @@ function CatIc({ name }: { name: string }) {
   );
 }
 
-/** Pill that floats over a scene (walvee .tut-float). */
+/** Pill that floats over a scene (chamafacil .tut-float). */
 function TutFloat({ icon, label, style }: { icon: string; label: string; style?: ViewStyle }) {
   const t = useTheme();
   return (
@@ -71,7 +71,7 @@ function SceneHelp() {
   );
 }
 
-/** A single bid row (walvee BidMini). */
+/** A single bid row (chamafacil BidMini). */
 function BidMini({ initials, color, name, rating, price, eta }: { initials: string; color: string; name: string; rating: string; price: string; eta: string }) {
   const t = useTheme();
   return (
@@ -121,7 +121,7 @@ function SceneTrack() {
           <CatIc name="pix" />
           <View style={{ flex: 1 }}>
             <Text weight="800" style={{ fontSize: 12 }}>Pago com Pix</Text>
-            <Text weight="700" style={{ fontSize: 10.5, color: t.colors.ok }}>Protegido pela walvee</Text>
+            <Text weight="700" style={{ fontSize: 10.5, color: t.colors.ok }}>Protegido pela Chama Fácil</Text>
           </View>
           <Text weight="800" style={{ fontSize: 15 }}>R$ 120</Text>
         </View>
@@ -147,7 +147,7 @@ export default function Welcome() {
       {/* hero */}
       <LinearGradient colors={t.grad as unknown as readonly [string, string, ...string[]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
         <SafeAreaView edges={['top']} style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: 24 }}>
-          <Text weight="800" color="#fff" style={{ fontSize: 20, letterSpacing: 0.5 }}>walvee</Text>
+          <Text weight="800" color="#fff" style={{ fontSize: 20, letterSpacing: 0.5 }}>Chama Fácil</Text>
         </SafeAreaView>
         <View style={{ position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,0.13)', top: -60, right: -50 }} />
         <View style={{ position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.13)', bottom: 30, left: -40 }} />

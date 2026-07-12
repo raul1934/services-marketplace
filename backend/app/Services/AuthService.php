@@ -123,7 +123,7 @@ class AuthService
 
             $user = User::create([
                 'name' => $name && $name !== '' ? $name : 'Usuário',
-                'email' => 'phone+'.$phone.'@walvee.local',
+                'email' => 'phone+'.$phone.'@chamafacil.local',
                 'phone' => $phone,
                 'password' => Str::random(40),
                 'is_client' => $isClient,

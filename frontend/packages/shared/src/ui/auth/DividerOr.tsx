@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useTheme } from '../../theme';
 import { Text } from '../Text';
 
-/** "or" divider with rules (walvee .divider-or). */
+/** "or" divider with rules (chamafacil .divider-or). */
 export function DividerOr({ label }: { label: string }) {
   const t = useTheme();
   return (

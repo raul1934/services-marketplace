@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   BackBar, Badge, Button, Card, Field, Icon, Row, Screen, SectionLabel, Text, brl, useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useJob, useProposeSurcharge } from '../../../src/queries';
 import { appendPhoto, pickPhotos, PickedPhoto } from '../../../src/photos';
 

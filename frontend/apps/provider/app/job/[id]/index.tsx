@@ -31,7 +31,7 @@ import {
   PLATFORM_FEE_RATE,
   useAuth,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import {
   useJob,
   useJobReport,

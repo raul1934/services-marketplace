@@ -4,7 +4,7 @@ import { useTheme } from '../../theme';
 import { Text } from '../Text';
 import GoogleMark from '../../../../../icons/google.svg';
 
-/** Google sign-in button (walvee .gbtn). */
+/** Google sign-in button (chamafacil .gbtn). */
 export function GoogleButton({ label, onPress, loading }: { label: string; onPress?: () => void; loading?: boolean }) {
   const t = useTheme();
   return (

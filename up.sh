@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Bring up the full guincho (walvee) local stack — Laravel API + both Expo web
+# Bring up the full guincho (Chama Fácil) local stack — Laravel API + both Expo web
 # apps — wired to the published localhost ports so it runs side-by-side with the
 # lula stack (no :80 conflict; everything on 19xxx).
 #
@@ -16,7 +16,7 @@ cd "$(dirname "$0")"
 
 # The Expo web apps run in the BROWSER, so these URLs resolve from the host
 # (where the API/Reverb ports are published) — not from inside the containers.
-# The compose file otherwise defaults to api.walvee.local (:80), which now
+# The compose file otherwise defaults to api.chamafacil.local (:80), which now
 # belongs to the lula proxy, so we override to the direct localhost ports.
 export EXPO_PUBLIC_CUSTOMER_API_URL="http://localhost:19000/api/customer/v1"
 export EXPO_PUBLIC_PROVIDER_API_URL="http://localhost:19000/api/provider/v1"
@@ -63,11 +63,11 @@ Endpoints
   API (provider)       http://localhost:19000/api/provider/v1
   Reverb (WebSocket)   ws://localhost:19080
   Landing              http://localhost:19090
-  Caddy proxy          http://localhost:19088   (*.walvee.local — optional)
+  Caddy proxy          http://localhost:19088   (*.chamafacil.local — optional)
 
 Test logins (password: senha123)
-  Client     cliente@walvee.test
-  Provider   prestador@walvee.test   (pre-approved, online, all categories)
+  Client     cliente@chamafacil.test
+  Provider   prestador@chamafacil.test   (pre-approved, online, all categories)
 
 Notes
   • First web load takes ~1–2 min while Metro bundles. Watch it with:

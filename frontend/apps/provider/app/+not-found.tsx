@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { NotFoundView } from '@walvee/shared';
+import { NotFoundView } from '@chamafacil/shared';
 
 /** Catch-all for unmatched routes. */
 export default function NotFound() {

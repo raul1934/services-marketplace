@@ -1,9 +1,9 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Button, Card, Icon, Row, Screen, SlideToConfirm, Text, brl, useTheme } from '@walvee/shared';
+import { BackBar, Button, Card, Icon, Row, Screen, SlideToConfirm, Text, brl, useTheme } from '@chamafacil/shared';
 import { useRequest, useRequoteDecision } from '../../../src/queries';
 
 /** RecotacaoScreen (C40): accept the present provider's new quote, or reopen to others. */

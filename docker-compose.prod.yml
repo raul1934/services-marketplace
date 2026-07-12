@@ -1,4 +1,4 @@
-# Walvee / chamafacil.app — stack de PRODUÇÃO (instância única Lightsail).
+# Chama Fácil / chamafacil.app — stack de PRODUÇÃO (instância única Lightsail).
 #
 # Arquivo AUTÔNOMO (não é override do docker-compose.yml de dev). Use sozinho:
 #   docker compose -f docker-compose.prod.yml up -d --build

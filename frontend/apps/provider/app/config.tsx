@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,7 +17,7 @@ import {
   Weekday,
   useAuth,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useAvailability, useCategories, useSetAvailability, useSetCategories } from '../src/queries';
 import { CatRow } from '../src/components/CatRow';
 

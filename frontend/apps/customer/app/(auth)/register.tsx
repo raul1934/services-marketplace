@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useTheme } from '@walvee/shared';
+import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useTheme } from '@chamafacil/shared';
 
 export default function Register() {
   const t = useTheme();

@@ -16,7 +16,7 @@ return [
     'otp_sent' => 'We sent a verification code to your phone.',
     'otp_invalid' => 'Invalid verification code.',
     'otp_expired' => 'The code has expired. Please request a new one.',
-    'waitlist_joined' => "You're on the list! We'll reach out as soon as walvee launches near you.",
+    'waitlist_joined' => "You're on the list! We'll reach out as soon as Chama Fácil launches near you.",
     'insufficient_balance' => 'Insufficient balance to withdraw.',
     'payout_pix' => 'Pix withdrawal',
     'payout_done' => 'Withdrawal requested. The money arrives shortly.',

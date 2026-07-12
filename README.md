@@ -1,10 +1,10 @@
-# Walvee (Guincho)
+# Chama Fácil (Guincho)
 
 > Roadside-assistance & home-services marketplace — customers post a service
 > request, nearby providers bid on it, and the job runs end-to-end with realtime
 > tracking, a one-time start code, surcharge re-quotes and in-app settlement.
 
-**Walvee** is the product brand; **Guincho** is the name of the local dev stack
+**Chama Fácil** is the product brand; **Guincho** is the name of the local dev stack
 (Portuguese for "tow truck", the original roadside use case). Service categories
 include towing, tyre, mechanic, plumber and more.
 
@@ -74,11 +74,11 @@ Host ports (all in the `19xxx` range so the stack can coexist with others):
 | Filament admin | http://localhost:19000/admin |
 | Reverb (WebSocket) | ws://localhost:19080 |
 | PostgreSQL | localhost:19432 |
-| Caddy reverse proxy (`*.walvee.local`) | http://localhost:19088 |
+| Caddy reverse proxy (`*.chamafacil.local`) | http://localhost:19088 |
 | Landing page | http://localhost:19090 |
 
-Seeded dev accounts (password `senha123`): `cliente@walvee.test` (customer),
-`prestador@walvee.test` (provider). See [DOCKER.md](DOCKER.md) for coexistence notes.
+Seeded dev accounts (password `senha123`): `cliente@chamafacil.test` (customer),
+`prestador@chamafacil.test` (provider). See [DOCKER.md](DOCKER.md) for coexistence notes.
 
 ### 2. Mobile apps (Expo)
 

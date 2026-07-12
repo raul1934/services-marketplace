@@ -1,7 +1,7 @@
 import React from 'react';
-import { Icon, ICON_NAMES, ServiceCategory, useTheme } from '@walvee/shared';
+import { Icon, ICON_NAMES, ServiceCategory, useTheme } from '@chamafacil/shared';
 
-/** Per-type fallback icon (walvee set) when a category has no specific icon. */
+/** Per-type fallback icon (chamafacil set) when a category has no specific icon. */
 const TYPE_FALLBACK: Record<string, string> = {
   roadside: 'car',
   residential: 'wrench',
@@ -11,11 +11,11 @@ const TYPE_FALLBACK: Record<string, string> = {
 };
 
 /**
- * Renders a category's icon from the walvee icon set. `ServiceCategory.icon`
- * holds a walvee icon name (seeded); falls back to a per-type icon when the
+ * Renders a category's icon from the chamafacil icon set. `ServiceCategory.icon`
+ * holds a chamafacil icon name (seeded); falls back to a per-type icon when the
  * name is missing or unknown, so nothing renders blank.
  */
-/** Resolve a category to its walvee icon name (specific icon, else per-type fallback). */
+/** Resolve a category to its chamafacil icon name (specific icon, else per-type fallback). */
 export function categoryIconName(category?: ServiceCategory | null): string {
   const icon = category?.icon ?? '';
   return ICON_NAMES.includes(icon) ? icon : TYPE_FALLBACK[category?.type ?? 'roadside'] ?? 'wrench';

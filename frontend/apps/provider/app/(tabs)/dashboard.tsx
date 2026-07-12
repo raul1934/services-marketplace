@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -25,7 +25,7 @@ import {
   isActiveStatus,
   useAuth,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useActiveJobs, useDashboard, useNearby, useSetOnline } from '../../src/queries';
 import { getCurrentCoords } from '../../src/location';
 import { CategoryIcon } from '../../src/components/CategoryIcon';

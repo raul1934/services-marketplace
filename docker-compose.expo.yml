@@ -20,7 +20,7 @@
 services:
   customer:
     image: node:22-bookworm
-    container_name: walvee-customer
+    container_name: chamafacil-customer
     working_dir: /app
     command: >
       sh -lc '[ -d node_modules ] || npm install;
@@ -40,7 +40,7 @@ services:
 
   provider:
     image: node:22-bookworm
-    container_name: walvee-provider
+    container_name: chamafacil-provider
     working_dir: /app
     command: >
       sh -lc '[ -d node_modules ] || npm install;

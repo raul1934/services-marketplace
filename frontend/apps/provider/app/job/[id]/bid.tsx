@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
-import { Alert } from '@walvee/shared';
+import { Alert } from '@chamafacil/shared';
 import MapView, { Marker } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +32,7 @@ import {
   RequestUrgency,
   useAuth,
   useTheme,
-} from '@walvee/shared';
+} from '@chamafacil/shared';
 import { useAcceptCounterOffer, useAskQuestion, useDeclineCounterOffer, useJob, useQuestionSuggestions, useQuestions, useRemoveQuestion, useSubmitProposal, useWithdrawProposal } from '../../../src/queries';
 import { CategoryIcon } from '../../../src/components/CategoryIcon';
 

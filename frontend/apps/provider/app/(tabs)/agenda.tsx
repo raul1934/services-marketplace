@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Badge, Card, EmptyState, Icon, Row, Screen, ServiceRequest, Text, flattenPages, isActiveStatus, useTheme } from '@walvee/shared';
+import { Badge, Card, EmptyState, Icon, Row, Screen, ServiceRequest, Text, flattenPages, isActiveStatus, useTheme } from '@chamafacil/shared';
 import { useActiveJobs } from '../../src/queries';
 import { CategoryIcon } from '../../src/components/CategoryIcon';
 
