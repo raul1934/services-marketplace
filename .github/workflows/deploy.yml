@@ -1,17 +1,16 @@
 name: Deploy to Lightsail
 
 # Deploy automático em produção (chamafacil.app) a cada push na main que toque
-# o backend, a landing ou a configuração de deploy. Também pode ser disparado
-# manualmente (workflow_dispatch).
+# o backend, a landing ou a configuração de deploy. Também roda manualmente.
 #
-# Pré-requisitos (uma vez):
-#   - Servidor Lightsail já provisionado: Docker + Compose instalados, repositório
-#     clonado em ~/services-marketplace, .env (raiz) e backend/.env criados.
-#     Veja DEPLOY.md, "Parte B".
-#   - Secrets do repositório (Settings -> Secrets and variables -> Actions):
-#       LIGHTSAIL_HOST     -> Static IP da instância
-#       LIGHTSAIL_USER     -> ec2-user
-#       LIGHTSAIL_SSH_KEY  -> conteúdo da chave .pem (NUNCA commitada)
+# O servidor é um clone git (remote via deploy key SSH read-only). Este workflow
+# só faz SSH e roda `git fetch/reset` + rebuild. O `.env` e o `vendor/` do servidor
+# são preservados (gitignored — `git reset --hard` não os toca).
+#
+# Secrets necessários (Settings -> Secrets and variables -> Actions):
+#   LIGHTSAIL_HOST     -> Static IP da instância (32.197.79.197)
+#   LIGHTSAIL_USER     -> ec2-user
+#   LIGHTSAIL_SSH_KEY  -> conteúdo da chave .pem de acesso à instância
 
 on:
   push:
@@ -24,7 +23,6 @@ on:
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
-# Nunca roda dois deploys ao mesmo tempo; não cancela um deploy em andamento.
 concurrency:
   group: deploy-production
   cancel-in-progress: false
@@ -40,30 +38,22 @@ jobs:
           username: ${{ secrets.LIGHTSAIL_USER }}
           key: ${{ secrets.LIGHTSAIL_SSH_KEY }}
           script_stop: true
+          command_timeout: 20m
           script: |
             set -euo pipefail
             cd ~/services-marketplace
 
-            # Atualiza o código (fast-forward apenas; sem merges surpresa em prod).
+            # Atualiza o código a partir do GitHub (deploy key). Fast-forward duro
+            # para a main; .env e vendor/ (gitignored) são preservados.
+            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
             git fetch origin main
             git reset --hard origin/main
 
             COMPOSE="docker compose -f docker-compose.prod.yml"
-
-            # Rebuild das imagens (Dockerfile do backend).
             $COMPOSE build
-
-            # Instala dependências PHP no volume ./backend antes de subir os
-            # containers (o backend roda `artisan migrate` no boot e precisa do vendor/).
             $COMPOSE run --rm --no-deps backend \
               composer install --no-dev --optimize-autoloader --no-interaction
-
-            # Sobe/atualiza o stack.
             $COMPOSE up -d
-
-            # Migrations e cache de config (idempotentes).
             $COMPOSE exec -T backend php artisan migrate --force
             $COMPOSE exec -T backend php artisan config:cache
-
-            # Remove imagens antigas órfãs para não encher o disco da instância.
             docker image prune -f

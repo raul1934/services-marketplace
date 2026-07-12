@@ -63,18 +63,19 @@ docker compose version   # confirma
 
 ### 2. Deploy key + clone (repositório privado)
 
+O servidor precisa ser um **clone git** (o CI/CD faz `git fetch/reset`). Gere uma
+chave no servidor e adicione a pública como **Deploy key** no GitHub (basta
+**read-only**):
+
 ```bash
 ssh-keygen -t ed25519 -C "lightsail-deploy" -f ~/.ssh/id_ed25519 -N ""
-cat ~/.ssh/id_ed25519.pub
-```
-
-Cole a **chave pública** em GitHub → repo → *Settings → Deploy keys → Add deploy key*
-(marque **somente leitura**). Depois:
-
-```bash
+cat ~/.ssh/id_ed25519.pub   # cole em GitHub -> repo -> Settings -> Deploy keys
 git clone git@github.com:raul1934/services-marketplace.git ~/services-marketplace
 cd ~/services-marketplace
 ```
+
+(Já provisionado: deploy key "LIGHTSAIL" no repo e `~/services-marketplace` é um
+clone rastreando `origin/main`.)
 
 ### 3. Variáveis de ambiente (não versionadas)
 
