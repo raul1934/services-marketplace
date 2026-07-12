@@ -1,4 +1,4 @@
-import { configureApi, configureRealtime, setupWeb } from '@chamafacil/shared';
+import { configureApi, configureGoogleSignIn, configureRealtime, setupWeb } from '@chamafacil/shared';
 import { config } from './config';
 
 let done = false;
@@ -14,4 +14,5 @@ export function initServices() {
     forceTLS: config.reverb.forceTLS,
     authBaseUrl: config.apiHost,
   });
+  configureGoogleSignIn(config.googleClientId);
 }

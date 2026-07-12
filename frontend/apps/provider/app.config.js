@@ -22,6 +22,7 @@ module.exports = ({ config }) => ({
   },
   plugins: [
     ...(config.plugins || []),
+    '@react-native-google-signin/google-signin',
     [
       withLocalizedPermissions,
       { strings: permissions.provider, locales: permissions.locales, defaultLocale: permissions.defaultLocale },

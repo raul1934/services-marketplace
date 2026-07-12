@@ -14,5 +14,8 @@ export const config = {
     wsPort: Number(process.env.EXPO_PUBLIC_REVERB_PORT ?? 443),
     forceTLS: (process.env.EXPO_PUBLIC_REVERB_TLS ?? 'true') === 'true',
   },
+  googleClientId:
+    process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ??
+    '750648294839-6fta9gctg4mh9e1eovvudri7a2c344r0.apps.googleusercontent.com',
   tokenKey: 'chamafacil.provider.token',
 };
