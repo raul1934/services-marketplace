@@ -23,12 +23,15 @@ config.resolver.nodeModulesPaths = [
 ];
 config.resolver.disableHierarchicalLookup = true;
 
-// react-native-maps has no web support — alias it to a stub on web only.
-const mapsStub = path.resolve(projectRoot, 'src/web-stubs/react-native-maps.tsx');
+// We don't use Google Maps. `react-native-maps` is aliased to Leaflet on every
+// platform: the DOM stub on web, and a Leaflet-in-WebView impl on native
+// (packages/shared/src/maps). Both expose the same MapView/Marker/Polygon/Polyline.
+const mapsWebStub = path.resolve(projectRoot, 'src/web-stubs/react-native-maps.tsx');
+const mapsNative = path.resolve(workspaceRoot, 'packages/shared/src/maps/react-native-maps.tsx');
 const defaultResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  if (platform === 'web' && moduleName === 'react-native-maps') {
-    return { type: 'sourceFile', filePath: mapsStub };
+  if (moduleName === 'react-native-maps') {
+    return { type: 'sourceFile', filePath: platform === 'web' ? mapsWebStub : mapsNative };
   }
   return defaultResolveRequest
     ? defaultResolveRequest(context, moduleName, platform)

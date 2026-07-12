@@ -6,6 +6,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "react-native-maps": [
+        "../../packages/shared/src/maps/react-native-maps"
       ]
     }
   },
