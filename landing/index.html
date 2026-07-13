@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Chama Fácil — ajuda, rápido</title>
 <meta name="description" content="Toda a manutenção dos seus ativos em um só lugar. Do socorro veicular ao reparo predial — chame um profissional verificado em segundos." />
-<!-- Configure the API base here (where POST /api/v1/waitlist lives). -->
+<!-- Onde vive POST /api/v1/waitlist e GET /api/v1/service-categories -->
 <meta name="api-base" content="https://api.chamafacil.app" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
   :root {
     --bg: #eef2f7; --surface: #fff; --surface-2: #f6f8fc;
@@ -21,26 +21,21 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body { font-family: "Manrope", system-ui, sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.5; }
-  a { color: inherit; text-decoration: none; }
-  svg { display: block; }
+  .lp a { color: inherit; text-decoration: none; }
   .lp-wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
-  h1, h2, h3 { letter-spacing: -.03em; margin: 0; font-weight: 800; }
+  .lp h1, .lp h2, .lp h3 { letter-spacing: -.03em; margin: 0; font-weight: 800; }
   .lp-eyebrow { font-size: 12.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  svg { display: block; }
 
   .lp-nav { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
   .lp-nav .lp-wrap { display: flex; align-items: center; gap: 14px; height: 72px; }
   .lp-logo { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 22px; letter-spacing: -.03em; }
-  /* Chama Fácil dolphins+wordmark, tinted to the brand orange via the PNG's alpha as a mask. */
-  .lp-logomark { display: inline-block; width: 134px; height: 34px; background: var(--grad);
-    -webkit-mask: url("https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/48619aa04_Marca.png") left center / contain no-repeat;
-    mask: url("https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/68e82e0380ac6e4a26051c6f/48619aa04_Marca.png") left center / contain no-repeat; }
   .lp-logo .lp-mk { width: 38px; height: 38px; border-radius: 12px; background: var(--grad); display: flex; align-items: center; justify-content: center; flex: none; }
   .lp-links { display: flex; gap: 30px; margin-left: 26px; font-weight: 700; font-size: 14.5px; color: var(--ink-2); }
   .lp-links a:hover { color: var(--ink); }
   .lp-spacer { flex: 1; }
-  .lp-btn { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; padding: 13px 22px; border-radius: 999px; border: none; cursor: pointer; font-family: inherit; white-space: nowrap; transition: transform .15s, box-shadow .15s; }
-  .lp-btn:hover { transform: translateY(-1px); }
-  .lp-btn.grad { background: var(--grad); color: #fff; box-shadow: 0 12px 26px -12px rgba(255,90,110,.7); }
+  .lp-btn { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; padding: 13px 22px; border-radius: 999px; border: none; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .lp-btn.grad { background: var(--grad); color: #fff; }
   .lp-btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
   .lp-btn.lg { padding: 16px 28px; font-size: 16px; }
   .lp-btn.light { background: #fff; color: var(--ink); }
@@ -48,7 +43,7 @@
   .lp-hero { position: relative; overflow: hidden; }
   .lp-hero .lp-wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 30px; align-items: center; padding-top: 56px; padding-bottom: 64px; }
   .lp-hero h1 { font-size: clamp(44px, 6vw, 76px); line-height: .98; }
-  .lp-sub { font-size: 19px; color: var(--ink-2); max-width: 34ch; margin: 22px 0 30px; font-weight: 500; }
+  .lp-sub { font-size: 19px; color: var(--ink-2); max-width: 30ch; margin: 22px 0 30px; font-weight: 500; }
   .lp-cta { display: flex; gap: 12px; flex-wrap: wrap; }
   .lp-meta { display: flex; gap: 28px; margin-top: 34px; }
   .lp-meta .v { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
@@ -56,8 +51,22 @@
   .lp-phonewrap { position: relative; display: flex; justify-content: center; }
   .lp-glow { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: var(--grad); filter: blur(80px); opacity: .22; top: 40px; right: -20px; z-index: 0; }
 
+  /* static phone mockup */
+  .phone { position: relative; z-index: 1; width: 320px; background: #0e141d; border-radius: 44px; padding: 12px; box-shadow: 0 50px 90px -40px rgba(20,30,50,.5); }
+  .phone .scr { background: var(--surface-2); border-radius: 34px; overflow: hidden; }
+  .phone .nub { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 120px; height: 26px; background: #0e141d; border-radius: 999px; z-index: 2; }
+  .ph-top { background: var(--grad); color: #fff; padding: 30px 18px 20px; }
+  .ph-top .h { font-size: 12px; font-weight: 800; opacity: .9; letter-spacing: .04em; text-transform: uppercase; }
+  .ph-top .t { font-size: 21px; font-weight: 800; margin-top: 4px; }
+  .ph-body { padding: 16px; }
+  .ph-cardhead { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .ph-badge { margin-left: auto; font-size: 10.5px; font-weight: 800; color: var(--accent); background: var(--accent-soft); padding: 5px 10px; border-radius: 999px; }
+  .ph-bid { display: flex; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: 16px; padding: 12px 13px; margin-bottom: 10px; background: var(--surface); }
+  .ph-bid.best { border: 1.5px solid var(--accent); background: var(--accent-soft); }
+  .ph-av { width: 38px; height: 38px; border-radius: 11px; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
+
   .lp-sec { padding: 76px 0; }
-  .lp-sechead { text-align: center; max-width: 660px; margin: 0 auto 48px; }
+  .lp-sechead { text-align: center; max-width: 640px; margin: 0 auto 48px; }
   .lp-sechead h2 { font-size: clamp(30px, 4vw, 44px); margin-top: 12px; }
   .lp-sechead p { color: var(--ink-2); font-size: 17px; margin-top: 14px; }
 
@@ -107,7 +116,7 @@
   .lp-fitem h3 { font-size: 19px; }
   .lp-fitem p { color: var(--ink-2); font-size: 14.5px; margin-top: 5px; }
   .lp-featvis { position: relative; display: flex; justify-content: center; }
-  .card-demo { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 30px 60px -30px rgba(20,35,59,.4); padding: 22px; width: 100%; max-width: 380px; }
+  .lp-featvis .card-demo { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 30px 60px -30px rgba(20,35,59,.4); padding: 22px; width: 100%; max-width: 380px; }
 
   .lp-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .lp-quote { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 26px; box-shadow: 0 12px 34px -22px rgba(20,35,59,.26); display: flex; flex-direction: column; gap: 14px; }
@@ -123,14 +132,22 @@
   .lp-faqq { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 24px 4px; cursor: pointer; font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
   .lp-faqq .chev { color: var(--ink-3); transition: transform .25s; flex: none; }
   .lp-faqa { color: var(--ink-2); font-size: 15.5px; line-height: 1.6; max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s ease; padding: 0 4px; }
-  .lp-faqitem.open .lp-faqa { max-height: 240px; padding: 0 4px 24px; }
+  .lp-faqitem.open .lp-faqa { max-height: 260px; padding: 0 4px 24px; }
   .lp-faqitem.open .chev { transform: rotate(180deg); }
 
   .lp-join { background: var(--surface); border-top: 1px solid var(--line); }
   .lp-joingrid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: center; }
   .lp-joinaside .lp-pt { display: flex; gap: 13px; align-items: flex-start; margin-top: 18px; }
   .lp-joinaside .lp-pt .pc { width: 26px; height: 26px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
-  .lp-joinaside .lp-pt span:last-child { font-size: 15px; color: var(--ink-2); font-weight: 600; }
+  .lp-joinaside .lp-pt span.tx { font-size: 15px; color: var(--ink-2); font-weight: 600; }
+  .lp-partner { display: flex; gap: 13px; align-items: flex-start; margin-top: 26px; padding: 18px; border-radius: 18px; text-decoration: none;
+    background: linear-gradient(135deg, var(--accent-soft), color-mix(in oklab, var(--accent-soft) 40%, var(--surface)));
+    border: 1px solid color-mix(in oklab, var(--accent) 28%, transparent); transition: transform .18s ease, box-shadow .18s ease; }
+  .lp-partner:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -26px rgba(224,104,58,.6); }
+  .lp-partner-ic { width: 40px; height: 40px; border-radius: 12px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+  .lp-partner-tx { font-size: 14px; color: var(--ink-2); font-weight: 600; line-height: 1.5; }
+  .lp-partner-tx b { display: block; font-size: 15px; color: var(--ink); font-weight: 800; margin-bottom: 3px; }
+  .lp-partner-cta { color: var(--accent); font-weight: 800; white-space: nowrap; }
   .lp-formcard { background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 34px; box-shadow: 0 30px 70px -36px rgba(20,35,59,.4); }
   .lp-seg2 { display: flex; gap: 10px; margin-bottom: 6px; }
   .lp-rolebtn { flex: 1; padding: 14px 10px; border: 1.5px solid var(--line); border-radius: 14px; font-weight: 800; font-size: 14.5px; cursor: pointer; background: var(--surface-2); color: var(--ink-2); display: flex; align-items: center; justify-content: center; gap: 9px; transition: .15s; font-family: inherit; }
@@ -147,7 +164,7 @@
   .lp-submit { width: 100%; margin-top: 20px; justify-content: center; }
   .lp-fineprint { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 14px; }
   .lp-success { text-align: center; padding: 26px 10px; }
-  .lp-success .sc-ic { width: 76px; height: 76px; border-radius: 24px; background: var(--grad); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; color: #fff; }
+  .lp-success .sc-ic { width: 76px; height: 76px; border-radius: 24px; background: var(--grad); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
   .lp-success h3 { font-size: 26px; }
   .lp-success p { color: var(--ink-2); font-size: 16px; margin-top: 10px; }
 
@@ -168,58 +185,22 @@
   .lp-plan .pfeat .pc { width: 20px; height: 20px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px; }
   .lp-plan .lp-btn { margin-top: auto; justify-content: center; width: 100%; }
 
-  /* phone mock */
-  .pm { width: 320px; height: 660px; background: #0d1626; border-radius: 44px; padding: 11px; box-shadow: 0 50px 90px -40px rgba(20,30,50,.55); position: relative; z-index: 1; }
-  .pm-screen { width: 100%; height: 100%; background: var(--bg); border-radius: 34px; overflow: hidden; position: relative; display: none; flex-direction: column; }
-  .pm-screen.on { display: flex; animation: pmFade .5s ease; }
-  @keyframes pmFade { from { opacity: 0; } to { opacity: 1; } }
-  .pm-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 116px; height: 26px; background: #0d1626; border-radius: 999px; z-index: 6; }
-  .pm-sb { height: 46px; flex: none; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 24px 6px; font-weight: 800; font-size: 13.5px; }
-  .pm-sb.on-accent { color: #fff; }
-  .pm-body { flex: 1; overflow: hidden; padding: 4px 18px 18px; }
-  .pm-head { background: var(--grad); margin: -4px -18px 14px; padding: 6px 20px 22px; color: #fff; }
-  .pm-greet { font-size: 13px; font-weight: 700; opacity: .92; }
-  .pm-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin-top: 3px; }
-  .pm-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 14px; margin-bottom: 11px; box-shadow: 0 10px 24px -18px rgba(20,35,59,.4); }
-  .pm-cat { display: flex; align-items: center; gap: 12px; }
-  .pm-cat .ci { width: 42px; height: 42px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
-  .pm-cat .cn { font-weight: 800; font-size: 15px; }
-  .pm-cat .cs { font-size: 12px; color: var(--ink-3); font-weight: 700; }
-  .pm-bid { display: flex; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: 14px; padding: 11px 12px; margin-bottom: 9px; }
-  .pm-bid.best { border: 1.5px solid var(--accent); background: var(--accent-soft); }
-  .pm-bid .av { width: 36px; height: 36px; border-radius: 10px; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; }
-  .pm-bid .nm { font-weight: 800; font-size: 13.5px; }
-  .pm-bid .mt { font-size: 11.5px; color: var(--ink-2); font-weight: 700; }
-  .pm-bid .pr { margin-left: auto; text-align: right; font-weight: 800; font-size: 16px; }
-  .pm-bid .bestlbl { font-size: 10px; font-weight: 800; color: var(--accent); }
-  .pm-map { height: 188px; border-radius: 18px; margin-bottom: 12px; background:
-      radial-gradient(circle at 30% 40%, #ffd9c9 0, transparent 40%),
-      radial-gradient(circle at 70% 60%, #ffe6b3 0, transparent 45%),
-      repeating-linear-gradient(0deg, #e3e9f2 0 1px, transparent 1px 26px),
-      repeating-linear-gradient(90deg, #e3e9f2 0 1px, transparent 1px 26px), #eef2f7;
-      position: relative; border: 1px solid var(--line); }
-  .pm-pin { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 34px; height: 34px; border-radius: 50%; background: var(--grad); display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 8px 18px -6px rgba(255,90,110,.8); }
-  .pm-bar { display: flex; align-items: center; gap: 11px; }
-  .pm-prog { flex: 1; height: 7px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
-  .pm-prog i { display: block; height: 100%; width: 64%; background: var(--grad); }
-  .pm-dots { display: flex; gap: 8px; justify-content: center; margin-top: 18px; }
-  .pm-dots .hd { width: 8px; height: 8px; border-radius: 50%; background: var(--line); border: none; padding: 0; cursor: pointer; transition: .2s; }
-  .pm-dots .hd.on { width: 24px; border-radius: 4px; background: var(--accent); }
-
   @media (max-width: 880px) {
     .lp-hero .lp-wrap, .lp-proband, .lp-feat, .lp-joingrid { grid-template-columns: 1fr; }
     .lp-phonewrap { margin-top: 8px; }
     .lp-svcgrid, .lp-steps, .lp-quotes, .lp-row2, .lp-plans { grid-template-columns: 1fr; }
     .lp-links { display: none; }
     .lp-trust .lp-wrap { gap: 20px; }
+    .lp-proband { padding: 40px 26px; }
   }
 </style>
 </head>
 <body>
+<div class="lp">
 
 <nav class="lp-nav"><div class="lp-wrap">
-  <a class="lp-logo" href="#" aria-label="Chama Fácil"><span class="lp-logomark"></span></a>
-  <div class="lp-links"><a href="#why">Plataforma</a><a href="#services">Serviços</a><a href="#planos">Planos</a><a href="#pro">Seja prestador</a></div>
+  <a class="lp-logo" href="#"><span class="lp-mk" data-ic="flame" data-sz="22"></span>Chama Fácil</a>
+  <div class="lp-links"><a href="#services">Serviços</a><a href="#planos">Planos</a><a href="#pro">Seja prestador</a><a href="parcerias.html">Parcerias</a></div>
   <span class="lp-spacer"></span>
   <a class="lp-btn grad" href="#join">Acesso antecipado</a>
 </div></nav>
@@ -242,41 +223,25 @@
       </div>
     </div>
     <div class="lp-phonewrap">
-      <div class="pm" id="phoneMock">
-        <div class="pm-notch"></div>
-
-        <div class="pm-screen on" data-screen="0">
-          <div class="pm-sb on-accent"><span>9:41</span><span>Chama Fácil</span></div>
-          <div class="pm-body">
-            <div class="pm-head"><div class="pm-greet">Olá, Mateus 👋</div><div class="pm-title">Do que você precisa?</div></div>
-            <div class="pm-card"><div class="pm-cat"><span class="ci" data-ic="car"></span><div><div class="cn">Veicular</div><div class="cs">Pneu, bateria, guincho, chave</div></div></div></div>
-            <div class="pm-card"><div class="pm-cat"><span class="ci" data-ic="drop"></span><div><div class="cn">Casa &amp; imóvel</div><div class="cs">Encanamento, elétrica, limpeza</div></div></div></div>
-            <div class="pm-card"><div class="pm-cat"><span class="ci" data-ic="paw"></span><div><div class="cn">Pets</div><div class="cs">Passeio, banho &amp; tosa, vet</div></div></div></div>
-          </div>
-        </div>
-
-        <div class="pm-screen" data-screen="1">
-          <div class="pm-sb"><span>9:41</span><span>Chama Fácil</span></div>
-          <div class="pm-body">
-            <div class="pm-card">
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="width:38px;height:38px;border-radius:11px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center" data-ic="car"></span><div><div style="font-weight:800;font-size:14px">Pneu furado · Av. Paulista</div><div style="font-size:11.5px;color:var(--ink-3);font-weight:700">3 propostas · urgente</div></div><span style="margin-left:auto;font-size:10.5px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:4px 9px;border-radius:999px">LIVE</span></div>
-              <div class="pm-bid best"><span class="av" style="background:#3b82f6">RC</span><div><div class="nm">Rafael C.</div><div class="mt">★ 4.9 · 8 min</div></div><div class="pr">R$120<div class="bestlbl">Melhor opção</div></div></div>
-              <div class="pm-bid"><span class="av" style="background:#12b981">JS</span><div><div class="nm">João S.</div><div class="mt">★ 4.7 · 12 min</div></div><div class="pr">R$95</div></div>
-              <div class="pm-bid"><span class="av" style="background:#ff6a3d">LM</span><div><div class="nm">Lucas M.</div><div class="mt">★ 4.8 · 15 min</div></div><div class="pr">R$110</div></div>
+      <div class="phone">
+        <span class="nub"></span>
+        <div class="scr">
+          <div class="ph-top"><div class="h">Chamado urgente</div><div class="t">Pneu furado · Av. Paulista</div></div>
+          <div class="ph-body">
+            <div class="ph-cardhead"><span style="font-weight:800;font-size:14px">3 propostas</span><span class="ph-badge">AO VIVO</span></div>
+            <div class="ph-bid best">
+              <span class="ph-av" style="background:#3b82f6">RC</span>
+              <div style="flex:1"><div style="font-weight:800;font-size:14px">Rafael C.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.9 · 8 min</div></div>
+              <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$120</div><div style="font-size:10.5px;font-weight:800;color:var(--accent)">Melhor opção</div></div>
+            </div>
+            <div class="ph-bid">
+              <span class="ph-av" style="background:#12b981">JS</span>
+              <div style="flex:1"><div style="font-weight:800;font-size:14px">João S.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.7 · 12 min</div></div>
+              <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$95</div></div>
             </div>
           </div>
         </div>
-
-        <div class="pm-screen" data-screen="2">
-          <div class="pm-sb"><span>9:41</span><span>Chama Fácil</span></div>
-          <div class="pm-body">
-            <div class="pm-map"><span class="pm-pin"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></span></div>
-            <div class="pm-card" style="margin-bottom:12px"><div class="pm-cat"><span class="av" style="width:42px;height:42px;border-radius:12px;background:#3b82f6;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">RC</span><div><div class="cn">Rafael está a caminho</div><div class="cs">Chega em ~8 min · R$120</div></div></div></div>
-            <div class="pm-bar"><div class="pm-prog"><i></i></div><span style="font-size:12px;font-weight:800;color:var(--accent)">A caminho</span></div>
-          </div>
-        </div>
       </div>
-      <div class="pm-dots" id="phoneDots" style="position:absolute;bottom:-34px;left:50%;transform:translateX(-50%)"></div>
     </div>
   </div>
 </header>
@@ -290,17 +255,6 @@
   </div>
 </div>
 
-<section class="lp-sec" id="services">
-  <div class="lp-wrap">
-    <div class="lp-sechead"><span class="lp-eyebrow">O que cobrimos</span><h2>Uma plataforma para toda manutenção</h2><p>Do socorro veicular ao reparo predial — chame um profissional verificado em segundos e mantenha o histórico de cada ativo.</p></div>
-    <div class="lp-svcgrid">
-      <div class="lp-svc reveal"><div class="lp-ic" data-ic="car"></div><h3>Veicular</h3><p>De volta à estrada, rápido.</p><div class="lp-tags"><span class="lp-tag">Pneu furado</span><span class="lp-tag">Bateria</span><span class="lp-tag">Guincho</span><span class="lp-tag">Sem chave</span></div></div>
-      <div class="lp-svc reveal"><div class="lp-ic" data-ic="drop"></div><h3>Casa &amp; imóvel</h3><p>Reparos e manutenção sob demanda.</p><div class="lp-tags"><span class="lp-tag">Encanamento</span><span class="lp-tag">Elétrica</span><span class="lp-tag">Limpeza</span><span class="lp-tag">Chaveiro</span></div></div>
-      <div class="lp-svc reveal"><div class="lp-ic" data-ic="paw"></div><h3>Pets</h3><p>Cuidado que vem até você.</p><div class="lp-tags"><span class="lp-tag">Passeio</span><span class="lp-tag">Banho &amp; tosa</span><span class="lp-tag">Veterinário</span></div></div>
-    </div>
-  </div>
-</section>
-
 <section class="lp-sec lp-join" id="join">
   <div class="lp-wrap">
     <div class="lp-joingrid">
@@ -308,16 +262,20 @@
         <span class="lp-eyebrow">Acesso antecipado</span>
         <h2 style="font-size:clamp(30px,4vw,44px);margin-top:12px">Seja o primeiro quando a Chama Fácil chegar perto de você.</h2>
         <p style="color:var(--ink-2);font-size:17px;margin-top:14px">Entre na lista e avisamos assim que lançarmos na sua cidade — com vantagens para os primeiros.</p>
-        <div class="lp-pt"><span class="pc" data-ic="check"></span><span>Acesso prioritário no lançamento</span></div>
-        <div class="lp-pt"><span class="pc" data-ic="check"></span><span>Créditos de fundador nos primeiros serviços</span></div>
-        <div class="lp-pt"><span class="pc" data-ic="check"></span><span>Sem spam — só um e-mail de lançamento</span></div>
+        <div class="lp-pt"><span class="pc" data-ic="check"></span><span class="tx">Acesso prioritário no lançamento</span></div>
+        <div class="lp-pt"><span class="pc" data-ic="check"></span><span class="tx">Créditos de fundador nos primeiros serviços</span></div>
+        <div class="lp-pt"><span class="pc" data-ic="check"></span><span class="tx">Sem spam — só um e-mail de lançamento</span></div>
+        <a href="parcerias.html" class="lp-partner">
+          <span class="lp-partner-ic" data-ic="handshake"></span>
+          <span class="lp-partner-tx"><b>Parcerias regionais abertas</b>Quer cuidar de uma região? Buscamos parceiros para prospectar prestadores e apoiar clientes em dúvidas e disputas. <span class="lp-partner-cta">Fale com a gente →</span></span>
+        </a>
       </div>
 
       <div class="lp-formcard reveal">
         <form id="joinForm" novalidate>
           <div class="lp-seg2">
-            <button type="button" class="lp-rolebtn on" data-role="customer"><span data-ic="search"></span> Preciso de ajuda</button>
-            <button type="button" class="lp-rolebtn" data-role="pro"><span data-ic="briefcase"></span> Quero trabalhar</button>
+            <button type="button" class="lp-rolebtn on" data-role="customer"><span data-ic="search" data-sz="16"></span> Preciso de ajuda</button>
+            <button type="button" class="lp-rolebtn" data-role="pro"><span data-ic="briefcase" data-sz="16"></span> Quero trabalhar</button>
           </div>
 
           <label class="lp-fl">Nome completo</label>
@@ -333,21 +291,33 @@
           <div class="lp-row2">
             <div><label class="lp-fl">Cidade</label><input class="lp-input" name="city" placeholder="São Paulo" value="São Paulo" /></div>
             <div><label class="lp-fl" data-svc-label>Tenho interesse em</label>
-              <select class="lp-input" name="service">
-                <option>Veicular</option><option>Casa &amp; imóvel</option><option>Pets</option><option>Qualquer um / não sei</option>
+              <select class="lp-input" name="service" id="serviceSelect">
+                <option>Qualquer um / não sei</option>
               </select>
             </div>
           </div>
 
-          <button type="submit" class="lp-btn grad lg lp-submit">Entrar na lista <span data-ic="arrowR"></span></button>
+          <button type="submit" class="lp-btn grad lg lp-submit">Entrar na lista <span data-ic="arrowR" data-sz="18"></span></button>
           <div class="lp-fineprint">Ao entrar você aceita os Termos e a Política de Privacidade.</div>
         </form>
         <div class="lp-success" id="joinSuccess" style="display:none">
-          <div class="sc-ic"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div class="sc-ic" data-ic="check" data-sz="40" data-white></div>
           <h3>Você está na lista!</h3>
           <p id="joinSuccessMsg">Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="lp-sec" id="services">
+  <div class="lp-wrap">
+    <div class="lp-sechead"><span class="lp-eyebrow">O que cobrimos</span><h2>Uma plataforma para toda manutenção</h2><p>Do socorro veicular ao reparo predial — chame um profissional verificado em segundos e mantenha o histórico de cada ativo.</p></div>
+    <div class="lp-svcgrid" id="svcGrid">
+      <!-- populado dinamicamente por /api/v1/service-categories; fallback estático abaixo -->
+      <div class="lp-svc"><div class="lp-ic" data-ic="car"></div><h3>Veicular</h3><p>De volta à estrada, rápido.</p><div class="lp-tags"><span class="lp-tag">Pneu furado</span><span class="lp-tag">Bateria</span><span class="lp-tag">Guincho</span><span class="lp-tag">Chaveiro</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="drop"></div><h3>Casa &amp; imóvel</h3><p>Reparos e manutenção sob demanda.</p><div class="lp-tags"><span class="lp-tag">Encanamento</span><span class="lp-tag">Elétrica</span><span class="lp-tag">Limpeza</span><span class="lp-tag">Chaveiro</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="paw"></div><h3>Pets</h3><p>Cuidado que vem até você.</p><div class="lp-tags"><span class="lp-tag">Passeio</span><span class="lp-tag">Banho &amp; tosa</span><span class="lp-tag">Veterinário</span></div></div>
     </div>
   </div>
 </section>
@@ -364,7 +334,7 @@
       </div>
       <div class="lp-featvis reveal">
         <div class="card-demo">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center" data-ic="car"></span><div><div style="font-weight:800;font-size:15px">Pneu furado · Av. Paulista</div><div style="font-size:12.5px;color:var(--ink-3);font-weight:700">3 propostas · urgente</div></div><span style="margin-left:auto;font-size:11.5px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:5px 10px;border-radius:999px">LIVE</span></div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center" data-ic="car"></span><div><div style="font-weight:800;font-size:15px">Pneu furado · Av. Paulista</div><div style="font-size:12.5px;color:var(--ink-3);font-weight:700">3 propostas · urgente</div></div><span style="margin-left:auto;font-size:11.5px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:5px 10px;border-radius:999px">AO VIVO</span></div>
           <div style="display:flex;flex-direction:column;gap:10px">
             <div style="display:flex;align-items:center;gap:11px;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:13px 14px">
               <span style="width:38px;height:38px;border-radius:11px;background:#3b82f6;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px">RC</span>
@@ -413,9 +383,9 @@
         <div class="pname">Free</div>
         <div class="pprice">R$ 0<span class="pm">/mês</span></div>
         <div class="pcomm"><span class="cv">5%</span><span class="cl">de comissão por serviço</span></div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Receba trabalhos na sua região</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Perfil verificado e avaliações</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Pagamento seguro via Pix</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Receba trabalhos na sua região</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Perfil verificado e avaliações</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Pagamento seguro via Pix</div>
         <a class="lp-btn ghost" href="#join">Começar grátis</a>
       </div>
       <div class="lp-plan pop reveal">
@@ -423,20 +393,20 @@
         <div class="pname">Pro</div>
         <div class="pprice">R$ 99<span class="pm">/mês</span></div>
         <div class="pcomm"><span class="cv">2,5%</span><span class="cl">de comissão por serviço</span></div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Tudo do Free</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Destaque nas buscas e propostas</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Raio de cobertura ampliado</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Relatórios de ganhos</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Tudo do Free</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Destaque nas buscas e propostas</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Raio de cobertura ampliado</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Relatórios de ganhos</div>
         <a class="lp-btn grad" href="#join">Assinar Pro</a>
       </div>
       <div class="lp-plan reveal">
         <div class="pname">Enterprise</div>
         <div class="pprice">R$ 299<span class="pm">/mês</span></div>
         <div class="pcomm"><span class="cv">1%</span><span class="cl">de comissão por serviço</span></div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Tudo do Pro</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Múltiplos profissionais e equipes</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Gestão de ativos e histórico</div>
-        <div class="pfeat"><span class="pc" data-ic="check"></span> Gerente de conta dedicado</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Tudo do Pro</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Múltiplos profissionais e equipes</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Gestão de ativos e histórico</div>
+        <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Gerente de conta dedicado</div>
         <a class="lp-btn ghost" href="#join">Falar com vendas</a>
       </div>
     </div>
@@ -466,158 +436,183 @@
   <div class="lp-wrap">
     <div class="lp-sechead reveal"><span class="lp-eyebrow">Bom saber</span><h2>Perguntas frequentes</h2></div>
     <div class="lp-faq">
-      <div class="lp-faqitem"><div class="lp-faqq">Em quanto tempo o profissional chega?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Em chamados urgentes em São Paulo, a primeira proposta chega em poucos minutos e o profissional em ~6. Em serviços agendados você escolhe dia e horário.</div></div>
-      <div class="lp-faqitem"><div class="lp-faqq">Como é definido o preço?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha.</div></div>
-      <div class="lp-faqitem"><div class="lp-faqq">Os profissionais são verificados?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade.</div></div>
-      <div class="lp-faqitem"><div class="lp-faqq">Como eu pago?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">Pix, cartão ou dinheiro — sua escolha, só após o serviço. Peças extras são detalhadas e aprovadas por você.</div></div>
-      <div class="lp-faqitem"><div class="lp-faqq">Quanto custa trabalhar como prestador?<span class="chev" data-ic="fwd"></span></div><div class="lp-faqa">O cadastro é grátis. Há planos de 5% a 1% de comissão — peças repassadas a custo — e pagamento seguro a cada serviço.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Em quanto tempo o profissional chega?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Em chamados urgentes em São Paulo, a primeira proposta chega em poucos minutos e o profissional em ~6. Em serviços agendados você escolhe dia e horário.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Como é definido o preço?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Os profissionais são verificados?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Como eu pago?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Pix, cartão ou dinheiro — sua escolha, só após o serviço. Peças extras são detalhadas e aprovadas por você.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Quanto custa trabalhar como prestador?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">O cadastro é grátis. Há planos de 5% a 1% de comissão — peças repassadas a custo — e pagamento seguro a cada serviço.</div></div>
     </div>
   </div>
 </section>
 
 <footer class="lp-footer"><div class="lp-wrap">
   <div class="lp-col" style="max-width:240px">
-    <a class="lp-logo" href="#" aria-label="Chama Fácil" style="margin-bottom:12px"><span class="lp-logomark"></span></a>
+    <a class="lp-logo" href="#" style="margin-bottom:12px"><span class="lp-mk" data-ic="flame" data-sz="22"></span>Chama Fácil</a>
     <p style="color:var(--ink-3);font-size:13.5px;margin:0">Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.</p>
   </div>
   <span class="lp-spacer"></span>
-  <div class="lp-col"><h4>Empresa</h4><a href="#why">Sobre</a><a href="#join">Carreiras</a><a href="#join">Imprensa</a></div>
-  <div class="lp-col"><h4>Serviços</h4><a href="#services">Veicular</a><a href="#services">Casa</a><a href="#services">Pets</a></div>
-  <div class="lp-col"><h4>Prestadores</h4><a href="#pro">Seja prestador</a><a href="#planos">Planos</a><a href="#faq">Suporte</a></div>
+  <div class="lp-col"><h4>Empresa</h4><a href="#why">Sobre</a><a href="#join">Contato</a></div>
+  <div class="lp-col"><h4>Serviços</h4><a href="#services">Categorias</a><a href="#how">Como funciona</a><a href="#reviews">Avaliações</a></div>
+  <div class="lp-col"><h4>Prestadores</h4><a href="#pro">Seja prestador</a><a href="#planos">Planos</a><a href="parcerias.html">Parcerias</a></div>
   <div class="lp-col"><h4>Jurídico</h4><a href="#join">Termos</a><a href="#join">Privacidade</a></div>
 </div></footer>
 
+</div>
+
 <script>
-  // ---- inline icon set (paths lifted from the design's icon kit) ----
-  const ICONS = {
-    search: "M11 11m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0 M21 21l-4.3-4.3",
-    fwd: "M9 18l6-6-6-6",
-    flash: "M13 2L4 14h7l-1 8 9-12h-7l1-8z",
-    navigate: "M3 11l19-9-9 19-2-8-8-2z",
-    car: "M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11 M5 11h14v5H5z M7 16v2M17 16v2 M7.5 13.5h.01M16.5 13.5h.01",
-    paw: "M8 9a1.6 1.6 0 1 0 0-3.2A1.6 1.6 0 0 0 8 9z M16 9a1.6 1.6 0 1 0 0-3.2A1.6 1.6 0 0 0 16 9z M5.5 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M18.5 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z M12 21c2.5 0 4.5-1.8 4.5-3.8 0-1.6-1.4-2.7-3-3.6-.8-.4-1-1-1.5-1s-.7.6-1.5 1c-1.6.9-3 2-3 3.6C7.5 19.2 9.5 21 12 21z",
-    star: "M12 3l2.5 5.5L20.5 9l-4.5 4 1.2 6L12 16l-5.2 3 1.2-6L3.5 9l6-0.5L12 3z",
-    check: "M5 13l4 4L19 7",
-    briefcase: "M4 8h16v11H4z M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2 M4 13h16",
-    arrowR: "M5 12h14M13 6l6 6-6 6",
-    shieldCheck: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z M9 12l2 2 4-4",
-    pin: "M12 21s-7-6.3-7-11a7 7 0 1 1 14 0c0 4.7-7 11-7 11z M12 10m-2.4 0a2.4 2.4 0 1 0 4.8 0a2.4 2.4 0 1 0-4.8 0",
-    dollar: "M12 2v20 M16 6.5C16 5 14.5 4 12.5 4S9 5 9 6.8c0 3.7 7 2.2 7 5.7 0 1.8-1.6 2.8-3.6 2.8S8 14.2 8 12.7",
-    drop: "M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z",
-    pix: "M12 3.2l3.4 3.4a2.2 2.2 0 0 0 1.6.6l1.8.0 M12 20.8l3.4-3.4a2.2 2.2 0 0 1 1.6-.6h1.8 M12 3.2L8.6 6.6A2.2 2.2 0 0 1 7 7.2H5.2 M12 20.8l-3.4-3.4A2.2 2.2 0 0 0 7 16.8H5.2 M3.4 9.4L1.8 11a1.4 1.4 0 0 0 0 2l1.6 1.6 M20.6 9.4L22.2 11a1.4 1.4 0 0 1 0 2l-1.6 1.6"
+(function () {
+  "use strict";
+  var P = {
+    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    flash: '<path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>',
+    shieldCheck: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>',
+    star: '<path d="M12 3l2.6 5.6 6.1.5-4.6 4 1.4 6-5.5-3.2L6 19.7l1.4-6-4.6-4 6.1-.5z"/>',
+    pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+    car: '<path d="M5 13l1.6-4.8A2 2 0 0 1 8.5 7h7a2 2 0 0 1 1.9 1.2L19 13"/><path d="M4 13h16v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><circle cx="7.5" cy="15.5" r="1"/><circle cx="16.5" cy="15.5" r="1"/>',
+    drop: '<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5S12.5 5 12 2.5C11.5 5 10 7.4 8 9.5 6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/>',
+    paw: '<circle cx="7" cy="9" r="1.8"/><circle cx="17" cy="9" r="1.8"/><circle cx="10" cy="5.5" r="1.8"/><circle cx="14" cy="5.5" r="1.8"/><path d="M12 12c-2.5 0-4.5 1.7-4.5 3.8 0 1.6 1.3 2.7 3 2.7.8 0 1.1-.3 1.5-.3s.7.3 1.5.3c1.7 0 3-1.1 3-2.7C16 13.7 14.5 12 12 12z"/>',
+    dollar: '<line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5.5H9.8a3.3 3.3 0 0 0 0 6.5h4.4a3.3 3.3 0 0 1 0 6.5H6.5"/>',
+    navigate: '<path d="M3 11l18-8-8 18-2.3-7.7z"/>',
+    pix: '<path d="M12 3l4.5 4.5a2 2 0 0 1 0 2.8L12 14.8 7.5 10.3a2 2 0 0 1 0-2.8z"/><path d="M12 14.8L16.5 10 21 14.5 16.5 19a2 2 0 0 1-2.8 0z"/><path d="M12 14.8L7.5 10 3 14.5 7.5 19a2 2 0 0 0 2.8 0z"/>',
+    check: '<path d="M20 6L9 17l-5-5"/>',
+    handshake: '<path d="M11 17l2 2a1.4 1.4 0 0 0 2-2"/><path d="M13.5 14.5l3 3a1.4 1.4 0 0 0 2-2l-4.2-4.2a2 2 0 0 0-2.8 0l-1.2 1.2a1.4 1.4 0 0 1-2 0L8 11a2 2 0 0 0-2.8 0L3 13"/><path d="M14 5l3 3 4-1"/><path d="M10 5L7 8 3 7"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+    briefcase: '<rect x="2.5" y="7" width="19" height="13" rx="2.5"/><path d="M8 7V5.5A2 2 0 0 1 10 3.5h4a2 2 0 0 1 2 2V7"/><path d="M2.5 12h19"/>',
+    arrowR: '<path d="M4 12h15"/><path d="M12 5l7 7-7 7"/>',
+    fwd: '<path d="M6 9l6 6 6-6"/>',
+    sparkles: '<path d="M12 3l1.8 4.9L18.7 9l-4.9 1.8L12 15.7l-1.8-4.9L5.3 9l4.9-1.8z"/><path d="M5 15l.7 1.9 1.9.7-1.9.7L5 20.2l-.7-1.9L2.4 17.6l1.9-.7z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
+    headset: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M20 15a2 2 0 0 1-2 2h-1v-4h1a2 2 0 0 1 2 2z"/><path d="M4 15a2 2 0 0 0 2 2h1v-4H6a2 2 0 0 0-2 2z"/><path d="M18 17v1a3 3 0 0 1-3 3h-3"/>',
+    location: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+    rocket: '<path d="M5 13c-1.5.5-3 2-3 5 3 0 4.5-1.5 5-3"/><path d="M9 15c-1-.5-1-2 .5-4 2.5-3.5 6-5 10.5-5 0 4.5-1.5 8-5 10.5-2 1.5-3.5 1.5-4 .5z"/><circle cx="14.5" cy="9.5" r="1.6"/>'
   };
-  function svgFor(name, size, filled) {
-    const d = ICONS[name];
-    if (!d) return "";
-    const stroke = filled ? "none" : "currentColor";
-    const fill = filled ? "currentColor" : "none";
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + fill + '" stroke="' + stroke + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' + d + '"/></svg>';
+  function renderIcons(root) {
+    (root || document).querySelectorAll("[data-ic]").forEach(function (el) {
+      if (el.__ic) return;
+      el.__ic = 1;
+      var name = el.getAttribute("data-ic");
+      var d = P[name];
+      if (!d) return;
+      var sz = el.getAttribute("data-sz");
+      if (!sz) {
+        if (el.closest(".lp-ic") || el.closest(".tic") || el.closest(".fic") || el.closest(".lp-mk") || el.closest(".lp-partner-ic")) sz = 26;
+        else if (el.closest(".pc")) sz = 15;
+        else sz = 22;
+      }
+      var white = el.hasAttribute("data-white") || el.closest(".lp-mk") || el.closest(".sc-ic") || el.closest(".lp-partner-ic");
+      var fill = name === "star" || name === "flame" || name === "sparkles" || name === "pix";
+      el.innerHTML = '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="' + (fill ? "currentColor" : "none") + '" stroke="' + (fill ? "none" : "currentColor") + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + (white ? ' style="color:#fff"' : "") + ">" + d + "</svg>";
+    });
   }
-  function iconSize(el) {
-    if (el.closest(".pc")) return 13;
-    if (el.closest(".lp-faqq")) return 22;
-    if (el.closest(".lp-submit")) return 18;
-    if (el.closest(".lp-rolebtn") || el.closest(".lp-pt") || el.closest("[data-svc-label]")) return 16;
-    if (el.closest(".tic")) return 22;
-    if (el.closest(".fic")) return 24;
-    if (el.closest(".lp-ic")) return 28;
-    if (el.closest(".ci")) return 21;
-    return 22;
-  }
-  document.querySelectorAll("[data-ic]").forEach((el) => { el.innerHTML = svgFor(el.dataset.ic, iconSize(el), false); });
-  document.querySelectorAll("[data-stars]").forEach((el) => {
-    el.innerHTML = [0,1,2,3,4].map(() => svgFor("star", 16, true)).join("");
+  renderIcons();
+  document.querySelectorAll("[data-stars]").forEach(function (el) {
+    var s = "";
+    for (var i = 0; i < 5; i++) s += '<span data-ic="star" data-sz="16"></span>';
+    el.innerHTML = s;
+    renderIcons(el);
   });
 
-  // ---- hero phone carousel ----
-  (function () {
-    const screens = document.querySelectorAll(".pm-screen");
-    const dotsWrap = document.getElementById("phoneDots");
-    let i = 0;
-    screens.forEach((_, k) => {
-      const b = document.createElement("button");
-      b.className = "hd" + (k === 0 ? " on" : "");
-      b.addEventListener("click", () => go(k));
-      dotsWrap.appendChild(b);
-    });
-    const dots = dotsWrap.querySelectorAll(".hd");
-    function go(k) {
-      screens[i].classList.remove("on");
-      dots[i].classList.remove("on");
-      i = k;
-      screens[i].classList.add("on");
-      dots[i].classList.add("on");
-    }
-    let timer = setInterval(() => go((i + 1) % screens.length), 3200);
-    dotsWrap.addEventListener("click", () => { clearInterval(timer); timer = setInterval(() => go((i + 1) % screens.length), 3200); });
-  })();
-
-  // ---- reveal on scroll ----
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
   }, { threshold: 0.12 });
-  document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
 
-  // ---- FAQ accordion ----
-  document.querySelectorAll(".lp-faqq").forEach((q) => {
-    q.addEventListener("click", () => {
-      const item = q.parentElement;
-      const open = item.classList.contains("open");
-      document.querySelectorAll(".lp-faqitem.open").forEach((x) => x.classList.remove("open"));
+  document.querySelectorAll(".lp-faqq").forEach(function (q) {
+    q.addEventListener("click", function () {
+      var item = q.parentElement;
+      var open = item.classList.contains("open");
+      document.querySelectorAll(".lp-faqitem.open").forEach(function (i) { i.classList.remove("open"); });
       if (!open) item.classList.add("open");
     });
   });
 
-  // ---- waitlist form ----
-  const API_BASE = (document.querySelector('meta[name="api-base"]') || {}).content || "";
-  const form = document.getElementById("joinForm");
-  let role = "customer";
-  document.querySelectorAll(".lp-rolebtn").forEach((b) => {
-    b.addEventListener("click", () => {
-      document.querySelectorAll(".lp-rolebtn").forEach((x) => x.classList.remove("on"));
+  var API_BASE = (document.querySelector('meta[name="api-base"]') || {}).content || "";
+
+  // dynamic service categories (grouped by backend `type`), with static fallback
+  var TYPE_META = {
+    roadside: { icon: "car", title: "Veicular", sub: "De volta à estrada, rápido." },
+    home: { icon: "drop", title: "Casa & imóvel", sub: "Reparos e manutenção sob demanda." },
+    pet: { icon: "paw", title: "Pets", sub: "Cuidado que vem até você." },
+    pets: { icon: "paw", title: "Pets", sub: "Cuidado que vem até você." }
+  };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+  fetch(API_BASE + "/api/v1/service-categories", { headers: { Accept: "application/json" } })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (res) {
+      var cats = res && (res.data || res);
+      if (!Array.isArray(cats) || !cats.length) return;
+      var groups = {}; var order = [];
+      cats.forEach(function (c) {
+        var t = c.type || "home";
+        if (!groups[t]) { groups[t] = []; order.push(t); }
+        groups[t].push(c);
+      });
+      var grid = document.getElementById("svcGrid");
+      if (grid) {
+        grid.innerHTML = order.map(function (t) {
+          var m = TYPE_META[t] || { icon: "drop", title: t, sub: "" };
+          var tags = groups[t].slice(0, 5).map(function (c) { return '<span class="lp-tag">' + esc(c.name) + "</span>"; }).join("");
+          return '<div class="lp-svc"><div class="lp-ic" data-ic="' + m.icon + '"></div><h3>' + esc(m.title) + "</h3><p>" + esc(m.sub) + '</p><div class="lp-tags">' + tags + "</div></div>";
+        }).join("");
+        renderIcons(grid);
+      }
+      var sel = document.getElementById("serviceSelect");
+      if (sel) {
+        var opts = order.map(function (t) { var m = TYPE_META[t] || { title: t }; return "<option>" + esc(m.title) + "</option>"; }).join("");
+        sel.innerHTML = opts + "<option>Qualquer um / não sei</option>";
+      }
+    })
+    .catch(function () { /* keep static fallback */ });
+
+  // waitlist form → POST /api/v1/waitlist
+  var form = document.getElementById("joinForm");
+  var role = "customer";
+  document.querySelectorAll(".lp-rolebtn").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".lp-rolebtn").forEach(function (x) { x.classList.remove("on"); });
       b.classList.add("on");
       role = b.dataset.role;
-      document.querySelector("[data-svc-label]").textContent = role === "pro" ? "Posso atender em" : "Tenho interesse em";
+      var lbl = document.querySelector("[data-svc-label]");
+      if (lbl) lbl.textContent = role === "pro" ? "Posso trabalhar com" : "Tenho interesse em";
     });
   });
-  const showErr = (key, on) => {
-    const m = form.querySelector('[data-err="' + key + '"]');
-    const inp = form.querySelector('[name="' + key + '"]');
+  function showErr(key, on) {
+    var m = form.querySelector('[data-err="' + key + '"]');
+    var inp = form.querySelector('[name="' + key + '"]');
     if (m) m.classList.toggle("show", on);
     if (inp) inp.classList.toggle("err", on);
-  };
-  form.addEventListener("submit", async (e) => {
+  }
+  form.addEventListener("submit", function (e) {
     e.preventDefault();
-    const name = form.name.value.trim();
-    const email = form.email.value.trim();
-    const okEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    var name = form.name.value.trim();
+    var email = form.email.value.trim();
+    var okEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
     showErr("name", !name);
     showErr("email", !okEmail);
     if (!name || !okEmail) return;
-
-    const payload = { role, name, email, phone: form.phone.value.trim(), city: form.city.value.trim(), service: form.service.value };
-    const submit = form.querySelector(".lp-submit");
-    submit.style.opacity = ".6"; submit.style.pointerEvents = "none";
-    try {
-      await fetch(API_BASE + "/api/v1/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json", "X-Locale": "pt" },
-        body: JSON.stringify(payload),
+    var btn = form.querySelector(".lp-submit");
+    btn.disabled = true;
+    fetch(API_BASE + "/api/v1/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ role: role, name: name, email: email, phone: form.phone.value.trim(), city: form.city.value.trim(), service: form.service.value })
+    })
+      .then(function (r) {
+        if (!r.ok && r.status !== 201) throw new Error("fail");
+        form.style.display = "none";
+        var msg = document.getElementById("joinSuccessMsg");
+        msg.textContent = role === "pro"
+          ? "Valeu, " + name.split(" ")[0] + "! Vamos entrar em contato para te cadastrar como profissional Chama Fácil."
+          : "Valeu, " + name.split(" ")[0] + "! Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.";
+        document.getElementById("joinSuccess").style.display = "block";
+      })
+      .catch(function () {
+        btn.disabled = false;
+        var m = form.querySelector('[data-err="email"]');
+        if (m) { m.textContent = "Não deu para enviar agora. Tente de novo em instantes."; m.classList.add("show"); }
       });
-    } catch (err) {
-      // Offline / API unreachable: keep the lead locally so nothing is lost.
-      try {
-        const list = JSON.parse(localStorage.getItem("chamafacil_waitlist") || "[]");
-        list.push(Object.assign({ at: Date.now() }, payload));
-        localStorage.setItem("chamafacil_waitlist", JSON.stringify(list));
-      } catch (e2) {}
-    }
-    form.style.display = "none";
-    document.getElementById("joinSuccessMsg").textContent = role === "pro"
-      ? "Valeu, " + name.split(" ")[0] + "! Vamos entrar em contato para te cadastrar como profissional Chama Fácil."
-      : "Valeu, " + name.split(" ")[0] + "! Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.";
-    document.getElementById("joinSuccess").style.display = "block";
   });
+})();
 </script>
 </body>
 </html>
