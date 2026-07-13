@@ -199,6 +199,44 @@
   .cd-hval { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
   .cd-hval.soon { color: var(--accent); }
 
+  /* app demo: device com abas que trocam sozinhas */
+  .app-demo { width: 100%; max-width: 340px; margin: 0 auto; }
+  .ad-tabs { display: flex; gap: 5px; margin-bottom: 16px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 5px; }
+  .ad-tab { flex: 1; border: none; background: none; font-family: inherit; font-weight: 800; font-size: 12px; color: var(--ink-3); padding: 8px 4px; border-radius: 999px; cursor: pointer; transition: .2s; white-space: nowrap; }
+  .ad-tab.on { background: var(--surface); color: var(--ink); box-shadow: 0 2px 8px -3px rgba(20,35,59,.25); }
+  .ad-phone { position: relative; background: #0e141d; border-radius: 40px; padding: 10px; box-shadow: 0 40px 80px -38px rgba(20,30,50,.5); }
+  :root[data-theme="dark"] .ad-phone { background: #05090f; }
+  .ad-nub { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 104px; height: 24px; background: #0e141d; border-radius: 999px; z-index: 4; }
+  :root[data-theme="dark"] .ad-nub { background: #05090f; }
+  .ad-screens { position: relative; height: 472px; background: var(--surface-2); border-radius: 30px; overflow: hidden; }
+  .ad-screen { position: absolute; inset: 0; opacity: 0; transition: opacity .45s ease; pointer-events: none; }
+  .ad-screen.on { opacity: 1; pointer-events: auto; }
+  .ad-hd { display: flex; align-items: center; gap: 10px; padding: 40px 16px 14px; }
+  .ad-ic { color: var(--ink-2); display: inline-flex; }
+  .ad-ic svg { width: 20px; height: 20px; }
+  .ad-hdc { flex: 1; }
+  .ad-hdsub { font-size: 12px; color: var(--ink-3); font-weight: 700; }
+  .ad-hdname { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
+  .ad-av { width: 34px; height: 34px; border-radius: 50%; background: var(--grad); color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ad-body { padding: 0 16px 16px; }
+  .ad-slabel { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 6px 0 10px; }
+  .ad-actcard { display: flex; align-items: center; gap: 11px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px 13px; margin-bottom: 18px; }
+  .ad-actic { width: 38px; height: 38px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+  .ad-actic svg { width: 20px; height: 20px; }
+  .ad-acttitle { font-weight: 800; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ad-actsub { font-size: 11.5px; color: var(--accent); font-weight: 700; margin-top: 1px; }
+  .ad-chev { color: var(--ink-3); display: inline-flex; flex: none; }
+  .ad-chev svg { width: 16px; height: 16px; }
+  .ad-cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 18px; }
+  .ad-cat { display: flex; flex-direction: column; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 700; color: var(--ink-2); }
+  .ad-catic { width: 52px; height: 52px; border-radius: 16px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+  .ad-catic svg { width: 24px; height: 24px; }
+  .ad-banner { display: flex; align-items: center; gap: 12px; background: var(--grad); border-radius: 18px; padding: 16px; color: #fff; }
+  .ad-bantitle { font-weight: 800; font-size: 15px; }
+  .ad-bansub { font-size: 12px; opacity: .92; margin-top: 2px; }
+  .ad-banic { width: 40px; height: 40px; border-radius: 13px; background: rgba(255,255,255,.2); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ad-banic svg { width: 20px; height: 20px; }
+
   .lp-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .lp-quote { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 26px; box-shadow: 0 12px 34px -22px rgba(20,35,59,.26); display: flex; flex-direction: column; gap: 14px; }
   .lp-quote .stars { color: var(--accent-2); display: flex; gap: 3px; }
@@ -478,17 +516,99 @@
         <div class="lp-fitem"><span class="fic" data-ic="pix"></span><div><h3>Pague como quiser</h3><p>Pix, cartão ou dinheiro — só após o serviço concluído.</p></div></div>
       </div>
       <div class="lp-featvis reveal">
-        <div class="card-demo">
-          <div class="cd-asset">
-            <span class="cd-assetic" data-ic="car"></span>
-            <div class="cd-assetinfo"><div class="cd-assetname">Honda Civic</div><div class="cd-assetsub">Placa ABC-1D23 · seu ativo</div></div>
-            <span class="cd-status">Em dia</span>
+        <div class="app-demo" id="appDemo">
+          <div class="ad-tabs" role="tablist">
+            <button class="ad-tab on" type="button" data-tab="0">Início</button>
+            <button class="ad-tab" type="button" data-tab="1">Propostas</button>
+            <button class="ad-tab" type="button" data-tab="2">Acompanhar</button>
+            <button class="ad-tab" type="button" data-tab="3">Histórico</button>
           </div>
-          <div class="cd-histlabel">Histórico de manutenção</div>
-          <div class="cd-hist">
-            <div class="cd-hrow"><span class="cd-hic done" data-ic="check"></span><div class="cd-hmain"><div class="cd-htitle">Troca de óleo</div><div class="cd-hsub">Rafael C. · 12 jun</div></div><span class="cd-hval">R$ 180</span></div>
-            <div class="cd-hrow"><span class="cd-hic done" data-ic="battery"></span><div class="cd-hmain"><div class="cd-htitle">Bateria nova</div><div class="cd-hsub">Auto Center Vila · 03 abr</div></div><span class="cd-hval">R$ 320</span></div>
-            <div class="cd-hrow"><span class="cd-hic" data-ic="wrench"></span><div class="cd-hmain"><div class="cd-htitle">Revisão agendada</div><div class="cd-hsub">amanhã, 09:00</div></div><span class="cd-hval soon">em breve</span></div>
+          <div class="ad-phone">
+            <span class="ad-nub"></span>
+            <div class="ad-screens">
+
+              <!-- 0: Início -->
+              <div class="ad-screen on" data-screen="0">
+                <div class="ad-hd">
+                  <span class="ad-ic" data-ic="menu"></span>
+                  <div class="ad-hdc"><div class="ad-hdsub">Olá 👋</div><div class="ad-hdname">Marina</div></div>
+                  <span class="ad-ic" data-ic="bell"></span>
+                  <span class="ad-av">MA</span>
+                </div>
+                <div class="ad-body">
+                  <div class="ad-slabel">Chamado ativo</div>
+                  <div class="ad-actcard">
+                    <span class="ad-actic" data-ic="car"></span>
+                    <div style="flex:1;min-width:0"><div class="ad-acttitle">Guincho · Av. Paulista</div><div class="ad-actsub">Em cotação · 3 propostas</div></div>
+                    <span class="ad-chev" data-ic="chevron"></span>
+                  </div>
+                  <div class="ad-slabel">Ajuda rápida</div>
+                  <div class="ad-cats">
+                    <div class="ad-cat"><span class="ad-catic" data-ic="car"></span>Veicular</div>
+                    <div class="ad-cat"><span class="ad-catic" data-ic="home"></span>Casa</div>
+                    <div class="ad-cat"><span class="ad-catic" data-ic="sparkles"></span>Beleza</div>
+                    <div class="ad-cat"><span class="ad-catic" data-ic="paw"></span>Pets</div>
+                  </div>
+                  <div class="ad-banner">
+                    <div style="flex:1"><div class="ad-bantitle">Precisa de ajuda?</div><div class="ad-bansub">Um profissional em segundos.</div></div>
+                    <span class="ad-banic" data-ic="arrowR"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 1: Propostas -->
+              <div class="ad-screen" data-screen="1">
+                <div class="ph-top"><div class="h">Chamado urgente</div><div class="t">Pneu furado · Av. Paulista</div></div>
+                <div class="ph-body">
+                  <div class="ph-cardhead"><span style="font-weight:800;font-size:14px">3 propostas</span><span class="ph-badge">AO VIVO</span></div>
+                  <div class="ph-bid best">
+                    <span class="ph-av" style="background:#3b82f6">RC</span>
+                    <div style="flex:1"><div style="font-weight:800;font-size:14px">Rafael C.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.9 · 8 min</div></div>
+                    <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$120</div><div style="font-size:10.5px;font-weight:800;color:var(--accent)">Melhor opção</div></div>
+                  </div>
+                  <div class="ph-bid">
+                    <span class="ph-av" style="background:#12b981">JS</span>
+                    <div style="flex:1"><div style="font-weight:800;font-size:14px">João S.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.7 · 12 min</div></div>
+                    <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$95</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2: Acompanhar -->
+              <div class="ad-screen" data-screen="2">
+                <div class="ph-map">
+                  <svg class="ph-routesvg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M20 79 C 46 79, 40 34, 84 24" vector-effect="non-scaling-stroke"/></svg>
+                  <div class="ph-pin ph-pin-a"></div>
+                  <div class="ph-pin ph-pin-b"><span data-ic="navigate"></span></div>
+                </div>
+                <div class="ph-body">
+                  <div class="ph-eta"><span class="ph-badge">A caminho</span><span class="ph-etamin">chega em 6 min</span></div>
+                  <div class="ph-bid">
+                    <span class="ph-av" style="background:#3b82f6">RC</span>
+                    <div style="flex:1"><div style="font-weight:800;font-size:13px">Rafael C.</div><div style="font-size:11.5px;color:var(--ink-2);font-weight:700">Guincho · 4.9 ★</div></div>
+                    <span class="ph-callic" data-ic="phone" data-sz="16"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3: Histórico -->
+              <div class="ad-screen" data-screen="3">
+                <div class="ad-body" style="padding-top:40px">
+                  <div class="cd-asset">
+                    <span class="cd-assetic" data-ic="car"></span>
+                    <div class="cd-assetinfo"><div class="cd-assetname">Honda Civic</div><div class="cd-assetsub">Placa ABC-1D23 · seu ativo</div></div>
+                    <span class="cd-status">Em dia</span>
+                  </div>
+                  <div class="cd-histlabel">Histórico de manutenção</div>
+                  <div class="cd-hist">
+                    <div class="cd-hrow"><span class="cd-hic done" data-ic="check"></span><div class="cd-hmain"><div class="cd-htitle">Troca de óleo</div><div class="cd-hsub">Rafael C. · 12 jun</div></div><span class="cd-hval">R$ 180</span></div>
+                    <div class="cd-hrow"><span class="cd-hic done" data-ic="battery"></span><div class="cd-hmain"><div class="cd-htitle">Bateria nova</div><div class="cd-hsub">Auto Center Vila · 03 abr</div></div><span class="cd-hval">R$ 320</span></div>
+                    <div class="cd-hrow"><span class="cd-hic" data-ic="wrench"></span><div class="cd-hmain"><div class="cd-htitle">Revisão agendada</div><div class="cd-hsub">amanhã, 09:00</div></div><span class="cd-hval soon">em breve</span></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
@@ -616,7 +736,8 @@
     shieldCheck: "ShieldCheck", star: "Star", sparkles: "Sparkles", users: "Users", headset: "Headset",
     location: "MapPin", rocket: "Rocket", truck: "Truck", battery: "BatteryCharging", key: "Key",
     wrench: "Wrench", home: "House", shield: "Shield", heart: "Heart", scissors: "Scissors",
-    camera: "Camera", settings: "Settings", wifi: "Wifi", chevron: "ChevronDown", phone: "Phone"
+    camera: "Camera", settings: "Settings", wifi: "Wifi", chevron: "ChevronDown", phone: "Phone",
+    menu: "Menu", bell: "Bell"
   };
   // Build the inner SVG for an icon from the vendored lucide package's icon nodes.
   function iconInner(name) {
@@ -789,6 +910,27 @@
   }
   document.querySelectorAll("[data-city-ac]").forEach(attachCityAutocomplete);
 
+  // app demo: abas que trocam sozinhas (pausa no hover)
+  (function () {
+    var demo = document.getElementById("appDemo");
+    if (!demo) return;
+    var tabs = [].slice.call(demo.querySelectorAll(".ad-tab"));
+    var screens = [].slice.call(demo.querySelectorAll(".ad-screen"));
+    if (!tabs.length || tabs.length !== screens.length) return;
+    var cur = 0, timer = null;
+    function show(n) {
+      cur = (n + screens.length) % screens.length;
+      tabs.forEach(function (t, k) { t.classList.toggle("on", k === cur); });
+      screens.forEach(function (s, k) { s.classList.toggle("on", k === cur); });
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    function start() { stop(); timer = setInterval(function () { show(cur + 1); }, 3800); }
+    tabs.forEach(function (t, k) { t.addEventListener("click", function () { show(k); start(); }); });
+    demo.addEventListener("mouseenter", stop);
+    demo.addEventListener("mouseleave", start);
+    start();
+  })();
+
   // waitlist form → POST /api/v1/waitlist
   var form = document.getElementById("joinForm");
   var role = "customer";
@@ -960,7 +1102,12 @@
     "Placa ABC-1D23 · seu ativo": "Plate ABC-1D23 · your asset", "Em dia": "Up to date",
     "Histórico de manutenção": "Maintenance history", "Troca de óleo": "Oil change",
     "Bateria nova": "New battery", "Revisão agendada": "Scheduled service",
-    "amanhã, 09:00": "tomorrow, 9:00", "em breve": "soon"
+    "amanhã, 09:00": "tomorrow, 9:00", "em breve": "soon",
+    // device com abas (telas do app)
+    "Início": "Home", "Propostas": "Proposals", "Acompanhar": "Track", "Histórico": "History",
+    "Chamado ativo": "Active request", "Guincho · Av. Paulista": "Tow · Av. Paulista",
+    "Em cotação · 3 propostas": "Getting quotes · 3 offers", "Ajuda rápida": "Quick help",
+    "Precisa de ajuda?": "Need help?", "Um profissional em segundos.": "A pro in seconds."
   };
   var EN_PH = { "voce@email.com": "you@email.com", "Digite sua cidade...": "Type your city...", "Mateus Almeida": "Jordan Smith" };
   var META = {
