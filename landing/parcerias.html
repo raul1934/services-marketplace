@@ -6,6 +6,20 @@
 <title>Chama Fácil — Parcerias regionais</title>
 <meta name="description" content="Cuide de uma região com a Chama Fácil: prospecte prestadores, apoie clientes e ative sua cidade. Parcerias regionais abertas." />
 <meta name="api-base" content="https://api.chamafacil.app" />
+<script>
+  // Tema + idioma antes do paint (evita flash). Restante da i18n no fim do body.
+  (function () {
+    try {
+      var t = localStorage.getItem("cf_theme");
+      if (t !== "dark" && t !== "light") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", t);
+      var l = localStorage.getItem("cf_lang");
+      if (l !== "pt" && l !== "en") l = (navigator.language || "pt").toLowerCase().indexOf("pt") === 0 ? "pt" : "en";
+      document.documentElement.setAttribute("lang", l === "en" ? "en" : "pt-BR");
+      window.__cfTheme = t; window.__cfLang = l;
+    } catch (e) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
@@ -18,17 +32,17 @@
     --accent-soft: #fff0ea;
     color-scheme: light;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0d131c; --surface: #161f2b; --surface-2: #101823;
-      --ink: #eef2f7; --ink-2: #a7b6c9; --ink-3: #6e7f95;
-      --line: #263242; --accent: #ff7a4d; --accent-2: #ffb85c;
-      --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
-      --accent-soft: rgba(255,122,77,.16);
-      color-scheme: dark;
-    }
-    .lp-btn.ghost, .lp-btn.light { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  /* Dark mode manual (data-theme) — definido no <head> a partir de localStorage
+     ou de prefers-color-scheme, alternado pelo botão do nav. */
+  :root[data-theme="dark"] {
+    --bg: #0d131c; --surface: #161f2b; --surface-2: #101823;
+    --ink: #eef2f7; --ink-2: #a7b6c9; --ink-3: #6e7f95;
+    --line: #263242; --accent: #ff7a4d; --accent-2: #ffb85c;
+    --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
+    --accent-soft: rgba(255,122,77,.16);
+    color-scheme: dark;
   }
+  :root[data-theme="dark"] .lp-btn.ghost, :root[data-theme="dark"] .lp-btn.light { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body { font-family: "Manrope", system-ui, sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.5; }
@@ -50,6 +64,9 @@
   .lp-btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
   .lp-btn.light { background: #fff; color: var(--ink); }
   .lp-btn.lg { padding: 16px 28px; font-size: 16px; }
+  .lp-icbtn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 40px; height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font-family: inherit; font-weight: 800; font-size: 13px; letter-spacing: .02em; cursor: pointer; transition: .15s; }
+  .lp-icbtn:hover { color: var(--ink); border-color: var(--ink-3); }
+  .lp-icbtn svg { width: 18px; height: 18px; }
 
   .lp-phead { position: relative; overflow: hidden; padding: 64px 0 40px; }
   .lp-glow { position: absolute; width: 460px; height: 460px; border-radius: 50%; background: var(--grad); filter: blur(90px); opacity: .2; top: -80px; right: -40px; }
@@ -123,6 +140,8 @@
   <a class="lp-logo" href="index.html"><span class="lp-mk" data-ic="flame" data-sz="22"></span>Chama Fácil</a>
   <div class="lp-links"><a href="index.html#services">Serviços</a><a href="index.html#planos">Planos</a><a href="index.html#pro">Seja prestador</a><a href="parcerias.html">Parcerias</a></div>
   <span class="lp-spacer"></span>
+  <button class="lp-icbtn" id="langBtn" type="button" aria-label="Language / Idioma">EN</button>
+  <button class="lp-icbtn" id="themeBtn" type="button" aria-label="Tema claro/escuro"></button>
   <a class="lp-btn grad" href="#candidatar">Quero ser parceiro</a>
 </div></nav>
 
@@ -219,6 +238,7 @@
 <script>
 (function () {
   "use strict";
+  function isEN() { return document.documentElement.lang === "en"; }
   // App icon names → lucide (PascalCase). Glyph data comes from the vendored
   // lucide package (vendor/lucide.min.js) — the same icon set the mobile app uses.
   var L = {
@@ -271,7 +291,7 @@
     function close() { list.hidden = true; list.innerHTML = ""; active = -1; input.setAttribute("aria-expanded", "false"); }
     function pick(i) { if (!items[i]) return; input.value = items[i].label || items[i].name; close(); }
     function render() {
-      if (!items.length) { list.innerHTML = '<div class="pf-ac-note">Nenhuma cidade encontrada</div>'; list.hidden = false; input.setAttribute("aria-expanded", "true"); return; }
+      if (!items.length) { list.innerHTML = '<div class="pf-ac-note">' + (isEN() ? "No city found" : "Nenhuma cidade encontrada") + "</div>"; list.hidden = false; input.setAttribute("aria-expanded", "true"); return; }
       list.innerHTML = items.map(function (c, i) {
         return '<div class="pf-ac-item' + (i === active ? " active" : "") + '" role="option" data-i="' + i + '">' + esc(c.name) + '<span class="pf-ac-uf">' + esc(c.uf || "") + "</span></div>";
       }).join("");
@@ -338,9 +358,130 @@
       .catch(function () {
         btn.disabled = false;
         var m = form.querySelector('[data-err="email"]');
-        if (m) { m.textContent = "Não deu para enviar agora. Tente de novo em instantes."; m.classList.add("show"); }
+        if (m) { m.textContent = isEN() ? "Couldn't submit right now. Try again in a moment." : "Não deu para enviar agora. Tente de novo em instantes."; m.classList.add("show"); }
       });
   });
+})();
+</script>
+<script>
+/* i18n (PT padrão; EN via dicionário de text-nodes) + tema day/night — página de parcerias. */
+(function () {
+  "use strict";
+
+  var EN = {
+    // nav / shared
+    "Serviços": "Services", "Planos": "Plans", "Seja prestador": "Become a pro", "Parcerias": "Partners",
+    "Quero ser parceiro": "I want to partner",
+    "Nome completo": "Full name", "Informe seu nome.": "Enter your name.", "Email": "Email",
+    "Informe um e-mail válido.": "Enter a valid email.",
+    "Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.": "Asset maintenance management. Customers, assets and pros connected.",
+    // header
+    "Parcerias regionais": "Regional partnerships",
+    "Cuide de uma região com a Chama Fácil.": "Run a region with Chama Fácil.",
+    "Buscamos parceiros locais para representar a Chama Fácil na sua cidade: prospectar prestadores, apoiar clientes e garantir a qualidade do serviço. Você conhece a região — nós damos a plataforma.": "We're looking for local partners to represent Chama Fácil in your city: recruiting pros, supporting customers and ensuring service quality. You know the area — we provide the platform.",
+    "Entender o papel": "Understand the role",
+    "Plataforma gratuita durante esta fase inicial": "Free platform during this early phase",
+    // role
+    "O papel do parceiro": "The partner's role",
+    "Você é a Chama Fácil na sua região": "You are Chama Fácil in your region",
+    "O parceiro regional é a ponte entre a plataforma e a comunidade local — cuidando das duas pontas do marketplace.": "The regional partner is the bridge between the platform and the local community — taking care of both sides of the marketplace.",
+    "Prospecta prestadores": "Recruits pros",
+    "Encontra, convida e ajuda a credenciar bons profissionais da região — construindo a oferta local.": "Finds, invites and helps onboard good local pros — building local supply.",
+    "Apoia os clientes": "Supports customers",
+    "É o rosto local para tirar dúvidas, orientar no primeiro pedido e acompanhar a experiência.": "The local face to answer questions, guide the first request and follow the experience.",
+    "Media disputas": "Mediates disputes",
+    "Atua na linha de frente de conflitos e garantias, junto com o time central da Chama Fácil.": "Works on the front line of conflicts and warranties, alongside the central Chama Fácil team.",
+    "Zela pela qualidade": "Safeguards quality",
+    "Acompanha avaliações, identifica quedas de qualidade e mantém o padrão da rede local.": "Tracks reviews, spots quality drops and keeps the local network's standard.",
+    "Conhece o território": "Knows the territory",
+    "Entende bairros, demanda e sazonalidade — e ajuda a plataforma a crescer no ritmo certo.": "Understands neighborhoods, demand and seasonality — helping the platform grow at the right pace.",
+    "Ativa a região": "Activates the region",
+    "Lidera o lançamento local: primeiros prestadores, primeiros clientes, primeiros serviços.": "Leads the local launch: first pros, first customers, first jobs.",
+    // why
+    "Por que ser parceiro": "Why partner",
+    "Um negócio local, com plataforma nacional": "A local business, on a national platform",
+    "Comece sem custo": "Start at no cost",
+    "Por enquanto a plataforma é gratuita para parceiros. Sem taxa de adesão nesta fase inicial.": "For now the platform is free for partners. No sign-up fee in this early phase.",
+    "Exclusividade na região": "Exclusivity in your area",
+    "Um parceiro por área. Você constrói e colhe o resultado do que ativou.": "One partner per area. You build and reap the results of what you activate.",
+    "Suporte central": "Central support",
+    "Tecnologia, pagamentos, verificação e time de apoio ficam com a Chama Fácil.": "Technology, payments, verification and support team stay with Chama Fácil.",
+    // steps
+    "Como funciona": "How it works",
+    "Da conversa ao lançamento em 4 passos": "From chat to launch in 4 steps",
+    "Candidatura": "Application",
+    "Conte sobre você e a região que quer atender.": "Tell us about you and the region you want to serve.",
+    "Conversa": "Conversation",
+    "Alinhamos expectativas, papel e a área de atuação.": "We align expectations, role and coverage area.",
+    "Onboarding": "Onboarding",
+    "Treinamento e acesso às ferramentas de parceiro.": "Training and access to the partner tools.",
+    "Lançamento": "Launch",
+    "Ativação da região: prestadores e primeiros clientes.": "Region activation: pros and first customers.",
+    // form
+    "Quer cuidar da sua região?": "Want to run your region?",
+    "Estamos abrindo parcerias regionais. Deixe seus dados e a gente entra em contato — de graça nesta fase inicial.": "We're opening regional partnerships. Leave your details and we'll get in touch — free in this early phase.",
+    "Telefone (WhatsApp)": "Phone (WhatsApp)",
+    "Cidade / região que quer atender": "City / region you want to serve",
+    "Sem compromisso — vamos conversar antes de qualquer passo.": "No commitment — we'll talk before any step.",
+    "Recebido!": "Received!",
+    "Obrigado! Nossa equipe vai entrar em contato para conversar sobre a parceria na sua região.": "Thank you! Our team will reach out to discuss the partnership in your region."
+  };
+  var EN_PH = { "voce@email.com": "you@email.com", "Digite sua cidade...": "Type your city...", "Mateus Almeida": "Jordan Smith" };
+  var META = {
+    title: { pt: "Chama Fácil — Parcerias regionais", en: "Chama Fácil — Regional partnerships" },
+    desc: {
+      pt: "Cuide de uma região com a Chama Fácil: prospecte prestadores, apoie clientes e ative sua cidade. Parcerias regionais abertas.",
+      en: "Run a region with Chama Fácil: recruit pros, support customers and activate your city. Regional partnerships open."
+    }
+  };
+
+  function lucideSvg(pascal, size) {
+    var lu = window.lucide, node = lu && lu.icons && lu.icons[pascal];
+    if (!node) return "";
+    var inner = node.map(function (t) { var s = "<" + t[0], a = t[1], k; for (k in a) { if (k !== "key") s += " " + k + '="' + a[k] + '"'; } return s + "/>"; }).join("");
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + "</svg>";
+  }
+  function walkText(fn) {
+    var skip = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1 };
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) { if (skip[n.parentNode.nodeName]) return NodeFilter.FILTER_REJECT; return n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
+    });
+    var n; while ((n = w.nextNode())) fn(n);
+  }
+  function applyLang(lang) {
+    var en = lang === "en";
+    walkText(function (n) {
+      var key = n.nodeValue.trim();
+      if (en) { if (EN[key] != null) { if (n.__o == null) n.__o = n.nodeValue; n.nodeValue = n.__o.replace(key, EN[key]); } }
+      else if (n.__o != null) { n.nodeValue = n.__o; }
+    });
+    document.querySelectorAll("[placeholder]").forEach(function (el) {
+      if (el.__ph == null) el.__ph = el.getAttribute("placeholder");
+      el.setAttribute("placeholder", en && EN_PH[el.__ph] ? EN_PH[el.__ph] : el.__ph);
+    });
+    document.title = META.title[en ? "en" : "pt"];
+    var md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute("content", META.desc[en ? "en" : "pt"]);
+    document.documentElement.setAttribute("lang", en ? "en" : "pt-BR");
+    var lb = document.getElementById("langBtn");
+    if (lb) { lb.textContent = en ? "PT" : "EN"; lb.setAttribute("aria-label", en ? "Mudar para português" : "Switch to English"); }
+    try { localStorage.setItem("cf_lang", lang); } catch (e) {}
+  }
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    var tb = document.getElementById("themeBtn");
+    if (tb) tb.innerHTML = lucideSvg(theme === "dark" ? "Sun" : "Moon", 18);
+    try { localStorage.setItem("cf_theme", theme); } catch (e) {}
+  }
+
+  var lang = window.__cfLang === "en" ? "en" : "pt";
+  var theme = window.__cfTheme === "dark" ? "dark" : "light";
+  applyLang(lang);
+  applyTheme(theme);
+  var langBtn = document.getElementById("langBtn");
+  if (langBtn) langBtn.addEventListener("click", function () { lang = lang === "en" ? "pt" : "en"; applyLang(lang); });
+  var themeBtn = document.getElementById("themeBtn");
+  if (themeBtn) themeBtn.addEventListener("click", function () { theme = theme === "dark" ? "light" : "dark"; applyTheme(theme); });
 })();
 </script>
 </body>

@@ -7,6 +7,20 @@
 <meta name="description" content="Toda a manutenção dos seus ativos em um só lugar. Do socorro veicular ao reparo predial — chame um profissional verificado em segundos." />
 <!-- Onde vive POST /api/v1/waitlist e GET /api/v1/service-categories -->
 <meta name="api-base" content="https://api.chamafacil.app" />
+<script>
+  // Tema + idioma antes do paint (evita flash). O restante da i18n roda no fim do body.
+  (function () {
+    try {
+      var t = localStorage.getItem("cf_theme");
+      if (t !== "dark" && t !== "light") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", t);
+      var l = localStorage.getItem("cf_lang");
+      if (l !== "pt" && l !== "en") l = (navigator.language || "pt").toLowerCase().indexOf("pt") === 0 ? "pt" : "en";
+      document.documentElement.setAttribute("lang", l === "en" ? "en" : "pt-BR");
+      window.__cfTheme = t; window.__cfLang = l;
+    } catch (e) {}
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -19,19 +33,18 @@
     --accent-soft: #fff0ea; --ok: #12b981;
     color-scheme: light;
   }
-  /* Dark mode seguindo a preferência do navegador (prefers-color-scheme). */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0d131c; --surface: #161f2b; --surface-2: #101823;
-      --ink: #eef2f7; --ink-2: #a7b6c9; --ink-3: #6e7f95;
-      --line: #263242; --accent: #ff7a4d; --accent-2: #ffb85c;
-      --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
-      --accent-soft: rgba(255,122,77,.16); --ok: #22c896;
-      color-scheme: dark;
-    }
-    .lp-btn.ghost, .lp-btn.light { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
-    .phone, .phone .nub { background: #05090f; }
+  /* Dark mode manual (data-theme). O tema inicial é definido no <head> a partir
+     de localStorage ou de prefers-color-scheme, e o botão no nav alterna. */
+  :root[data-theme="dark"] {
+    --bg: #0d131c; --surface: #161f2b; --surface-2: #101823;
+    --ink: #eef2f7; --ink-2: #a7b6c9; --ink-3: #6e7f95;
+    --line: #263242; --accent: #ff7a4d; --accent-2: #ffb85c;
+    --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
+    --accent-soft: rgba(255,122,77,.16); --ok: #22c896;
+    color-scheme: dark;
   }
+  :root[data-theme="dark"] .lp-btn.ghost, :root[data-theme="dark"] .lp-btn.light { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+  :root[data-theme="dark"] .phone, :root[data-theme="dark"] .phone .nub { background: #05090f; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body { font-family: "Manrope", system-ui, sans-serif; color: var(--ink); background: var(--bg); -webkit-font-smoothing: antialiased; line-height: 1.5; }
@@ -53,6 +66,9 @@
   .lp-btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
   .lp-btn.lg { padding: 16px 28px; font-size: 16px; }
   .lp-btn.light { background: #fff; color: var(--ink); }
+  .lp-icbtn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 40px; height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font-family: inherit; font-weight: 800; font-size: 13px; letter-spacing: .02em; cursor: pointer; transition: .15s; }
+  .lp-icbtn:hover { color: var(--ink); border-color: var(--ink-3); }
+  .lp-icbtn svg { width: 18px; height: 18px; }
 
   .lp-hero { position: relative; overflow: hidden; }
   .lp-hero .lp-wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 30px; align-items: center; padding-top: 56px; padding-bottom: 64px; }
@@ -224,6 +240,8 @@
   <a class="lp-logo" href="#"><span class="lp-mk" data-ic="flame" data-sz="22"></span>Chama Fácil</a>
   <div class="lp-links"><a href="#services">Serviços</a><a href="#planos">Planos</a><a href="#pro">Seja prestador</a><a href="parcerias.html">Parcerias</a></div>
   <span class="lp-spacer"></span>
+  <button class="lp-icbtn" id="langBtn" type="button" aria-label="Language / Idioma">EN</button>
+  <button class="lp-icbtn" id="themeBtn" type="button" aria-label="Tema claro/escuro"></button>
   <a class="lp-btn grad" href="#join">Acesso antecipado</a>
 </div></nav>
 
@@ -485,6 +503,7 @@
 <script>
 (function () {
   "use strict";
+  function isEN() { return document.documentElement.lang === "en"; }
   // App icon names → lucide (PascalCase). Glyph data comes from the vendored
   // lucide package (vendor/lucide.min.js) — the same icon set the mobile app uses.
   var L = {
@@ -582,7 +601,7 @@
       var sel = document.getElementById("serviceSelect");
       if (sel) {
         var opts = order.map(function (t) { var m = TYPE_META[t] || { title: t }; return "<option>" + esc(m.title) + "</option>"; }).join("");
-        sel.innerHTML = opts + "<option>Qualquer um / não sei</option>";
+        sel.innerHTML = opts + "<option>" + (isEN() ? "Any / not sure" : "Qualquer um / não sei") + "</option>";
       }
     })
     .catch(function () { /* keep static fallback */ });
@@ -596,7 +615,7 @@
     function close() { list.hidden = true; list.innerHTML = ""; active = -1; input.setAttribute("aria-expanded", "false"); }
     function pick(i) { if (!items[i]) return; input.value = items[i].label || items[i].name; close(); }
     function render() {
-      if (!items.length) { list.innerHTML = '<div class="lp-ac-note">Nenhuma cidade encontrada</div>'; list.hidden = false; input.setAttribute("aria-expanded", "true"); return; }
+      if (!items.length) { list.innerHTML = '<div class="lp-ac-note">' + (isEN() ? "No city found" : "Nenhuma cidade encontrada") + "</div>"; list.hidden = false; input.setAttribute("aria-expanded", "true"); return; }
       list.innerHTML = items.map(function (c, i) {
         return '<div class="lp-ac-item' + (i === active ? " active" : "") + '" role="option" data-i="' + i + '">' + esc(c.name) + '<span class="lp-ac-uf">' + esc(c.uf || "") + "</span></div>";
       }).join("");
@@ -644,7 +663,7 @@
       b.classList.add("on");
       role = b.dataset.role;
       var lbl = document.querySelector("[data-svc-label]");
-      if (lbl) lbl.textContent = role === "pro" ? "Posso trabalhar com" : "Tenho interesse em";
+      if (lbl) lbl.textContent = role === "pro" ? (isEN() ? "I can work with" : "Posso trabalhar com") : (isEN() ? "I'm interested in" : "Tenho interesse em");
     });
   });
   function showErr(key, on) {
@@ -672,17 +691,191 @@
         if (!r.ok && r.status !== 201) throw new Error("fail");
         form.style.display = "none";
         var msg = document.getElementById("joinSuccessMsg");
+        var first = name.split(" ")[0], en = isEN();
         msg.textContent = role === "pro"
-          ? "Valeu, " + name.split(" ")[0] + "! Vamos entrar em contato para te cadastrar como profissional Chama Fácil."
-          : "Valeu, " + name.split(" ")[0] + "! Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.";
+          ? (en ? "Thanks, " + first + "! We'll reach out to sign you up as a Chama Fácil pro." : "Valeu, " + first + "! Vamos entrar em contato para te cadastrar como profissional Chama Fácil.")
+          : (en ? "Thanks, " + first + "! We'll email you as soon as Chama Fácil reaches your area." : "Valeu, " + first + "! Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.");
         document.getElementById("joinSuccess").style.display = "block";
       })
       .catch(function () {
         btn.disabled = false;
         var m = form.querySelector('[data-err="email"]');
-        if (m) { m.textContent = "Não deu para enviar agora. Tente de novo em instantes."; m.classList.add("show"); }
+        if (m) { m.textContent = isEN() ? "Couldn't submit right now. Try again in a moment." : "Não deu para enviar agora. Tente de novo em instantes."; m.classList.add("show"); }
       });
   });
+})();
+</script>
+<script>
+/* ============================================================================
+ * i18n (PT padrão no HTML; EN via dicionário de text-nodes) + tema day/night.
+ * Portável: o dicionário abaixo migra 1:1 para next-intl/i18n quando virar React.
+ * ==========================================================================*/
+(function () {
+  "use strict";
+
+  var EN = {
+    // nav
+    "Serviços": "Services", "Planos": "Plans", "Seja prestador": "Become a pro",
+    "Parcerias": "Partners", "Acesso antecipado": "Early access",
+    // hero
+    "Gestão de manutenção de ativos": "Asset maintenance management",
+    "Toda a manutenção": "All the maintenance", "dos seus ativos": "of your assets",
+    "em um só lugar.": "in one place.",
+    "Do primeiro chamado ao histórico completo de manutenção, conectamos clientes, ativos e prestadores de serviço em um único ecossistema.": "From the first request to the full maintenance history, we connect customers, assets and service providers in a single ecosystem.",
+    "1ª proposta": "1st quote", "Nota dos profissionais": "Pro rating", "Atendimentos": "Jobs done",
+    // phone mockup
+    "Chamado urgente": "Urgent request", "Pneu furado · Av. Paulista": "Flat tire · Av. Paulista",
+    "3 propostas": "3 quotes", "AO VIVO": "LIVE", "Melhor opção": "Best match",
+    // trust strip
+    "até a 1ª proposta": "to the 1st quote", "profissionais verificados": "verified pros",
+    "em 12k+ serviços": "across 12k+ jobs", "ativa agora, mais cidades em breve": "live now, more cities soon",
+    // join
+    "Seja o primeiro quando a Chama Fácil chegar perto de você.": "Be first when Chama Fácil reaches your area.",
+    "Entre na lista e avisamos assim que lançarmos na sua cidade — com vantagens para os primeiros.": "Join the list and we'll let you know the moment we launch in your city — with perks for the first ones.",
+    "Acesso prioritário no lançamento": "Priority access at launch",
+    "Créditos de fundador nos primeiros serviços": "Founder credits on your first jobs",
+    "Sem spam — só um e-mail de lançamento": "No spam — just one launch email",
+    "Parcerias regionais abertas": "Regional partnerships open",
+    "Quer cuidar de uma região? Buscamos parceiros para prospectar prestadores e apoiar clientes em dúvidas e disputas.": "Want to run a region? We're looking for partners to recruit pros and support customers with questions and disputes.",
+    "Fale com a gente →": "Get in touch →", "Preciso de ajuda": "I need help", "Quero trabalhar": "I want to work",
+    "Nome completo": "Full name", "Informe seu nome.": "Enter your name.", "Email": "Email",
+    "Telefone (opcional)": "Phone (optional)", "Informe um e-mail válido.": "Enter a valid email.",
+    "Cidade": "City", "Tenho interesse em": "I'm interested in", "Entrar na lista": "Join the list",
+    "Ao entrar você aceita os Termos e a Política de Privacidade.": "By joining you accept the Terms and Privacy Policy.",
+    "Você está na lista!": "You're on the list!",
+    "Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.": "We'll email you as soon as Chama Fácil reaches your area.",
+    // services
+    "O que cobrimos": "What we cover", "Uma plataforma para toda manutenção": "One platform for all maintenance",
+    "Do socorro veicular ao reparo predial — chame um profissional verificado em segundos e mantenha o histórico de cada ativo.": "From roadside help to building repairs — call a verified pro in seconds and keep every asset's history.",
+    // platform / features
+    "A plataforma": "The platform", "Clientes, ativos e prestadores conectados.": "Customers, assets and pros connected.",
+    "Centralize chamados, acompanhe cada serviço e mantenha o histórico completo de manutenção de cada ativo — tudo em um só lugar.": "Centralize requests, track every job and keep each asset's full maintenance history — all in one place.",
+    "Você define o orçamento": "You set the budget",
+    "Diga quanto quer pagar. O medidor mostra a média da região para uma proposta justa.": "Say how much you want to pay. The meter shows the local average for a fair quote.",
+    "Profissionais verificados": "Verified pros",
+    "Todo prestador é verificado e aprovado. A avaliação é mútua, mantendo a qualidade.": "Every pro is verified and approved. Ratings go both ways, keeping quality high.",
+    "Acompanhe em tempo real": "Track in real time",
+    "Veja o profissional chegando no mapa e converse pelo app.": "Watch the pro arrive on the map and chat in the app.",
+    "Pague como quiser": "Pay however you like",
+    "Pix, cartão ou dinheiro — só após o serviço concluído.": "Pix, card or cash — only after the job is done.",
+    "3 propostas · urgente": "3 quotes · urgent",
+    "★ 4.9 · 8 min de distância": "★ 4.9 · 8 min away", "★ 4.7 · 12 min de distância": "★ 4.7 · 12 min away",
+    // how it works
+    "Como funciona": "How it works", "Três passos até pronto": "Three steps and done",
+    "Peça ajuda": "Ask for help",
+    "Escolha a categoria, dê alguns detalhes e a localização. Urgente ou agendado.": "Pick a category, add a few details and your location. Urgent or scheduled.",
+    "Compare propostas": "Compare quotes",
+    "Profissionais próximos enviam ofertas com preço, prazo e nota. Escolha a ideal.": "Nearby pros send offers with price, time and rating. Pick the best one.",
+    "Acompanhe & pague": "Track & pay",
+    "Acompanhe no mapa e pague por Pix, cartão ou dinheiro ao concluir.": "Track on the map and pay by Pix, card or cash when it's done.",
+    // reviews
+    "Quem usa, recomenda": "People who use it, recommend it",
+    "Histórias reais com a Chama Fácil": "Real stories with Chama Fácil",
+    "\"Pneu furado de noite na Marginal. Em dois minutos veio proposta e em vinte eu estava rodando. Salvou.\"": "\"Flat tire at night on the Marginal. A quote came in two minutes and in twenty I was back on the road. Lifesaver.\"",
+    "Cliente · São Paulo": "Customer · São Paulo",
+    "\"Defini meu preço e vi a média da área — sem pechincha. O encanador veio na mesma tarde.\"": "\"I set my price and saw the area average — no haggling. The plumber came that same afternoon.\"",
+    "Cliente · Pinheiros": "Customer · Pinheiros",
+    "\"Como profissional, pego trabalhos perto e fico com 97%. As fotos de antes/depois geram confiança.\"": "\"As a pro, I take nearby jobs and keep 97%. Before/after photos build trust.\"",
+    "profissional Chama Fácil · 213 trabalhos": "Chama Fácil pro · 213 jobs",
+    // plans
+    "Planos para prestadores": "Plans for pros", "Comece grátis, cresça quando quiser.": "Start free, grow when you want.",
+    "Quanto mais avançado o plano, menor a comissão por serviço. Sem fidelidade — mude de plano a qualquer momento.": "The higher the plan, the lower the per-job commission. No lock-in — switch plans anytime.",
+    "/mês": "/mo", "de comissão por serviço": "commission per job",
+    "Receba trabalhos na sua região": "Get jobs in your area", "Perfil verificado e avaliações": "Verified profile and reviews",
+    "Pagamento seguro via Pix": "Secure payment via Pix", "Começar grátis": "Start free", "Mais popular": "Most popular",
+    "Tudo do Free": "Everything in Free", "Destaque nas buscas e propostas": "Featured in search and quotes",
+    "Raio de cobertura ampliado": "Extended coverage radius", "Relatórios de ganhos": "Earnings reports",
+    "Assinar Pro": "Get Pro", "Tudo do Pro": "Everything in Pro",
+    "Múltiplos profissionais e equipes": "Multiple pros and teams", "Gestão de ativos e histórico": "Asset management and history",
+    "Gerente de conta dedicado": "Dedicated account manager", "Falar com vendas": "Talk to sales",
+    // pro band
+    "Ganhe no seu ritmo como profissional Chama Fácil.": "Earn at your own pace as a Chama Fácil pro.",
+    "Receba trabalhos na sua região, defina suas propostas e construa uma reputação. Planos a partir de 1% de comissão.": "Get jobs in your area, set your quotes and build a reputation. Plans from 1% commission.",
+    "Começar a ganhar": "Start earning", "A partir de 1%": "From 1%",
+    "Comissão por serviço · escolha seu plano": "Commission per job · choose your plan",
+    "Sua área, seu horário": "Your area, your schedule", "Defina raio e disponibilidade": "Set radius and availability",
+    "Receba rápido": "Get paid fast", "Pagamento seguro a cada serviço": "Secure payment on every job",
+    // faq
+    "Bom saber": "Good to know", "Perguntas frequentes": "Frequently asked questions",
+    "Em quanto tempo o profissional chega?": "How fast does the pro arrive?",
+    "Em chamados urgentes em São Paulo, a primeira proposta chega em poucos minutos e o profissional em ~6. Em serviços agendados você escolhe dia e horário.": "For urgent requests in São Paulo, the first quote arrives in minutes and the pro in ~6. For scheduled jobs you pick the day and time.",
+    "Como é definido o preço?": "How is the price set?",
+    "Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha.": "You set a budget and receive quotes. A meter shows the local average — no fixed table, no haggling.",
+    "Os profissionais são verificados?": "Are the pros verified?",
+    "Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade.": "Every pro submits an ID, proof and a selfie, and is approved by our team before working. Two-way ratings keep quality high.",
+    "Como eu pago?": "How do I pay?",
+    "Pix, cartão ou dinheiro — sua escolha, só após o serviço. Peças extras são detalhadas e aprovadas por você.": "Pix, card or cash — your choice, only after the job. Extra parts are itemized and approved by you.",
+    "Quanto custa trabalhar como prestador?": "How much does it cost to work as a pro?",
+    "O cadastro é grátis. Há planos de 5% a 1% de comissão — peças repassadas a custo — e pagamento seguro a cada serviço.": "Signing up is free. Plans range from 5% to 1% commission — parts passed on at cost — with secure payment on every job.",
+    // footer
+    "Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.": "Asset maintenance management. Customers, assets and pros connected.",
+    "Empresa": "Company", "Sobre": "About", "Contato": "Contact", "Categorias": "Categories",
+    "Avaliações": "Reviews", "Prestadores": "Pros", "Jurídico": "Legal", "Termos": "Terms", "Privacidade": "Privacy"
+  };
+  var EN_PH = { "voce@email.com": "you@email.com", "Digite sua cidade...": "Type your city...", "Mateus Almeida": "Jordan Smith" };
+  var META = {
+    title: { pt: "Chama Fácil — ajuda, rápido", en: "Chama Fácil — help, fast" },
+    desc: {
+      pt: "Toda a manutenção dos seus ativos em um só lugar. Do socorro veicular ao reparo predial — chame um profissional verificado em segundos.",
+      en: "All your asset maintenance in one place. From roadside help to building repairs — call a verified pro in seconds."
+    }
+  };
+
+  function lucideSvg(pascal, size) {
+    var lu = window.lucide, node = lu && lu.icons && lu.icons[pascal];
+    if (!node) return "";
+    var inner = node.map(function (t) { var s = "<" + t[0], a = t[1], k; for (k in a) { if (k !== "key") s += " " + k + '="' + a[k] + '"'; } return s + "/>"; }).join("");
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + inner + "</svg>";
+  }
+
+  // ---- i18n: walk text nodes; PT is the source (cached em node.__o) ----
+  function walkText(fn) {
+    var skip = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1 };
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (skip[n.parentNode.nodeName]) return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    var n; while ((n = w.nextNode())) fn(n);
+  }
+  function applyLang(lang) {
+    var en = lang === "en";
+    walkText(function (n) {
+      var key = n.nodeValue.trim();
+      if (en) { if (EN[key] != null) { if (n.__o == null) n.__o = n.nodeValue; n.nodeValue = n.__o.replace(key, EN[key]); } }
+      else if (n.__o != null) { n.nodeValue = n.__o; }
+    });
+    document.querySelectorAll("[placeholder]").forEach(function (el) {
+      if (el.__ph == null) el.__ph = el.getAttribute("placeholder");
+      el.setAttribute("placeholder", en && EN_PH[el.__ph] ? EN_PH[el.__ph] : el.__ph);
+    });
+    document.title = META.title[en ? "en" : "pt"];
+    var md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute("content", META.desc[en ? "en" : "pt"]);
+    document.documentElement.setAttribute("lang", en ? "en" : "pt-BR");
+    var lb = document.getElementById("langBtn");
+    if (lb) { lb.textContent = en ? "PT" : "EN"; lb.setAttribute("aria-label", en ? "Mudar para português" : "Switch to English"); }
+    try { localStorage.setItem("cf_lang", lang); } catch (e) {}
+  }
+
+  // ---- tema ----
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    var tb = document.getElementById("themeBtn");
+    if (tb) tb.innerHTML = lucideSvg(theme === "dark" ? "Sun" : "Moon", 18);
+    try { localStorage.setItem("cf_theme", theme); } catch (e) {}
+  }
+
+  var lang = window.__cfLang === "en" ? "en" : "pt";
+  var theme = window.__cfTheme === "dark" ? "dark" : "light";
+  applyLang(lang);
+  applyTheme(theme);
+
+  var langBtn = document.getElementById("langBtn");
+  if (langBtn) langBtn.addEventListener("click", function () { lang = lang === "en" ? "pt" : "en"; applyLang(lang); });
+  var themeBtn = document.getElementById("themeBtn");
+  if (themeBtn) themeBtn.addEventListener("click", function () { theme = theme === "dark" ? "light" : "dark"; applyTheme(theme); });
 })();
 </script>
 </body>
