@@ -20,7 +20,7 @@
 # Landing page estática (marketing + formulário de waitlist).
 chamafacil.app, www.chamafacil.app {
 	root * /srv/landing
-	encode gzip
+	encode zstd gzip
 	file_server
 }
 

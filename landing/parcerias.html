@@ -215,32 +215,41 @@
   <p>Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.</p>
 </div></footer>
 
+<script src="vendor/lucide.min.js"></script>
 <script>
 (function () {
   "use strict";
-  var P = {
-    flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-    shieldCheck: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>',
-    star: '<path d="M12 3l2.6 5.6 6.1.5-4.6 4 1.4 6-5.5-3.2L6 19.7l1.4-6-4.6-4 6.1-.5z"/>',
-    check: '<path d="M20 6L9 17l-5-5"/>',
-    arrowR: '<path d="M4 12h15"/><path d="M12 5l7 7-7 7"/>',
-    sparkles: '<path d="M12 3l1.8 4.9L18.7 9l-4.9 1.8L12 15.7l-1.8-4.9L5.3 9l4.9-1.8z"/><path d="M5 15l.7 1.9 1.9.7-1.9.7L5 20.2l-.7-1.9L2.4 17.6l1.9-.7z"/>',
-    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
-    headset: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M20 15a2 2 0 0 1-2 2h-1v-4h1a2 2 0 0 1 2 2z"/><path d="M4 15a2 2 0 0 0 2 2h1v-4H6a2 2 0 0 0-2 2z"/><path d="M18 17v1a3 3 0 0 1-3 3h-3"/>',
-    location: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
-    rocket: '<path d="M5 13c-1.5.5-3 2-3 5 3 0 4.5-1.5 5-3"/><path d="M9 15c-1-.5-1-2 .5-4 2.5-3.5 6-5 10.5-5 0 4.5-1.5 8-5 10.5-2 1.5-3.5 1.5-4 .5z"/><circle cx="14.5" cy="9.5" r="1.6"/>',
-    briefcase: '<rect x="2.5" y="7" width="19" height="13" rx="2.5"/><path d="M8 7V5.5A2 2 0 0 1 10 3.5h4a2 2 0 0 1 2 2V7"/><path d="M2.5 12h19"/>'
+  // App icon names → lucide (PascalCase). Glyph data comes from the vendored
+  // lucide package (vendor/lucide.min.js) — the same icon set the mobile app uses.
+  var L = {
+    arrowR: "ArrowRight", briefcase: "Briefcase", car: "Car", check: "Check", dollar: "DollarSign",
+    drop: "Droplet", flame: "Flame", flash: "Zap", fwd: "CornerUpRight", handshake: "Handshake",
+    navigate: "Navigation", paw: "PawPrint", pin: "Pin", pix: "QrCode", search: "Search",
+    shieldCheck: "ShieldCheck", star: "Star", sparkles: "Sparkles", users: "Users", headset: "Headset",
+    location: "MapPin", rocket: "Rocket", truck: "Truck", battery: "BatteryCharging", key: "Key",
+    wrench: "Wrench", home: "House", shield: "Shield", heart: "Heart", scissors: "Scissors",
+    camera: "Camera", settings: "Settings", wifi: "Wifi"
   };
+  // Build the inner SVG for an icon from the vendored lucide package's icon nodes.
+  function iconInner(name) {
+    var lu = window.lucide, node = lu && lu.icons && lu.icons[L[name] || ""];
+    if (!node) return "";
+    return node.map(function (t) {
+      var s = "<" + t[0], a = t[1], k;
+      for (k in a) { if (k !== "key") s += " " + k + '="' + a[k] + '"'; }
+      return s + "/>";
+    }).join("");
+  }
   function renderIcons(root) {
     (root || document).querySelectorAll("[data-ic]").forEach(function (el) {
-      if (el.__ic) return; el.__ic = 1;
-      var d = P[el.getAttribute("data-ic")]; if (!d) return;
+      if (el.__ic) return;
+      var d = iconInner(el.getAttribute("data-ic")); if (!d) return;
+      el.__ic = 1;
       var sz = el.getAttribute("data-sz");
       if (!sz) sz = (el.closest(".lp-ic") || el.closest(".lp-mk")) ? 26 : 22;
       var white = el.hasAttribute("data-white") || el.closest(".lp-mk") || el.closest(".sc-ic");
-      var name = el.getAttribute("data-ic");
-      var fill = name === "star" || name === "flame" || name === "sparkles";
-      el.innerHTML = '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="' + (fill ? "currentColor" : "none") + '" stroke="' + (fill ? "none" : "currentColor") + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + (white ? ' style="color:#fff"' : "") + ">" + d + "</svg>";
+      // lucide icons are outline glyphs (fill none + currentColor stroke), same as the app.
+      el.innerHTML = '<svg width="' + sz + '" height="' + sz + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + (white ? ' style="color:#fff"' : "") + ">" + d + "</svg>";
     });
   }
   renderIcons();
