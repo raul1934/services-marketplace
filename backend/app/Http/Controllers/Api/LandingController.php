@@ -53,8 +53,9 @@ class LandingController extends Controller
         $query = City::query()->with('state:id,name,uf,country_id');
 
         if ($q !== '') {
-            $query->where('name', 'ilike', '%'.$q.'%')
-                ->orderByRaw('(name ilike ?) desc', [$q.'%']); // prefix matches first
+            // Accent-insensitive (unaccent extension): "goiania" matches "Goiânia".
+            $query->whereRaw('unaccent(name) ILIKE unaccent(?)', ['%'.$q.'%'])
+                ->orderByRaw('unaccent(name) ILIKE unaccent(?) DESC', [$q.'%']); // prefix matches first
         }
 
         $cities = $query->orderBy('name')->limit(20)->get(['id', 'state_id', 'name']);
