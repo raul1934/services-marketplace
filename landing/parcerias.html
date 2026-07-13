@@ -23,7 +23,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 <style>
   :root {
     --bg: #eef2f7; --surface: #fff; --surface-2: #f6f8fc;
@@ -31,6 +31,7 @@
     --line: #e7ecf3; --accent: #ff6a3d; --accent-2: #ffb23e;
     --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
     --accent-soft: #fff0ea;
+    --mono: 'Space Mono', ui-monospace, monospace;
     color-scheme: light;
   }
   /* Dark mode manual (data-theme) — definido no <head> a partir de localStorage
@@ -51,7 +52,7 @@
   svg { display: block; }
   .lp-wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
   h1, h2, h3 { letter-spacing: -.03em; margin: 0; font-weight: 800; }
-  .lp-eyebrow { font-size: 12.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .lp-eyebrow { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
 
   .lp-nav { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
   .lp-nav .lp-wrap { display: flex; align-items: center; gap: 14px; height: 72px; }

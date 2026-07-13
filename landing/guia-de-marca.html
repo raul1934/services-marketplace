@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chama Fácil — Guia de marca</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#eef2f7; --surface:#fff; --surface-2:#f6f8fc;
+    --ink:#15233b; --ink-2:#5b6b82; --ink-3:#95a2b6;
+    --line:#e7ecf3; --accent:#ff6a3d; --accent-2:#ffb23e;
+    --grad:linear-gradient(135deg,#ff8a4c 0%,#ff5a6e 55%,#ffb23e 110%);
+    --accent-soft:#fff0ea; --ok:#12b981;
+    --mono:'Space Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .page{max-width:960px;margin:0 auto;padding:64px 48px 96px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
+  h1{font-size:52px;font-weight:800;letter-spacing:-.03em;margin:12px 0 10px;line-height:1;}
+  .lead{font-size:18px;color:var(--ink-2);max-width:60ch;line-height:1.55;}
+  section{margin-top:64px;}
+  h2{font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);border-bottom:1px solid var(--line);padding-bottom:12px;margin:0 0 28px;}
+  h3{font-size:20px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px;}
+  p.note{color:var(--ink-2);font-size:14.5px;line-height:1.55;margin:6px 0 0;}
+  a{color:var(--accent);text-decoration:none;font-weight:700;}
+
+  /* lockup (símbolo + wordmark) */
+  .lockup{display:flex;align-items:center;gap:12px;font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--ink);}
+  .lockup img{width:52px;height:52px;border-radius:15px;}
+  .lockup.stacked{flex-direction:column;gap:10px;font-size:22px;}
+  .lockup.stacked img{width:64px;height:64px;border-radius:18px;}
+  .logo-card.dark .lockup{color:#fff;}
+
+  /* logo */
+  .logo-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;}
+  .logo-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:34px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;min-height:180px;box-shadow:0 12px 34px -24px rgba(20,35,59,.26);}
+  .logo-card.dark{background:var(--ink);}
+  .logo-card img{max-width:100%;max-height:120px;object-fit:contain;border-radius:14px;}
+  .logo-card .cap{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase;}
+  .logo-card.dark .cap{color:#8697ad;}
+  .misuse{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px;}
+  .misuse div{background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:13.5px;color:var(--ink-2);font-weight:600;display:flex;gap:9px;align-items:flex-start;}
+  .misuse .x{color:#e11d48;font-weight:800;flex:none;}
+
+  /* clearspace + sizing */
+  .cs-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:stretch;}
+  .cs-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:32px;box-shadow:0 12px 34px -24px rgba(20,35,59,.26);}
+  .cs-stage{position:relative;background:var(--surface-2);border:1px dashed var(--line);border-radius:16px;padding:44px;display:flex;align-items:center;justify-content:center;}
+  .cs-box{position:relative;padding:56px;}
+  .cs-box::before{content:"";position:absolute;inset:0;border:1.5px dashed var(--accent);border-radius:6px;opacity:.5;}
+  .cs-box img{display:block;height:70px;border-radius:16px;}
+  .cs-tick{position:absolute;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);}
+  .cs-tick.t{top:16px;left:50%;transform:translateX(-50%);} .cs-tick.l{left:14px;top:50%;transform:translateY(-50%);}
+  .cs-legend{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);margin-top:16px;line-height:1.7;}
+  .cs-legend b{color:var(--ink);}
+  .cs-x{color:var(--accent);font-weight:700;}
+  .sizes{display:flex;align-items:flex-end;gap:32px;flex-wrap:wrap;}
+  .size{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .size img{object-fit:contain;border-radius:8px;}
+  .size .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-align:center;line-height:1.4;}
+  .size .lbl b{color:var(--ink);display:block;font-size:12px;}
+
+  /* colors */
+  .swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .sw{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);}
+  .sw .chip{height:96px;display:flex;align-items:flex-end;padding:10px;}
+  .sw .meta{padding:12px 14px;}
+  .sw .nm{font-weight:800;font-size:14px;}
+  .sw .hex{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:3px;text-transform:uppercase;}
+  .sw .role{font-size:11.5px;color:var(--ink-3);font-weight:600;margin-top:5px;line-height:1.35;}
+  .grad-bar{height:96px;border-radius:16px;background:var(--grad);display:flex;align-items:flex-end;padding:12px;color:#fff;font-family:var(--mono);font-size:11px;font-weight:700;}
+  .grad-wrap{margin-top:16px;}
+  .grad-code{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+
+  /* icons & illustration */
+  .ico-note{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .ico-spec{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;}
+  .ico-spec .k{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;}
+  .ico-spec .v{font-weight:800;font-size:16px;margin-top:5px;}
+  .ico-set{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-top:16px;}
+  .ico-chip{aspect-ratio:1;background:var(--surface);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ink);}
+  .ico-chip svg{width:26px;height:26px;}
+  .ico-chip .cn{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);}
+  .ill{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px;}
+  .ill .t{aspect-ratio:1;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;}
+  .ill .t svg{width:38px;height:38px;}
+
+  /* type */
+  .type-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:32px;box-shadow:0 12px 34px -24px rgba(20,35,59,.26);}
+  .type-card + .type-card{margin-top:16px;}
+  .type-fam{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+  .type-fam .fn{font-size:22px;font-weight:800;letter-spacing:-.01em;}
+  .type-fam .use{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);padding:4px 9px;border-radius:7px;}
+  .spec{display:flex;align-items:baseline;gap:16px;padding:14px 0;border-top:1px solid var(--line);}
+  .spec .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-3);width:130px;flex:none;text-transform:uppercase;letter-spacing:.04em;}
+  .d1{font-size:44px;font-weight:800;letter-spacing:-.03em;}
+  .h-eg{font-size:28px;font-weight:800;letter-spacing:-.02em;}
+  .b-eg{font-size:16px;font-weight:500;color:var(--ink-2);}
+  .m-eg{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.04em;}
+  .scale{font-family:var(--mono);font-size:12.5px;color:var(--ink-2);line-height:1.9;}
+
+  /* voice */
+  .voice{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .voice .col{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:24px;}
+  .voice h4{margin:0 0 12px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;}
+  .voice.do h4{color:var(--ok);} .voice .col li{margin-bottom:8px;font-size:14.5px;color:var(--ink-2);line-height:1.5;}
+  ul{margin:0;padding-left:18px;}
+  footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3);letter-spacing:.04em;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  @media (max-width:720px){ .page{padding:40px 22px 72px;} h1{font-size:40px;} .logo-grid,.cs-grid,.voice{grid-template-columns:1fr;} .swatches{grid-template-columns:repeat(2,1fr);} .ico-note{grid-template-columns:1fr;} .ico-set{grid-template-columns:repeat(3,1fr);} }
+  @media print{ html,body{background:#fff;} .page{padding:0;max-width:none;} .logo-card,.type-card{box-shadow:none;} section{break-inside:avoid;} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="eyebrow">Chama Fácil · Identidade visual</div>
+    <h1>Guia de marca</h1>
+    <p class="lead">O essencial para aplicar a marca Chama Fácil com consistência: logo, cores e tipografia. A marca combina uma <b>chama</b> (o nome), um <b>pin</b> e um <b>check</b> — energia, localização e confiança.</p>
+  </header>
+
+  <!-- LOGO -->
+  <section>
+    <h2>Logo</h2>
+    <div class="logo-grid">
+      <div class="logo-card"><div class="lockup"><img src="logo.svg" alt="" />Chama Fácil</div><span class="cap">Horizontal · uso primário</span></div>
+      <div class="logo-card"><div class="lockup stacked"><img src="logo.svg" alt="" />Chama Fácil</div><span class="cap">Empilhado</span></div>
+      <div class="logo-card"><img src="logo.svg" alt="Símbolo" style="max-height:96px" /><span class="cap">Símbolo · app &amp; favicon</span></div>
+      <div class="logo-card dark"><img src="logo.svg" alt="Símbolo em fundo escuro" style="max-height:96px" /><span class="cap">Símbolo · fundo escuro</span></div>
+    </div>
+    <div class="misuse">
+      <div><span class="x">✕</span> Não distorça, gire ou altere as proporções do símbolo.</div>
+      <div><span class="x">✕</span> Não recolore a chama fora da paleta oficial.</div>
+      <div><span class="x">✕</span> Mantenha área de respiro ≥ altura do símbolo ao redor do logo.</div>
+      <div><span class="x">✕</span> Não aplique sombra, contorno ou gradiente no wordmark.</div>
+    </div>
+  </section>
+
+  <!-- ESPACAMENTO -->
+  <section>
+    <h2>Espaçamento &amp; tamanho mínimo</h2>
+    <div class="cs-grid">
+      <div class="cs-card">
+        <h3>Área de proteção (clearspace)</h3>
+        <p class="note">Reserve, no mínimo, o espaço de <b>uma altura do símbolo (1×)</b> em volta de todo o logo. Nada — texto, imagem ou borda — deve invadir essa margem.</p>
+        <div class="cs-stage" style="margin-top:20px">
+          <div class="cs-box">
+            <span class="cs-tick t">1×</span><span class="cs-tick l">1×</span>
+            <img src="logo.svg" alt="Clearspace" />
+          </div>
+        </div>
+        <div class="cs-legend">Unidade <b>x</b> = altura do símbolo (a chama). <span class="cs-x">– – –</span> limite de respiro.</div>
+      </div>
+      <div class="cs-card">
+        <h3>Tamanho mínimo</h3>
+        <p class="note">Abaixo destes tamanhos o símbolo perde legibilidade. Em espaços muito reduzidos, use só o símbolo.</p>
+        <div class="sizes" style="margin-top:24px">
+          <div class="size"><img src="logo.svg" style="height:40px" alt="" /><span class="lbl"><b>Símbolo</b>≥ 40px</span></div>
+          <div class="size"><img src="logo.svg" style="height:24px" alt="" /><span class="lbl"><b>Compacto</b>≥ 24px</span></div>
+          <div class="size"><img src="logo.svg" style="height:16px" alt="" /><span class="lbl"><b>Favicon</b>16px</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CORES -->
+  <section>
+    <h2>Cores</h2>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#ff6a3d"></div><div class="meta"><div class="nm">Chama</div><div class="hex">#FF6A3D</div><div class="role">Cor primária · CTAs, links, destaques</div></div></div>
+      <div class="sw"><div class="chip" style="background:#ffb23e"></div><div class="meta"><div class="nm">Âmbar</div><div class="hex">#FFB23E</div><div class="role">Secundária · realces, gradiente</div></div></div>
+      <div class="sw"><div class="chip" style="background:#15233b"></div><div class="meta"><div class="nm">Ink</div><div class="hex">#15233B</div><div class="role">Texto principal, fundos escuros</div></div></div>
+      <div class="sw"><div class="chip" style="background:#12b981"></div><div class="meta"><div class="nm">Sucesso</div><div class="hex">#12B981</div><div class="role">Confirmações, status positivo</div></div></div>
+      <div class="sw"><div class="chip" style="background:#5b6b82"></div><div class="meta"><div class="nm">Ink 2</div><div class="hex">#5B6B82</div><div class="role">Texto secundário</div></div></div>
+      <div class="sw"><div class="chip" style="background:#95a2b6"></div><div class="meta"><div class="nm">Ink 3</div><div class="hex">#95A2B6</div><div class="role">Legendas, placeholders</div></div></div>
+      <div class="sw"><div class="chip" style="background:#fff0ea;border-bottom:1px solid var(--line)"></div><div class="meta"><div class="nm">Chama suave</div><div class="hex">#FFF0EA</div><div class="role">Fundos de destaque, chips</div></div></div>
+      <div class="sw"><div class="chip" style="background:#eef2f7;border-bottom:1px solid var(--line)"></div><div class="meta"><div class="nm">Fundo</div><div class="hex">#EEF2F7</div><div class="role">Base neutra da interface</div></div></div>
+    </div>
+    <div class="grad-wrap">
+      <div class="grad-bar">GRADIENTE DE MARCA</div>
+      <div class="grad-code">linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%)</div>
+      <p class="note">O gradiente é reservado a superfícies de marca — botões primários, banners e blocos hero. Não use como fundo de texto corrido.</p>
+    </div>
+  </section>
+
+  <!-- ICONES & ILUSTRACAO -->
+  <section>
+    <h2>Ícones &amp; ilustração</h2>
+    <div class="ico-note">
+      <div class="ico-spec"><div class="k">Biblioteca</div><div class="v">Lucide</div><p class="note">Base única em todo o produto e site. Não misture com outros conjuntos.</p></div>
+      <div class="ico-spec"><div class="k">Traço</div><div class="v">2px · arredondado</div><p class="note">Contorno (não preenchido), pontas e junções arredondadas. viewBox 24.</p></div>
+      <div class="ico-spec"><div class="k">Cor</div><div class="v">currentColor</div><p class="note">Herdam a cor do texto; use Chama para ícones em destaque.</p></div>
+    </div>
+
+    <h3 style="margin-top:28px">Ícones de serviço</h3>
+    <p class="note">Um ícone por categoria, sempre no mesmo estilo de traço.</p>
+    <div class="ico-set" id="icoSet"></div>
+
+    <h3 style="margin-top:28px">Tiles de categoria</h3>
+    <p class="note">Ícone branco sobre tile de canto arredondado (16px). Fundo neutro <b>ink</b> ou <b>chama suave</b>; reserve o gradiente para superfícies de marca.</p>
+    <div class="ill" id="illSet"></div>
+
+    <div class="misuse">
+      <div><span class="x">✕</span> Não misture ícones preenchidos com os de contorno.</div>
+      <div><span class="x">✕</span> Não use ícones de outra biblioteca ou emojis na interface.</div>
+      <div><span class="x">✕</span> Não distorça a espessura do traço ao redimensionar.</div>
+      <div><span class="x">✕</span> Ilustração: geométrica e plana — sem 3D, sombras ou degradê complexo.</div>
+    </div>
+  </section>
+
+  <!-- TIPOGRAFIA -->
+  <section>
+    <h2>Tipografia</h2>
+    <div class="type-card">
+      <div class="type-fam"><span class="fn">Manrope</span><span class="use">Títulos &amp; corpo</span></div>
+      <div class="spec"><span class="lbl">Display / H1</span><span class="d1">Chama Fácil</span></div>
+      <div class="spec"><span class="lbl">Título / H2·H3</span><span class="h-eg">Ajuda de confiança, a um toque</span></div>
+      <div class="spec"><span class="lbl">Corpo</span><span class="b-eg">Do primeiro chamado ao histórico completo de manutenção dos seus ativos.</span></div>
+      <div class="spec"><span class="lbl">Pesos</span><span class="scale">500 Medium · 600 SemiBold · 700 Bold · 800 ExtraBold</span></div>
+    </div>
+    <div class="type-card">
+      <div class="type-fam"><span class="fn">Space Mono</span><span class="use">Etiquetas &amp; dados</span></div>
+      <div class="spec"><span class="lbl">Eyebrow / label</span><span class="m-eg">ACESSO ANTECIPADO</span></div>
+      <div class="spec"><span class="lbl">Números / código</span><span class="m-eg">R$ 120 · 04:32 · #FF6A3D</span></div>
+      <div class="spec"><span class="lbl">Pesos</span><span class="scale">400 Regular · 700 Bold</span></div>
+    </div>
+    <p class="note">Hierarquia: títulos em Manrope ExtraBold com tracking negativo (−2% a −3%); corpo em Manrope Medium/SemiBold; etiquetas, horários e valores em Space Mono maiúsculo com tracking positivo.</p>
+  </section>
+
+  <!-- VOZ -->
+  <section>
+    <h2>Tom de voz</h2>
+    <div class="voice">
+      <div class="col do"><h4>Faça</h4><ul>
+        <li>Direto e prático: "Chame um profissional em segundos."</li>
+        <li>Confiante e acolhedor, sem jargão.</li>
+        <li>Foque no benefício: rapidez, confiança, histórico.</li>
+        <li>Português do Brasil, informal na medida ("você").</li>
+      </ul></div>
+      <div class="col"><h4 style="color:#e11d48">Evite</h4><ul>
+        <li>Termos técnicos de marketplace com o cliente final.</li>
+        <li>Promessas exageradas ou urgência artificial.</li>
+        <li>Texto longo onde uma frase resolve.</li>
+        <li>Emojis nos títulos e comunicações formais.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <footer><span>Chama Fácil · Guia de marca v1 · uso interno</span><a href="index.html">← voltar ao site</a></footer>
+</div>
+<script src="vendor/lucide.min.js"></script>
+<script>
+  const SVC = [["Car","Veicular"],["House","Casa"],["PawPrint","Pets"],["Sparkles","Beleza"],["Wrench","Reparos"],["Droplets","Limpeza"]];
+  const ico = (name,stroke) => { const n = (window.lucide.icons&&window.lucide.icons[name])||window.lucide[name]; if(!Array.isArray(n)) return ""; const kids=(typeof n[0]==="string"&&n[0].toLowerCase()==="svg")?n[2]:n; return '<svg viewBox="0 0 24 24" fill="none" stroke="'+(stroke||'currentColor')+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+kids.map(([t,a])=>{const at=Object.entries(a).filter(([k])=>!/^(key|stroke|fill|xmlns)/.test(k)).map(([k,v])=>k+'="'+v+'"').join(" ");return '<'+t+' '+at+'/>';}).join("")+'</svg>'; };
+  document.getElementById("icoSet").innerHTML = SVC.map(([n,l])=>'<div class="ico-chip">'+ico(n)+'<span class="cn">'+l+'</span></div>').join("");
+  const tiles=["#15233b","#15233b","#ff6a3d","#15233b"];
+  document.getElementById("illSet").innerHTML = SVC.slice(0,4).map(([n],i)=>'<div class="t" style="background:'+(i===2?'var(--grad)':tiles[i])+'">'+ico(n,"#fff")+'</div>').join("");
+</script>
+</body>
+</html>
