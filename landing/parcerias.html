@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Chama Fácil — Parcerias regionais</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg" />
 <meta name="description" content="Cuide de uma região com a Chama Fácil: prospecte prestadores, apoie clientes e ative sua cidade. Parcerias regionais abertas." />
 <meta name="api-base" content="https://api.chamafacil.app" />
 <script>
@@ -55,7 +56,7 @@
   .lp-nav { position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
   .lp-nav .lp-wrap { display: flex; align-items: center; gap: 14px; height: 72px; }
   .lp-logo { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 22px; letter-spacing: -.03em; }
-  .lp-logo .lp-mk { width: 38px; height: 38px; border-radius: 12px; background: var(--grad); display: flex; align-items: center; justify-content: center; flex: none; }
+  .lp-logo .lp-mk { width: 38px; height: 38px; border-radius: 12px; overflow: hidden; flex: none; object-fit: cover; display: block; }
   .lp-links { display: flex; gap: 30px; margin-left: 26px; font-weight: 700; font-size: 14.5px; color: var(--ink-2); }
   .lp-links a:hover { color: var(--ink); }
   .lp-spacer { flex: 1; }
@@ -138,7 +139,7 @@
 <body>
 
 <nav class="lp-nav"><div class="lp-wrap">
-  <a class="lp-logo" href="index.html"><span class="lp-mk" data-ic="flame" data-sz="22"></span>Chama Fácil</a>
+  <a class="lp-logo" href="index.html"><img class="lp-mk" src="logo.svg" alt="Chama Fácil" />Chama Fácil</a>
   <div class="lp-links"><a href="index.html#services">Serviços</a><a href="index.html#planos">Planos</a><a href="index.html#pro">Seja prestador</a><a href="parcerias.html">Parcerias</a></div>
   <span class="lp-spacer"></span>
   <button class="lp-icbtn" id="langBtn" type="button" aria-label="Language / Idioma">EN</button>
@@ -230,7 +231,7 @@
 </section>
 
 <footer class="lp-footer"><div class="lp-wrap">
-  <a class="lp-logo" href="index.html"><span class="lp-mk" data-ic="flame" data-sz="22"></span>Chama Fácil</a>
+  <a class="lp-logo" href="index.html"><img class="lp-mk" src="logo.svg" alt="Chama Fácil" />Chama Fácil</a>
   <span class="lp-spacer"></span>
   <p>Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.</p>
 </div></footer>
