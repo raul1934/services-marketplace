@@ -17,6 +17,20 @@
     --line: #e7ecf3; --accent: #ff6a3d; --accent-2: #ffb23e;
     --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
     --accent-soft: #fff0ea; --ok: #12b981;
+    color-scheme: light;
+  }
+  /* Dark mode seguindo a preferência do navegador (prefers-color-scheme). */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d131c; --surface: #161f2b; --surface-2: #101823;
+      --ink: #eef2f7; --ink-2: #a7b6c9; --ink-3: #6e7f95;
+      --line: #263242; --accent: #ff7a4d; --accent-2: #ffb85c;
+      --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
+      --accent-soft: rgba(255,122,77,.16); --ok: #22c896;
+      color-scheme: dark;
+    }
+    .lp-btn.ghost, .lp-btn.light { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+    .phone, .phone .nub { background: #05090f; }
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -76,7 +90,8 @@
   .lp-svc h3 { font-size: 20px; }
   .lp-svc p { color: var(--ink-2); font-size: 14.5px; margin: 7px 0 14px; }
   .lp-tags { display: flex; flex-wrap: wrap; gap: 7px; }
-  .lp-tag { font-size: 12.5px; font-weight: 700; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; }
+  .lp-tag { font-size: 12.5px; font-weight: 700; color: var(--ink-2); background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; display: inline-flex; align-items: center; gap: 5px; }
+  .lp-tag [data-ic] { color: var(--accent); display: inline-flex; }
 
   .lp-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
   .lp-step .n { width: 46px; height: 46px; border-radius: 14px; background: var(--grad); color: #fff; font-weight: 800; font-size: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
@@ -484,7 +499,18 @@
     users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/>',
     headset: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M20 15a2 2 0 0 1-2 2h-1v-4h1a2 2 0 0 1 2 2z"/><path d="M4 15a2 2 0 0 0 2 2h1v-4H6a2 2 0 0 0-2 2z"/><path d="M18 17v1a3 3 0 0 1-3 3h-3"/>',
     location: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
-    rocket: '<path d="M5 13c-1.5.5-3 2-3 5 3 0 4.5-1.5 5-3"/><path d="M9 15c-1-.5-1-2 .5-4 2.5-3.5 6-5 10.5-5 0 4.5-1.5 8-5 10.5-2 1.5-3.5 1.5-4 .5z"/><circle cx="14.5" cy="9.5" r="1.6"/>'
+    rocket: '<path d="M5 13c-1.5.5-3 2-3 5 3 0 4.5-1.5 5-3"/><path d="M9 15c-1-.5-1-2 .5-4 2.5-3.5 6-5 10.5-5 0 4.5-1.5 8-5 10.5-2 1.5-3.5 1.5-4 .5z"/><circle cx="14.5" cy="9.5" r="1.6"/>',
+    truck: '<rect x="1" y="6" width="12" height="9" rx="1.5"/><path d="M13 9h4.6l2.9 3v3H13z"/><circle cx="6" cy="17.5" r="1.9"/><circle cx="17.5" cy="17.5" r="1.9"/>',
+    battery: '<rect x="2" y="7.5" width="16" height="9" rx="2.5"/><line x1="22" y1="10.5" x2="22" y2="13.5"/><line x1="6" y1="10.5" x2="6" y2="13.5"/><line x1="10" y1="10.5" x2="10" y2="13.5"/>',
+    key: '<circle cx="7.5" cy="15.5" r="4"/><path d="M10.3 12.7L20 3"/><path d="M15.5 7.5l3 3"/><path d="M18 5l2.5 2.5"/>',
+    wrench: '<path d="M15.5 4a4.2 4.2 0 0 0 1.3 7.1l-8.5 8.5a2.1 2.1 0 0 1-3-3l8.5-8.5A4.2 4.2 0 0 1 15.5 4z"/>',
+    home: '<path d="M3 11l9-7 9 7"/><path d="M5 9.5V20h14V9.5"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    heart: '<path d="M12 21s-7-4.6-9.4-9C1 9 2.6 5.5 6 5.5c2 0 3.2 1 4 2 .8-1 2-2 4-2 3.4 0 5 3.5 3.4 6.5C19 16.4 12 21 12 21z"/>',
+    scissors: '<circle cx="6" cy="6" r="2.4"/><circle cx="6" cy="18" r="2.4"/><path d="M8.1 7.6L20 16"/><path d="M8.1 16.4L20 8"/>',
+    camera: '<path d="M3 8h3l1.6-2.2h8.8L18 8h3v11H3z"/><circle cx="12" cy="13" r="3.4"/>',
+    settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2.1 2.1M16.9 16.9L19 19M19 5l-2.1 2.1M7.1 16.9L5 19"/>',
+    wifi: '<path d="M2 8.5a15 15 0 0 1 20 0"/><path d="M5 12a10 10 0 0 1 14 0"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/><circle cx="12" cy="19" r="1"/>'
   };
   function renderIcons(root) {
     (root || document).querySelectorAll("[data-ic]").forEach(function (el) {
@@ -551,7 +577,10 @@
       if (grid) {
         grid.innerHTML = order.map(function (t) {
           var m = TYPE_META[t] || { icon: "drop", title: t, sub: "" };
-          var tags = groups[t].slice(0, 5).map(function (c) { return '<span class="lp-tag">' + esc(c.name) + "</span>"; }).join("");
+          var tags = groups[t].slice(0, 6).map(function (c) {
+            var ic = (c.icon && P[c.icon]) ? c.icon : "";
+            return '<span class="lp-tag">' + (ic ? '<span data-ic="' + ic + '" data-sz="14"></span>' : "") + esc(c.name) + "</span>";
+          }).join("");
           return '<div class="lp-svc"><div class="lp-ic" data-ic="' + m.icon + '"></div><h3>' + esc(m.title) + "</h3><p>" + esc(m.sub) + '</p><div class="lp-tags">' + tags + "</div></div>";
         }).join("");
         renderIcons(grid);

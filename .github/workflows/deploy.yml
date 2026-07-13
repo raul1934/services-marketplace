@@ -55,5 +55,7 @@ jobs:
               composer install --no-dev --optimize-autoloader --no-interaction
             $COMPOSE up -d
             $COMPOSE exec -T backend php artisan migrate --force
+            # Dados de referência idempotentes (categorias, perguntas, catálogos) em todo deploy.
+            $COMPOSE exec -T backend php artisan db:seed --class=ProductionSeeder --force
             $COMPOSE exec -T backend php artisan config:cache
             docker image prune -f

@@ -16,6 +16,18 @@
     --line: #e7ecf3; --accent: #ff6a3d; --accent-2: #ffb23e;
     --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
     --accent-soft: #fff0ea;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d131c; --surface: #161f2b; --surface-2: #101823;
+      --ink: #eef2f7; --ink-2: #a7b6c9; --ink-3: #6e7f95;
+      --line: #263242; --accent: #ff7a4d; --accent-2: #ffb85c;
+      --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
+      --accent-soft: rgba(255,122,77,.16);
+      color-scheme: dark;
+    }
+    .lp-btn.ghost, .lp-btn.light { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
