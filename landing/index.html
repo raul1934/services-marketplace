@@ -181,6 +181,23 @@
   .lp-fitem p { color: var(--ink-2); font-size: 14.5px; margin-top: 5px; }
   .lp-featvis { position: relative; display: flex; justify-content: center; }
   .lp-featvis .card-demo { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: 0 30px 60px -30px rgba(20,35,59,.4); padding: 22px; width: 100%; max-width: 380px; }
+  .cd-asset { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+  .cd-assetic { width: 44px; height: 44px; border-radius: 13px; background: var(--grad); color: #fff; display: flex; align-items: center; justify-content: center; flex: none; }
+  .cd-assetic svg { width: 22px; height: 22px; }
+  .cd-assetname { font-weight: 800; font-size: 16px; }
+  .cd-assetsub { font-size: 12.5px; color: var(--ink-3); font-weight: 700; margin-top: 2px; }
+  .cd-status { margin-left: auto; font-family: var(--mono); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); padding: 5px 10px; border-radius: 999px; white-space: nowrap; }
+  .cd-histlabel { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 16px 0 12px; }
+  .cd-hist { display: flex; flex-direction: column; gap: 10px; }
+  .cd-hrow { display: flex; align-items: center; gap: 12px; }
+  .cd-hic { width: 30px; height: 30px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-3); display: flex; align-items: center; justify-content: center; flex: none; }
+  .cd-hic svg { width: 15px; height: 15px; }
+  .cd-hic.done { background: color-mix(in srgb, var(--ok) 15%, transparent); border-color: transparent; color: var(--ok); }
+  .cd-hmain { flex: 1; }
+  .cd-htitle { font-weight: 800; font-size: 13.5px; }
+  .cd-hsub { font-size: 11.5px; color: var(--ink-3); font-weight: 600; margin-top: 1px; }
+  .cd-hval { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+  .cd-hval.soon { color: var(--accent); }
 
   .lp-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .lp-quote { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 26px; box-shadow: 0 12px 34px -22px rgba(20,35,59,.26); display: flex; flex-direction: column; gap: 14px; }
@@ -462,18 +479,16 @@
       </div>
       <div class="lp-featvis reveal">
         <div class="card-demo">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="width:40px;height:40px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center" data-ic="car"></span><div><div style="font-weight:800;font-size:15px">Pneu furado · Av. Paulista</div><div style="font-size:12.5px;color:var(--ink-3);font-weight:700">3 propostas · urgente</div></div><span style="margin-left:auto;font-size:11.5px;font-weight:800;color:var(--accent);background:var(--accent-soft);padding:5px 10px;border-radius:999px">AO VIVO</span></div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <div style="display:flex;align-items:center;gap:11px;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:13px 14px">
-              <span style="width:38px;height:38px;border-radius:11px;background:#3b82f6;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px">RC</span>
-              <div style="flex:1"><div style="font-weight:800;font-size:14px">Rafael C.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.9 · 8 min de distância</div></div>
-              <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$120</div><div style="font-size:10.5px;font-weight:800;color:var(--accent)">Melhor opção</div></div>
-            </div>
-            <div style="display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:16px;padding:13px 14px">
-              <span style="width:38px;height:38px;border-radius:11px;background:#12b981;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px">JS</span>
-              <div style="flex:1"><div style="font-weight:800;font-size:14px">João S.</div><div style="font-size:12px;color:var(--ink-2);font-weight:700">★ 4.7 · 12 min de distância</div></div>
-              <div style="text-align:right"><div style="font-weight:800;font-size:17px">R$95</div></div>
-            </div>
+          <div class="cd-asset">
+            <span class="cd-assetic" data-ic="car"></span>
+            <div class="cd-assetinfo"><div class="cd-assetname">Honda Civic</div><div class="cd-assetsub">Placa ABC-1D23 · seu ativo</div></div>
+            <span class="cd-status">Em dia</span>
+          </div>
+          <div class="cd-histlabel">Histórico de manutenção</div>
+          <div class="cd-hist">
+            <div class="cd-hrow"><span class="cd-hic done" data-ic="check"></span><div class="cd-hmain"><div class="cd-htitle">Troca de óleo</div><div class="cd-hsub">Rafael C. · 12 jun</div></div><span class="cd-hval">R$ 180</span></div>
+            <div class="cd-hrow"><span class="cd-hic done" data-ic="battery"></span><div class="cd-hmain"><div class="cd-htitle">Bateria nova</div><div class="cd-hsub">Auto Center Vila · 03 abr</div></div><span class="cd-hval">R$ 320</span></div>
+            <div class="cd-hrow"><span class="cd-hic" data-ic="wrench"></span><div class="cd-hmain"><div class="cd-htitle">Revisão agendada</div><div class="cd-hsub">amanhã, 09:00</div></div><span class="cd-hval soon">em breve</span></div>
           </div>
         </div>
       </div>
@@ -940,7 +955,12 @@
     // telas do hero (mockups)
     "Olá 👋": "Hi 👋", "O que você precisa hoje?": "What do you need today?",
     "Casa": "Home", "Buscar serviço": "Search a service",
-    "A caminho": "On the way", "chega em 6 min": "arrives in 6 min", "Guincho · 4.9 ★": "Tow · 4.9 ★"
+    "A caminho": "On the way", "chega em 6 min": "arrives in 6 min", "Guincho · 4.9 ★": "Tow · 4.9 ★",
+    // card "A plataforma" (ativo + histórico)
+    "Placa ABC-1D23 · seu ativo": "Plate ABC-1D23 · your asset", "Em dia": "Up to date",
+    "Histórico de manutenção": "Maintenance history", "Troca de óleo": "Oil change",
+    "Bateria nova": "New battery", "Revisão agendada": "Scheduled service",
+    "amanhã, 09:00": "tomorrow, 9:00", "em breve": "soon"
   };
   var EN_PH = { "voce@email.com": "you@email.com", "Digite sua cidade...": "Type your city...", "Mateus Almeida": "Jordan Smith" };
   var META = {
