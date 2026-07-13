@@ -170,8 +170,15 @@
   .lp-fl { font-size: 13px; font-weight: 800; color: var(--ink-2); display: block; margin: 14px 0 7px; }
   .lp-input { width: 100%; padding: 14px 15px; border: 1.5px solid var(--line); border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 600; background: var(--surface-2); color: var(--ink); transition: .15s; }
   .lp-input::placeholder { color: var(--ink-3); font-weight: 500; }
-  .lp-input:focus { border-color: var(--accent); outline: none; background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .lp-input:focus { border-color: var(--accent); outline: none; background: var(--surface); box-shadow: 0 0 0 3px var(--accent-soft); }
   .lp-input.err { border-color: #e11d48; }
+  .lp-ac { position: relative; }
+  .lp-ac-list { position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 6px); background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; box-shadow: 0 16px 40px rgba(2,8,20,.16); max-height: 248px; overflow-y: auto; padding: 6px; }
+  .lp-ac-list[hidden] { display: none; }
+  .lp-ac-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .lp-ac-item:hover, .lp-ac-item.active { background: var(--accent-soft); }
+  .lp-ac-item .lp-ac-uf { margin-left: auto; font-size: 12px; font-weight: 800; color: var(--ink-3); letter-spacing: .04em; }
+  .lp-ac-note { padding: 11px 12px; color: var(--ink-3); font-size: 14px; font-weight: 500; }
   select.lp-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2395a2b6' stroke-width='2'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px; }
   .lp-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .lp-errmsg { color: #e11d48; font-size: 12.5px; font-weight: 700; margin-top: 6px; display: none; }
@@ -304,7 +311,7 @@
           <div class="lp-errmsg" data-err="email">Informe um e-mail válido.</div>
 
           <div class="lp-row2">
-            <div><label class="lp-fl">Cidade</label><input class="lp-input" name="city" placeholder="São Paulo" value="São Paulo" /></div>
+            <div class="lp-ac" data-city-ac><label class="lp-fl">Cidade</label><input class="lp-input" name="city" placeholder="Digite sua cidade..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="lp-ac-list" role="listbox" hidden></div></div>
             <div><label class="lp-fl" data-svc-label>Tenho interesse em</label>
               <select class="lp-input" name="service" id="serviceSelect">
                 <option>Qualquer um / não sei</option>
@@ -592,6 +599,54 @@
       }
     })
     .catch(function () { /* keep static fallback */ });
+
+  // City autocomplete (Brazil / IBGE) — wires any [data-city-ac] to /api/v1/cities
+  function attachCityAutocomplete(box) {
+    var input = box.querySelector("input");
+    var list = box.querySelector(".lp-ac-list");
+    if (!input || !list) return;
+    var items = [], active = -1, timer = null, lastQ = null;
+    function close() { list.hidden = true; list.innerHTML = ""; active = -1; input.setAttribute("aria-expanded", "false"); }
+    function pick(i) { if (!items[i]) return; input.value = items[i].label || items[i].name; close(); }
+    function render() {
+      if (!items.length) { list.innerHTML = '<div class="lp-ac-note">Nenhuma cidade encontrada</div>'; list.hidden = false; input.setAttribute("aria-expanded", "true"); return; }
+      list.innerHTML = items.map(function (c, i) {
+        return '<div class="lp-ac-item' + (i === active ? " active" : "") + '" role="option" data-i="' + i + '">' + esc(c.name) + '<span class="lp-ac-uf">' + esc(c.uf || "") + "</span></div>";
+      }).join("");
+      list.hidden = false; input.setAttribute("aria-expanded", "true");
+    }
+    function search(q) {
+      fetch(API_BASE + "/api/v1/cities?q=" + encodeURIComponent(q), { headers: { Accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (res) {
+          var data = res && (res.data || res);
+          items = Array.isArray(data) ? data.slice(0, 20) : [];
+          active = -1; render();
+        })
+        .catch(function () { close(); });
+    }
+    input.addEventListener("input", function () {
+      var q = input.value.trim();
+      if (timer) clearTimeout(timer);
+      if (q.length < 2) { close(); return; }
+      if (q === lastQ) return;
+      lastQ = q;
+      timer = setTimeout(function () { search(q); }, 180);
+    });
+    input.addEventListener("keydown", function (e) {
+      if (list.hidden) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(active + 1, items.length - 1); render(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(active - 1, 0); render(); }
+      else if (e.key === "Enter") { if (active >= 0) { e.preventDefault(); pick(active); } }
+      else if (e.key === "Escape") { close(); }
+    });
+    list.addEventListener("mousedown", function (e) {
+      var it = e.target.closest(".lp-ac-item"); if (!it) return;
+      e.preventDefault(); pick(parseInt(it.dataset.i, 10));
+    });
+    document.addEventListener("click", function (e) { if (!box.contains(e.target)) close(); });
+  }
+  document.querySelectorAll("[data-city-ac]").forEach(attachCityAutocomplete);
 
   // waitlist form → POST /api/v1/waitlist
   var form = document.getElementById("joinForm");

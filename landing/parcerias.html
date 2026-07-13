@@ -86,8 +86,15 @@
   .pf-card { max-width: 560px; margin: 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 28px; padding: 34px; box-shadow: 0 30px 70px -36px rgba(20,35,59,.4); }
   .pf-fl { font-size: 13px; font-weight: 800; color: var(--ink-2); display: block; margin: 14px 0 7px; }
   .pf-input { width: 100%; padding: 14px 15px; border: 1.5px solid var(--line); border-radius: 14px; font-family: inherit; font-size: 15px; font-weight: 600; background: var(--surface-2); color: var(--ink); }
-  .pf-input:focus { border-color: var(--accent); outline: none; background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+  .pf-input:focus { border-color: var(--accent); outline: none; background: var(--surface); box-shadow: 0 0 0 3px var(--accent-soft); }
   .pf-input.err { border-color: #e11d48; }
+  .pf-ac { position: relative; }
+  .pf-ac-list { position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 6px); background: var(--surface); border: 1.5px solid var(--line); border-radius: 14px; box-shadow: 0 16px 40px rgba(2,8,20,.16); max-height: 248px; overflow-y: auto; padding: 6px; }
+  .pf-ac-list[hidden] { display: none; }
+  .pf-ac-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .pf-ac-item:hover, .pf-ac-item.active { background: var(--accent-soft); }
+  .pf-ac-item .pf-ac-uf { margin-left: auto; font-size: 12px; font-weight: 800; color: var(--ink-3); letter-spacing: .04em; }
+  .pf-ac-note { padding: 11px 12px; color: var(--ink-3); font-size: 14px; font-weight: 500; }
   .pf-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .pf-err { color: #e11d48; font-size: 12.5px; font-weight: 700; margin-top: 6px; display: none; }
   .pf-err.show { display: block; }
@@ -189,7 +196,7 @@
         </div>
         <div class="pf-err" data-err="email">Informe um e-mail válido.</div>
         <label class="pf-fl">Cidade / região que quer atender</label>
-        <input class="pf-input" name="city" placeholder="Ex.: Campinas — SP" />
+        <div class="pf-ac" data-city-ac><input class="pf-input" name="city" placeholder="Digite sua cidade..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="pf-ac-list" role="listbox" hidden></div></div>
         <button type="submit" class="lp-btn grad lg pf-submit">Quero ser parceiro <span data-ic="arrowR" data-sz="18"></span></button>
         <div style="text-align:center;font-size:12px;color:var(--ink-3);margin-top:14px">Sem compromisso — vamos conversar antes de qualquer passo.</div>
       </form>
@@ -244,6 +251,56 @@
   document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
 
   var API_BASE = (document.querySelector('meta[name="api-base"]') || {}).content || "";
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+  // City autocomplete (Brazil / IBGE) — wires any [data-city-ac] to /api/v1/cities
+  function attachCityAutocomplete(box) {
+    var input = box.querySelector("input");
+    var list = box.querySelector(".pf-ac-list");
+    if (!input || !list) return;
+    var items = [], active = -1, timer = null, lastQ = null;
+    function close() { list.hidden = true; list.innerHTML = ""; active = -1; input.setAttribute("aria-expanded", "false"); }
+    function pick(i) { if (!items[i]) return; input.value = items[i].label || items[i].name; close(); }
+    function render() {
+      if (!items.length) { list.innerHTML = '<div class="pf-ac-note">Nenhuma cidade encontrada</div>'; list.hidden = false; input.setAttribute("aria-expanded", "true"); return; }
+      list.innerHTML = items.map(function (c, i) {
+        return '<div class="pf-ac-item' + (i === active ? " active" : "") + '" role="option" data-i="' + i + '">' + esc(c.name) + '<span class="pf-ac-uf">' + esc(c.uf || "") + "</span></div>";
+      }).join("");
+      list.hidden = false; input.setAttribute("aria-expanded", "true");
+    }
+    function search(q) {
+      fetch(API_BASE + "/api/v1/cities?q=" + encodeURIComponent(q), { headers: { Accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (res) {
+          var data = res && (res.data || res);
+          items = Array.isArray(data) ? data.slice(0, 20) : [];
+          active = -1; render();
+        })
+        .catch(function () { close(); });
+    }
+    input.addEventListener("input", function () {
+      var q = input.value.trim();
+      if (timer) clearTimeout(timer);
+      if (q.length < 2) { close(); return; }
+      if (q === lastQ) return;
+      lastQ = q;
+      timer = setTimeout(function () { search(q); }, 180);
+    });
+    input.addEventListener("keydown", function (e) {
+      if (list.hidden) return;
+      if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(active + 1, items.length - 1); render(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(active - 1, 0); render(); }
+      else if (e.key === "Enter") { if (active >= 0) { e.preventDefault(); pick(active); } }
+      else if (e.key === "Escape") { close(); }
+    });
+    list.addEventListener("mousedown", function (e) {
+      var it = e.target.closest(".pf-ac-item"); if (!it) return;
+      e.preventDefault(); pick(parseInt(it.dataset.i, 10));
+    });
+    document.addEventListener("click", function (e) { if (!box.contains(e.target)) close(); });
+  }
+  document.querySelectorAll("[data-city-ac]").forEach(attachCityAutocomplete);
+
   var form = document.getElementById("partnerForm");
   function showErr(key, on) {
     var m = form.querySelector('[data-err="' + key + '"]');

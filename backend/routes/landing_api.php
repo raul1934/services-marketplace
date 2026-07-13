@@ -12,4 +12,5 @@ use Illuminate\Support\Facades\Route;
 Route::controller(LandingController::class)->group(function () {
     Route::post('v1/waitlist', 'waitlist');
     Route::get('v1/service-categories', 'serviceCategories');
+    Route::get('v1/cities', 'cities');
 });

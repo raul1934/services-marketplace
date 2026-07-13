@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\City;
 use App\Models\ServiceCategory;
 use App\Models\WaitlistEntry;
 use Illuminate\Http\JsonResponse;
@@ -42,5 +43,30 @@ class LandingController extends Controller
             ->get(['id', 'type', 'slug', 'name', 'icon']);
 
         return response()->json(['data' => $categories]);
+    }
+
+    /** City autocomplete for the landing forms (Brazil / IBGE). */
+    public function cities(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+
+        $query = City::query()->with('state:id,name,uf,country_id');
+
+        if ($q !== '') {
+            $query->where('name', 'ilike', '%'.$q.'%')
+                ->orderByRaw('(name ilike ?) desc', [$q.'%']); // prefix matches first
+        }
+
+        $cities = $query->orderBy('name')->limit(20)->get(['id', 'state_id', 'name']);
+
+        return response()->json([
+            'data' => $cities->map(fn (City $c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'uf' => $c->state?->uf,
+                'state' => $c->state?->name,
+                'label' => $c->state ? "{$c->name} - {$c->state->uf}" : $c->name,
+            ]),
+        ]);
     }
 }

@@ -23,6 +23,7 @@ class ProductionSeeder extends Seeder
             VehicleCatalogSeeder::class,
             PropertyTypeSeeder::class,
             PetCatalogSeeder::class,
+            LocationSeeder::class,
         ]);
     }
 }
