@@ -95,6 +95,37 @@
   .ph-bid.best { border: 1.5px solid var(--accent); background: var(--accent-soft); }
   .ph-av { width: 38px; height: 38px; border-radius: 11px; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 13px; flex: none; }
 
+  /* ---- hero: cluster de 3 telas do app ---- */
+  .lp-phones { position: relative; height: 560px; }
+  .lp-phones .phone { position: absolute; top: 50%; left: 50%; width: 250px; box-shadow: 0 40px 80px -38px rgba(20,30,50,.55); }
+  .lp-phones .ph-mid { z-index: 3; transform: translate(-50%, -50%); }
+  .lp-phones .ph-side { width: 218px; z-index: 1; }
+  .lp-phones .ph-left { transform: translate(-50%, -50%) translateX(-140px) translateY(20px) rotate(-8deg) scale(.92); }
+  .lp-phones .ph-right { z-index: 2; transform: translate(-50%, -50%) translateX(140px) translateY(20px) rotate(8deg) scale(.92); }
+  .lp-phones .phone .scr { min-height: 424px; }
+  /* tela: categorias */
+  .ph-plain { background: var(--surface-2); color: var(--ink); padding: 42px 15px 12px; }
+  .ph-plain .h2 { font-size: 12.5px; font-weight: 800; color: var(--ink-2); }
+  .ph-plain .t3 { font-size: 17px; font-weight: 800; margin-top: 3px; letter-spacing: -.02em; }
+  .ph-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .ph-cat { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; border-radius: 15px; background: var(--surface); border: 1px solid var(--line); font-size: 12.5px; font-weight: 800; }
+  .ph-catic { width: 34px; height: 34px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; }
+  .ph-searchbar { display: flex; align-items: center; gap: 8px; margin-top: 11px; padding: 11px 13px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); color: var(--ink-3); font-size: 12.5px; font-weight: 700; }
+  /* tela: acompanhamento */
+  .ph-map { position: relative; height: 168px; background: linear-gradient(160deg, #e7edf6, #d9e3ef); overflow: hidden; }
+  :root[data-theme="dark"] .ph-map { background: linear-gradient(160deg, #172230, #0f1824); }
+  .ph-map::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 24px 24px; opacity: .55; }
+  .ph-routesvg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .ph-routesvg path { fill: none; stroke: var(--accent); stroke-width: 2.5px; stroke-linecap: round; stroke-dasharray: 1 7; }
+  .ph-pin { position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .ph-pin-a { left: 20%; top: 76%; width: 12px; height: 12px; background: var(--ink); border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+  .ph-pin-b { right: 16%; top: 22%; width: 30px; height: 30px; background: var(--grad); color: #fff; box-shadow: 0 8px 18px rgba(255,90,60,.5); }
+  .ph-pin-b svg { width: 15px; height: 15px; }
+  .ph-eta { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .ph-eta .ph-badge { margin-left: 0; }
+  .ph-etamin { font-size: 12px; font-weight: 700; color: var(--ink-2); }
+  .ph-callic { color: var(--accent); flex: none; }
+
   .lp-sec { padding: 76px 0; }
   .lp-sechead { text-align: center; max-width: 640px; margin: 0 auto 48px; }
   .lp-sechead h2 { font-size: clamp(30px, 4vw, 44px); margin-top: 12px; }
@@ -195,6 +226,13 @@
   .lp-ac-item:hover, .lp-ac-item.active { background: var(--accent-soft); }
   .lp-ac-item .lp-ac-uf { margin-left: auto; font-size: 12px; font-weight: 800; color: var(--ink-3); letter-spacing: .04em; }
   .lp-ac-note { padding: 11px 12px; color: var(--ink-3); font-size: 14px; font-weight: 500; }
+  .lp-svcbtn { display: flex; align-items: center; gap: 9px; text-align: left; cursor: pointer; }
+  .lp-svcbtn-ic { color: var(--accent); display: inline-flex; }
+  .lp-svcbtn-ic:empty { display: none; }
+  .lp-svcbtn-label { flex: 1; }
+  .lp-svcbtn-chev { color: var(--ink-3); display: inline-flex; transition: transform .18s; }
+  .lp-svcbtn[aria-expanded="true"] .lp-svcbtn-chev { transform: rotate(180deg); }
+  .lp-ac-item [data-ic] { color: var(--accent); display: inline-flex; }
   select.lp-input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2395a2b6' stroke-width='2'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; padding-right: 40px; }
   .lp-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .lp-errmsg { color: #e11d48; font-size: 12.5px; font-weight: 700; margin-top: 6px; display: none; }
@@ -225,7 +263,13 @@
 
   @media (max-width: 880px) {
     .lp-hero .lp-wrap, .lp-proband, .lp-feat, .lp-joingrid { grid-template-columns: 1fr; }
+    .lp-links { display: none; }
+    .lp-nav .lp-btn.grad { display: none; }
     .lp-phonewrap { margin-top: 8px; }
+    /* no mobile mostra só a tela central */
+    .lp-phones { height: auto; display: flex; justify-content: center; }
+    .lp-phones .ph-side { display: none; }
+    .lp-phones .ph-mid { position: relative; top: auto; left: auto; transform: none; }
     .lp-svcgrid, .lp-steps, .lp-quotes, .lp-row2, .lp-plans { grid-template-columns: 1fr; }
     .lp-links { display: none; }
     .lp-trust .lp-wrap { gap: 20px; }
@@ -262,8 +306,46 @@
         <div><div class="v">12k+</div><div class="k">Atendimentos</div></div>
       </div>
     </div>
-    <div class="lp-phonewrap">
-      <div class="phone">
+    <div class="lp-phonewrap lp-phones">
+      <!-- Tela 1: escolher categoria -->
+      <div class="phone ph-side ph-left" aria-hidden="true">
+        <span class="nub"></span>
+        <div class="scr">
+          <div class="ph-top ph-plain"><div class="h2">Olá 👋</div><div class="t3">O que você precisa hoje?</div></div>
+          <div class="ph-body">
+            <div class="ph-cats">
+              <div class="ph-cat"><span class="ph-catic" data-ic="car"></span>Veicular</div>
+              <div class="ph-cat"><span class="ph-catic" data-ic="home"></span>Casa</div>
+              <div class="ph-cat"><span class="ph-catic" data-ic="scissors"></span>Beleza</div>
+              <div class="ph-cat"><span class="ph-catic" data-ic="paw"></span>Pets</div>
+            </div>
+            <div class="ph-searchbar"><span data-ic="search" data-sz="16"></span>Buscar serviço</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tela 3: acompanhar o profissional -->
+      <div class="phone ph-side ph-right" aria-hidden="true">
+        <span class="nub"></span>
+        <div class="scr">
+          <div class="ph-map">
+            <svg class="ph-routesvg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M20 79 C 46 79, 40 34, 84 24" vector-effect="non-scaling-stroke"/></svg>
+            <div class="ph-pin ph-pin-a"></div>
+            <div class="ph-pin ph-pin-b"><span data-ic="navigate"></span></div>
+          </div>
+          <div class="ph-body">
+            <div class="ph-eta"><span class="ph-badge">A caminho</span><span class="ph-etamin">chega em 6 min</span></div>
+            <div class="ph-bid">
+              <span class="ph-av" style="background:#3b82f6">RC</span>
+              <div style="flex:1"><div style="font-weight:800;font-size:13px">Rafael C.</div><div style="font-size:11.5px;color:var(--ink-2);font-weight:700">Guincho · 4.9 ★</div></div>
+              <span class="ph-callic" data-ic="phone" data-sz="16"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tela 2 (frente): comparar propostas -->
+      <div class="phone ph-mid">
         <span class="nub"></span>
         <div class="scr">
           <div class="ph-top"><div class="h">Chamado urgente</div><div class="t">Pneu furado · Av. Paulista</div></div>
@@ -330,10 +412,14 @@
 
           <div class="lp-row2">
             <div class="lp-ac" data-city-ac><label class="lp-fl">Cidade</label><input class="lp-input" name="city" placeholder="Digite sua cidade..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="lp-ac-list" role="listbox" hidden></div></div>
-            <div><label class="lp-fl" data-svc-label>Tenho interesse em</label>
-              <select class="lp-input" name="service" id="serviceSelect">
-                <option>Qualquer um / não sei</option>
-              </select>
+            <div class="lp-ac" data-svc-ac><label class="lp-fl" data-svc-label>Tenho interesse em</label>
+              <input type="hidden" name="service" id="serviceInput" />
+              <button type="button" class="lp-input lp-svcbtn" id="svcBtn" aria-haspopup="listbox" aria-expanded="false">
+                <span class="lp-svcbtn-ic" data-svc-ic></span>
+                <span class="lp-svcbtn-label" id="svcLabel">Qualquer um / não sei</span>
+                <span class="lp-svcbtn-chev" data-ic="chevron" data-sz="18"></span>
+              </button>
+              <div class="lp-ac-list" id="svcList" role="listbox" hidden></div>
             </div>
           </div>
 
@@ -513,7 +599,7 @@
     shieldCheck: "ShieldCheck", star: "Star", sparkles: "Sparkles", users: "Users", headset: "Headset",
     location: "MapPin", rocket: "Rocket", truck: "Truck", battery: "BatteryCharging", key: "Key",
     wrench: "Wrench", home: "House", shield: "Shield", heart: "Heart", scissors: "Scissors",
-    camera: "Camera", settings: "Settings", wifi: "Wifi"
+    camera: "Camera", settings: "Settings", wifi: "Wifi", chevron: "ChevronDown", phone: "Phone"
   };
   // Build the inner SVG for an icon from the vendored lucide package's icon nodes.
   function iconInner(name) {
@@ -570,11 +656,46 @@
   // dynamic service categories (grouped by backend `type`), with static fallback
   var TYPE_META = {
     roadside: { icon: "car", title: "Veicular", sub: "De volta à estrada, rápido." },
-    home: { icon: "drop", title: "Casa & imóvel", sub: "Reparos e manutenção sob demanda." },
+    residential: { icon: "home", title: "Casa & imóvel", sub: "Reparos e manutenção sob demanda." },
+    beauty: { icon: "scissors", title: "Beleza", sub: "Cuidado que vai até você." },
     pet: { icon: "paw", title: "Pets", sub: "Cuidado que vem até você." },
+    // aliases tolerantes a variações do backend
+    home: { icon: "home", title: "Casa & imóvel", sub: "Reparos e manutenção sob demanda." },
     pets: { icon: "paw", title: "Pets", sub: "Cuidado que vem até você." }
   };
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]; }); }
+
+  // Custom service dropdown (native <select> não mostra ícone) — botão + lista com
+  // ícone da categoria; valor vai num input hidden. Labels ficam em PT (canônico)
+  // e a i18n traduz os text-nodes.
+  function buildServiceSelect(order) {
+    var wrap = document.querySelector("[data-svc-ac]");
+    if (!wrap) return;
+    var btn = wrap.querySelector("#svcBtn"), label = wrap.querySelector("#svcLabel");
+    var icHost = wrap.querySelector("[data-svc-ic]"), list = wrap.querySelector("#svcList");
+    var hidden = wrap.querySelector("#serviceInput");
+    var opts = order.map(function (t) { var m = TYPE_META[t] || { title: t, icon: "" }; return { title: m.title, icon: m.icon || "" }; });
+    opts.push({ title: "Qualquer um / não sei", icon: "" });
+    list.innerHTML = opts.map(function (o, i) {
+      return '<div class="lp-ac-item" role="option" data-i="' + i + '">' + (o.icon ? '<span data-ic="' + o.icon + '" data-sz="18"></span>' : "") + "<span>" + esc(o.title) + "</span></div>";
+    }).join("");
+    renderIcons(list);
+    function close() { list.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+    function pick(i) {
+      var o = opts[i]; if (!o) return;
+      hidden.value = o.title;
+      label.textContent = o.title;
+      icHost.innerHTML = o.icon ? '<span data-ic="' + o.icon + '" data-sz="18"></span>' : "";
+      if (o.icon) renderIcons(icHost);
+      close();
+      if (window.cfApplyLang) window.cfApplyLang(); // traduz o rótulo escolhido se em EN
+    }
+    btn.onclick = function () { if (list.hidden) { list.hidden = false; btn.setAttribute("aria-expanded", "true"); } else close(); };
+    list.onmousedown = function (e) { var it = e.target.closest(".lp-ac-item"); if (it) { e.preventDefault(); pick(parseInt(it.dataset.i, 10)); } };
+    document.addEventListener("click", function (e) { if (!wrap.contains(e.target)) close(); });
+    pick(opts.length - 1); // default: "Qualquer um / não sei"
+  }
+
   fetch(API_BASE + "/api/v1/service-categories", { headers: { Accept: "application/json" } })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (res) {
@@ -598,11 +719,8 @@
         }).join("");
         renderIcons(grid);
       }
-      var sel = document.getElementById("serviceSelect");
-      if (sel) {
-        var opts = order.map(function (t) { var m = TYPE_META[t] || { title: t }; return "<option>" + esc(m.title) + "</option>"; }).join("");
-        sel.innerHTML = opts + "<option>" + (isEN() ? "Any / not sure" : "Qualquer um / não sei") + "</option>";
-      }
+      buildServiceSelect(order);
+      if (window.cfApplyLang) window.cfApplyLang(); // traduz grid + dropdown se em EN
     })
     .catch(function () { /* keep static fallback */ });
 
@@ -810,7 +928,17 @@
     // footer
     "Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.": "Asset maintenance management. Customers, assets and pros connected.",
     "Empresa": "Company", "Sobre": "About", "Contato": "Contact", "Categorias": "Categories",
-    "Avaliações": "Reviews", "Prestadores": "Pros", "Jurídico": "Legal", "Termos": "Terms", "Privacidade": "Privacy"
+    "Avaliações": "Reviews", "Prestadores": "Pros", "Jurídico": "Legal", "Termos": "Terms", "Privacidade": "Privacy",
+    // tipos de serviço (grid dinâmico + dropdown "Tenho interesse em")
+    "Veicular": "Vehicle", "De volta à estrada, rápido.": "Back on the road, fast.",
+    "Casa & imóvel": "Home & property", "Reparos e manutenção sob demanda.": "Repairs and upkeep on demand.",
+    "Beleza": "Beauty", "Cuidado que vai até você.": "Care that comes to you.",
+    "Pets": "Pets", "Cuidado que vem até você.": "Care that comes to you.",
+    "Qualquer um / não sei": "Any / not sure",
+    // telas do hero (mockups)
+    "Olá 👋": "Hi 👋", "O que você precisa hoje?": "What do you need today?",
+    "Casa": "Home", "Buscar serviço": "Search a service",
+    "A caminho": "On the way", "chega em 6 min": "arrives in 6 min", "Guincho · 4.9 ★": "Tow · 4.9 ★"
   };
   var EN_PH = { "voce@email.com": "you@email.com", "Digite sua cidade...": "Type your city...", "Mateus Almeida": "Jordan Smith" };
   var META = {
@@ -871,6 +999,8 @@
   var theme = window.__cfTheme === "dark" ? "dark" : "light";
   applyLang(lang);
   applyTheme(theme);
+  // Reaplicar o idioma atual (usado após render dinâmico do grid/dropdown de serviços).
+  window.cfApplyLang = function () { applyLang(lang); };
 
   var langBtn = document.getElementById("langBtn");
   if (langBtn) langBtn.addEventListener("click", function () { lang = lang === "en" ? "pt" : "en"; applyLang(lang); });
