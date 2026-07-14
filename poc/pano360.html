@@ -1,0 +1,303 @@
+<title>Foto 360° do Local — Chama Fácil (POC)</title>
+<style>
+  :root{
+    --paper:#f4efe8; --panel:#fffdfa; --ink:#241d17; --ink-soft:#6b5f54;
+    --line:#e2d7c9; --grid:#e8ddce; --accent:#ff6a3d; --accent-ink:#fff;
+    --good:#1f9d63; --shadow:0 1px 2px rgba(60,40,20,.06),0 10px 30px rgba(60,40,20,.10);
+    --mono:ui-monospace,"SFMono-Regular","Roboto Mono",Menlo,Consolas,monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#161311; --panel:#211c18; --ink:#f4ece2; --ink-soft:#a99a89;
+    --line:#332b24; --grid:#2a231d; --accent:#ff7a4f; --accent-ink:#1a120c;
+    --good:#4fd18c; --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.55);
+  }}
+  :root[data-theme="light"]{--paper:#f4efe8;--panel:#fffdfa;--ink:#241d17;--ink-soft:#6b5f54;--line:#e2d7c9;--grid:#e8ddce;--accent:#ff6a3d;--accent-ink:#fff;--good:#1f9d63;--shadow:0 1px 2px rgba(60,40,20,.06),0 10px 30px rgba(60,40,20,.10)}
+  :root[data-theme="dark"]{--paper:#161311;--panel:#211c18;--ink:#f4ece2;--ink-soft:#a99a89;--line:#332b24;--grid:#2a231d;--accent:#ff7a4f;--accent-ink:#1a120c;--good:#4fd18c;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px rgba(0,0,0,.55)}
+  *{box-sizing:border-box} body{margin:0}
+  .wrap{font-family:var(--sans);color:var(--ink);background:var(--paper);min-height:100vh;display:flex;justify-content:center;padding:18px 14px 40px;line-height:1.5;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px;background-position:center}
+  .app{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px}
+  header .eyebrow{font:600 11px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:8px}
+  header .eyebrow::before{content:"";width:22px;height:2px;background:var(--accent);border-radius:2px}
+  header h1{margin:.35em 0 .15em;font-size:26px;font-weight:800;letter-spacing:-.02em;text-wrap:balance}
+  header p{margin:0;color:var(--ink-soft);font-size:14px}
+  .poc-tag{font:600 10px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);padding:4px 7px;border-radius:5px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+
+  .rooms{display:flex;gap:8px;padding:12px;overflow-x:auto;scrollbar-width:thin}
+  .rchip{flex:0 0 auto;font:600 13px var(--sans);border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap;display:flex;gap:7px;align-items:center}
+  .rchip[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel));color:var(--ink)}
+
+  .stage{position:relative;overflow:hidden;border-radius:16px 16px 0 0;background:#111;aspect-ratio:16/10}
+  canvas#gl{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+  canvas#gl.drag{cursor:grabbing}
+  .overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .hotspot{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;will-change:left,top;display:none}
+  .hotspot .dot{width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 4px rgba(255,106,61,.25),0 2px 6px rgba(0,0,0,.4);margin:0 auto}
+  .hotspot .lbl{margin-top:6px;transform:translateX(-50%);position:absolute;left:50%;white-space:nowrap;background:rgba(20,15,10,.82);color:#fff;border-radius:8px;padding:5px 9px;font:600 12px/1.15 var(--sans);text-align:center;backdrop-filter:blur(4px);cursor:pointer}
+  .hotspot .lbl b{display:block;font:700 11px var(--mono);color:#ffcbb4;letter-spacing:.02em}
+  .badge360{position:absolute;top:10px;left:10px;font:700 11px/1 var(--mono);letter-spacing:.14em;color:#fff;background:rgba(20,15,10,.55);border:1px solid rgba(255,255,255,.25);padding:6px 9px;border-radius:999px;backdrop-filter:blur(4px)}
+  .heading{position:absolute;top:10px;right:10px;font:700 12px var(--mono);color:#fff;background:rgba(20,15,10,.55);border:1px solid rgba(255,255,255,.25);padding:6px 10px;border-radius:999px;display:flex;gap:7px;align-items:center;backdrop-filter:blur(4px)}
+  .heading .arrow{display:inline-block;transition:transform .05s linear}
+  .hint{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);font:600 11.5px var(--sans);color:#fff;background:rgba(20,15,10,.5);padding:6px 11px;border-radius:999px;backdrop-filter:blur(4px);pointer-events:none;transition:opacity .4s}
+  .toast{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:var(--ink);color:var(--paper);font:600 12px/1.3 var(--sans);padding:9px 13px;border-radius:9px;max-width:88%;text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.on{opacity:1}
+
+  .toolbar{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);flex-wrap:wrap;align-items:center}
+  .ghost{font:600 13px var(--sans);border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 12px;border-radius:9px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+  .ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .ghost[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--panel));color:var(--ink)}
+  .ghost:focus-visible,.rchip:focus-visible,.cta:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .spacer{flex:1}
+  .cta{font:700 14px var(--sans);border:0;background:var(--accent);color:var(--accent-ink);padding:11px 14px;border-radius:10px;cursor:pointer}
+
+  .facts{padding:16px;display:flex;flex-direction:column;gap:12px}
+  .facts h2{margin:0;font-size:15px;font-weight:800}
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .step{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .step .n{font:700 11px var(--mono);color:var(--accent)}
+  .step .t{font-weight:700;font-size:13px;margin:5px 0 3px}
+  .step .d{font-size:12px;color:var(--ink-soft)}
+  .note{font-size:12.5px;color:var(--ink-soft);padding:2px 4px}
+  .note b{color:var(--ink)}
+  footer{font-size:12px;color:var(--ink-soft);text-align:center;padding:6px 8px 0;line-height:1.6}
+  @media (max-width:440px){.flow{grid-template-columns:1fr}header h1{font-size:22px}}
+  @media (prefers-reduced-motion:reduce){.heading .arrow{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="app">
+    <header>
+      <div class="eyebrow">Chama Fácil · Registro 360°</div>
+      <h1>Foto 360° do local</h1>
+      <p><span class="poc-tag">POC</span> &nbsp;Arraste para girar a vista. Cada cômodo tem seu panorama, com as medições fixadas nos pontos certos.</p>
+    </header>
+
+    <div class="card">
+      <div class="rooms" id="rooms" role="tablist" aria-label="Cômodos"></div>
+      <div class="stage" id="stage">
+        <canvas id="gl"></canvas>
+        <div class="overlay" id="overlay"></div>
+        <span class="badge360">◉ 360°</span>
+        <span class="heading"><span class="arrow" id="arrow">↑</span><span id="deg">0°</span></span>
+        <div class="hint" id="hint">Arraste para olhar em volta · role para zoom</div>
+        <div class="toast" id="toast"></div>
+      </div>
+      <div class="toolbar">
+        <button class="ghost" id="btnAuto" aria-pressed="false" title="Girar automaticamente">⟳ Girar</button>
+        <button class="ghost" id="btnGyro" aria-pressed="false" title="Usar o giroscópio do aparelho">🧭 Giroscópio</button>
+        <button class="ghost" id="btnReset" title="Voltar à vista inicial">⌖ Centralizar</button>
+        <span class="spacer"></span>
+        <button class="ghost" id="btnPins" aria-pressed="true" title="Mostrar/ocultar medições">📍 Medições</button>
+        <button class="cta" id="btnCapture">Capturar 360°</button>
+      </div>
+    </div>
+
+    <div class="card facts">
+      <h2>Do celular ao pino de medição</h2>
+      <div class="flow">
+        <div class="step"><div class="n">01 · Capturar</div><div class="t">Câmera 360 ou captura guiada</div><div class="d">Ricoh Theta / Insta360 em 1 clique, ou giroscópio costurando fotos do próprio celular.</div></div>
+        <div class="step"><div class="n">02 · Guardar</div><div class="t">Anexa ao cômodo</div><div class="d">JPEG equiretangular no storage, ligado ao Ativo → Cômodo do cliente.</div></div>
+        <div class="step"><div class="n">03 · Anotar</div><div class="t">Pinos de medição e serviço</div><div class="d">Fixe a área da parede, a janela, o piso — o profissional orça vendo o espaço todo.</div></div>
+      </div>
+      <p class="note"><b>No seu stack:</b> exibição roda no dev-build com <b>expo-gl</b>/three ou <b>ViroReact</b> (<i>Viro360Image</i>); captura 360 real precisa de câmera dedicada ou fluxo de <i>photo sphere</i> guiado. Aqui o panorama é gerado na hora (sem imagem externa) só para provar a navegação.</p>
+    </div>
+    <footer>Visualizador equiretangular em WebGL · self-contained. No celular, toque “Giroscópio” e mova o aparelho para olhar em volta.</footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var canvas=document.getElementById('gl');
+  var overlay=document.getElementById('overlay');
+  var DEG=Math.PI/180;
+
+  // ---------- rooms (palette + hotspots) ----------
+  var ROOMS={
+    sala:{label:'🛋️ Sala', pal:{wall:'#d9cfc0',wall2:'#cfc4b2',ceil:'#efe9e0',floor:'#b0885a',door:'#6d4f38',win:'#bcd3e0',base:'#8a7a64'},
+      hs:[{y:0,p:2,l:'Parede Norte',s:'12,4 m²'},{y:-60,p:6,l:'Janela',s:'1,20 × 1,00 m'},{y:120,p:-4,l:'Porta',s:'2,10 m'},{y:35,p:-48,l:'Piso',s:'14,8 m²'},{y:0,p:60,l:'Teto',s:'3,20 × 4,60 m'}]},
+    cozinha:{label:'🍳 Cozinha', pal:{wall:'#d3ded8',wall2:'#c4d2cb',ceil:'#eef2f0',floor:'#cabfae',door:'#5a6d63',win:'#c3d8e0',base:'#7d8a82'},
+      hs:[{y:10,p:0,l:'Bancada',s:'3,60 × 0,60 m'},{y:-90,p:4,l:'Parede azulejo',s:'6,8 m²'},{y:150,p:-6,l:'Porta serviço',s:'2,10 m'},{y:40,p:-50,l:'Piso',s:'8,9 m²'}]},
+    quarto:{label:'🛏️ Quarto', pal:{wall:'#d8cede',wall2:'#ccc0d6',ceil:'#efeaf0',floor:'#a9855a',door:'#6a5140',win:'#c6d3e4',base:'#877692'},
+      hs:[{y:0,p:2,l:'Parede cabeceira',s:'10,2 m²'},{y:-55,p:5,l:'Janela',s:'1,50 × 1,10 m'},{y:110,p:-4,l:'Porta',s:'2,10 m'},{y:38,p:-50,l:'Piso',s:'12,1 m²'}]}
+  };
+  var order=['sala','cozinha','quarto'], current='sala';
+
+  // ---------- procedural equirectangular panorama ----------
+  function makePano(pal){
+    var w=2048,h=1024,c=document.createElement('canvas');c.width=w;c.height=h;var g=c.getContext('2d');
+    function lon2x(d){return ((d/360)+0.5)*w;}
+    var yTop=h*0.30, yBot=h*0.70, hor=h*0.5;
+    // ceiling
+    var cg=g.createLinearGradient(0,0,0,yTop);cg.addColorStop(0,shade(pal.ceil,-8));cg.addColorStop(1,pal.ceil);g.fillStyle=cg;g.fillRect(0,0,w,yTop);
+    // walls
+    g.fillStyle=pal.wall;g.fillRect(0,yTop,w,yBot-yTop);
+    // per-quadrant subtle shade (front/right/back/left)
+    for(var q=0;q<4;q++){if(q%2===1){g.fillStyle=pal.wall2;var x0=lon2x(-180+q*90),x1=lon2x(-180+q*90+90);g.fillRect(x0,yTop,x1-x0,yBot-yTop);}}
+    // wall seams
+    g.strokeStyle=shade(pal.wall,-16);g.lineWidth=3;g.globalAlpha=.5;
+    [ -135,-45,45,135 ].forEach(function(d){var x=lon2x(d);line(g,x,yTop,x,yBot);});g.globalAlpha=1;
+    // horizon + baseboard
+    g.strokeStyle=shade(pal.wall,-10);g.lineWidth=2;line(g,0,hor,w,hor);
+    g.fillStyle=pal.base;g.fillRect(0,yBot-14,w,14);
+    // floor
+    var fg=g.createLinearGradient(0,yBot,0,h);fg.addColorStop(0,pal.floor);fg.addColorStop(1,shade(pal.floor,-14));g.fillStyle=fg;g.fillRect(0,yBot,w,h-yBot);
+    g.strokeStyle=shade(pal.floor,-18);g.lineWidth=2;g.globalAlpha=.4;
+    for(var i=0;i<=12;i++){var x=i/12*w;line(g,x,yBot,x,h);} for(var j=1;j<=3;j++){var y=yBot+(h-yBot)*j/4;line(g,0,y,w,y);}g.globalAlpha=1;
+    // rug near front
+    g.fillStyle=shade(pal.floor,18);g.globalAlpha=.55;roundRectF(g,lon2x(-16),yBot+40,lon2x(16)-lon2x(-16),(h-yBot)*0.5,18);g.globalAlpha=1;
+    // door (lon ~ door angle)
+    (function(){var dx=lon2x(120),dw=(24/360)*w;g.fillStyle=pal.door;g.fillRect(dx-dw/2,yTop+ (yBot-yTop)*0.06,dw,(yBot-yTop)*0.94);g.strokeStyle=shade(pal.door,-20);g.lineWidth=3;g.strokeRect(dx-dw/2,yTop+(yBot-yTop)*0.06,dw,(yBot-yTop)*0.94);g.strokeRect(dx-dw/2+10,yTop+(yBot-yTop)*0.12,dw-20,(yBot-yTop)*0.82);g.fillStyle=shade(pal.door,30);g.beginPath();g.arc(dx+dw/2-14,hor,5,0,7);g.fill();})();
+    // window
+    (function(){var wx=lon2x(-60),ww=(28/360)*w,wy=yTop+(yBot-yTop)*0.22,wh=(yBot-yTop)*0.4;var sky=g.createLinearGradient(0,wy,0,wy+wh);sky.addColorStop(0,shade(pal.win,14));sky.addColorStop(1,shade(pal.win,-8));g.fillStyle=sky;g.fillRect(wx-ww/2,wy,ww,wh);g.strokeStyle=shade(pal.wall,-24);g.lineWidth=6;g.strokeRect(wx-ww/2,wy,ww,wh);g.lineWidth=4;line(g,wx,wy,wx,wy+wh);line(g,wx-ww/2,wy+wh/2,wx+ww/2,wy+wh/2);})();
+    // ceiling light
+    (function(){var lx=lon2x(0),ly=h*0.12;var lg=g.createRadialGradient(lx,ly,2,lx,ly,60);lg.addColorStop(0,'#fff7e6');lg.addColorStop(1,pal.ceil);g.fillStyle=lg;g.beginPath();g.arc(lx,ly,60,0,7);g.fill();g.fillStyle='#fff2d8';g.beginPath();g.arc(lx,ly,16,0,7);g.fill();})();
+    // subtle photo noise
+    g.globalAlpha=.04;for(var n=0;n<9000;n++){g.fillStyle=(n&1)?'#000':'#fff';g.fillRect(Math.random()*w,Math.random()*h,1,1);}g.globalAlpha=1;
+    // top/bottom darkening for depth
+    var vg=g.createLinearGradient(0,0,0,h);vg.addColorStop(0,'rgba(0,0,0,.18)');vg.addColorStop(.5,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.22)');g.fillStyle=vg;g.fillRect(0,0,w,h);
+    return c;
+  }
+  function line(g,x1,y1,x2,y2){g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();}
+  function roundRectF(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();g.fill();}
+  function shade(hex,amt){var n=parseInt(hex.slice(1),16),r=(n>>16)+amt,gr=((n>>8)&255)+amt,b=(n&255)+amt;function cl(v){return Math.max(0,Math.min(255,v));}return 'rgb('+cl(r)+','+cl(gr)+','+cl(b)+')';}
+
+  // ---------- WebGL ----------
+  var gl=canvas.getContext('webgl')||canvas.getContext('experimental-webgl');
+  var prog,uni,tex,glOK=!!gl;
+  var VS='attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos;gl_Position=vec4(aPos,0.0,1.0);}';
+  var FS='precision highp float;varying vec2 vUv;uniform float yaw,pitch,fov,aspect;uniform sampler2D tex;const float PI=3.14159265;'
+    +'vec3 dirFor(float y,float p){return vec3(sin(y)*cos(p),sin(p),cos(y)*cos(p));}'
+    +'void main(){vec3 f=dirFor(yaw,pitch);vec3 r=normalize(vec3(cos(yaw),0.0,-sin(yaw)));vec3 u=cross(f,r);'
+    +'float t=tan(fov*0.5);vec3 ray=normalize(f+vUv.x*t*aspect*r+vUv.y*t*u);'
+    +'float lon=atan(ray.x,ray.z);float lat=asin(clamp(ray.y,-1.0,1.0));'
+    +'vec2 uv=vec2(lon/(2.0*PI)+0.5,0.5-lat/PI);gl_FragColor=texture2D(tex,uv);}';
+  function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
+  if(glOK){
+    prog=gl.createProgram();gl.attachShader(prog,sh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);
+    if(!gl.getProgramParameter(prog,gl.LINK_STATUS))glOK=false;
+  }
+  if(glOK){
+    gl.useProgram(prog);
+    var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+    var loc=gl.getAttribLocation(prog,'aPos');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    uni={yaw:gl.getUniformLocation(prog,'yaw'),pitch:gl.getUniformLocation(prog,'pitch'),fov:gl.getUniformLocation(prog,'fov'),aspect:gl.getUniformLocation(prog,'aspect'),tex:gl.getUniformLocation(prog,'tex')};
+    tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.uniform1i(uni.tex,0);
+  }
+  var panoCanvas=null;
+  function uploadPano(pal){panoCanvas=makePano(pal);if(!glOK)return;gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,panoCanvas);}
+
+  // ---------- camera state ----------
+  var yaw=0,pitch=0,fov=1.3,dpr=1,cw=0,ch=0;
+  var auto=false,gyro=false,pinsOn=true,dragging=false;
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+  function resize(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    cw=canvas.clientWidth;ch=canvas.clientHeight;
+    canvas.width=Math.round(cw*dpr);canvas.height=Math.round(ch*dpr);
+    if(glOK)gl.viewport(0,0,canvas.width,canvas.height);
+  }
+
+  // hotspot elements
+  var hsEls=[];
+  function buildHotspots(){
+    overlay.innerHTML='';hsEls=[];
+    ROOMS[current].hs.forEach(function(d){
+      var el=document.createElement('div');el.className='hotspot';
+      el.innerHTML='<div class="dot"></div><div class="lbl">'+d.l+'<b>'+d.s+'</b></div>';
+      el.querySelector('.lbl').addEventListener('click',function(){toast(d.l+' — '+d.s);});
+      overlay.appendChild(el);hsEls.push({el:el,yaw:d.y*DEG,pitch:d.p*DEG});
+    });
+  }
+
+  // math for hotspot projection (mirror of shader)
+  function dirFor(y,p){return [Math.sin(y)*Math.cos(p),Math.sin(p),Math.cos(y)*Math.cos(p)];}
+  function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}
+  function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+  function project(hy,hp){
+    var f=dirFor(yaw,pitch),r=[Math.cos(yaw),0,-Math.sin(yaw)],u=cross(f,r);
+    var d=dirFor(hy,hp),fx=dot(d,f);
+    if(fx<=0.05)return null;
+    var rx=dot(d,r),ux=dot(d,u),t=Math.tan(fov*0.5),aspect=cw/ch;
+    var uvx=rx/(fx*t*aspect),uvy=ux/(fx*t);
+    if(Math.abs(uvx)>1.25||Math.abs(uvy)>1.25)return null;
+    return {x:(uvx*0.5+0.5)*cw,y:(0.5-uvy*0.5)*ch};
+  }
+
+  var arrow=document.getElementById('arrow'),degEl=document.getElementById('deg');
+  function frame(){
+    if(auto&&!dragging&&!gyro&&!reduce)yaw+=0.0016;
+    pitch=Math.max(-1.35,Math.min(1.35,pitch));
+    fov=Math.max(0.55,Math.min(2.0,fov));
+    if(glOK){gl.uniform1f(uni.yaw,yaw);gl.uniform1f(uni.pitch,pitch);gl.uniform1f(uni.fov,fov);gl.uniform1f(uni.aspect,cw/ch);gl.drawArrays(gl.TRIANGLES,0,6);}
+    else draw2D();
+    // hotspots
+    for(var i=0;i<hsEls.length;i++){var pr=pinsOn?project(hsEls[i].yaw,hsEls[i].pitch):null;var el=hsEls[i].el;if(pr){el.style.display='block';el.style.left=pr.x+'px';el.style.top=pr.y+'px';}else el.style.display='none';}
+    // heading
+    var deg=((yaw/DEG)%360+360)%360;degEl.textContent=Math.round(deg)+'°';arrow.style.transform='rotate('+deg+'deg)';
+    requestAnimationFrame(frame);
+  }
+
+  // 2D fallback: flat pano pan
+  var ctx2=glOK?null:canvas.getContext('2d');
+  function draw2D(){
+    if(!panoCanvas)return;var pw=panoCanvas.width,ph=panoCanvas.height;
+    var scale=canvas.height/ph*(1.3/fov);var vw=canvas.width/scale;
+    var off=(((yaw/(2*Math.PI))%1)+1)%1*pw;
+    var sy=Math.max(0,Math.min(ph-canvas.height/scale,ph*0.5-pitch* (ph*0.3)-canvas.height/scale/2));
+    ctx2.imageSmoothingEnabled=true;ctx2.clearRect(0,0,canvas.width,canvas.height);
+    ctx2.drawImage(panoCanvas,off,sy,vw,canvas.height/scale,0,0,canvas.width,canvas.height);
+    if(off+vw>pw)ctx2.drawImage(panoCanvas,0,sy,off+vw-pw,canvas.height/scale,(pw-off)*scale,0,(off+vw-pw)*scale,canvas.height);
+  }
+
+  // ---------- interaction ----------
+  var last=null;
+  canvas.addEventListener('pointerdown',function(e){dragging=true;auto=false;setP('btnAuto',false);canvas.classList.add('drag');last={x:e.clientX,y:e.clientY};try{canvas.setPointerCapture(e.pointerId);}catch(err){}fadeHint();});
+  canvas.addEventListener('pointermove',function(e){if(!dragging||!last)return;var k=fov/ch;yaw-=(e.clientX-last.x)*k;pitch+=(e.clientY-last.y)*k;last={x:e.clientX,y:e.clientY};});
+  function up(){dragging=false;last=null;canvas.classList.remove('drag');}
+  canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+  canvas.addEventListener('wheel',function(e){e.preventDefault();fov*=(1+(e.deltaY>0?0.08:-0.08));},{passive:false});
+  // pinch
+  var pd={};
+  canvas.addEventListener('pointerdown',function(e){pd[e.pointerId]={x:e.clientX,y:e.clientY};});
+  canvas.addEventListener('pointermove',function(e){if(pd[e.pointerId])pd[e.pointerId]={x:e.clientX,y:e.clientY};var ks=Object.keys(pd);if(ks.length===2){var a=pd[ks[0]],b=pd[ks[1]];var dcur=Math.hypot(a.x-b.x,a.y-b.y);if(pd._d)fov*=pd._d/dcur;pd._d=dcur;dragging=false;}});
+  function clearPd(e){delete pd[e.pointerId];pd._d=0;}
+  canvas.addEventListener('pointerup',clearPd);canvas.addEventListener('pointercancel',clearPd);
+
+  var hintFaded=false;function fadeHint(){if(hintFaded)return;hintFaded=true;var h=document.getElementById('hint');h.style.opacity='0';}
+  var toastT;function toast(m){var el=document.getElementById('toast');el.textContent=m;el.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('on');},2400);}
+
+  function setP(id,v){document.getElementById(id).setAttribute('aria-pressed',v);}
+  document.getElementById('btnAuto').onclick=function(){auto=!auto;setP('btnAuto',auto);if(auto)fadeHint();};
+  document.getElementById('btnReset').onclick=function(){yaw=0;pitch=0;fov=1.3;};
+  document.getElementById('btnPins').onclick=function(){pinsOn=!pinsOn;setP('btnPins',pinsOn);};
+  document.getElementById('btnCapture').onclick=function(){toast('Numa câmera 360 isso seria 1 clique · aqui o panorama é gerado');};
+  var goHandler=null;
+  document.getElementById('btnGyro').onclick=function(){
+    if(gyro){gyro=false;setP('btnGyro',false);if(goHandler)window.removeEventListener('deviceorientation',goHandler);toast('Giroscópio desligado');return;}
+    function enable(){goHandler=function(ev){if(ev.alpha==null)return;yaw=-ev.alpha*DEG;pitch=Math.max(-1.2,Math.min(1.2,((ev.beta||90)-90)*DEG));};window.addEventListener('deviceorientation',goHandler);gyro=true;setP('btnGyro',true);auto=false;setP('btnAuto',false);fadeHint();toast('Mova o aparelho para olhar em volta');}
+    if(typeof DeviceOrientationEvent!=='undefined'&&DeviceOrientationEvent.requestPermission){DeviceOrientationEvent.requestPermission().then(function(r){if(r==='granted')enable();else toast('Permissão do sensor negada');}).catch(function(){toast('Giroscópio indisponível');});}
+    else if(typeof DeviceOrientationEvent!=='undefined')enable();else toast('Sem giroscópio neste aparelho');
+  };
+
+  // rooms tabs
+  function buildRooms(){var box=document.getElementById('rooms');box.innerHTML='';order.forEach(function(k){var b=document.createElement('button');b.className='rchip';b.setAttribute('role','tab');b.setAttribute('aria-pressed',k===current);b.textContent=ROOMS[k].label;b.onclick=function(){current=k;uploadPano(ROOMS[k].pal);buildHotspots();buildRooms();yaw=0;pitch=0;toast('360° · '+ROOMS[k].label.replace(/^[^ ]+ /,''));};box.appendChild(b);});}
+
+  // theme (pano is content; regen keeps same look)
+  new MutationObserver(function(){}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  window.addEventListener('resize',resize);
+  if(window.ResizeObserver)new ResizeObserver(resize).observe(canvas);
+
+  // init
+  resize();uploadPano(ROOMS[current].pal);buildHotspots();buildRooms();
+  requestAnimationFrame(frame);
+})();
+</script>
