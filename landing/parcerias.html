@@ -7,6 +7,21 @@
 <link rel="icon" type="image/svg+xml" href="logo.svg" />
 <meta name="description" content="Cuide de uma região com a Chama Fácil: prospecte prestadores, apoie clientes e ative sua cidade. Parcerias regionais abertas." />
 <meta name="api-base" content="https://api.chamafacil.app" />
+<!-- Google Analytics 4 — cole seu ID de medição em content="G-XXXXXXXXXX" (vazio = desativado) -->
+<meta name="ga-id" content="" />
+<script>
+  (function () {
+    var id = ((document.querySelector('meta[name="ga-id"]') || {}).content || "").trim();
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+    if (!id) return;
+    var s = document.createElement("script"); s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
+    document.head.appendChild(s);
+    gtag("js", new Date());
+    gtag("config", id);
+  })();
+</script>
 <script>
   // Tema + idioma antes do paint (evita flash). Restante da i18n no fim do body.
   (function () {
@@ -357,6 +372,7 @@
         if (!r.ok && r.status !== 201) throw new Error("fail");
         form.style.display = "none";
         document.getElementById("partnerSuccess").style.display = "block";
+        if (window.gtag) gtag("event", "generate_lead", { method: "waitlist", role: "partner" });
       })
       .catch(function () {
         btn.disabled = false;

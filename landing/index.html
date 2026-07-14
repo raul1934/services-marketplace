@@ -8,6 +8,21 @@
 <meta name="description" content="Toda a manutenção dos seus ativos em um só lugar. Do socorro veicular ao reparo predial — chame um profissional verificado em segundos." />
 <!-- Onde vive POST /api/v1/waitlist e GET /api/v1/service-categories -->
 <meta name="api-base" content="https://api.chamafacil.app" />
+<!-- Google Analytics 4 — cole seu ID de medição em content="G-XXXXXXXXXX" (vazio = desativado) -->
+<meta name="ga-id" content="" />
+<script>
+  (function () {
+    var id = ((document.querySelector('meta[name="ga-id"]') || {}).content || "").trim();
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+    if (!id) return; // sem ID, o GA fica desativado
+    var s = document.createElement("script"); s.async = true;
+    s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
+    document.head.appendChild(s);
+    gtag("js", new Date());
+    gtag("config", id);
+  })();
+</script>
 <script>
   // Tema + idioma antes do paint (evita flash). O restante da i18n roda no fim do body.
   (function () {
@@ -973,6 +988,7 @@
           ? (en ? "Thanks, " + first + "! We'll reach out to sign you up as a Chama Fácil pro." : "Valeu, " + first + "! Vamos entrar em contato para te cadastrar como profissional Chama Fácil.")
           : (en ? "Thanks, " + first + "! We'll email you as soon as Chama Fácil reaches your area." : "Valeu, " + first + "! Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.");
         document.getElementById("joinSuccess").style.display = "block";
+        if (window.gtag) gtag("event", "generate_lead", { method: "waitlist", role: role });
       })
       .catch(function () {
         btn.disabled = false;
