@@ -329,6 +329,9 @@
   .lp-plan .pcomm .cv { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
   .lp-plan.pop .pcomm .cv { color: var(--accent); }
   .lp-plan .pcomm .cl { font-size: 12.5px; font-weight: 700; color: var(--ink-3); }
+  .lp-plan .pprice .pold { display: block; font-size: 16px; font-weight: 700; color: var(--ink-3); text-decoration: line-through; letter-spacing: normal; margin-bottom: 1px; }
+  .lp-plan .pprice .pnow { color: var(--ok); }
+  .lp-plan .pcomm .cv .cold { font-size: 15px; font-weight: 700; color: var(--ink-3); text-decoration: line-through; margin-right: 6px; }
   .lp-plan .pfeat { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; font-size: 14.5px; color: var(--ink-2); font-weight: 600; }
   .lp-plan .pfeat .pc { width: 20px; height: 20px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px; }
   .lp-plan .lp-btn { margin-top: auto; justify-content: center; width: 100%; }
@@ -655,12 +658,12 @@
 
 <section class="lp-sec" id="planos">
   <div class="lp-wrap">
-    <div class="lp-sechead reveal"><span class="lp-eyebrow">Planos para prestadores</span><h2>Comece grátis, cresça quando quiser.</h2><p>Quanto mais avançado o plano, menor a comissão por serviço. Sem fidelidade — mude de plano a qualquer momento.</p></div>
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">Planos para prestadores</span><h2>Grátis no acesso antecipado.</h2><p>Sem mensalidade agora. Os planos abaixo mostram o modelo que vem depois — quem entra cedo começa de graça.</p></div>
     <div class="lp-plans">
       <div class="lp-plan reveal">
         <div class="pname">Free</div>
-        <div class="pprice">R$ 0<span class="pm">/mês</span></div>
-        <div class="pcomm"><span class="cv">5%</span><span class="cl">de comissão por serviço</span></div>
+        <div class="pprice"><span class="pnow">Grátis</span></div>
+        <div class="pcomm"><span class="cv"><s class="cold">5%</s>0%</span><span class="cl">de comissão por serviço</span></div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Receba trabalhos na sua região</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Perfil verificado e avaliações</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Pagamento seguro via Pix</div>
@@ -669,23 +672,23 @@
       <div class="lp-plan pop reveal">
         <div class="pbadge">Mais popular</div>
         <div class="pname">Pro</div>
-        <div class="pprice">R$ 99<span class="pm">/mês</span></div>
-        <div class="pcomm"><span class="cv">2,5%</span><span class="cl">de comissão por serviço</span></div>
+        <div class="pprice"><span class="pold">R$ 99/mês</span><span class="pnow">Grátis</span></div>
+        <div class="pcomm"><span class="cv"><s class="cold">2,5%</s>0%</span><span class="cl">de comissão por serviço</span></div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Tudo do Free</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Destaque nas buscas e propostas</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Raio de cobertura ampliado</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Relatórios de ganhos</div>
-        <a class="lp-btn grad" href="#join">Assinar Pro</a>
+        <a class="lp-btn grad" href="#join">Começar grátis</a>
       </div>
       <div class="lp-plan reveal">
         <div class="pname">Enterprise</div>
-        <div class="pprice">R$ 299<span class="pm">/mês</span></div>
-        <div class="pcomm"><span class="cv">1%</span><span class="cl">de comissão por serviço</span></div>
+        <div class="pprice"><span class="pold">R$ 299/mês</span><span class="pnow">Grátis</span></div>
+        <div class="pcomm"><span class="cv"><s class="cold">1%</s>0%</span><span class="cl">de comissão por serviço</span></div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Tudo do Pro</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Múltiplos profissionais e equipes</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Gestão de ativos e histórico</div>
         <div class="pfeat"><span class="pc" data-ic="check" data-sz="13"></span> Gerente de conta dedicado</div>
-        <a class="lp-btn ghost" href="#join">Falar com vendas</a>
+        <a class="lp-btn ghost" href="#join">Começar grátis</a>
       </div>
     </div>
   </div>
@@ -698,11 +701,11 @@
       <div class="lp-blob" style="width:160px;height:160px;bottom:-70px;left:30%"></div>
       <div>
         <h2>Ganhe no seu ritmo como profissional Chama Fácil.</h2>
-        <p>Receba trabalhos na sua região, defina suas propostas e construa uma reputação. Planos a partir de 1% de comissão.</p>
+        <p>Receba trabalhos na sua região, defina suas propostas e construa uma reputação. Grátis no acesso antecipado — sem mensalidade.</p>
         <a class="lp-btn light lg" href="#join">Começar a ganhar</a>
       </div>
       <div class="lp-prostats">
-        <div class="lp-prostat"><div class="v">A partir de 1%</div><div class="k">Comissão por serviço · escolha seu plano</div></div>
+        <div class="lp-prostat"><div class="v">Grátis</div><div class="k">No acesso antecipado · sem mensalidade</div></div>
         <div class="lp-prostat"><div class="v">Sua área, seu horário</div><div class="k">Defina raio e disponibilidade</div></div>
         <div class="lp-prostat"><div class="v">Receba rápido</div><div class="k">Pagamento seguro a cada serviço</div></div>
       </div>
@@ -718,7 +721,7 @@
       <div class="lp-faqitem"><div class="lp-faqq">Como é definido o preço?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Os profissionais são verificados?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Como eu pago?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Pix, cartão ou dinheiro — sua escolha, só após o serviço. Peças extras são detalhadas e aprovadas por você.</div></div>
-      <div class="lp-faqitem"><div class="lp-faqq">Quanto custa trabalhar como prestador?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">O cadastro é grátis. Há planos de 5% a 1% de comissão — peças repassadas a custo — e pagamento seguro a cada serviço.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Quanto custa trabalhar como prestador?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">No acesso antecipado é totalmente grátis — sem mensalidade nem comissão. Planos pagos entram só quando lançarmos, com aviso antes.</div></div>
     </div>
   </div>
 </section>
@@ -1074,6 +1077,13 @@
     "Planos para prestadores": "Plans for pros", "Comece grátis, cresça quando quiser.": "Start free, grow when you want.",
     "Quanto mais avançado o plano, menor a comissão por serviço. Sem fidelidade — mude de plano a qualquer momento.": "The higher the plan, the lower the per-job commission. No lock-in — switch plans anytime.",
     "/mês": "/mo", "de comissão por serviço": "commission per job",
+    // acesso antecipado grátis (planos sem mensalidade agora)
+    "Grátis no acesso antecipado.": "Free during early access.",
+    "Sem mensalidade agora. Os planos abaixo mostram o modelo que vem depois — quem entra cedo começa de graça.": "No monthly fee for now. The plans below show the model that comes later — join early and start free.",
+    "Grátis": "Free", "R$ 99/mês": "R$ 99/mo", "R$ 299/mês": "R$ 299/mo",
+    "No acesso antecipado · sem mensalidade": "During early access · no monthly fee",
+    "Receba trabalhos na sua região, defina suas propostas e construa uma reputação. Grátis no acesso antecipado — sem mensalidade.": "Get jobs in your area, set your quotes and build a reputation. Free during early access — no monthly fee.",
+    "No acesso antecipado é totalmente grátis — sem mensalidade nem comissão. Planos pagos entram só quando lançarmos, com aviso antes.": "During early access it's completely free — no monthly fee, no commission. Paid plans arrive only at launch, with notice.",
     "Receba trabalhos na sua região": "Get jobs in your area", "Perfil verificado e avaliações": "Verified profile and reviews",
     "Pagamento seguro via Pix": "Secure payment via Pix", "Começar grátis": "Start free", "Mais popular": "Most popular",
     "Tudo do Free": "Everything in Free", "Destaque nas buscas e propostas": "Featured in search and quotes",
