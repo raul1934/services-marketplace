@@ -3,6 +3,8 @@ import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Segment, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
+import { EnvSwitch } from '../../src/components/EnvSwitch';
+import { currentHost } from '../../src/env';
 
 type Mode = 'phone' | 'email';
 
@@ -47,8 +49,9 @@ export default function Login() {
 
   return (
     <Screen scroll={false} padded={false}>
-      <View style={{ paddingHorizontal: 26, paddingTop: 18 }}>
+      <View style={{ paddingHorizontal: 26, paddingTop: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <BrandMark />
+        <EnvSwitch />
       </View>
       <View style={{ flex: 1, paddingHorizontal: 26, paddingTop: 8, paddingBottom: 26, gap: 13 }}>
         <View>
@@ -74,7 +77,12 @@ export default function Login() {
           </>
         )}
 
-        {formError ? <Text variant="caption" color={t.colors.danger}>{formError}</Text> : null}
+        {formError ? (
+          <View style={{ gap: 2 }}>
+            <Text variant="caption" color={t.colors.danger}>{formError}</Text>
+            <Text variant="caption" color={t.colors.ink3}>API: {currentHost()}</Text>
+          </View>
+        ) : null}
 
         <Button title={mode === 'phone' ? tr('login.sendCode') : tr('login.submit')} full loading={loading} onPress={submit} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} style={{ marginTop: 4 }} />
 

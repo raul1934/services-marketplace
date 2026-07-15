@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Field, Icon, NotFoundView, Screen, SectionLabel, Text, useTheme } from '@chamafacil/shared';
@@ -36,13 +36,7 @@ export default function EditAsset() {
     }
   }, [asset]);
 
-  if (isLoading) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading) return <SkeletonScreen />;
   if (!asset) {
     return (
       <NotFoundView

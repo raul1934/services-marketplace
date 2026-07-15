@@ -1,0 +1,28 @@
+/** Tunable constants for the AR measurement feature. Distances are in metres. */
+
+// Reticle / hit testing
+export const HIT_THROTTLE_M = 0.003; // ignore camera hits that move less than this
+export const SNAP_RADIUS_M = 0.05; // snap the reticle to a point within this radius
+
+export const RETICLE_RADIUS_M = 0.01;
+export const SNAP_RETICLE_RADIUS_M = 0.016; // slightly larger when snapped
+
+// Markers & lines
+export const POINT_RADIUS_M = 0.02;
+export const LINE_THICKNESS_M = 0.01;
+export const PREVIEW_LINE_THICKNESS_M = 0.008;
+
+// Area fill
+export const FILL_OFFSET_M = 0.004; // sink the fill below the lines so they stay on top
+export const FILL_OPACITY = 0.5;
+
+// Labels (ViroText scale is a multiplier on its point size)
+export const LABEL_SCALE = 0.2;
+export const AREA_LABEL_SCALE = 0.28;
+
+export const AMBIENT_INTENSITY = 1000;
+export const MIN_POLYGON_POINTS = 3;
+
+// Brand colours reused by the overlay
+export const COLOR_ACCENT = '#ff6a3d';
+export const COLOR_SNAP = '#2bd576';

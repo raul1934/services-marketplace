@@ -4,7 +4,7 @@ import MapView, { Marker, Polyline, Region } from 'react-native-maps';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import {
+import { SkeletonScreen,
   Asset,
   AvInit,
   BackBar,
@@ -117,13 +117,7 @@ export default function RequestDetail() {
     setRateOpen(false);
   };
 
-  if (isLoading) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading) return <SkeletonScreen />;
   if (!request) {
     return (
       <NotFoundView

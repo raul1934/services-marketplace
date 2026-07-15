@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Image, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Icon, Row, SectionLabel, Text, useTheme } from '@chamafacil/shared';
+import { Button, Card, Icon, Row, SectionLabel, SkeletonList, Text, useTheme } from '@chamafacil/shared';
 import { Asset } from '../api';
 import { ICON, assetCaption } from '../assetDisplay';
 
@@ -33,7 +33,7 @@ export function AssetSelector({
       <SectionLabel>{tr('createRequest.yourAsset')}</SectionLabel>
 
       {loading && assets.length === 0 ? (
-        <ActivityIndicator color={t.colors.accent} style={{ marginVertical: 12 }} />
+        <SkeletonList count={2} padded={false} />
       ) : (
         assets.map((a) => {
           const on = selectedId === a.id;

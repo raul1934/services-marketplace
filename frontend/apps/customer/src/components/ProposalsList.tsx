@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { Alert, SkeletonList } from '@chamafacil/shared';
 import { useTranslation } from 'react-i18next';
 import {
   AvInit,
@@ -130,7 +130,7 @@ export function ProposalsList({
       </Row>
 
       {proposals.isLoading ? (
-        <ActivityIndicator color={t.colors.accent} style={{ marginTop: 20 }} />
+        <SkeletonList count={2} padded={false} />
       ) : !items.length ? (
         <EmptyState fill icon="clock" title={tr('requestDetail.waitingTitle')} body={tr('requestDetail.waitingBody')} />
       ) : (

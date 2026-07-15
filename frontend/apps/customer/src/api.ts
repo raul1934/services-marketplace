@@ -128,6 +128,22 @@ export interface AddReadingPayload {
   note?: string;
 }
 
+/** A named part of a property (room/area) with its optional AR measurement. */
+export interface AssetPart {
+  id: number;
+  name: string;
+  area: number | null; // m²
+  perimeter: number | null; // m
+  points_count: number | null;
+  measured_at: string | null;
+}
+
+export interface PartMeasurement {
+  area: number;
+  perimeter: number;
+  points_count: number;
+}
+
 export interface VehicleMake {
   id: number;
   name: string;
@@ -159,6 +175,11 @@ export const assetsApi = {
     http.get<Paginated<AssetReading>>(`assets/${id}/readings`, { query: { page } }).then(unwrapPage),
   addReading: (id: number, payload: AddReadingPayload) =>
     http.post<{ data: AssetReading; current_mileage: number | null }>(`assets/${id}/readings`, { body: payload }),
+  parts: (id: number) => http.get<{ data: AssetPart[] }>(`assets/${id}/parts`).then(unwrap),
+  addPart: (id: number, name: string) => http.post<{ data: AssetPart }>(`assets/${id}/parts`, { body: { name } }).then(unwrap),
+  updatePart: (id: number, partId: number, payload: { name?: string } & Partial<PartMeasurement>) =>
+    http.put<{ data: AssetPart }>(`assets/${id}/parts/${partId}`, { body: payload }).then(unwrap),
+  removePart: (id: number, partId: number) => http.del<{ ok: boolean }>(`assets/${id}/parts/${partId}`),
 };
 
 export const vehicleCatalogApi = {

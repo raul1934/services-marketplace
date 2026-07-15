@@ -618,6 +618,23 @@
   },
   "assets": {
     "title": "Meus ativos",
+    "parts": {
+      "title": "Cômodos e áreas",
+      "addPart": "Adicionar cômodo",
+      "add": "Adicionar",
+      "empty": "Nenhum cômodo ainda. Adicione as partes do imóvel (sala, quarto, piscina…) e meça cada uma com a câmera.",
+      "unmeasured": "Sem medição",
+      "measure": "Medir",
+      "remeasure": "Medir de novo",
+      "summaryArea": "{{area}} m² · {{perimeter}} m",
+      "summaryDist": "{{perimeter}} m",
+      "total": "Total {{value}} m²",
+      "nameLabel": "Nome do cômodo",
+      "namePlaceholder": "Ex.: Sala, Piscina, Corredor",
+      "removeTitle": "Remover cômodo",
+      "removeBody": "Remover “{{name}}” e sua medição?",
+      "remove": "Remover"
+    },
     "menuSub": "Veículos, imóveis e pets",
     "add": "Adicionar ativo",
     "addTitle": "Adicionar ativo",
@@ -720,5 +737,55 @@
     "myRequests": "Meus pedidos",
     "newRequest": "Pedir serviço",
     "logout": "Sair"
+  },
+  "ar": {
+    "back": "Voltar",
+    "clear": "Limpar",
+    "undo": "Desfazer",
+    "modeSurface": "Superfície",
+    "modeFree": "Livre",
+    "line": "Linha",
+    "lineOn": "Linha ON",
+    "confirmPoint": "Confirmar ponto",
+    "confirmSnap": "Confirmar (snap)",
+    "pointSingular": "pt",
+    "pointPlural": "pts",
+    "hintDetecting": "Mova o aparelho devagar para detectar superfícies…",
+    "hintMotion": "Mais devagar 🐢 — você está movendo rápido demais.",
+    "hintFeatures": "Aponte para uma superfície com mais textura e luz.",
+    "hintFree": "Mire num canto e toque em “Confirmar ponto”. Usa a estimativa do AR (sem precisar de plano).",
+    "hintWaitingPlane": "Aguardando superfície plana… ou use o modo “Livre”.",
+    "hintAim": "Mire numa superfície e toque em “Confirmar ponto”.",
+    "crossing": "⚠ As linhas não podem se cruzar",
+    "help": "Ajuda",
+    "saveMeasurement": "Salvar em «{{name}}»",
+    "tutorial": {
+      "skip": "Pular",
+      "back": "Voltar",
+      "next": "Próximo",
+      "start": "Começar a medir",
+      "steps": [
+        {
+          "icon": "📐",
+          "title": "Meça no mundo real",
+          "text": "Aponte a câmera, marque os cantos e veja a distância e a área na hora."
+        },
+        {
+          "icon": "💡",
+          "title": "Boa luz e textura",
+          "text": "Funciona com bastante luz e superfícies com textura: piso de madeira, tapete, azulejo. Evite chão liso, branco ou brilhante."
+        },
+        {
+          "icon": "🐢",
+          "title": "Escaneie devagar",
+          "text": "Mova o celular BEM devagar apontando pra superfície por alguns segundos, até ela ser reconhecida (aparece uma superfície translúcida sobre ela)."
+        },
+        {
+          "icon": "📍",
+          "title": "Marque os pontos",
+          "text": "Mire o alvo num canto e toque em “Confirmar ponto”. 2 pontos medem a distância; 3 ou mais fecham uma área."
+        }
+      ]
+    }
   }
 }

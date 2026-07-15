@@ -69,7 +69,7 @@ export function Screen({
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.colors.bg }} edges={edges}>
-      <StatusBar barStyle={t.dark ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle="light-content" backgroundColor={t.colors.accent} />
       {header ? <View style={[{ backgroundColor: t.colors.bg }, column, pad]}>{header}</View> : null}
       {scroll ? (
         <ScrollView

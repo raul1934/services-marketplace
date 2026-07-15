@@ -1,5 +1,5 @@
 /**
- * Chama Fácil theme tokens — ported from walvee-ui.css (.t-sunset / .t-trust / .t-night).
+ * Chama Fácil theme tokens — ported from chamafacil-ui.css (.t-sunset / .t-trust / .t-night).
  * CSS custom properties become a typed theme object consumed by the shared UI kit
  * via ThemeProvider / useTheme(). Gradients are expressed as ordered color-stop
  * arrays for use with expo-linear-gradient.

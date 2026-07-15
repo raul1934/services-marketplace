@@ -117,6 +117,35 @@ export function useAddReading(id: number) {
   });
 }
 
+/** The property's named parts (rooms/areas) with their AR measurements. */
+export const useAssetParts = (id: number, enabled = true) =>
+  useQuery({ queryKey: ['asset-parts', id], queryFn: () => assetsApi.parts(id), enabled: !!id && enabled });
+
+export function useAddPart(id: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => assetsApi.addPart(id, name),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['asset-parts', id] }),
+  });
+}
+
+export function useUpdatePart(id: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ partId, ...payload }: { partId: number; name?: string; area?: number; perimeter?: number; points_count?: number }) =>
+      assetsApi.updatePart(id, partId, payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['asset-parts', id] }),
+  });
+}
+
+export function useRemovePart(id: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (partId: number) => assetsApi.removePart(id, partId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['asset-parts', id] }),
+  });
+}
+
 export const useMyRequests = () =>
   useInfiniteQuery({
     queryKey: keys.myRequests,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Image, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,13 +18,7 @@ export default function SurchargeScreen() {
   const { data: request, isLoading } = useRequest(requestId);
   const resolve = useResolveSurcharge(requestId);
 
-  if (isLoading || !request) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading || !request) return <SkeletonScreen />;
 
   const combinado = request.accepted_proposal?.price ?? 0;
   const all = request.surcharges ?? [];

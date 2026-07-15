@@ -11,6 +11,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // `unaccent` is a PostgreSQL extension; skip on other drivers (e.g. the
+        // sqlite :memory: database used by the test suite) so migrations run there.
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
         DB::statement('CREATE EXTENSION IF NOT EXISTS unaccent');
     }
 

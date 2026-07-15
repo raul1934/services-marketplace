@@ -1,15 +1,16 @@
 import React from 'react';
-import { Image } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '../Text';
 import { useTheme } from '../../theme';
+// Official Chama Fácil mark from the landing page (multi-hue flame + white ribbon),
+// imported as a component via react-native-svg-transformer. It keeps its own brand
+// colors; only the wordmark text takes the theme accent (or white on gradients).
+import ChamaLogo from '../../../../../assets/chamafacil-logo.svg';
 
-// Official Chama Fácil wordmark (dolphins + "Chama Fácil"). The asset is a single-hue
-// mark on transparent bg, so we tint it to the theme accent — matching how the
-// landing page renders the logo. Pass `onAccent` for white (on gradient bgs).
-const MARK = require('../../../../../assets/chamafacil-mark.png');
-const RATIO = 773 / 196;
+const LOGO_RATIO = 610 / 870;
 
 export function BrandMark({
-  height = 26,
+  height = 28,
   color,
   onAccent,
 }: {
@@ -18,12 +19,21 @@ export function BrandMark({
   onAccent?: boolean;
 }) {
   const t = useTheme();
-  const tintColor = onAccent ? '#ffffff' : color ?? t.colors.accent;
+  const textColor = onAccent ? '#ffffff' : color ?? t.colors.accent;
   return (
-    <Image
-      source={MARK}
-      resizeMode="contain"
-      style={{ height, width: height * RATIO, tintColor }}
-    />
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: height * 0.32 }}>
+      <ChamaLogo width={height * LOGO_RATIO} height={height} />
+      <Text
+        style={{
+          fontFamily: 'Manrope_800ExtraBold',
+          fontSize: height * 0.82,
+          lineHeight: height * 1.15,
+          letterSpacing: -0.5,
+          color: textColor,
+        }}
+      >
+        Chama Fácil
+      </Text>
+    </View>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Card, Icon, Row, Screen, Text, useTheme } from '@chamafacil/shared';
@@ -17,13 +17,7 @@ export default function NoShowScreen() {
   const reopen = useReportNoShow(requestId);
   const cancel = useCancelRequest(requestId);
 
-  if (isLoading || !request) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading || !request) return <SkeletonScreen />;
 
   const onReopen = () =>
     reopen.mutate(undefined, {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,13 +22,7 @@ export default function DisputeScreen() {
   const [claim, setClaim] = useState('');
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
 
-  if (isLoading) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading) return <SkeletonScreen />;
 
   const addPhotos = async () => {
     try {

@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Button, Card, Icon, LANGUAGES, Row, Screen, Text, ThemeName, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
 
-const THEMES: ThemeName[] = ['yeti', 'sunset', 'trust', 'night'];
+const THEMES: ThemeName[] = ['sunset', 'trust', 'night'];
 
 export default function Profile() {
   const { user, logout } = useAuth();

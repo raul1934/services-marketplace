@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,13 +22,7 @@ export default function WarrantyScreen() {
   const [description, setDescription] = useState('');
   const [showForm, setShowForm] = useState(false);
 
-  if (isLoading) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading) return <SkeletonScreen />;
 
   const hasClaims = !!claims?.length;
   // First claim → form is the point of the screen. With an existing claim, the

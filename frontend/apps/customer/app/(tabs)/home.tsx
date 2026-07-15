@@ -18,6 +18,8 @@ import {
   Screen,
   SectionLabel,
   ServiceRequest,
+  SkeletonList,
+  SkeletonTiles,
   Steps,
   Text,
   flattenPages,
@@ -106,7 +108,12 @@ export default function Home() {
       />
 
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
-        {candidates.length > 0 ? (
+        {requests.isLoading ? (
+          <>
+            <SectionLabel>{tr('home.activeRequest')}</SectionLabel>
+            <SkeletonList count={2} padded={false} />
+          </>
+        ) : candidates.length > 0 ? (
           <>
             <SectionLabel>{tr('home.activeRequest')}</SectionLabel>
             {visibleRequests.map((r) => (
@@ -128,7 +135,7 @@ export default function Home() {
 
         <SectionLabel>{tr('home.quickHelp')}</SectionLabel>
         {categories.isLoading ? (
-          <ActivityIndicator color={t.colors.accent} />
+          <SkeletonTiles count={4} />
         ) : (
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             {topCats.map((c) => (
@@ -163,6 +170,19 @@ export default function Home() {
             </View>
           </LinearGradient>
         </Pressable>
+
+        <Card onPress={() => router.push('/medicao')}>
+          <Row gap={12}>
+            <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="camera" size={22} color={t.colors.accent} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text weight="800" style={{ fontSize: 15 }}>Medir com RA</Text>
+              <Text variant="caption">Meça cômodos e gere orçamento · POC</Text>
+            </View>
+            <Icon name="arrowR" size={18} color={t.colors.ink3} />
+          </Row>
+        </Card>
       </View>
 
       <AppDrawer
@@ -184,6 +204,7 @@ export default function Home() {
             items: [
               { icon: 'list', label: tr('drawer.myRequests'), onPress: () => router.push('/(tabs)/requests') },
               { icon: 'plus', label: tr('drawer.newRequest'), onPress: () => router.push('/categories') },
+              { icon: 'camera', label: 'Medir com RA (POC)', onPress: () => router.push('/medicao') },
             ],
           },
         ]}

@@ -6,12 +6,17 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ff6a3d"
+      "backgroundColor": "#ffffff"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#ff6a3d",
+      "barStyle": "light-content",
+      "translucent": false
     },
     "ios": {
       "supportsTablet": false,
@@ -22,7 +27,7 @@
     },
     "android": {
       "package": "com.chamafacil.customer",
-      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#ff6a3d" },
+      "adaptiveIcon": { "foregroundImage": "./assets/adaptive-icon.png", "backgroundColor": "#ffffff" },
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -41,6 +46,13 @@
           "microphonePermission": "O Chama Fácil usa o microfone para ditar textos por voz.",
           "speechRecognitionPermission": "O Chama Fácil usa reconhecimento de fala para transcrever o que você ditar.",
           "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+        }
+      ],
+      [
+        "@reactvision/react-viro",
+        {
+          "xRMode": ["AR"],
+          "cameraUsagePermission": "O Chama Fácil usa a câmera para medir com Realidade Aumentada."
         }
       ]
     ],

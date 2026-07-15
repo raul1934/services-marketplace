@@ -17,6 +17,8 @@ import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/spac
 import { addNotificationResponseListener, AuthProvider, ThemeProvider, useAuth, usePushSync, useRealtimeNotifications, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
 import { initServices } from '../src/init';
+import { loadEnv } from '../src/env';
+import { SplashBrand } from '../src/components/SplashBrand';
 import '../src/i18n';
 
 initServices();
@@ -58,19 +60,21 @@ function Gate() {
     });
   }, [status, router]);
 
+  // Load the persisted Dev/Prod choice and point the API client at it (once).
+  useEffect(() => {
+    void loadEnv();
+  }, []);
+
   useEffect(() => {
     if (status === 'loading') return;
     const inAuth = segments[0] === '(auth)';
-    if (status === 'guest' && !inAuth) router.replace('/(auth)/welcome');
+    const exempt = segments[0] === 'medicao' || segments[0] === 'ar-medicao'; // POC screens — reachable without auth
+    if (status === 'guest' && !inAuth && !exempt) router.replace('/(auth)/welcome');
     else if (status === 'authed' && inAuth) router.replace('/(tabs)/home');
   }, [status, segments, router]);
 
   if (status === 'loading') {
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: t.colors.bg }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </View>
-    );
+    return <SplashBrand />;
   }
   return <Stack screenOptions={{ headerShown: false }} />;
 }

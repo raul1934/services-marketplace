@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, CATEGORY_TYPE_ORDER, Card, Screen, SectionLabel, ServiceCategory, Text, useTheme } from '@chamafacil/shared';
+import { BackBar, CATEGORY_TYPE_ORDER, Card, Screen, SectionLabel, ServiceCategory, Skeleton, Text, useTheme } from '@chamafacil/shared';
 import { useCategories } from '../src/queries';
 import { CategoryIcon } from '../src/components/CategoryIcon';
 
@@ -19,7 +19,18 @@ export default function Categories() {
       <BackBar title={tr('categories.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 22 }}>
         {isLoading ? (
-          <ActivityIndicator color={t.colors.accent} style={{ marginTop: 40 }} />
+          <View style={{ gap: 22 }}>
+            {[0, 1].map((s) => (
+              <View key={s} style={{ gap: 14 }}>
+                <Skeleton width="42%" height={13} />
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+                  {[0, 1, 2, 3, 4, 5].map((i) => (
+                    <Skeleton key={i} width="31%" height={92} radius={16} />
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
         ) : (
           CATEGORY_TYPE_ORDER.map((type) => {
             const items = byType(type);

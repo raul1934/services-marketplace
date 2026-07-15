@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
+import { SkeletonList } from './Skeleton';
 import type { Paginated } from '../types/models';
 import { flattenPages } from '../api/pagination';
 
@@ -95,11 +96,11 @@ export function PaginatedList<T>({
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.colors.bg }} edges={edges}>
-      <StatusBar barStyle={t.dark ? 'light-content' : 'dark-content'} />
+      <StatusBar barStyle="light-content" backgroundColor={t.colors.accent} />
       {header ? <View style={[{ backgroundColor: t.colors.bg }, column, pad]}>{header}</View> : null}
 
       {query.isLoading ? (
-        <ActivityIndicator color={t.colors.accent} style={{ marginTop: 40 }} />
+        <SkeletonList padded={padded} />
       ) : (
         <FlatList
           data={items}

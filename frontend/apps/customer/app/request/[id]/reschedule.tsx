@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -27,13 +27,7 @@ export default function RescheduleScreen() {
   const [period, setPeriod] = useState('morning');
   const [reason, setReason] = useState('');
 
-  if (isLoading || !request) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading || !request) return <SkeletonScreen />;
 
   // A reschedule from the provider awaiting this client's decision.
   const incoming = (request.reschedule_requests ?? []).find((r) => r.status === 'pending' && r.requested_by_role === 'provider');

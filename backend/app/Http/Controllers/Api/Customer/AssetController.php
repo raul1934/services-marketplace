@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\Customer;
 
 use App\Enums\AssetType;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AssetPartResource;
 use App\Http\Resources\AssetReadingResource;
 use App\Http\Resources\AssetResource;
 use App\Http\Resources\ServiceRequestResource;
 use App\Models\Asset;
+use App\Models\AssetPart;
 use App\Models\AssetPet;
 use App\Models\AssetProperty;
 use App\Models\AssetVehicle;
@@ -215,9 +217,75 @@ class AssetController extends Controller
             ->response()->setStatusCode(201);
     }
 
+    /** The property's named parts with their AR measurements, in creation order. */
+    public function parts(Request $request, Asset $asset): AnonymousResourceCollection
+    {
+        $this->authorizeOwner($request, $asset);
+
+        return AssetPartResource::collection($asset->parts()->get());
+    }
+
+    /** Add a named part (room/area) to a property. */
+    public function addPart(Request $request, Asset $asset): JsonResponse
+    {
+        $this->authorizeOwner($request, $asset);
+        abort_unless($asset->type === AssetType::Property, 422, __('messages.invalid_status'));
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:80'],
+        ]);
+
+        $part = $asset->parts()->create(['name' => $data['name']]);
+
+        return (new AssetPartResource($part))->response()->setStatusCode(201);
+    }
+
+    /** Rename a part and/or store the AR measurement taken on the device. */
+    public function updatePart(Request $request, Asset $asset, AssetPart $part): AssetPartResource
+    {
+        $this->authorizeOwner($request, $asset);
+        $this->authorizePart($asset, $part);
+
+        $data = $request->validate([
+            'name' => ['sometimes', 'string', 'max:80'],
+            'area' => ['nullable', 'numeric', 'min:0'],
+            'perimeter' => ['nullable', 'numeric', 'min:0'],
+            'points_count' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        if (array_key_exists('name', $data)) {
+            $part->name = $data['name'];
+        }
+        // A measurement always comes with a point count; stamp measured_at then.
+        if (array_key_exists('points_count', $data)) {
+            $part->area = $data['area'] ?? null;
+            $part->perimeter = $data['perimeter'] ?? null;
+            $part->points_count = $data['points_count'];
+            $part->measured_at = now();
+        }
+        $part->save();
+
+        return new AssetPartResource($part);
+    }
+
+    /** Delete a part and its measurement. */
+    public function removePart(Request $request, Asset $asset, AssetPart $part): JsonResponse
+    {
+        $this->authorizeOwner($request, $asset);
+        $this->authorizePart($asset, $part);
+        $part->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
     private function authorizeOwner(Request $request, Asset $asset): void
     {
         abort_unless($asset->user_id === $request->user()->id, 403);
+    }
+
+    private function authorizePart(Asset $asset, AssetPart $part): void
+    {
+        abort_unless($part->asset_id === $asset->id, 404);
     }
 
     /** @return class-string<\Illuminate\Database\Eloquent\Model> */

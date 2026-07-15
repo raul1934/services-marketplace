@@ -3,11 +3,12 @@ import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Card, EmptyState, FieldDisplay, Icon, NotFoundView, Row, Screen, SectionLabel, Text, useTheme } from '@chamafacil/shared';
+import { SkeletonScreen, BackBar, Card, EmptyState, FieldDisplay, Icon, NotFoundView, Row, Screen, SectionLabel, Text, useTheme } from '@chamafacil/shared';
 import { useAddReading, useAsset, useAssetHistory, useAssetReadings } from '../../../src/queries';
 import { ASSET_FIELDS, AssetTypeKey } from '../../../src/assetFields';
 import { RequestCard } from '../../../src/components/RequestCard';
 import { RecordKmSheet } from '../../../src/components/RecordKmSheet';
+import { AssetParts } from '../../../src/components/AssetParts';
 
 const ICON: Record<string, string> = { vehicle: 'car', property: 'home', pet: 'paw' };
 
@@ -27,13 +28,7 @@ export default function AssetDetail() {
   const addReading = useAddReading(assetId);
   const [kmOpen, setKmOpen] = useState(false);
 
-  if (isLoading) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading) return <SkeletonScreen />;
   if (!asset) {
     return (
       <NotFoundView
@@ -149,6 +144,9 @@ export default function AssetDetail() {
             </Card>
           </View>
         ) : null}
+
+        {/* Rooms / areas measured with AR (properties) — stored locally on device */}
+        {type === 'property' ? <AssetParts assetId={assetId} /> : null}
 
         {/* Mileage (vehicles) — current value + append-only readings log */}
         {isVehicle ? (

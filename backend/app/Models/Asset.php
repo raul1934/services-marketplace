@@ -54,6 +54,12 @@ class Asset extends Model
         return $this->hasMany(AssetReading::class)->latest('recorded_at');
     }
 
+    /** Named, AR-measurable parts of a property (rooms/areas), in creation order. */
+    public function parts(): HasMany
+    {
+        return $this->hasMany(AssetPart::class)->orderBy('id');
+    }
+
     /** Not archived (sold/given away). */
     public function scopeActive(Builder $query): Builder
     {

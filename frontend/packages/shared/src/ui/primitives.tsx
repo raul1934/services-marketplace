@@ -48,7 +48,7 @@ export function AppBar({ sub, title, left, right }: { sub?: string; title: strin
         {sub ? (
           <Text style={{ color: t.colors.ink2, fontSize: 13, fontWeight: '600', marginBottom: 1 }}>{sub}</Text>
         ) : null}
-        <Text style={{ fontSize: 26, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.5 }}>{title}</Text>
+        <Text style={{ fontSize: 26, lineHeight: 32, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.5 }}>{title}</Text>
       </View>
       {right}
     </View>

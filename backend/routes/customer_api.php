@@ -62,6 +62,10 @@ Route::prefix('customer/v1')->group(function () {
         Route::get('assets/{asset}/history', [AssetController::class, 'history']);
         Route::get('assets/{asset}/readings', [AssetController::class, 'readings']);
         Route::post('assets/{asset}/readings', [AssetController::class, 'addReading']);
+        Route::get('assets/{asset}/parts', [AssetController::class, 'parts']);
+        Route::post('assets/{asset}/parts', [AssetController::class, 'addPart']);
+        Route::put('assets/{asset}/parts/{part}', [AssetController::class, 'updatePart']);
+        Route::delete('assets/{asset}/parts/{part}', [AssetController::class, 'removePart']);
 
         Route::get('requests', [RequestController::class, 'index']);
         Route::post('requests', [RequestController::class, 'store']);

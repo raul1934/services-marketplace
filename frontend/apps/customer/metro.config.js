@@ -16,6 +16,18 @@ config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 // Watch the whole workspace so changes in packages/shared hot-reload.
 config.watchFolders = [workspaceRoot];
 
+// Ignore native build outputs. After `expo prebuild`, android/ (and its build/
+// and .gradle/ dirs) live inside the project; Metro watching them causes constant
+// ENOENT churn during Gradle builds and can stall/timeout bundle requests.
+config.resolver.blockList = [
+  /.*\/android\/build\/.*/,
+  /.*\/android\/app\/build\/.*/,
+  /.*\/android\/\.gradle\/.*/,
+  /.*\/android\/\.cxx\/.*/,
+  /.*\/ios\/build\/.*/,
+  /.*\/ios\/Pods\/.*/,
+];
+
 // Resolve modules from the app first, then the workspace root.
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),

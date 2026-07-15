@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Card, Icon, Row, Screen, SlideToConfirm, Text, brl, useTheme } from '@chamafacil/shared';
@@ -16,13 +16,7 @@ export default function RequoteScreen() {
   const { data: request, isLoading } = useRequest(requestId);
   const decide = useRequoteDecision(requestId);
 
-  if (isLoading || !request) {
-    return (
-      <Screen stickyHeader scroll={false} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={t.colors.accent} size="large" />
-      </Screen>
-    );
-  }
+  if (isLoading || !request) return <SkeletonScreen />;
 
   const combinado = request.accepted_proposal?.price ?? 0;
   const pendingExtra = (request.surcharges ?? []).filter((s) => s.status === 'pending').reduce((s, x) => s + x.amount, 0);

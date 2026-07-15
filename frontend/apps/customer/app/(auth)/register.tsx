@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useTheme } from '@chamafacil/shared';
+import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
 
 export default function Register() {
   const t = useTheme();
   const { register } = useAuth();
   const router = useRouter();
   const { t: tr } = useTranslation();
+  const google = useGoogleSignIn();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -53,7 +54,8 @@ export default function Register() {
         <Button title={tr('register.submit')} full loading={loading} onPress={submit} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} style={{ marginTop: 4 }} />
 
         <DividerOr label={tr('common.or')} />
-        <GoogleButton label={tr('common.googleSignup')} />
+        <GoogleButton label={tr('common.googleSignup')} loading={google.loading} onPress={google.signIn} />
+        {google.error ? <Text variant="caption" color={t.colors.danger} center>{google.error}</Text> : null}
 
         <Text center style={{ fontSize: 11, color: t.colors.ink3, lineHeight: 16, marginTop: 4 }}>{tr('register.legal')}</Text>
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>

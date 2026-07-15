@@ -618,6 +618,23 @@
   },
   "assets": {
     "title": "My assets",
+    "parts": {
+      "title": "Rooms & areas",
+      "addPart": "Add room",
+      "add": "Add",
+      "empty": "No rooms yet. Add the property's parts (living room, bedroom, pool…) and measure each with the camera.",
+      "unmeasured": "Not measured",
+      "measure": "Measure",
+      "remeasure": "Measure again",
+      "summaryArea": "{{area}} m² · {{perimeter}} m",
+      "summaryDist": "{{perimeter}} m",
+      "total": "Total {{value}} m²",
+      "nameLabel": "Room name",
+      "namePlaceholder": "e.g. Living room, Pool, Hallway",
+      "removeTitle": "Remove room",
+      "removeBody": "Remove “{{name}}” and its measurement?",
+      "remove": "Remove"
+    },
     "menuSub": "Vehicles, properties and pets",
     "add": "Add asset",
     "addTitle": "Add asset",
@@ -720,5 +737,55 @@
     "myRequests": "My requests",
     "newRequest": "Request service",
     "logout": "Log out"
+  },
+  "ar": {
+    "back": "Back",
+    "clear": "Clear",
+    "undo": "Undo",
+    "modeSurface": "Surface",
+    "modeFree": "Free",
+    "line": "Line",
+    "lineOn": "Line ON",
+    "confirmPoint": "Confirm point",
+    "confirmSnap": "Confirm (snap)",
+    "pointSingular": "pt",
+    "pointPlural": "pts",
+    "hintDetecting": "Move the device slowly to detect surfaces…",
+    "hintMotion": "Slow down 🐢 — you're moving too fast.",
+    "hintFeatures": "Point at a surface with more texture and light.",
+    "hintFree": "Aim at a corner and tap “Confirm point”. Uses the AR depth estimate (no plane needed).",
+    "hintWaitingPlane": "Waiting for a flat surface… or use “Free” mode.",
+    "hintAim": "Aim at a surface and tap “Confirm point”.",
+    "crossing": "⚠ Lines can’t cross each other",
+    "help": "Help",
+    "saveMeasurement": "Save to “{{name}}”",
+    "tutorial": {
+      "skip": "Skip",
+      "back": "Back",
+      "next": "Next",
+      "start": "Start measuring",
+      "steps": [
+        {
+          "icon": "📐",
+          "title": "Measure the real world",
+          "text": "Point the camera, mark the corners, and see the distance and area instantly."
+        },
+        {
+          "icon": "💡",
+          "title": "Good light and texture",
+          "text": "Works with plenty of light and textured surfaces: wood floor, rug, patterned tile. Avoid plain, white or shiny floors."
+        },
+        {
+          "icon": "🐢",
+          "title": "Scan slowly",
+          "text": "Move the phone VERY slowly aiming at the surface for a few seconds, until it's recognized (a translucent surface appears over it)."
+        },
+        {
+          "icon": "📍",
+          "title": "Drop the points",
+          "text": "Aim the target at a corner and tap “Confirm point”. 2 points measure distance; 3 or more close an area."
+        }
+      ]
+    }
   }
 }

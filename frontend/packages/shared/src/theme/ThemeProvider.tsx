@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useColorScheme } from 'react-native';
 import { Theme, ThemeName, themes } from './themes';
 
 interface ThemeContextValue {
@@ -14,10 +15,15 @@ export function ThemeProvider({
   initial = 'sunset',
 }: {
   children: React.ReactNode;
+  /** The light-mode theme for this app (used when the OS is in light mode). */
   initial?: ThemeName;
 }) {
-  const [themeName, setThemeName] = useState<ThemeName>(initial);
-  const setTheme = useCallback((name: ThemeName) => setThemeName(name), []);
+  // Follow the OS light/dark setting: light -> the app's light theme, dark -> 'night'.
+  const scheme = useColorScheme();
+  // A manual pick in the profile theme selector overrides the system scheme.
+  const [override, setOverride] = useState<ThemeName | null>(null);
+  const themeName: ThemeName = override ?? (scheme === 'dark' ? 'night' : initial);
+  const setTheme = useCallback((name: ThemeName) => setOverride(name), []);
   const value = useMemo<ThemeContextValue>(
     () => ({ theme: themes[themeName], themeName, setTheme }),
     [themeName, setTheme],
