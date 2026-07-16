@@ -68,6 +68,10 @@ export default function ARMedicaoScreen() {
   const surfaceReady = reliable && tracking;
   usePlaneFeedback(surfaceReady);
 
+  // While the scanning overlay is up it already says "move the phone to find a
+  // surface" — and says it better. Don't stack the banner on top saying the same.
+  const scanning = !surfaceReady && !hasMeasurement(metrics.count);
+
   return (
     <View style={styles.root}>
       <ViroARSceneNavigator autofocus initialScene={INITIAL_SCENE} viroAppProps={appProps} style={styles.ar} />
@@ -89,16 +93,18 @@ export default function ARMedicaoScreen() {
 
       {/* Only nag while nothing is measured yet — once points are down, a brief
           loss of tracking shouldn't cover the measurement. */}
-      <ScanOverlay visible={!surfaceReady && !hasMeasurement(metrics.count)} />
+      <ScanOverlay visible={scanning} />
 
-      <StatusBanner
-        crossing={metrics.crossing}
-        tracking={tracking}
-        trackingReason={trackingReason}
-        count={metrics.count}
-        mode={mode}
-        reliable={reliable}
-      />
+      {scanning ? null : (
+        <StatusBanner
+          crossing={metrics.crossing}
+          tracking={tracking}
+          trackingReason={trackingReason}
+          count={metrics.count}
+          mode={mode}
+          reliable={reliable}
+        />
+      )}
       <LiveLength visible={lineMode && metrics.count >= 1 && !metrics.crossing} length={metrics.liveLength} />
 
       <BottomControls
