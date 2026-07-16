@@ -1,0 +1,12 @@
+{
+  "customer": {
+    "version": "1.0.0",
+    "url": "https://chamafacil.app/downloads/chamafacil-cliente.apk",
+    "notes": "Versão inicial da Chama Fácil."
+  },
+  "provider": {
+    "version": "1.0.0",
+    "url": "https://chamafacil.app/downloads/chamafacil-prestador.apk",
+    "notes": "Versão inicial da Chama Fácil."
+  }
+}

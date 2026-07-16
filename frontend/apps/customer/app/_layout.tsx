@@ -14,7 +14,7 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
-import { addNotificationResponseListener, AuthProvider, ThemeProvider, useAuth, usePushSync, useRealtimeNotifications, useTheme } from '@chamafacil/shared';
+import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useRealtimeNotifications, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
 import { initServices } from '../src/init';
 import { loadEnv } from '../src/env';
@@ -76,7 +76,12 @@ function Gate() {
   if (status === 'loading') {
     return <SplashBrand />;
   }
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <>
+      <Stack screenOptions={{ headerShown: false }} />
+      <UpdateBanner app="customer" />
+    </>
+  );
 }
 
 export default function RootLayout() {

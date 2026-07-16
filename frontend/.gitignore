@@ -11,6 +11,19 @@ web-build/
 ios/
 android/
 
+# The customer app uses the BARE workflow: its ViroReact setup is hand-configured
+# in the native project (flatDir AARs, Kotlin pin, ReactViroPackage registration,
+# newArchEnabled=false), and `expo prebuild` — which EAS runs in the managed
+# workflow — would wipe it. So we version apps/customer/android and let EAS build
+# it as-is. Generated output and machine-specific paths stay ignored.
+!apps/customer/android/
+apps/customer/android/.gradle/
+apps/customer/android/.cxx/
+apps/customer/android/build/
+apps/customer/android/app/build/
+apps/customer/android/app/.cxx/
+apps/customer/android/local.properties
+
 # env
 .env
 .env.local

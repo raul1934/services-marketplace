@@ -12,6 +12,7 @@ export * from './lib/format';
 export * from './lib/useRoute';
 export * from './lib/language';
 export * from './lib/push';
+export * from './lib/appUpdate';
 export * from './lib/usePushSync';
 export * from './lib/payout';
 export * from './lib/webSetup';

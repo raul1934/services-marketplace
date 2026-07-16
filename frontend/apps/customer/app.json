@@ -4,6 +4,11 @@
     "slug": "chamafacil-customer",
     "scheme": "chamafacil",
     "version": "1.0.0",
+    "runtimeVersion": { "policy": "appVersion" },
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0
+    },
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
