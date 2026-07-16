@@ -13,6 +13,8 @@ import { LevelDot } from '../src/ar/components/LevelDot';
 import { ModeToggle } from '../src/ar/components/ModeToggle';
 import { ScanOverlay } from '../src/ar/components/ScanOverlay';
 import { usePlaneFeedback } from '../src/ar/hooks/usePlaneFeedback';
+import { useSettled } from '../src/ar/hooks/useSettled';
+import { SCAN_OVERLAY_DELAY_MS } from '../src/ar/constants';
 import { LiveLength, StatusBanner } from '../src/ar/components/StatusBanner';
 import { TopBar } from '../src/ar/components/TopBar';
 import { Tutorial } from '../src/ar/components/Tutorial';
@@ -68,9 +70,10 @@ export default function ARMedicaoScreen() {
   const surfaceReady = reliable && tracking;
   usePlaneFeedback(surfaceReady);
 
-  // While the scanning overlay is up it already says "move the phone to find a
-  // surface" — and says it better. Don't stack the banner on top saying the same.
-  const scanning = !surfaceReady && !hasMeasurement(metrics.count);
+  // Show the scanning overlay whenever the surface is lost — including mid-measure,
+  // since that's exactly when you need to know why the reticle stopped following.
+  // Gated by useSettled so the frame-to-frame tracking flicker can't strobe it.
+  const scanning = useSettled(!surfaceReady, SCAN_OVERLAY_DELAY_MS);
 
   return (
     <View style={styles.root}>
@@ -91,8 +94,6 @@ export default function ARMedicaoScreen() {
 
       <LevelDot />
 
-      {/* Only nag while nothing is measured yet — once points are down, a brief
-          loss of tracking shouldn't cover the measurement. */}
       <ScanOverlay visible={scanning} />
 
       {scanning ? null : (

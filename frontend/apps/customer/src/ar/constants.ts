@@ -32,3 +32,10 @@ export const COLOR_ACCENT = '#ff6a3d';
 export const COLOR_SNAP = '#2bd576';
 export const COLOR_LEVEL_OK = '#2bd576';
 export const COLOR_LEVEL_OFF = '#e11d48';
+
+// How long the surface must stay lost before the scanning overlay appears
+// (tracking blips off for a frame or two constantly; without this it strobes).
+export const SCAN_OVERLAY_DELAY_MS = 700;
+
+// Dragging a placed point: the grabbed handle swells so your fingertip doesn't hide it.
+export const DRAG_POINT_RADIUS_M = 0.032;

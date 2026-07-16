@@ -19,6 +19,7 @@ import {
   HIT_THROTTLE_M,
   LABEL_SCALE,
   LINE_THICKNESS_M,
+  DRAG_POINT_RADIUS_M,
   POINT_RADIUS_M,
   PREVIEW_LINE_THICKNESS_M,
   RETICLE_RADIUS_M,
@@ -37,6 +38,8 @@ interface State {
   points: Vec3[];
   reticle: ReticleState | null;
   tracking: boolean;
+  /** Index of the point being dragged, or null. Drives its enlarged handle. */
+  dragging: number | null;
 }
 
 /**
@@ -58,7 +61,7 @@ interface State {
  *   using ARCore's depth estimate.
  */
 export class MeasureScene extends React.Component<SceneNavigatorProps, State> {
-  state: State = { points: [], reticle: null, tracking: false };
+  state: State = { points: [], reticle: null, tracking: false, dragging: null };
   private lastHit: Vec3 | null = null;
   private seen = { add: 0, undo: 0, clear: 0 };
 
@@ -145,6 +148,23 @@ export class MeasureScene extends React.Component<SceneNavigatorProps, State> {
     const reliable = this.app.mode === MeasureMode.Free ? true : hit.isPlane || snapped;
     this.setReticle({ position: snap.position, snapIndex: snap.snapIndex, reliable });
   };
+
+  /**
+   * Drag a placed point along the detected plane. Viro reports the node's new world
+   * position continuously (dragType "FixedToPlane"), so we move the point and let
+   * the metrics recompute — you see the length change under your finger.
+   *
+   * The dragged point is excluded from the crossing check against itself, but a drag
+   * that would make the polygon self-intersect is rejected (same rule as placing).
+   */
+  private onDragPoint = (index: number, dragToPos: Vec3) => {
+    const moved: Vec3 = [...dragToPos] as Vec3; // clone: Viro reuses the event array
+    const points = this.state.points.map((p, i) => (i === index ? moved : p));
+    if (isSelfIntersecting(points)) return; // keep the last valid position
+    this.setState({ points, dragging: index }, () => this.report(this.state.reticle));
+  };
+
+  private onDragEnd = () => this.setState({ dragging: null }, () => this.report(this.state.reticle));
 
   private onTracking = (trackingState: number, reason?: number) => {
     const normal = trackingState === ViroTrackingStateConstants.TRACKING_NORMAL;
@@ -256,8 +276,25 @@ export class MeasureScene extends React.Component<SceneNavigatorProps, State> {
           />
         ) : null}
 
+        {/* Each point is a drag handle: grab it and it slides along the plane, with the
+            length updating live. The one under your finger swells so it isn't hidden by
+            your fingertip — the fix for not being able to see where you're placing it. */}
         {points.map((p, i) => (
-          <ViroSphere key={`point-${i}`} position={p} radius={POINT_RADIUS_M} materials={[Material.Point]} />
+          <ViroSphere
+            key={`point-${i}`}
+            position={p}
+            radius={this.state.dragging === i ? DRAG_POINT_RADIUS_M : POINT_RADIUS_M}
+            materials={[this.state.dragging === i ? Material.Snap : Material.Point]}
+            // FixedToWorld raycasts against the real geometry, so the point stays stuck
+            // to the surface as you drag. Don't derive a dragPlane from the points: with
+            // fewer than three (or collinear ones) the normal collapses to zero, and the
+            // NaN that normalizing produces crashes Viro's native side.
+            dragType="FixedToWorld"
+            onDrag={(dragToPos) => this.onDragPoint(i, dragToPos as Vec3)}
+            onClickState={(clickState) => {
+              if (clickState === 3) this.onDragEnd(); // 3 = Clicked (release)
+            }}
+          />
         ))}
 
         {this.renderEdges(points, closed)}
