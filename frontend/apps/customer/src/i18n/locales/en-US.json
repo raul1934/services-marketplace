@@ -26,9 +26,18 @@
   },
   "notFound": {
     "home": "Home",
-    "route": { "title": "Page not found", "body": "This page doesn't exist or has moved." },
-    "asset": { "title": "Asset not found", "body": "This asset doesn't exist or was removed." },
-    "request": { "title": "Request not found", "body": "This service request doesn't exist or was removed." }
+    "route": {
+      "title": "Page not found",
+      "body": "This page doesn't exist or has moved."
+    },
+    "asset": {
+      "title": "Asset not found",
+      "body": "This asset doesn't exist or was removed."
+    },
+    "request": {
+      "title": "Request not found",
+      "body": "This service request doesn't exist or was removed."
+    }
   },
   "enums": {
     "requestStatus": {
@@ -786,6 +795,9 @@
           "text": "Aim the target at a corner and tap “Confirm point”. 2 points measure distance; 3 or more close an area."
         }
       ]
-    }
+    },
+    "scanning": "Detecting surface…",
+    "scanHint": "Slowly wave the phone side to side, aiming at the surface.",
+    "surfaceFound": "Surface detected!"
   }
 }

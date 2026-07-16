@@ -71,6 +71,43 @@ export const styles = StyleSheet.create({
   levelDot: { width: 12, height: 12, borderRadius: 6 },
   levelTxt: { color: '#fff', fontSize: 12 },
 
+  // "Scanning for a surface" overlay — animated phone sliding over a floor.
+  scanWrap: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+  scanCard: {
+    backgroundColor: 'rgba(16,12,10,0.82)',
+    borderRadius: 22,
+    paddingVertical: 22,
+    paddingHorizontal: 26,
+    alignItems: 'center',
+    gap: 10,
+    maxWidth: 320,
+  },
+  scanStage: { width: 190, height: 96, alignItems: 'center', justifyContent: 'center' },
+  scanFloor: {
+    position: 'absolute',
+    bottom: 8,
+    width: 170,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+    borderStyle: 'dashed',
+    transform: [{ perspective: 300 }, { rotateX: '58deg' }],
+  },
+  scanPhone: {
+    width: 34,
+    height: 58,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: '#fff',
+    backgroundColor: 'rgba(255,178,62,0.22)',
+    alignItems: 'center',
+    paddingTop: 6,
+  },
+  scanPhoneLens: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#ffb23e' },
+  scanTitle: { color: '#fff', fontSize: 16, textAlign: 'center' },
+  scanHint: { color: '#c9ced8', fontSize: 13, lineHeight: 19, textAlign: 'center' },
+
   saveBar: {
     position: 'absolute',
     left: 16,

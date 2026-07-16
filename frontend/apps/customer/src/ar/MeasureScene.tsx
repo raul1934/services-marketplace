@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ViroARPlane,
   ViroARPlaneSelector,
   ViroARScene,
   ViroAmbientLight,
@@ -243,17 +242,8 @@ export class MeasureScene extends React.Component<SceneNavigatorProps, State> {
       >
         <ViroAmbientLight color="#ffffff" intensity={AMBIENT_INTENSITY} />
 
-        {/* Visualise every detected plane as a translucent surface (the "squares"). */}
+        {/* Visualise every detected plane as a translucent surface. */}
         <ViroARPlaneSelector minWidth={0.1} minHeight={0.1} />
-
-        {/* TEMP PROBE: does Viro surface ANY plane anchor at all? (2.43.0 has known
-            plane-pipeline bugs, overhauled in 2.44.x — this tells us definitively.) */}
-        <ViroARPlane
-          minWidth={0.1}
-          minHeight={0.1}
-          onAnchorFound={(a: any) => console.log(`ARDBG PLANE found ${JSON.stringify(a)}`)}
-          onAnchorUpdated={(a: any) => console.log(`ARDBG PLANE upd w=${a?.width} h=${a?.height} align=${a?.alignment}`)}
-        />
 
 
         {closed ? this.renderArea(points) : null}

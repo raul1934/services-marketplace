@@ -11,6 +11,8 @@ import { BottomControls } from '../src/ar/components/BottomControls';
 import { Crosshair } from '../src/ar/components/Crosshair';
 import { LevelDot } from '../src/ar/components/LevelDot';
 import { ModeToggle } from '../src/ar/components/ModeToggle';
+import { ScanOverlay } from '../src/ar/components/ScanOverlay';
+import { usePlaneFeedback } from '../src/ar/hooks/usePlaneFeedback';
 import { LiveLength, StatusBanner } from '../src/ar/components/StatusBanner';
 import { TopBar } from '../src/ar/components/TopBar';
 import { Tutorial } from '../src/ar/components/Tutorial';
@@ -61,6 +63,11 @@ export default function ARMedicaoScreen() {
   const title = isPolygon(metrics.count) ? `${metrics.area.toFixed(2)} m²` : `${metrics.perimeter.toFixed(2)} m`;
   const reliable = !!metrics.reticle?.reliable;
 
+  // A surface is "locked" once the reticle sits on a real plane. That single fact
+  // drives the chirp/haptic and the scanning overlay.
+  const surfaceReady = reliable && tracking;
+  usePlaneFeedback(surfaceReady);
+
   return (
     <View style={styles.root}>
       <ViroARSceneNavigator autofocus initialScene={INITIAL_SCENE} viroAppProps={appProps} style={styles.ar} />
@@ -79,6 +86,10 @@ export default function ARMedicaoScreen() {
       <ModeToggle mode={mode} onChange={setMode} />
 
       <LevelDot />
+
+      {/* Only nag while nothing is measured yet — once points are down, a brief
+          loss of tracking shouldn't cover the measurement. */}
+      <ScanOverlay visible={!surfaceReady && !hasMeasurement(metrics.count)} />
 
       <StatusBanner
         crossing={metrics.crossing}

@@ -26,9 +26,18 @@
   },
   "notFound": {
     "home": "Início",
-    "route": { "title": "Página não encontrada", "body": "Esta página não existe ou foi movida." },
-    "asset": { "title": "Ativo não encontrado", "body": "Este ativo não existe ou foi removido." },
-    "request": { "title": "Chamado não encontrado", "body": "Este chamado não existe ou foi removido." }
+    "route": {
+      "title": "Página não encontrada",
+      "body": "Esta página não existe ou foi movida."
+    },
+    "asset": {
+      "title": "Ativo não encontrado",
+      "body": "Este ativo não existe ou foi removido."
+    },
+    "request": {
+      "title": "Chamado não encontrado",
+      "body": "Este chamado não existe ou foi removido."
+    }
   },
   "enums": {
     "requestStatus": {
@@ -786,6 +795,9 @@
           "text": "Mire o alvo num canto e toque em “Confirmar ponto”. 2 pontos medem a distância; 3 ou mais fecham uma área."
         }
       ]
-    }
+    },
+    "scanning": "Detectando superfície…",
+    "scanHint": "Balance o celular devagar de um lado para o outro, apontando para a superfície.",
+    "surfaceFound": "Superfície detectada!"
   }
 }
