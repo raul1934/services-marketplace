@@ -23,6 +23,12 @@ export const Vector3 = {
     return [a[0] / l, a[1] / l, a[2] / l];
   },
   distance: (a: Vec3, b: Vec3): number => Vector3.length(Vector3.subtract(a, b)),
+  /** Move `t` of the way from `a` to `b` (t=0 → a, t=1 → b). */
+  lerp: (a: Vec3, b: Vec3, t: number): Vec3 => [
+    a[0] + (b[0] - a[0]) * t,
+    a[1] + (b[1] - a[1]) * t,
+    a[2] + (b[2] - a[2]) * t,
+  ],
   centroid: (points: Vec3[]): Vec3 => {
     const n = points.length || 1;
     const sum = points.reduce<Vec3>((acc, p) => [acc[0] + p[0], acc[1] + p[1], acc[2] + p[2]], [0, 0, 0]);

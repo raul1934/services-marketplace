@@ -23,6 +23,8 @@ import {
   POINT_RADIUS_M,
   PREVIEW_LINE_THICKNESS_M,
   RETICLE_RADIUS_M,
+  RETICLE_SMOOTHING,
+  RETICLE_SNAP_RESET_M,
   SNAP_RADIUS_M,
   SNAP_RETICLE_RADIUS_M,
 } from './constants';
@@ -63,6 +65,8 @@ interface State {
 export class MeasureScene extends React.Component<SceneNavigatorProps, State> {
   state: State = { points: [], reticle: null, tracking: false, dragging: null };
   private lastHit: Vec3 | null = null;
+  /** Filtered reticle position — see stabilize(). */
+  private smoothed: Vec3 | null = null;
   private seen = { add: 0, undo: 0, clear: 0 };
 
   private get app(): MeasureAppProps {
@@ -146,16 +150,35 @@ export class MeasureScene extends React.Component<SceneNavigatorProps, State> {
     const snap = snapToPoint(hit.position, this.state.points, SNAP_RADIUS_M);
     const snapped = snap.snapIndex >= 0;
     const reliable = this.app.mode === MeasureMode.Free ? true : hit.isPlane || snapped;
-    this.setReticle({ position: snap.position, snapIndex: snap.snapIndex, reliable });
+    this.setReticle({ position: this.stabilize(snap.position, snapped), snapIndex: snap.snapIndex, reliable });
   };
 
   /**
-   * Drag a placed point along the detected plane. Viro reports the node's new world
-   * position continuously (dragType "FixedToPlane"), so we move the point and let
-   * the metrics recompute — you see the length change under your finger.
+   * Low-pass filter for the reticle. ARCore's pose is already IMU-fused; what's left
+   * is per-frame hit-test noise, and it's what makes the number twitch while you hold
+   * still. Easing toward each new hit absorbs that.
    *
-   * The dragged point is excluded from the crossing check against itself, but a drag
-   * that would make the polygon self-intersect is rejected (same rule as placing).
+   * Two escapes, or it would feel broken: a snap must land exactly on the point (that's
+   * the whole promise of snapping), and a jump bigger than RETICLE_SNAP_RESET_M means
+   * you aimed somewhere else — follow immediately instead of gliding over.
+   */
+  private stabilize(target: Vec3, snapped: boolean): Vec3 {
+    const prev = this.smoothed;
+    if (snapped || !prev || Vector3.distance(prev, target) > RETICLE_SNAP_RESET_M) {
+      this.smoothed = target;
+      return target;
+    }
+    const next = Vector3.lerp(prev, target, RETICLE_SMOOTHING);
+    this.smoothed = next;
+    return next;
+  }
+
+  /**
+   * Drag a placed point across the real surface. Viro raycasts the finger against the
+   * world (dragType "FixedToWorld") and reports the new position continuously, so the
+   * metrics recompute — you watch the length change under your finger.
+   *
+   * A drag that would make the polygon self-intersect is rejected, same rule as placing.
    */
   private onDragPoint = (index: number, dragToPos: Vec3) => {
     const moved: Vec3 = [...dragToPos] as Vec3; // clone: Viro reuses the event array

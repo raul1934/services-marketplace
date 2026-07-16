@@ -39,3 +39,8 @@ export const SCAN_OVERLAY_DELAY_MS = 700;
 
 // Dragging a placed point: the grabbed handle swells so your fingertip doesn't hide it.
 export const DRAG_POINT_RADIUS_M = 0.032;
+
+// Reticle stabilisation: how far it eases toward each new hit (0 = frozen, 1 = raw),
+// and the jump size that means "you aimed elsewhere" — follow instantly past it.
+export const RETICLE_SMOOTHING = 0.28;
+export const RETICLE_SNAP_RESET_M = 0.18;
