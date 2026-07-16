@@ -753,8 +753,6 @@
     "undo": "Desfazer",
     "modeSurface": "Superfície",
     "modeFree": "Livre",
-    "line": "Linha",
-    "lineOn": "Linha ON",
     "confirmPoint": "Confirmar ponto",
     "confirmSnap": "Confirmar (snap)",
     "pointSingular": "pt",

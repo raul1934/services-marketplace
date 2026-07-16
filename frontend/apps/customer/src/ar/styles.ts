@@ -43,19 +43,6 @@ export const styles = StyleSheet.create({
   btnUndo: { width: 54, backgroundColor: 'rgba(20,15,10,0.55)' },
   btnTxt: { fontSize: 14 },
 
-  helpBtn: {
-    position: 'absolute',
-    right: 14,
-    top: '40%',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(20,15,10,0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  helpTxt: { color: '#fff', fontSize: 19 },
-
   levelWrap: {
     position: 'absolute',
     right: 14,

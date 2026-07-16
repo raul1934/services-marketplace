@@ -9,7 +9,6 @@ import { EMPTY_METRICS, MeasureAppProps, MeasureMode, MeasurementMetrics } from 
  */
 export function useMeasurement() {
   const [cmd, setCmd] = useState({ add: 0, undo: 0, clear: 0 });
-  const [lineMode, setLineMode] = useState(false);
   const [mode, setMode] = useState<MeasureMode>(MeasureMode.Surface);
   const [metrics, setMetrics] = useState<MeasurementMetrics>(EMPTY_METRICS);
   const [tracking, setTracking] = useState(false);
@@ -20,7 +19,9 @@ export function useMeasurement() {
       add: cmd.add,
       undo: cmd.undo,
       clear: cmd.clear,
-      lineMode,
+      // Always on: you're always measuring from the last point, so hiding the rubber
+      // band only ever hid what you were about to measure.
+      lineMode: true,
       mode,
       onMetrics: setMetrics,
       onTracking: (isNormal, reason) => {
@@ -28,20 +29,18 @@ export function useMeasurement() {
         setTrackingReason(reason);
       },
     }),
-    [cmd, lineMode, mode],
+    [cmd, mode],
   );
 
   return {
     metrics,
     tracking,
     trackingReason,
-    lineMode,
     mode,
     appProps,
     confirmPoint: () => setCmd((c) => ({ ...c, add: c.add + 1 })),
     undo: () => setCmd((c) => ({ ...c, undo: c.undo + 1 })),
     clear: () => setCmd((c) => ({ ...c, clear: c.clear + 1 })),
-    toggleLine: () => setLineMode((v) => !v),
     setMode,
   };
 }

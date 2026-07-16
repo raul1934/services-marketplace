@@ -34,7 +34,7 @@ export default function ARMedicaoScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { assetId, partId, partName } = useLocalSearchParams<{ assetId?: string; partId?: string; partName?: string }>();
-  const { metrics, tracking, trackingReason, lineMode, mode, appProps, confirmPoint, undo, clear, toggleLine, setMode } = useMeasurement();
+  const { metrics, tracking, trackingReason, mode, appProps, confirmPoint, undo, clear, setMode } = useMeasurement();
   const [showTutorial, setShowTutorial] = useState(false);
 
   const partMode = !!assetId && !!partId;
@@ -106,21 +106,16 @@ export default function ARMedicaoScreen() {
           reliable={reliable}
         />
       )}
-      <LiveLength visible={lineMode && metrics.count >= 1 && !metrics.crossing} length={metrics.liveLength} />
+      <LiveLength visible={metrics.count >= 1 && !metrics.crossing} length={metrics.liveLength} />
 
       <BottomControls
-        lineMode={lineMode}
-        onToggleLine={toggleLine}
+        onHelp={() => setShowTutorial(true)}
         onConfirm={confirmPoint}
         canConfirm={canConfirmPoint(metrics)}
         snapped={isSnapped(metrics)}
         onUndo={undo}
         undoDisabled={!hasMeasurement(metrics.count)}
       />
-
-      <Pressable style={styles.helpBtn} onPress={() => setShowTutorial(true)} accessibilityLabel={t('ar.help')}>
-        <Text weight="800" style={styles.helpTxt}>?</Text>
-      </Pressable>
 
       {partMode && hasMeasurement(metrics.count) ? (
         <Pressable style={styles.saveBar} onPress={saveMeasurement} disabled={updatePart.isPending}>

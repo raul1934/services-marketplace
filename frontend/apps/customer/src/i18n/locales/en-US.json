@@ -753,8 +753,6 @@
     "undo": "Undo",
     "modeSurface": "Surface",
     "modeFree": "Free",
-    "line": "Line",
-    "lineOn": "Line ON",
     "confirmPoint": "Confirm point",
     "confirmSnap": "Confirm (snap)",
     "pointSingular": "pt",

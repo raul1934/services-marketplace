@@ -6,8 +6,7 @@ import { Text } from '@chamafacil/shared';
 import { styles } from '../styles';
 
 interface Props {
-  lineMode: boolean;
-  onToggleLine: () => void;
+  onHelp: () => void;
   onConfirm: () => void;
   canConfirm: boolean;
   snapped: boolean;
@@ -15,15 +14,20 @@ interface Props {
   undoDisabled: boolean;
 }
 
-/** The two primary actions (toggle line + confirm point) plus a compact undo. */
-export function BottomControls({ lineMode, onToggleLine, onConfirm, canConfirm, snapped, onUndo, undoDisabled }: Props) {
+/**
+ * Confirm point (primary), with help and undo flanking it.
+ *
+ * The rubber-band line used to be a toggle; it's always on now — you're always
+ * measuring from the last point, so hiding the preview only ever hid what you were
+ * about to measure. Help took the freed slot: it was a floating button overlapping
+ * the dev menu, and it belongs next to the action it explains.
+ */
+export function BottomControls({ onHelp, onConfirm, canConfirm, snapped, onUndo, undoDisabled }: Props) {
   const { t } = useTranslation();
   return (
     <SafeAreaView edges={['bottom']} style={styles.bottomBar} pointerEvents="box-none">
-      <Pressable onPress={onToggleLine} style={[styles.btn, styles.btnToggle, lineMode ? styles.btnToggleOn : null]}>
-        <Text weight="800" style={[styles.btnTxt, { color: lineMode ? '#1a120c' : '#fff' }]}>
-          🔗 {lineMode ? t('ar.lineOn') : t('ar.line')}
-        </Text>
+      <Pressable onPress={onHelp} accessibilityLabel={t('ar.help')} style={[styles.btn, styles.btnToggle]}>
+        <Text weight="800" style={[styles.btnTxt, { color: '#fff' }]}>? {t('ar.help')}</Text>
       </Pressable>
       <Pressable
         onPress={onConfirm}
