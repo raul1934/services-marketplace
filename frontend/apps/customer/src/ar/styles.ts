@@ -56,6 +56,21 @@ export const styles = StyleSheet.create({
   },
   helpTxt: { color: '#fff', fontSize: 19 },
 
+  levelWrap: {
+    position: 'absolute',
+    right: 14,
+    top: '31%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    backgroundColor: 'rgba(20,15,10,0.6)',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  levelDot: { width: 12, height: 12, borderRadius: 6 },
+  levelTxt: { color: '#fff', fontSize: 12 },
+
   saveBar: {
     position: 'absolute',
     left: 16,

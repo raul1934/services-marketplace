@@ -9,6 +9,7 @@ import { useUpdatePart } from '../src/queries';
 
 import { BottomControls } from '../src/ar/components/BottomControls';
 import { Crosshair } from '../src/ar/components/Crosshair';
+import { LevelDot } from '../src/ar/components/LevelDot';
 import { ModeToggle } from '../src/ar/components/ModeToggle';
 import { LiveLength, StatusBanner } from '../src/ar/components/StatusBanner';
 import { TopBar } from '../src/ar/components/TopBar';
@@ -76,6 +77,8 @@ export default function ARMedicaoScreen() {
       />
 
       <ModeToggle mode={mode} onChange={setMode} />
+
+      <LevelDot />
 
       <StatusBanner
         crossing={metrics.crossing}

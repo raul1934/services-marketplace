@@ -23,6 +23,12 @@ export const AREA_LABEL_SCALE = 0.28;
 export const AMBIENT_INTENSITY = 1000;
 export const MIN_POLYGON_POINTS = 3;
 
+// Level indicator: how far the phone may tilt left/right and still read as level.
+export const LEVEL_TOLERANCE_DEG = 4;
+export const LEVEL_UPDATE_MS = 100;
+
 // Brand colours reused by the overlay
 export const COLOR_ACCENT = '#ff6a3d';
 export const COLOR_SNAP = '#2bd576';
+export const COLOR_LEVEL_OK = '#2bd576';
+export const COLOR_LEVEL_OFF = '#e11d48';
