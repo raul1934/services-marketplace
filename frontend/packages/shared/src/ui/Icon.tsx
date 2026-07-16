@@ -1,4 +1,5 @@
 import React from 'react';
+import { ColorValue } from 'react-native';
 import {
   ArrowLeft,
   ArrowRight,
@@ -126,12 +127,15 @@ export function Icon({
 }: {
   name: string;
   size?: number;
-  color?: string;
+  /** RN's canonical colour type, so navigation's `tabBarIcon({ color })` passes straight through. */
+  color?: ColorValue;
   fill?: 'none' | 'current';
   strokeWidth?: number;
 }) {
   const t = useTheme();
   const Comp = ICONS[name] ?? Search;
-  const c = color ?? t.colors.ink;
+  // lucide types `color` as a plain string; ColorValue only differs for
+  // PlatformColor/DynamicColorIOS, which we never pass. Cast once, here.
+  const c = (color ?? t.colors.ink) as string;
   return <Comp size={size} color={c} strokeWidth={strokeWidth} fill={fill === 'current' ? c : 'none'} />;
 }

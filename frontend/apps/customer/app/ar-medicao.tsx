@@ -23,7 +23,7 @@ const TUTORIAL_KEY = 'chamafacil.ar.tutorialSeen';
 
 // Viro's initialScene type is `{ scene: () => Element }`; our class component is
 // runtime-compatible. This single cast is the only place the Viro type boundary needs it.
-const INITIAL_SCENE = { scene: MeasureScene as unknown as () => JSX.Element };
+const INITIAL_SCENE = { scene: MeasureScene as unknown as () => React.JSX.Element };
 
 /** AR measurement screen — thin composition; all logic lives in `src/ar`. */
 export default function ARMedicaoScreen() {

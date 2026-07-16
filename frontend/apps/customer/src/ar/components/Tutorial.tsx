@@ -83,7 +83,7 @@ export function Tutorial({ onDone }: { onDone: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0b0b0f', zIndex: 20 },
+  backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#0b0b0f', zIndex: 20 },
   safe: { flex: 1, paddingHorizontal: 24 },
   header: { flexDirection: 'row', justifyContent: 'flex-end', paddingTop: 6 },
   skip: { color: '#9aa0ab', fontSize: 15, paddingVertical: 6, paddingHorizontal: 4 },
