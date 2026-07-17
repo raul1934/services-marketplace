@@ -885,7 +885,8 @@
         "O tamanho em m² aparece sozinho; salve quando estiver bom."
       ],
       "draw": "Desenhar área",
-      "optional": "Você pode pular e definir depois."
+      "optional": "Você pode pular e definir depois.",
+      "needLocation": "Defina a localização na etapa anterior para desenhar a área."
     }
   }
 }
