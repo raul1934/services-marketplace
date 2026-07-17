@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Button, Icon, Text, useTheme } from '@chamafacil/shared';
+import { BrandMark, Button, Icon, Text, useTheme } from '@chamafacil/shared';
 
 const SCENE_ICONS = ['location', 'dollar', 'star'];
 
@@ -20,13 +20,18 @@ export default function Welcome() {
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <LinearGradient colors={t.grad as unknown as readonly [string, string, ...string[]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
-        <SafeAreaView edges={['top']} style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: 24 }}>
-          <Text weight="800" color="#fff" style={{ fontSize: 20, letterSpacing: 0.5 }}>
-            Chama Fácil <Text color="rgba(255,255,255,0.7)">pro</Text>
-          </Text>
+        {/* Decorative blobs first, and untouchable: drawn on top they cover the
+            header and swallow its taps. */}
+        <View pointerEvents="none" style={{ position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,0.13)', top: -60, right: -50 }} />
+        <View pointerEvents="none" style={{ position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.13)', bottom: 30, left: -40 }} />
+        <SafeAreaView edges={['top']} style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: 24, zIndex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <BrandMark onAccent height={26} />
+            <Text weight="800" color="rgba(255,255,255,0.7)" style={{ fontSize: 20, letterSpacing: 0.5 }}>
+              pro
+            </Text>
+          </View>
         </SafeAreaView>
-        <View style={{ position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,0.13)', top: -60, right: -50 }} />
-        <View style={{ position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.13)', bottom: 30, left: -40 }} />
         <View style={{ width: 150, height: 150, borderRadius: 44, backgroundColor: 'rgba(255,255,255,0.16)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' }}>
           <Icon name={SCENE_ICONS[i]} size={64} color="#fff" fill={SCENE_ICONS[i] === 'star' ? 'current' : 'none'} />
         </View>
