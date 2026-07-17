@@ -10,7 +10,11 @@ export function Screen({
   scroll = true,
   padded = true,
   style,
-  edges = ['top'],
+  // Both edges by default: the bottom one keeps content clear of Android's nav
+  // buttons and the iOS home indicator. Inside a tab navigator this costs
+  // nothing — SafeAreaView only pads where the view actually meets the screen
+  // edge, and there the tab bar already does.
+  edges = ['top', 'bottom'],
   footer,
   stickyHeader = false,
   onEndReached,

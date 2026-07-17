@@ -1,11 +1,19 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, useTheme } from '@chamafacil/shared';
+
+/** Bar height above the system inset — room for a 24px icon plus its label. */
+const TAB_BAR_H = 60;
 
 export default function TabsLayout() {
   const t = useTheme();
   const { t: tr } = useTranslation();
+  // Android's nav buttons (and the iOS home indicator) sit inside the tab bar's
+  // own footprint, so the bar has to grow by the inset and pad its content past
+  // it. A fixed height would draw the labels underneath them.
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -15,8 +23,9 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: t.colors.surface,
           borderTopColor: t.colors.line,
-          height: 84,
+          height: TAB_BAR_H + insets.bottom,
           paddingTop: 8,
+          paddingBottom: insets.bottom,
         },
         tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
       }}

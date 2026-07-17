@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
 import { Avatar } from './Avatar';
 import { Icon } from './Icon';
@@ -41,10 +42,14 @@ export function AppDrawer({
   footer?: DrawerItem;
 }) {
   const t = useTheme();
+  const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={{ flex: 1, flexDirection: 'row' }}>
-        <View style={{ width: '84%', maxWidth: 360, backgroundColor: t.colors.bg, paddingTop: 52, paddingBottom: 20, ...t.shadow }}>
+        {/* The panel is a raw Modal child, so no SafeAreaView pads it: the
+            bottom inset has to be added by hand or the footer ("Sair") renders
+            under Android's nav buttons. */}
+        <View style={{ width: '84%', maxWidth: 360, backgroundColor: t.colors.bg, paddingTop: 52, paddingBottom: 20 + insets.bottom, ...t.shadow }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingBottom: 16 }}>
             <Avatar name={name} uri={avatarUri ?? undefined} size={52} />
             <View style={{ flex: 1 }}>
