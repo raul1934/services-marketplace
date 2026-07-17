@@ -3,7 +3,7 @@ import { Image, Pressable, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Alert, Field, Icon, IconName, SectionLabel, Text, Wiz, useTheme } from '@chamafacil/shared';
-import { useCreateAsset } from '../../src/queries';
+import { useCategories, useCreateAsset } from '../../src/queries';
 import { setCreatedAsset } from '../../src/assetPick';
 import { ICON } from '../../src/assetDisplay';
 import { ASSET_FIELDS, ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
@@ -42,6 +42,10 @@ export default function AddAsset() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   const create = useCreateAsset();
+  const categories = useCategories();
+  // How many services each type unlocks — a real count off the catalog
+  // (categories carry asset_type), shown on the card so the choice has weight.
+  const serviceCount = (k: AssetTypeKey) => (categories.data ?? []).filter((c) => c.asset_type === k).length;
   const { pick: pickMode, type: typeParam, guided: guidedParam } = useLocalSearchParams<{ pick?: string; type?: string; guided?: string }>();
   const picking = !!pickMode;
   const guided = !!guidedParam;
@@ -182,9 +186,17 @@ export default function AddAsset() {
                 <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
                   <Icon name={ICON[k]} size={26} color={active ? t.colors.accentInk : t.colors.accent} />
                 </View>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, gap: 4 }}>
                   <Text weight="800" style={{ fontSize: 17 }}>{tr(`assets.type.${k}`)}</Text>
                   <Text variant="caption" color={t.colors.ink3}>{tr(`assetWizard.type.options.${k}`)}</Text>
+                  {serviceCount(k) > 0 ? (
+                    <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, marginTop: 2 }}>
+                      <Icon name="wrench" size={11} color={active ? t.colors.accentInk : t.colors.accent} />
+                      <Text weight="800" style={{ fontSize: 11.5 }} color={active ? t.colors.accentInk : t.colors.accent}>
+                        {tr('assetWizard.type.serviceCount', { count: serviceCount(k) })}
+                      </Text>
+                    </View>
+                  ) : null}
                 </View>
                 {active ? <Icon name="check" size={22} color={t.colors.accent} /> : null}
               </Pressable>

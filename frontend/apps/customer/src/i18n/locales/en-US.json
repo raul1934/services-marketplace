@@ -864,6 +864,8 @@
       "title": "What are you registering?",
       "sub": "House, car or pet — whatever needs care.",
       "options": { "vehicle": "Car, motorcycle, truck", "property": "House, apartment, annex", "pet": "Dog, cat and others" },
+      "serviceCount": "{{count}} service",
+      "serviceCount_plural": "{{count}} services",
       "benefitsTitle": "WHAT YOU CAN DO",
       "benefits": {
         "vehicle": ["Call a tow, battery and more", "Track the mileage", "Keep photos and documents"],
