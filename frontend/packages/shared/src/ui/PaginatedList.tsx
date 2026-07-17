@@ -58,7 +58,8 @@ export function PaginatedList<T>({
   empty,
   gap = 12,
   padded = true,
-  edges = ['top'],
+  // See Screen: the bottom edge keeps the last row clear of the nav buttons.
+  edges = ['top', 'bottom'],
   contentContainerStyle,
 }: {
   query: InfiniteListQuery<T>;
