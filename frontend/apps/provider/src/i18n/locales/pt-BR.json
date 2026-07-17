@@ -29,8 +29,14 @@
   },
   "notFound": {
     "home": "Painel",
-    "route": { "title": "Página não encontrada", "body": "Esta página não existe ou foi movida." },
-    "job": { "title": "Trabalho não encontrado", "body": "Este trabalho não existe ou não está mais disponível." }
+    "route": {
+      "title": "Página não encontrada",
+      "body": "Esta página não existe ou foi movida."
+    },
+    "job": {
+      "title": "Trabalho não encontrado",
+      "body": "Este trabalho não existe ou não está mais disponível."
+    }
   },
   "enums": {
     "paymentMethod": {
@@ -278,7 +284,11 @@
     "statStatus": "Status",
     "sectionProfile": "Perfil",
     "planSection": "Plano atual",
-    "planNames": { "free": "Free", "pro": "Pro", "enterprise": "Enterprise" },
+    "planNames": {
+      "free": "Free",
+      "pro": "Pro",
+      "enterprise": "Enterprise"
+    },
     "planCommission": "{{pct}}% de comissão por serviço",
     "planValidUntil": "Válido até {{date}}",
     "planNoExpiry": "Plano gratuito · sem expiração",
@@ -291,9 +301,9 @@
     "appearance": "Aparência",
     "language": "Idioma",
     "themes": {
-      "sunset": "Pôr do sol",
-      "trust": "Confiança",
-      "night": "Noite"
+      "auto": "Automático",
+      "light": "Claro",
+      "dark": "Escuro"
     }
   },
   "editProfile": {

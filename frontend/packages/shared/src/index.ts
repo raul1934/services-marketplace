@@ -11,6 +11,7 @@ export * from './lib/dictation';
 export * from './lib/format';
 export * from './lib/useRoute';
 export * from './lib/language';
+export * from './lib/theme-pref';
 export * from './lib/push';
 export * from './lib/appUpdate';
 export * from './lib/usePushSync';
