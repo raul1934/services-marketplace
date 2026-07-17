@@ -4,9 +4,7 @@
     "slug": "chamafacil-customer",
     "scheme": "chamafacil",
     "version": "1.0.0",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "enabled": true,
       "fallbackToCacheTimeout": 0,
