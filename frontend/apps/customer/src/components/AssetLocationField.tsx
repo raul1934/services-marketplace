@@ -65,6 +65,10 @@ export function AssetLocationField({
             style={{ height }}
             region={{ latitude: center.latitude, longitude: center.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
             onPress={(e) => onChange({ latitude: e.nativeEvent.coordinate.latitude, longitude: e.nativeEvent.coordinate.longitude })}
+            // Inside a ScrollView the map would swallow vertical drags; disable
+            // its own panning so the page scrolls. Tap-to-place and dragging the
+            // pin still work, and it stays centred on the pin.
+            scrollEnabled={false}
           >
             <Marker
               draggable

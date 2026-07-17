@@ -69,6 +69,9 @@ interface MapViewProps {
   children?: React.ReactNode;
   onPress?: (e: MapPress) => void;
   onRegionChangeComplete?: (region: Region) => void;
+  /** When false, the map won't pan on drag — so it doesn't swallow the parent
+   *  ScrollView's vertical scroll. Tap-to-place and marker drag still work. */
+  scrollEnabled?: boolean;
 }
 
 const LIGHT_TILES = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
@@ -158,7 +161,7 @@ function serialize(children: React.ReactNode): Layer[] {
 }
 
 /** The HTML document rendered inside the WebView: Leaflet from CDN + a bridge. */
-function htmlDoc(center: [number, number], zoom: number, dark: boolean, accent: string): string {
+function htmlDoc(center: [number, number], zoom: number, dark: boolean, accent: string, dragEnabled = true): string {
   const tiles = dark ? DARK_TILES : LIGHT_TILES;
   return `<!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
@@ -169,7 +172,7 @@ function htmlDoc(center: [number, number], zoom: number, dark: boolean, accent: 
 <script>
 var ACCENT=${JSON.stringify(accent)};
 var post=function(o){try{window.ReactNativeWebView.postMessage(JSON.stringify(o));}catch(e){}};
-var map=L.map('map',{attributionControl:false,zoomControl:true,maxZoom:18}).setView([${center[0]},${center[1]}],${zoom});
+var map=L.map('map',{attributionControl:false,zoomControl:true,maxZoom:18,dragging:${dragEnabled ? 'true' : 'false'}}).setView([${center[0]},${center[1]}],${zoom});
 var tile=L.tileLayer(${JSON.stringify(tiles)},{subdomains:'abcd',maxZoom:19}).addTo(map);
 map.on('click',function(e){post({t:'press',lat:e.latlng.lat,lng:e.latlng.lng});});
 map.on('moveend',function(){var c=map.getCenter(),b=map.getBounds();post({t:'region',lat:c.lat,lng:c.lng,latD:b.getNorth()-b.getSouth(),lngD:b.getEast()-b.getWest()});});
@@ -248,10 +251,11 @@ function MapViewInner(props: MapViewProps & { handleRef: React.Ref<MapViewHandle
   }, [props.children]);
 
   const html = React.useMemo(
-    () => htmlDoc([start.latitude, start.longitude], zoomFor(start.latitudeDelta), t.dark, t.colors.accent),
-    // Rebuild only when theme flips; region/children sync via injection below.
+    () => htmlDoc([start.latitude, start.longitude], zoomFor(start.latitudeDelta), t.dark, t.colors.accent, props.scrollEnabled !== false),
+    // Rebuild only when theme flips or panning is toggled; region/children sync
+    // via injection below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t.dark],
+    [t.dark, props.scrollEnabled],
   );
 
   const send = React.useCallback((obj: unknown) => {
