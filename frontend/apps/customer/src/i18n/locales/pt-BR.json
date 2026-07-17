@@ -864,6 +864,8 @@
       "title": "O que você quer cadastrar?",
       "sub": "Casa, carro ou pet — o que precisar de cuidado.",
       "options": { "vehicle": "Carro, moto, caminhão", "property": "Casa, apartamento, edícula", "pet": "Cão, gato e outros" },
+      "serviceCount": "{{count}} serviço",
+      "serviceCount_plural": "{{count}} serviços",
       "benefitsTitle": "O QUE DÁ PRA FAZER",
       "benefits": {
         "vehicle": ["Chamar guincho, bateria e mais", "Acompanhar a quilometragem", "Guardar fotos e documentos"],
