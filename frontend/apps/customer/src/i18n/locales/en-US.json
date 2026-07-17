@@ -899,6 +899,8 @@
         "The size in m² updates itself; save when it looks right."
       ],
       "draw": "Draw area",
+      "start": "Start measuring",
+      "notNow": "Not now",
       "optional": "You can skip and set it later.",
       "needLocation": "Set the location on the previous step to draw the area."
     }
