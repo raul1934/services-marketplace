@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { Image, LayoutAnimation, Platform, Pressable, UIManager, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Alert, Field, Icon, IconName, SectionLabel, Text, Wiz, useTheme } from '@chamafacil/shared';
@@ -27,6 +27,11 @@ const BENEFITS: Record<AssetTypeKey, IconName[]> = {
   property: ['camera', 'wrench', 'home'],
   pet: ['heart', 'shield', 'camera'],
 };
+
+// Old-arch Android needs this opt-in for LayoutAnimation; a no-op on Fabric.
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 /**
  * AddAssetScreen (C23) as a stepper — same chrome as the request wizard (Wiz),
@@ -134,11 +139,11 @@ export default function AddAsset() {
 
   const footer = isLast
     ? {
-        primary: { label: tr('assets.save'), onPress: submit, loading: create.isPending, disabled: nickname.trim().length < 2 },
+        primary: { label: tr('assets.save'), onPress: submit, loading: create.isPending, disabled: nickname.trim().length < 2, pulse: true },
         back: clamped > 1 ? () => setStep(clamped - 1) : undefined,
       }
     : {
-        primary: { label: tr('common.continue'), onPress: () => setStep(clamped + 1), disabled: !canContinue },
+        primary: { label: tr('common.continue'), onPress: () => setStep(clamped + 1), disabled: !canContinue, pulse: true },
         back: clamped > 1 ? () => setStep(clamped - 1) : undefined,
       };
 
@@ -160,65 +165,66 @@ export default function AddAsset() {
       footer={footer}
     >
       {stepKey === 'type' ? (
-        // Big tappable cards (icon + name + one line), not a compact segment:
-        // step 1 was a tiny toggle on an empty screen, and this is the choice the
-        // whole flow branches on — it earns the room. Below them, what the type
-        // unlocks — so the rest of the step previews the payoff, not blank space.
-        <>
+        // Big tappable cards (icon + name + one line + service count), not a
+        // compact segment. The selected card expands to reveal what the type
+        // unlocks — right under the choice, not in a detached box — and the
+        // reveal animates as selection moves from one card to the next.
         <View style={{ gap: 12 }}>
           {ASSET_TYPES.map((k) => {
             const active = type === k;
             return (
               <Pressable
                 key={k}
-                onPress={() => { setType(k); setDetail({}); }}
+                onPress={() => {
+                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                  setType(k);
+                  setDetail({});
+                }}
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 14,
                   padding: 16,
                   borderRadius: t.radius.card,
                   borderWidth: 1.5,
                   borderColor: active ? t.colors.accent : t.colors.line,
                   backgroundColor: active ? t.colors.accentSoft : t.colors.surface,
+                  gap: 12,
                 }}
               >
-                <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon name={ICON[k]} size={26} color={active ? t.colors.accentInk : t.colors.accent} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                  <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon name={ICON[k]} size={26} color={active ? t.colors.accentInk : t.colors.accent} />
+                  </View>
+                  <View style={{ flex: 1, gap: 4 }}>
+                    <Text weight="800" style={{ fontSize: 17 }}>{tr(`assets.type.${k}`)}</Text>
+                    <Text variant="caption" color={t.colors.ink3}>{tr(`assetWizard.type.options.${k}`)}</Text>
+                    {serviceCount(k) > 0 ? (
+                      <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, marginTop: 2 }}>
+                        <Icon name="wrench" size={11} color={active ? t.colors.accentInk : t.colors.accent} />
+                        <Text weight="800" style={{ fontSize: 11.5 }} color={active ? t.colors.accentInk : t.colors.accent}>
+                          {tr('assetWizard.type.serviceCount', { count: serviceCount(k) })}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                  {active ? <Icon name="check" size={22} color={t.colors.accent} /> : null}
                 </View>
-                <View style={{ flex: 1, gap: 4 }}>
-                  <Text weight="800" style={{ fontSize: 17 }}>{tr(`assets.type.${k}`)}</Text>
-                  <Text variant="caption" color={t.colors.ink3}>{tr(`assetWizard.type.options.${k}`)}</Text>
-                  {serviceCount(k) > 0 ? (
-                    <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, marginTop: 2 }}>
-                      <Icon name="wrench" size={11} color={active ? t.colors.accentInk : t.colors.accent} />
-                      <Text weight="800" style={{ fontSize: 11.5 }} color={active ? t.colors.accentInk : t.colors.accent}>
-                        {tr('assetWizard.type.serviceCount', { count: serviceCount(k) })}
-                      </Text>
-                    </View>
-                  ) : null}
-                </View>
-                {active ? <Icon name="check" size={22} color={t.colors.accent} /> : null}
+
+                {/* Revealed only for the chosen type — the payoff, under the choice. */}
+                {active ? (
+                  <View style={{ gap: 2, borderTopWidth: 1, borderColor: t.colors.line, paddingTop: 8 }}>
+                    {BENEFITS[k].map((icon, i) => (
+                      <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 }}>
+                        <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: t.colors.bg, alignItems: 'center', justifyContent: 'center' }}>
+                          <Icon name={icon} size={15} color={t.colors.accent} />
+                        </View>
+                        <Text style={{ flex: 1, fontSize: 14 }}>{tr(`assetWizard.type.benefits.${k}.${i}`)}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : null}
               </Pressable>
             );
           })}
         </View>
-
-        {/* What this type unlocks — fills the step and reacts to the choice. */}
-        <View style={{ marginTop: 4, padding: 16, borderRadius: t.radius.card, backgroundColor: t.colors.surface2, gap: 2 }}>
-          <Text variant="caption" weight="800" color={t.colors.ink3} style={{ marginBottom: 6 }}>
-            {tr('assetWizard.type.benefitsTitle')}
-          </Text>
-          {BENEFITS[type].map((icon, i) => (
-            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 7 }}>
-              <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name={icon} size={16} color={t.colors.accent} />
-              </View>
-              <Text style={{ flex: 1, fontSize: 14 }}>{tr(`assetWizard.type.benefits.${type}.${i}`)}</Text>
-            </View>
-          ))}
-        </View>
-        </>
       ) : null}
 
       {stepKey === 'details' ? (
