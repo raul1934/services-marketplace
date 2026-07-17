@@ -858,5 +858,11 @@
     "addAndMeasure_plural": "Adicionar {{count}} e medir o primeiro",
     "skipToDetail": "Continuar",
     "later": "Depois"
+  },
+  "assetWizard": {
+    "type": { "title": "O que você quer cadastrar?", "sub": "Casa, carro ou pet — o que precisar de cuidado." },
+    "details": { "title": "Detalhes", "sub": "Preencha o que souber. Dá para editar depois." },
+    "location": { "title": "Onde fica?", "sub": "Marque no mapa para o profissional achar." },
+    "identity": { "title": "Dê um nome", "sub": "Uma foto e um apelido para você reconhecer." }
   }
 }

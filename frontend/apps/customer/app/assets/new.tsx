@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Button, Field, Icon, Screen, SectionLabel, Segment, Text, useTheme } from '@chamafacil/shared';
+import { Alert, Button, Field, Icon, SectionLabel, Segment, Text, Wiz, useTheme } from '@chamafacil/shared';
 import { useCreateAsset } from '../../src/queries';
 import { setCreatedAsset } from '../../src/assetPick';
 import { ASSET_FIELDS, ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
@@ -15,7 +14,17 @@ import { PropertyTypePicker } from '../../src/components/PropertyTypePicker';
 import { DatePicker } from '../../src/components/DatePicker';
 import { PickedPhoto, uploadPhotos, pickPhotos } from '../../src/photos';
 
-/** AddAssetScreen (C23): register a new asset (free nickname + typed detail). */
+type StepKey = 'type' | 'details' | 'location' | 'identity';
+
+/**
+ * AddAssetScreen (C23) as a stepper — same chrome as the request wizard (Wiz),
+ * so registering an asset feels like the guided flow it feeds, not a long form.
+ * Steps adapt to the type (only a property gets a location step) and to the entry
+ * point (opened as a picker from the request flow, the type is fixed and its step
+ * is dropped). The submit behaviour is unchanged from the old single-form screen:
+ * picker → hand the id back; first-run property (`guided`) → the room setup;
+ * otherwise → the asset detail.
+ */
 export default function AddAsset() {
   const t = useTheme();
   const router = useRouter();
@@ -31,8 +40,21 @@ export default function AddAsset() {
   const [nickname, setNickname] = useState('');
   const [detail, setDetail] = useState<AssetDetailInput>({});
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
+  const [step, setStep] = useState(1); // 1-based
 
   const set = (k: string, v: string | number | null) => setDetail((s) => ({ ...s, [k]: v }));
+
+  // Steps depend on the type (property adds a location step) and the entry point
+  // (a picker fixes the type, so its step is dropped).
+  const stepKeys = useMemo<StepKey[]>(() => {
+    const middle: StepKey[] = type === 'property' ? ['details', 'location'] : ['details'];
+    return picking ? [...middle, 'identity'] : ['type', ...middle, 'identity'];
+  }, [type, picking]);
+
+  const total = stepKeys.length;
+  const clamped = Math.min(step, total);
+  const stepKey = stepKeys[clamped - 1];
+  const isLast = clamped === total;
 
   const pick = async () => {
     try {
@@ -81,100 +103,138 @@ export default function AddAsset() {
     );
   };
 
+  // Only the name is required (as before); every other field is optional and can
+  // be filled in later, so a step never traps you except the final save.
+  const canContinue =
+    stepKey === 'type' ||
+    stepKey === 'details' ||
+    stepKey === 'location' ||
+    (stepKey === 'identity' && nickname.trim().length >= 2);
+
+  const goBack = () => {
+    if (clamped > 1) return setStep(clamped - 1);
+    return router.canGoBack() ? router.back() : router.replace('/assets');
+  };
+
+  const footer = isLast
+    ? {
+        primary: { label: tr('assets.save'), onPress: submit, loading: create.isPending, disabled: nickname.trim().length < 2 },
+        back: clamped > 1 ? () => setStep(clamped - 1) : undefined,
+      }
+    : {
+        primary: { label: tr('common.continue'), onPress: () => setStep(clamped + 1), disabled: !canContinue },
+        back: clamped > 1 ? () => setStep(clamped - 1) : undefined,
+      };
+
+  const META: Record<StepKey, { title: string; sub: string }> = {
+    type: { title: tr('assetWizard.type.title'), sub: tr('assetWizard.type.sub') },
+    details: { title: tr('assetWizard.details.title'), sub: tr('assetWizard.details.sub') },
+    location: { title: tr('assetWizard.location.title'), sub: tr('assetWizard.location.sub') },
+    identity: { title: tr('assetWizard.identity.title'), sub: tr('assetWizard.identity.sub') },
+  };
+
   return (
-    <Screen stickyHeader padded={false}>
-      <BackBar title={tr('assets.addTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/assets'))} />
-      <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
-        {!picking && (
-          <>
-            <SectionLabel>{tr('assets.typeLabel')}</SectionLabel>
-            <Segment items={ASSET_TYPES.map((k) => ({ value: k, label: tr(`assets.type.${k}`) }))} value={type} onChange={(v) => { setType(v as AssetTypeKey); setDetail({}); }} />
-          </>
-        )}
+    <Wiz
+      cat={tr('assets.addTitle')}
+      step={clamped}
+      total={total}
+      title={META[stepKey].title}
+      sub={META[stepKey].sub}
+      onBack={goBack}
+      footer={footer}
+    >
+      {stepKey === 'type' ? (
+        <Segment
+          items={ASSET_TYPES.map((k) => ({ value: k, label: tr(`assets.type.${k}`) }))}
+          value={type}
+          onChange={(v) => { setType(v as AssetTypeKey); setDetail({}); }}
+        />
+      ) : null}
 
-        <Pressable onPress={pick} style={{ alignSelf: 'center', alignItems: 'center', gap: 6 }}>
-          {photo ? (
-            <Image source={{ uri: photo.uri }} style={{ width: 96, height: 96, borderRadius: 18 }} />
-          ) : (
-            <View style={{ width: 96, height: 96, borderRadius: 18, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="camera" size={28} color={t.colors.accent} />
-            </View>
+      {stepKey === 'details' ? (
+        <>
+          {type === 'vehicle' ? (
+            <MakeModelPicker
+              makeId={(detail.vehicle_make_id as number) ?? null}
+              modelId={(detail.vehicle_model_id as number) ?? null}
+              onChange={(v) => setDetail((s) => ({ ...s, ...v }))}
+            />
+          ) : null}
+          {type === 'pet' ? (
+            <PetSpeciesBreedPicker
+              speciesId={(detail.pet_species_id as number) ?? null}
+              breedId={(detail.pet_breed_id as number) ?? null}
+              onChange={(v) => setDetail((s) => ({ ...s, ...v }))}
+            />
+          ) : null}
+          {type === 'property' ? (
+            <PropertyTypePicker
+              value={(detail.property_type_id as number) ?? null}
+              onChange={(id) => setDetail((s) => ({ ...s, property_type_id: id }))}
+            />
+          ) : null}
+
+          {ASSET_FIELDS[type].map((f) =>
+            f.key === 'birthdate' ? (
+              <DatePicker
+                key={f.key}
+                label={tr(`assets.fields.${f.key}`)}
+                value={(detail[f.key] as string) ?? ''}
+                onChange={(v) => set(f.key, v)}
+                placeholder={tr('assets.datePlaceholder')}
+                disableFuture
+              />
+            ) : (
+              <Field
+                key={f.key}
+                label={tr(`assets.fields.${f.key}`)}
+                value={(detail[f.key] as string) ?? ''}
+                onChangeText={(v) => set(f.key, v)}
+                placeholder={f.placeholder}
+                keyboardType={f.keyboardType}
+                autoCapitalize={f.key === 'plate' ? 'characters' : 'sentences'}
+              />
+            ),
           )}
-          <Text variant="caption" color={t.colors.accent}>{photo ? tr('assets.changePhoto') : tr('assets.addPhoto')}</Text>
-        </Pressable>
 
-        <Field label={tr('assets.nickname')} value={nickname} onChangeText={setNickname} placeholder={tr('assets.nicknamePlaceholder')} />
-
-        <SectionLabel>{tr('assets.detailsLabel')}</SectionLabel>
-
-        {type === 'vehicle' ? (
-          <MakeModelPicker
-            makeId={(detail.vehicle_make_id as number) ?? null}
-            modelId={(detail.vehicle_model_id as number) ?? null}
-            onChange={(v) => setDetail((s) => ({ ...s, ...v }))}
-          />
-        ) : null}
-        {type === 'pet' ? (
-          <PetSpeciesBreedPicker
-            speciesId={(detail.pet_species_id as number) ?? null}
-            breedId={(detail.pet_breed_id as number) ?? null}
-            onChange={(v) => setDetail((s) => ({ ...s, ...v }))}
-          />
-        ) : null}
-        {type === 'property' ? (
-          <PropertyTypePicker
-            value={(detail.property_type_id as number) ?? null}
-            onChange={(id) => setDetail((s) => ({ ...s, property_type_id: id }))}
-          />
-        ) : null}
-
-        {ASSET_FIELDS[type].map((f) =>
-          f.key === 'birthdate' ? (
-            <DatePicker
-              key={f.key}
-              label={tr(`assets.fields.${f.key}`)}
-              value={(detail[f.key] as string) ?? ''}
-              onChange={(v) => set(f.key, v)}
-              placeholder={tr('assets.datePlaceholder')}
-              disableFuture
-            />
-          ) : (
+          {type === 'vehicle' ? (
             <Field
-              key={f.key}
-              label={tr(`assets.fields.${f.key}`)}
-              value={(detail[f.key] as string) ?? ''}
-              onChangeText={(v) => set(f.key, v)}
-              placeholder={f.placeholder}
-              keyboardType={f.keyboardType}
-              autoCapitalize={f.key === 'plate' ? 'characters' : 'sentences'}
+              label={tr('assets.mileage')}
+              value={(detail.mileage as string) ?? ''}
+              onChangeText={(v) => set('mileage', v.replace(/\D/g, ''))}
+              placeholder={tr('assets.kmPlaceholder')}
+              keyboardType="numeric"
             />
-          ),
-        )}
+          ) : null}
+        </>
+      ) : null}
 
-        {type === 'property' ? (
-          <>
-            <SectionLabel>{tr('assets.locationLabel')}</SectionLabel>
-            <AssetLocationField
-              latitude={detail.latitude as number | undefined}
-              longitude={detail.longitude as number | undefined}
-              geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
-              onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
-            />
-          </>
-        ) : null}
+      {stepKey === 'location' ? (
+        <AssetLocationField
+          latitude={detail.latitude as number | undefined}
+          longitude={detail.longitude as number | undefined}
+          geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
+          onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
+        />
+      ) : null}
 
-        {type === 'vehicle' ? (
-          <Field
-            label={tr('assets.mileage')}
-            value={(detail.mileage as string) ?? ''}
-            onChangeText={(v) => set('mileage', v.replace(/\D/g, ''))}
-            placeholder={tr('assets.kmPlaceholder')}
-            keyboardType="numeric"
-          />
-        ) : null}
+      {stepKey === 'identity' ? (
+        <>
+          <Pressable onPress={pick} style={{ alignSelf: 'center', alignItems: 'center', gap: 6 }}>
+            {photo ? (
+              <Image source={{ uri: photo.uri }} style={{ width: 96, height: 96, borderRadius: 18 }} />
+            ) : (
+              <View style={{ width: 96, height: 96, borderRadius: 18, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="camera" size={28} color={t.colors.accent} />
+              </View>
+            )}
+            <Text variant="caption" color={t.colors.accent}>{photo ? tr('assets.changePhoto') : tr('assets.addPhoto')}</Text>
+          </Pressable>
 
-        <Button title={tr('assets.save')} full loading={create.isPending} onPress={submit} style={{ marginTop: 4 }} />
-      </View>
-    </Screen>
+          <SectionLabel>{tr('assets.nickname')}</SectionLabel>
+          <Field value={nickname} onChangeText={setNickname} placeholder={tr('assets.nicknamePlaceholder')} onSubmitEditing={isLast ? submit : undefined} />
+        </>
+      ) : null}
+    </Wiz>
   );
 }
