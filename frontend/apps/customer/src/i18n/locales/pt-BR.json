@@ -875,6 +875,17 @@
     },
     "details": { "title": "Detalhes", "sub": "Preencha o que souber. Dá para editar depois.", "more": "Mais detalhes (opcional)", "less": "Ocultar detalhes" },
     "location": { "title": "Onde fica?", "sub": "Marque no mapa para o profissional achar." },
-    "identity": { "title": "Dê um nome", "sub": "Uma foto e um apelido para você reconhecer." }
+    "area": {
+      "title": "Área do imóvel",
+      "sub": "Opcional — ajuda o profissional a dimensionar o serviço.",
+      "tutorialTitle": "Como desenhar a área",
+      "steps": [
+        "Toque em \"Desenhar área\" para abrir o mapa.",
+        "Arraste os pontos até cobrir o terreno ou a construção.",
+        "O tamanho em m² aparece sozinho; salve quando estiver bom."
+      ],
+      "draw": "Desenhar área",
+      "optional": "Você pode pular e definir depois."
+    }
   }
 }

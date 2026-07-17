@@ -875,6 +875,17 @@
     },
     "details": { "title": "Details", "sub": "Fill in what you know. You can edit it later.", "more": "More details (optional)", "less": "Hide details" },
     "location": { "title": "Where is it?", "sub": "Drop a pin so the pro can find it." },
-    "identity": { "title": "Give it a name", "sub": "A photo and a nickname to recognise it." }
+    "area": {
+      "title": "Property area",
+      "sub": "Optional — helps the pro size the job.",
+      "tutorialTitle": "How to draw the area",
+      "steps": [
+        "Tap \"Draw area\" to open the map.",
+        "Drag the points to cover the lot or building.",
+        "The size in m² updates itself; save when it looks right."
+      ],
+      "draw": "Draw area",
+      "optional": "You can skip and set it later."
+    }
   }
 }

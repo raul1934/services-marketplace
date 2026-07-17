@@ -3,20 +3,24 @@ import { Image, Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Field, Icon, IconName, SectionLabel, Text, Wiz, useTheme } from '@chamafacil/shared';
+import { Alert, Button, Field, Icon, IconName, Text, Wiz, useTheme } from '@chamafacil/shared';
 import { useCategories, useCreateAsset } from '../../src/queries';
 import { setCreatedAsset } from '../../src/assetPick';
 import { ICON } from '../../src/assetDisplay';
 import { ASSET_FIELDS, ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
 import { AssetDetailInput, GeoPoint } from '../../src/api';
 import { AssetLocationField } from '../../src/components/AssetLocationField';
+import { GeofenceEditor } from '../../src/components/GeofenceEditor';
 import { MakeModelPicker } from '../../src/components/MakeModelPicker';
 import { PetSpeciesBreedPicker } from '../../src/components/PetSpeciesBreedPicker';
 import { PropertyTypePicker } from '../../src/components/PropertyTypePicker';
 import { DatePicker } from '../../src/components/DatePicker';
 import { PickedPhoto, uploadPhotos, pickPhotos } from '../../src/photos';
 
-type StepKey = 'type' | 'details' | 'location' | 'identity';
+type StepKey = 'type' | 'details' | 'location' | 'area';
+
+/** Fallback map center (São Paulo) when there's no pin yet. */
+const FALLBACK = { latitude: -23.56, longitude: -46.64 };
 
 /**
  * What each asset type unlocks — shown under the type cards so step 1 isn't a
@@ -59,6 +63,7 @@ export default function AddAsset() {
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
   const [step, setStep] = useState(1); // 1-based
   const [showExtra, setShowExtra] = useState(false); // optional free-text fields
+  const [areaOpen, setAreaOpen] = useState(false); // geofence editor modal
 
   // Free-text extras shown under "mais detalhes"; a property's address moves to
   // the location step (it belongs with the map pin), so it's excluded here.
@@ -66,11 +71,12 @@ export default function AddAsset() {
 
   const set = (k: string, v: string | number | null) => setDetail((s) => ({ ...s, [k]: v }));
 
-  // Steps depend on the type (property adds a location step) and the entry point
-  // (a picker fixes the type, so its step is dropped).
+  // Steps depend on the type (a property adds location + area) and the entry
+  // point (a picker fixes the type, so its step is dropped). Name and photo now
+  // live at the top of `details`, so there's no separate identity step.
   const stepKeys = useMemo<StepKey[]>(() => {
-    const middle: StepKey[] = type === 'property' ? ['details', 'location'] : ['details'];
-    return picking ? [...middle, 'identity'] : ['type', ...middle, 'identity'];
+    const middle: StepKey[] = type === 'property' ? ['details', 'location', 'area'] : ['details'];
+    return picking ? middle : ['type', ...middle];
   }, [type, picking]);
 
   const total = stepKeys.length;
@@ -125,13 +131,13 @@ export default function AddAsset() {
     );
   };
 
-  // Only the name is required (as before); every other field is optional and can
-  // be filled in later, so a step never traps you except the final save.
+  // The name (on the details step) is the only requirement; location and area
+  // are optional, so no other step traps you.
   const canContinue =
     stepKey === 'type' ||
-    stepKey === 'details' ||
+    (stepKey === 'details' && nickname.trim().length >= 2) ||
     stepKey === 'location' ||
-    (stepKey === 'identity' && nickname.trim().length >= 2);
+    stepKey === 'area';
 
   const goBack = () => {
     if (clamped > 1) return setStep(clamped - 1);
@@ -152,7 +158,7 @@ export default function AddAsset() {
     type: { title: tr('assetWizard.type.title'), sub: tr('assetWizard.type.sub') },
     details: { title: tr('assetWizard.details.title'), sub: tr('assetWizard.details.sub') },
     location: { title: tr('assetWizard.location.title'), sub: tr('assetWizard.location.sub') },
-    identity: { title: tr('assetWizard.identity.title'), sub: tr('assetWizard.identity.sub') },
+    area: { title: tr('assetWizard.area.title'), sub: tr('assetWizard.area.sub') },
   };
 
   return (
@@ -234,6 +240,24 @@ export default function AddAsset() {
 
       {stepKey === 'details' ? (
         <>
+          {/* Name first — what you'll call it — then a photo to recognise it. */}
+          <Field
+            label={tr('assets.nickname')}
+            value={nickname}
+            onChangeText={setNickname}
+            placeholder={tr('assets.nicknamePlaceholder')}
+          />
+          <Pressable onPress={pick} style={{ alignSelf: 'center', alignItems: 'center', gap: 6 }}>
+            {photo ? (
+              <Image source={{ uri: photo.uri }} style={{ width: 88, height: 88, borderRadius: 18 }} />
+            ) : (
+              <View style={{ width: 88, height: 88, borderRadius: 18, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="camera" size={26} color={t.colors.accent} />
+              </View>
+            )}
+            <Text variant="caption" color={t.colors.accent}>{photo ? tr('assets.changePhoto') : tr('assets.addPhoto')}</Text>
+          </Pressable>
+
           {/* The one structured field that matters — it drives the room
               suggestions (property) or the catalog (vehicle/pet). */}
           {type === 'vehicle' ? (
@@ -313,38 +337,71 @@ export default function AddAsset() {
       {stepKey === 'location' ? (
         <>
           {/* Address lives with the pin, not buried among the detail fields:
-              type it, or let "use my location" fill it by reverse-geocode. */}
+              type it, or let "use my location" fill it by reverse-geocode.
+              multiline so a long street name wraps instead of scrolling off. */}
           <Field
             label={tr('assets.fields.address')}
             value={(detail.address as string) ?? ''}
             onChangeText={(v) => set('address', v)}
             placeholder="Rua das Flores, 100"
+            multiline
           />
           <AssetLocationField
             latitude={detail.latitude as number | undefined}
             longitude={detail.longitude as number | undefined}
             geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
             onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
+            height={300}
+            autoLocate
+            hideArea
           />
         </>
       ) : null}
 
-      {stepKey === 'identity' ? (
-        <>
-          <Pressable onPress={pick} style={{ alignSelf: 'center', alignItems: 'center', gap: 6 }}>
-            {photo ? (
-              <Image source={{ uri: photo.uri }} style={{ width: 96, height: 96, borderRadius: 18 }} />
-            ) : (
-              <View style={{ width: 96, height: 96, borderRadius: 18, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name="camera" size={28} color={t.colors.accent} />
+      {stepKey === 'area' ? (
+        <View style={{ gap: 14 }}>
+          {/* Tutorial: what the area is and how to draw it. */}
+          <View style={{ padding: 16, borderRadius: t.radius.card, backgroundColor: t.colors.surface2, gap: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="home" size={20} color={t.colors.accent} />
               </View>
-            )}
-            <Text variant="caption" color={t.colors.accent}>{photo ? tr('assets.changePhoto') : tr('assets.addPhoto')}</Text>
-          </Pressable>
+              <Text weight="800" style={{ flex: 1, fontSize: 16 }}>{tr('assetWizard.area.tutorialTitle')}</Text>
+            </View>
+            {[0, 1, 2].map((i) => (
+              <View key={i} style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+                <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text weight="800" color={t.colors.accentInk} style={{ fontSize: 12 }}>{i + 1}</Text>
+                </View>
+                <Text style={{ flex: 1, fontSize: 14, lineHeight: 20 }} color={t.colors.ink2}>{tr(`assetWizard.area.steps.${i}`)}</Text>
+              </View>
+            ))}
+          </View>
 
-          <SectionLabel>{tr('assets.nickname')}</SectionLabel>
-          <Field value={nickname} onChangeText={setNickname} placeholder={tr('assets.nicknamePlaceholder')} onSubmitEditing={isLast ? submit : undefined} />
-        </>
+          <Button
+            title={(detail.geofence as GeoPoint[] | undefined)?.length ? tr('assets.editArea', { count: (detail.geofence as GeoPoint[]).length }) : tr('assetWizard.area.draw')}
+            variant={(detail.geofence as GeoPoint[] | undefined)?.length ? 'soft' : undefined}
+            full
+            onPress={() => setAreaOpen(true)}
+            left={<Icon name="plus" size={16} color={(detail.geofence as GeoPoint[] | undefined)?.length ? t.colors.accent : t.colors.accentInk} />}
+          />
+          <Text variant="caption" color={t.colors.ink3} center>{tr('assetWizard.area.optional')}</Text>
+
+          <GeofenceEditor
+            visible={areaOpen}
+            center={
+              detail.latitude != null && detail.longitude != null
+                ? { latitude: detail.latitude as number, longitude: detail.longitude as number }
+                : FALLBACK
+            }
+            value={(detail.geofence as GeoPoint[] | undefined) ?? null}
+            onClose={() => setAreaOpen(false)}
+            onSave={(poly) => {
+              setDetail((s) => ({ ...s, geofence: poly }));
+              setAreaOpen(false);
+            }}
+          />
+        </View>
       ) : null}
     </Wiz>
   );
