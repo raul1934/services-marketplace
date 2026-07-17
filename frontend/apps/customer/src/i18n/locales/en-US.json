@@ -712,7 +712,8 @@
       "addPoint": "Add point",
       "removePoint": "Remove point",
       "count": "{{count}} points",
-      "save": "Save area"
+      "save": "Save area",
+      "recenter": "Centre on screen"
     },
     "kmService": "Link to a service (optional)",
     "kmError": "Enter a valid mileage.",

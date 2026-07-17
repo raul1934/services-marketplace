@@ -712,7 +712,8 @@
       "addPoint": "Adicionar ponto",
       "removePoint": "Remover ponto",
       "count": "{{count}} pontos",
-      "save": "Salvar área"
+      "save": "Salvar área",
+      "recenter": "Centralizar na tela"
     },
     "kmService": "Vincular a um serviço (opcional)",
     "kmError": "Informe um valor de km válido.",

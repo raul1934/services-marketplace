@@ -1,6 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Image, Modal, Pressable, View } from 'react-native';
-import MapView, { Marker, Polygon } from 'react-native-maps';
+import React, { useMemo, useState } from 'react';
+import { Image, Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -62,8 +61,6 @@ export default function AddAsset() {
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
   const [step, setStep] = useState(1); // 1-based
   const [showExtra, setShowExtra] = useState(false); // optional free-text fields
-  const [areaOpen, setAreaOpen] = useState(false); // geofence editor modal
-  const [tutorialOpen, setTutorialOpen] = useState(false); // transparent how-to overlay
   const [privateNote, setPrivateNote] = useState('');
   const [providerNote, setProviderNote] = useState('');
 
@@ -88,20 +85,6 @@ export default function AddAsset() {
   const clamped = Math.min(step, total);
   const stepKey = stepKeys[clamped - 1];
   const isLast = clamped === total;
-
-  // Open the how-to overlay when the area step first appears (nothing drawn yet).
-  useEffect(() => {
-    if (stepKey === 'area' && !geofence?.length) setTutorialOpen(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepKey]);
-
-  // Re-nudge: after 10s idle on the area step (overlay dismissed, editor closed,
-  // nothing drawn yet), bring the how-to back.
-  useEffect(() => {
-    if (stepKey !== 'area' || tutorialOpen || areaOpen || geofence?.length) return;
-    const timer = setTimeout(() => setTutorialOpen(true), 10000);
-    return () => clearTimeout(timer);
-  }, [stepKey, tutorialOpen, areaOpen, geofence]);
 
   const pick = async () => {
     try {
@@ -428,75 +411,26 @@ export default function AddAsset() {
       ) : null}
 
       {stepKey === 'area' ? (
-        <View style={{ gap: 12 }}>
-          {/* The area shown on the map. Non-interactive preview — no scroll steal. */}
-          {hasCoords ? (
-            <Card padded={false} style={{ overflow: 'hidden' }}>
-              <View pointerEvents="none" style={{ height: 300 }}>
-                <MapView style={{ flex: 1 }} region={{ latitude: detail.latitude as number, longitude: detail.longitude as number, latitudeDelta: 0.006, longitudeDelta: 0.006 }}>
-                  <Marker coordinate={{ latitude: detail.latitude as number, longitude: detail.longitude as number }} pinColor={t.colors.accent} />
-                  {geofence && geofence.length >= 2 ? (
-                    <Polygon coordinates={geofence} strokeColor={t.colors.accent} fillColor={`${t.colors.accent}33`} strokeWidth={2} />
-                  ) : null}
-                </MapView>
-              </View>
-            </Card>
-          ) : (
-            <Card style={{ alignItems: 'center', gap: 8, paddingVertical: 28 }}>
-              <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name="location" size={24} color={t.colors.accent} />
-              </View>
-              <Text variant="caption" center color={t.colors.ink3}>{tr('assetWizard.area.needLocation')}</Text>
-            </Card>
-          )}
-
-          <Button
-            title={geofence?.length ? tr('assets.editArea', { count: geofence.length }) : tr('assetWizard.area.draw')}
-            variant={geofence?.length ? 'soft' : undefined}
-            full
-            disabled={!hasCoords}
-            onPress={() => (geofence?.length ? setAreaOpen(true) : setTutorialOpen(true))}
-            left={<Icon name="plus" size={16} color={geofence?.length ? t.colors.accent : t.colors.accentInk} />}
-          />
-          <Text variant="caption" color={t.colors.ink3} center>{tr('assetWizard.area.optional')}</Text>
-
-          {/* Transparent how-to overlay; its button starts the actual drawing. */}
-          <Modal visible={tutorialOpen && hasCoords} transparent animationType="fade" onRequestClose={() => setTutorialOpen(false)} statusBarTranslucent>
-            <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'flex-end' }} onPress={() => setTutorialOpen(false)}>
-              <Pressable onPress={() => {}} style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 22, paddingBottom: 34, gap: 14 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                  <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon name="home" size={20} color={t.colors.accent} />
-                  </View>
-                  <Text weight="800" style={{ flex: 1, fontSize: 18 }}>{tr('assetWizard.area.tutorialTitle')}</Text>
-                </View>
-                {[0, 1, 2].map((i) => (
-                  <View key={i} style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-                    <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text weight="800" color={t.colors.accentInk} style={{ fontSize: 12 }}>{i + 1}</Text>
-                    </View>
-                    <Text style={{ flex: 1, fontSize: 14.5, lineHeight: 21 }} color={t.colors.ink2}>{tr(`assetWizard.area.steps.${i}`)}</Text>
-                  </View>
-                ))}
-                <Button title={tr('assetWizard.area.start')} full onPress={() => { setTutorialOpen(false); setAreaOpen(true); }} left={<Icon name="plus" size={16} color={t.colors.accentInk} />} />
-                <Button title={tr('assetWizard.area.notNow')} variant="ghost" full onPress={() => setTutorialOpen(false)} />
-              </Pressable>
-            </Pressable>
-          </Modal>
-
-          {hasCoords ? (
+        hasCoords ? (
+          <View style={{ gap: 12 }}>
+            {/* The drawing lives right in the step — no modal to open. A default
+                square is seeded on the map; drag its points to fit the property. */}
             <GeofenceEditor
-              visible={areaOpen}
+              inline
               center={{ latitude: detail.latitude as number, longitude: detail.longitude as number }}
               value={geofence}
-              onClose={() => setAreaOpen(false)}
-              onSave={(poly) => {
-                setDetail((s) => ({ ...s, geofence: poly }));
-                setAreaOpen(false);
-              }}
+              onChange={(poly) => setDetail((s) => ({ ...s, geofence: poly }))}
             />
-          ) : null}
-        </View>
+            <Text variant="caption" color={t.colors.ink3} center>{tr('assetWizard.area.optional')}</Text>
+          </View>
+        ) : (
+          <Card style={{ alignItems: 'center', gap: 8, paddingVertical: 28 }}>
+            <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="location" size={24} color={t.colors.accent} />
+            </View>
+            <Text variant="caption" center color={t.colors.ink3}>{tr('assetWizard.area.needLocation')}</Text>
+          </Card>
+        )
       ) : null}
     </Wiz>
   );
