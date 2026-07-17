@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Animated, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
 import { Text } from './Text';
@@ -8,8 +8,9 @@ import { Button } from './Button';
 import { SlideToConfirm } from './SlideToConfirm';
 
 export interface WizFooter {
-  /** Primary "Continue" button (non-final steps). */
-  primary?: { label: string; onPress: () => void; disabled?: boolean; loading?: boolean };
+  /** Primary "Continue" button (non-final steps). `pulse` adds the notification
+   *  badge's breathing ring behind it to draw the eye forward. */
+  primary?: { label: string; onPress: () => void; disabled?: boolean; loading?: boolean; pulse?: boolean };
   /** Slide-to-confirm (final step). */
   slide?: { label: string; doneLabel: string; onConfirm: () => void; disabled?: boolean };
   /** Show a ghost back button next to the primary. */
@@ -83,10 +84,51 @@ export function Wiz({
                 <Icon name="back" size={18} color={t.colors.ink} />
               </Pressable>
             )}
-            <Button title={footer.primary.label} full disabled={footer.primary.disabled} loading={footer.primary.loading} onPress={footer.primary.onPress} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} style={{ flex: 1 }} />
+            <View style={{ flex: 1 }}>
+              {/* The bell badge's breathing ring, sized to the button. Only while
+                  enabled — a pulsing dead button reads as broken, not inviting. */}
+              {footer.primary.pulse && !footer.primary.disabled ? <PulseRing color={t.colors.accent} radius={t.radius.btn} /> : null}
+              <Button title={footer.primary.label} full disabled={footer.primary.disabled} loading={footer.primary.loading} onPress={footer.primary.onPress} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} />
+            </View>
           </>
         ) : null}
       </View>
     </SafeAreaView>
+  );
+}
+
+/**
+ * The same breathing ring the notification badge uses (primitives.tsx), sized to
+ * sit behind a full-width button: it expands and fades in a loop to pull the eye
+ * to the primary action. RN's Animated with useNativeDriver, so it survives a
+ * busy JS thread — no reanimated dependency, matching the badge.
+ */
+function PulseRing({ color, radius }: { color: string; radius: number }) {
+  const pulse = React.useRef(new Animated.Value(0)).current;
+  React.useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
+        Animated.delay(900),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        borderRadius: radius,
+        backgroundColor: color,
+        opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.5, 0] }),
+        transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.08] }) }],
+      }}
+    />
   );
 }
