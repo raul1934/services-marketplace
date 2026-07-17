@@ -43,6 +43,30 @@ export const styles = StyleSheet.create({
   btnUndo: { width: 54, backgroundColor: 'rgba(20,15,10,0.55)' },
   btnTxt: { fontSize: 14 },
 
+  // Camera button — sits where the old floating help button used to.
+  shotBtn: {
+    position: 'absolute',
+    right: 14,
+    top: '40%',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(20,15,10,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  shotTxt: { fontSize: 20 },
+  shotToast: {
+    position: 'absolute',
+    top: '46%',
+    right: 68,
+    backgroundColor: 'rgba(20,15,10,0.75)',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  shotToastTxt: { color: '#fff', fontSize: 12 },
+
   levelWrap: {
     position: 'absolute',
     right: 14,

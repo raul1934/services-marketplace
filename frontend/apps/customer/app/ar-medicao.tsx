@@ -13,6 +13,7 @@ import { LevelDot } from '../src/ar/components/LevelDot';
 import { ModeToggle } from '../src/ar/components/ModeToggle';
 import { ScanOverlay } from '../src/ar/components/ScanOverlay';
 import { usePlaneFeedback } from '../src/ar/hooks/usePlaneFeedback';
+import { useScreenshot } from '../src/ar/hooks/useScreenshot';
 import { useSettled } from '../src/ar/hooks/useSettled';
 import { SCAN_OVERLAY_DELAY_MS } from '../src/ar/constants';
 import { LiveLength, StatusBanner } from '../src/ar/components/StatusBanner';
@@ -75,9 +76,19 @@ export default function ARMedicaoScreen() {
   // Gated by useSettled so the frame-to-frame tracking flicker can't strobe it.
   const scanning = useSettled(!surfaceReady, SCAN_OVERLAY_DELAY_MS);
 
+  // Viro renders the camera and the overlay into the same surface, so one capture
+  // gives you the pool with its area drawn on it — the evidence behind the quote.
+  const shot = useScreenshot(partMode && partName ? `chamafacil-${partName}` : undefined);
+
   return (
     <View style={styles.root}>
-      <ViroARSceneNavigator autofocus initialScene={INITIAL_SCENE} viroAppProps={appProps} style={styles.ar} />
+      <ViroARSceneNavigator
+        ref={shot.ref as never}
+        autofocus
+        initialScene={INITIAL_SCENE}
+        viroAppProps={appProps}
+        style={styles.ar}
+      />
 
       <Crosshair active={!!metrics.reticle} snapped={isSnapped(metrics)} reliable={reliable} />
 
@@ -93,6 +104,17 @@ export default function ARMedicaoScreen() {
       <ModeToggle mode={mode} onChange={setMode} />
 
       <LevelDot />
+
+      <Pressable style={styles.shotBtn} onPress={shot.capture} accessibilityLabel={t('ar.shot')}>
+        <Text style={styles.shotTxt}>{shot.state === 'saving' ? '⏳' : '📷'}</Text>
+      </Pressable>
+      {shot.state !== 'idle' && shot.state !== 'saving' ? (
+        <View pointerEvents="none" style={styles.shotToast}>
+          <Text weight="800" style={styles.shotToastTxt}>
+            {t(`ar.shot_${shot.state}`)}
+          </Text>
+        </View>
+      ) : null}
 
       <ScanOverlay visible={scanning} />
 
