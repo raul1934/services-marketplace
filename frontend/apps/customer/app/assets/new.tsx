@@ -58,6 +58,11 @@ export default function AddAsset() {
   const [detail, setDetail] = useState<AssetDetailInput>({});
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
   const [step, setStep] = useState(1); // 1-based
+  const [showExtra, setShowExtra] = useState(false); // optional free-text fields
+
+  // Free-text extras shown under "mais detalhes"; a property's address moves to
+  // the location step (it belongs with the map pin), so it's excluded here.
+  const extraFields = ASSET_FIELDS[type].filter((f) => !(type === 'property' && f.key === 'address'));
 
   const set = (k: string, v: string | number | null) => setDetail((s) => ({ ...s, [k]: v }));
 
@@ -229,6 +234,8 @@ export default function AddAsset() {
 
       {stepKey === 'details' ? (
         <>
+          {/* The one structured field that matters — it drives the room
+              suggestions (property) or the catalog (vehicle/pet). */}
           {type === 'vehicle' ? (
             <MakeModelPicker
               makeId={(detail.vehicle_make_id as number) ?? null}
@@ -250,29 +257,8 @@ export default function AddAsset() {
             />
           ) : null}
 
-          {ASSET_FIELDS[type].map((f) =>
-            f.key === 'birthdate' ? (
-              <DatePicker
-                key={f.key}
-                label={tr(`assets.fields.${f.key}`)}
-                value={(detail[f.key] as string) ?? ''}
-                onChange={(v) => set(f.key, v)}
-                placeholder={tr('assets.datePlaceholder')}
-                disableFuture
-              />
-            ) : (
-              <Field
-                key={f.key}
-                label={tr(`assets.fields.${f.key}`)}
-                value={(detail[f.key] as string) ?? ''}
-                onChangeText={(v) => set(f.key, v)}
-                placeholder={f.placeholder}
-                keyboardType={f.keyboardType}
-                autoCapitalize={f.key === 'plate' ? 'characters' : 'sentences'}
-              />
-            ),
-          )}
-
+          {/* Mileage stays in view — it's a defining vehicle attribute, not an
+              afterthought like the free-text extras below. */}
           {type === 'vehicle' ? (
             <Field
               label={tr('assets.mileage')}
@@ -282,16 +268,65 @@ export default function AddAsset() {
               keyboardType="numeric"
             />
           ) : null}
+
+          {/* Everything else is optional free text — folded away so the step
+              reads as one choice, not a wall of inputs. */}
+          {extraFields.length ? (
+            <View style={{ gap: 12 }}>
+              <Pressable onPress={() => setShowExtra((v) => !v)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 }}>
+                <Icon name={showExtra ? 'check' : 'plus'} size={16} color={t.colors.accent} />
+                <Text weight="700" color={t.colors.accent}>
+                  {showExtra ? tr('assetWizard.details.less') : tr('assetWizard.details.more')}
+                </Text>
+              </Pressable>
+              {showExtra ? (
+                <Animated.View entering={FadeIn.duration(200)} exiting={FadeOut.duration(140)} style={{ gap: 13 }}>
+                  {extraFields.map((f) =>
+                    f.key === 'birthdate' ? (
+                      <DatePicker
+                        key={f.key}
+                        label={tr(`assets.fields.${f.key}`)}
+                        value={(detail[f.key] as string) ?? ''}
+                        onChange={(v) => set(f.key, v)}
+                        placeholder={tr('assets.datePlaceholder')}
+                        disableFuture
+                      />
+                    ) : (
+                      <Field
+                        key={f.key}
+                        label={tr(`assets.fields.${f.key}`)}
+                        value={(detail[f.key] as string) ?? ''}
+                        onChangeText={(v) => set(f.key, v)}
+                        placeholder={f.placeholder}
+                        keyboardType={f.keyboardType}
+                        autoCapitalize={f.key === 'plate' ? 'characters' : 'sentences'}
+                      />
+                    ),
+                  )}
+                </Animated.View>
+              ) : null}
+            </View>
+          ) : null}
         </>
       ) : null}
 
       {stepKey === 'location' ? (
-        <AssetLocationField
-          latitude={detail.latitude as number | undefined}
-          longitude={detail.longitude as number | undefined}
-          geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
-          onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
-        />
+        <>
+          {/* Address lives with the pin, not buried among the detail fields:
+              type it, or let "use my location" fill it by reverse-geocode. */}
+          <Field
+            label={tr('assets.fields.address')}
+            value={(detail.address as string) ?? ''}
+            onChangeText={(v) => set('address', v)}
+            placeholder="Rua das Flores, 100"
+          />
+          <AssetLocationField
+            latitude={detail.latitude as number | undefined}
+            longitude={detail.longitude as number | undefined}
+            geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
+            onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
+          />
+        </>
       ) : null}
 
       {stepKey === 'identity' ? (

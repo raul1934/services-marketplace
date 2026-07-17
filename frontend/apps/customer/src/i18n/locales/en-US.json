@@ -873,7 +873,7 @@
         "pet": ["Call a vet, grooming and more", "Keep the vaccination record", "Keep photos of your pet"]
       }
     },
-    "details": { "title": "Details", "sub": "Fill in what you know. You can edit it later." },
+    "details": { "title": "Details", "sub": "Fill in what you know. You can edit it later.", "more": "More details (optional)", "less": "Hide details" },
     "location": { "title": "Where is it?", "sub": "Drop a pin so the pro can find it." },
     "identity": { "title": "Give it a name", "sub": "A photo and a nickname to recognise it." }
   }
