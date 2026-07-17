@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { AvInit, Button, Icon, MiniMap, Text, useTheme } from '@chamafacil/shared';
+import { AvInit, BrandMark, Button, Icon, MiniMap, Text, useTheme } from '@chamafacil/shared';
 import { EnvSwitch } from '../../src/components/EnvSwitch';
 
 const TMINI_SHADOW = '0 22px 44px -18px rgba(15,23,42,0.55)';
@@ -137,6 +137,7 @@ export default function Welcome() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [i, setI] = useState(0);
   const slides = tr('welcome.slides', { returnObjects: true }) as { title: string; body: string }[];
   const eyebrows = tr('welcome.eyebrows', { returnObjects: true }) as string[];
@@ -147,19 +148,25 @@ export default function Welcome() {
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       {/* hero */}
       <LinearGradient colors={t.grad as unknown as readonly [string, string, ...string[]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
-        <SafeAreaView edges={['top']} style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: 24 }}>
+        {/* Decorative blobs first: they sit *under* the header, and take no
+            touches. Drawn on top they swallowed taps on the EnvSwitch, which is
+            exactly where the top-right one lands. */}
+        <View pointerEvents="none" style={{ position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,0.13)', top: -60, right: -50 }} />
+        <View pointerEvents="none" style={{ position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.13)', bottom: 30, left: -40 }} />
+        <SafeAreaView edges={['top']} style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: 24, zIndex: 1 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text weight="800" color="#fff" style={{ fontSize: 20, letterSpacing: 0.5 }}>Chama Fácil</Text>
+            <BrandMark onAccent height={26} />
             <EnvSwitch onAccent />
           </View>
         </SafeAreaView>
-        <View style={{ position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,0.13)', top: -60, right: -50 }} />
-        <View style={{ position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.13)', bottom: 30, left: -40 }} />
         <Scene />
       </LinearGradient>
 
       {/* card */}
-      <View style={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -28, padding: 26, paddingBottom: 34, gap: 14 }}>
+      {/* This screen builds its own chrome instead of using <Screen>, so it has
+          to add the bottom inset itself — otherwise "Já tem conta? Entrar" sits
+          under Android's nav buttons. */}
+      <View style={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -28, padding: 26, paddingBottom: 34 + insets.bottom, gap: 14 }}>
         <View style={{ flexDirection: 'row', gap: 7 }}>
           {slides.map((_, k) => (
             <View key={k} style={{ width: k === i ? 22 : 7, height: 7, borderRadius: 4, backgroundColor: k === i ? t.colors.accent : t.colors.line }} />
