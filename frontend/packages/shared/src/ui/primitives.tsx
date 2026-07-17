@@ -1,12 +1,25 @@
 import React from 'react';
-import { Pressable, View, ViewStyle } from 'react-native';
+import { Animated, Pressable, View, ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
 import { focusRing } from '../lib/a11y';
 import { Text } from './Text';
 import { Icon } from './Icon';
 
 /** Round 40px icon button (chamafacil .iconbtn). */
-export function IconButton({ name, onPress, size = 20, accessibilityLabel }: { name: string; onPress?: () => void; size?: number; accessibilityLabel?: string }) {
+export function IconButton({
+  name,
+  onPress,
+  size = 20,
+  accessibilityLabel,
+  badge,
+}: {
+  name: string;
+  onPress?: () => void;
+  size?: number;
+  accessibilityLabel?: string;
+  /** Unread count. Zero and undefined both render nothing. */
+  badge?: number;
+}) {
   const t = useTheme();
   return (
     <Pressable
@@ -21,9 +34,76 @@ export function IconButton({ name, onPress, size = 20, accessibilityLabel }: { n
       ]}
     >
       <Icon name={name} size={size} color={t.colors.ink} />
+      {badge ? <Badge count={badge} /> : null}
     </Pressable>
   );
 }
+
+/** Unread-count dot for IconButton: a pulsing ring plus the number. */
+function Badge({ count }: { count: number }) {
+  const t = useTheme();
+  const pulse = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    // Reanimated isn't a peer dep of this package, and RN's Animated is enough
+    // for one looping ring. `useNativeDriver` keeps it off the JS thread, so it
+    // survives the app being busy.
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
+        Animated.delay(900),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse]);
+
+  return (
+    <View pointerEvents="none" style={{ position: 'absolute', top: -3, right: -3, alignItems: 'center', justifyContent: 'center' }}>
+      {/* The ring expands out of the badge and fades — drawn behind it, and
+          sized to the badge so it reads as one object breathing. */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          width: BADGE_H,
+          height: BADGE_H,
+          borderRadius: BADGE_H / 2,
+          backgroundColor: t.colors.danger,
+          opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.55, 0] }),
+          transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 2.1] }) }],
+        }}
+      />
+      <View
+        style={{
+          minWidth: BADGE_H,
+          height: BADGE_H,
+          borderRadius: BADGE_H / 2,
+          paddingHorizontal: 4,
+          backgroundColor: t.colors.danger,
+          borderWidth: 2,
+          borderColor: t.colors.bg,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {/* includeFontPadding is Android's default and adds invisible padding
+            above/below the glyph, which shoves the number off-centre in a box
+            this small. lineHeight pins it to the box. Past 99 the exact number
+            stops mattering and stops fitting. */}
+        <Text
+          weight="800"
+          color="#fff"
+          style={{ fontSize: 10, lineHeight: 10, includeFontPadding: false, textAlign: 'center' }}
+        >
+          {count > 99 ? '99+' : count}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+/** Badge diameter — the ring and the number share it. */
+const BADGE_H = 18;
 
 /** Gradient initials avatar (chamafacil .avatar) — uses a flat accent fill. */
 export function AvatarGrad({ initials, size = 42 }: { initials: string; size?: number }) {

@@ -283,3 +283,26 @@ export interface ReschedulePayload {
   proposed_reception_type?: string;
   reason?: string;
 }
+
+/**
+ * One row of the bell. `type` is the app-facing kind (e.g. "new_proposal") the
+ * deep-link map switches on — not a PHP class name; `payload` carries whatever
+ * ids that kind needs. Both can be null/empty for a notification the server
+ * knows about and this app version doesn't.
+ */
+export interface AppNotification {
+  id: string;
+  type: string | null;
+  title: string | null;
+  body: string | null;
+  payload: Record<string, string>;
+  read_at: string | null;
+  created_at: string | null;
+}
+
+export const notificationsApi = {
+  list: (page = 1) => http.get<Paginated<AppNotification>>('notifications', { query: { page } }).then(unwrapPage),
+  unreadCount: () => http.get<{ count: number }>('notifications/unread-count'),
+  markRead: (id: string) => http.post<{ ok: boolean }>(`notifications/${id}/read`),
+  markAllRead: () => http.post<{ ok: boolean }>('notifications/read-all'),
+};

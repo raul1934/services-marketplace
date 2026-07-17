@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, nextPageParam } from '@chamafacil/shared';
-import { assetsApi, categoriesApi, customerApi, CreateAssetPayload, CreateRequestPayload, ProposalSort, jobReportApi, vehicleCatalogApi, propertyTypesApi, petSpeciesApi, AddReadingPayload, AssetDetailInput } from './api';
+import { assetsApi, categoriesApi, customerApi, CreateAssetPayload, CreateRequestPayload, ProposalSort, jobReportApi, notificationsApi, vehicleCatalogApi, propertyTypesApi, petSpeciesApi, AddReadingPayload, AssetDetailInput } from './api';
 import { PickedPhoto, uploadPhotos } from './photos';
 
 export const keys = {
@@ -344,3 +344,33 @@ export function useOpenWarranty(requestId: number) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warranty', requestId] }),
   });
 }
+
+// ── Notifications (the bell) ───────────────────────────────────────────────
+
+export const useNotifications = () =>
+  useInfiniteQuery({
+    queryKey: ['notifications'],
+    queryFn: ({ pageParam }) => notificationsApi.list(pageParam),
+    initialPageParam: 1,
+    getNextPageParam: nextPageParam,
+  });
+
+/** Feeds the bell's badge. Polled loosely; the socket will make this exact. */
+export const useUnreadCount = () =>
+  useQuery({ queryKey: ['unread-count'], queryFn: () => notificationsApi.unreadCount() });
+
+/** Both mutations refresh the list and the badge — they always move together. */
+function useNotificationMutation<T>(fn: (arg: T) => Promise<unknown>) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['notifications'] });
+      qc.invalidateQueries({ queryKey: ['unread-count'] });
+    },
+  });
+}
+
+export const useMarkNotificationRead = () => useNotificationMutation((id: string) => notificationsApi.markRead(id));
+// void, not an inferred unknown — otherwise `mutate()` demands an argument.
+export const useMarkAllNotificationsRead = () => useNotificationMutation<void>(() => notificationsApi.markAllRead());

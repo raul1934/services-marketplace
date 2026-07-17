@@ -153,7 +153,12 @@
     "quickHelp": "Ajuda rápida",
     "reviewBids": "Ver propostas dos prestadores",
     "trackRequest": "Acompanhar atendimento",
-    "seeAll": "Ver todos ({{count}})"
+    "seeAll": "Ver todos ({{count}})",
+    "assets": "Meus ativos",
+    "assetsAll": "Ver todos",
+    "assetsAdd": "Adicionar",
+    "firstAssetTitle": "Cadastre seu primeiro ativo",
+    "firstAssetBody": "Casa, carro ou pet — guarde os dados uma vez e peça orçamentos sem repetir tudo."
   },
   "requests": {
     "title": "Meus chamados",
@@ -183,9 +188,9 @@
     "language": "Idioma",
     "logout": "Sair",
     "themes": {
-      "sunset": "Pôr do sol",
-      "trust": "Confiança",
-      "night": "Noite"
+      "auto": "Automático",
+      "light": "Claro",
+      "dark": "Escuro"
     }
   },
   "categories": {
@@ -310,7 +315,8 @@
     "detailsLabel": "Detalhes",
     "paymentLabel": "Forma de pagamento",
     "yourAsset": "Seu ativo",
-    "addAsset": "Adicionar novo"
+    "addAsset": "Adicionar novo",
+    "assetAutoPicked": "Selecionamos este por ser o seu único cadastrado. Toque em outro para trocar."
   },
   "payment": {
     "pix": "Pix",
@@ -796,6 +802,34 @@
     },
     "scanning": "Detectando superfície…",
     "scanHint": "Balance o celular devagar de um lado para o outro, apontando para a superfície.",
-    "surfaceFound": "Superfície detectada!"
+    "surfaceFound": "Superfície detectada!",
+    "shot": "Tirar foto da medição",
+    "shot_saved": "Foto guardada",
+    "shot_failed": "Não deu para tirar a foto"
+  },
+  "notifications": {
+    "title": "Avisos",
+    "markAll": "Marcar todas",
+    "emptyTitle": "Nenhum aviso ainda",
+    "emptyBody": "Quando algo acontecer nos seus chamados — uma proposta, uma resposta, uma mudança de status — avisamos aqui.",
+    "untitled": "Aviso"
+  },
+  "firstAsset": {
+    "skip": "Agora não",
+    "cta": "Cadastrar meu primeiro ativo",
+    "steps": [
+      {
+        "title": "Cadastre o que você cuida",
+        "body": "Sua casa, seu carro, seu pet — o que precisar de manutenção um dia. Chamamos isso de ativo."
+      },
+      {
+        "title": "Guarde tudo num lugar só",
+        "body": "Endereço, medidas dos cômodos, quilometragem, fotos. Você preenche uma vez."
+      },
+      {
+        "title": "Peça orçamento sem repetir",
+        "body": "O profissional já recebe o que é, onde fica e o tamanho. Menos conversa, proposta mais certeira."
+      }
+    ]
   }
 }
