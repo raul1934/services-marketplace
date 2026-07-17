@@ -19,7 +19,7 @@ class ServiceRequest extends Model
     use HasMedia;
 
     protected $fillable = [
-        'client_id', 'market_id', 'service_category_id', 'asset_id', 'accepted_proposal_id', 'accepted_provider_id',
+        'client_id', 'market_id', 'service_category_id', 'asset_id', 'share_asset_note', 'accepted_proposal_id', 'accepted_provider_id',
         'description', 'latitude', 'longitude', 'address', 'reception_type', 'entry_code', 'start_code', 'budget_max',
         'payment_method',
         'urgency', 'max_wait_minutes', 'status',
@@ -32,6 +32,7 @@ class ServiceRequest extends Model
         'status' => RequestStatus::class,
         'urgency' => RequestUrgency::class,
         'max_wait_minutes' => 'integer',
+        'share_asset_note' => 'boolean',
         'reception_type' => ReceptionType::class,
         'payment_method' => PaymentMethod::class,
         'latitude' => 'float',

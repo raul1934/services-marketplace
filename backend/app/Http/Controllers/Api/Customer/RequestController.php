@@ -40,6 +40,8 @@ class RequestController extends Controller
         $data = $request->validate([
             'service_category_id' => ['required', 'integer', 'exists:service_categories,id'],
             'asset_id' => ['nullable', 'integer', Rule::exists('assets', 'id')->where('user_id', $request->user()->id)],
+            // Opt-in to share the asset's provider_note with the provider (private by default).
+            'share_asset_note' => ['nullable', 'boolean'],
             'description' => ['required', 'string', 'max:1000'],
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],

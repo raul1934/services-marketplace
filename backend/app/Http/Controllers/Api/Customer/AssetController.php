@@ -74,6 +74,9 @@ class AssetController extends Controller
         $data = $request->validate([
             'nickname' => ['required', 'string', 'max:80'],
             'photo_media_id' => ['nullable', 'integer', 'exists:media,id'],
+            // Owner notes live on the asset (all types), not inside the typed detail.
+            'private_note' => ['nullable', 'string', 'max:2000'],
+            'provider_note' => ['nullable', 'string', 'max:2000'],
             'detail' => ['nullable', 'array'],
             ...$this->detailRules($type),
         ]);
@@ -90,6 +93,8 @@ class AssetController extends Controller
                 'nickname' => $data['nickname'],
                 'detailable_type' => $type->value,
                 'detailable_id' => $detail->id,
+                'private_note' => $data['private_note'] ?? null,
+                'provider_note' => $data['provider_note'] ?? null,
             ]);
 
             // An initial mileage on a vehicle is recorded as the first reading.
@@ -122,6 +127,9 @@ class AssetController extends Controller
         $data = $request->validate([
             'nickname' => ['sometimes', 'string', 'max:80'],
             'photo_media_id' => ['nullable', 'integer', 'exists:media,id'],
+            // Owner notes live on the asset (all types), not inside the typed detail.
+            'private_note' => ['nullable', 'string', 'max:2000'],
+            'provider_note' => ['nullable', 'string', 'max:2000'],
             'detail' => ['nullable', 'array'],
             ...$this->detailRules($type),
         ]);
@@ -133,6 +141,11 @@ class AssetController extends Controller
         DB::transaction(function () use ($request, $asset, $data, $type, $detailInput) {
             if (array_key_exists('nickname', $data)) {
                 $asset->update(['nickname' => $data['nickname']]);
+            }
+            foreach (['private_note', 'provider_note'] as $note) {
+                if (array_key_exists($note, $data)) {
+                    $asset->update([$note => $data[$note]]);
+                }
             }
             if (array_key_exists('detail', $data) && $asset->detailable) {
                 // Mileage is never overwritten here — it's changed only via readings.
@@ -346,6 +359,10 @@ class AssetController extends Controller
                 'detail.property_type_id' => ['nullable', 'integer', 'exists:property_types,id'],
                 'detail.unit' => $str, 'detail.size' => $str,
                 'detail.address' => $str, 'detail.floor' => $str, 'detail.condo' => $str,
+                'detail.cep' => ['nullable', 'string', 'max:16'],
+                'detail.street' => $str, 'detail.number' => ['nullable', 'string', 'max:16'],
+                'detail.neighborhood' => $str, 'detail.city' => $str,
+                'detail.state' => ['nullable', 'string', 'max:2'],
                 'detail.latitude' => ['nullable', 'numeric', 'between:-90,90'],
                 'detail.longitude' => ['nullable', 'numeric', 'between:-180,180'],
                 'detail.geofence' => ['nullable', 'array', 'min:4'],
@@ -366,7 +383,7 @@ class AssetController extends Controller
     {
         $keys = match ($type) {
             AssetType::Vehicle => ['vehicle_make_id', 'vehicle_model_id', 'plate', 'color', 'year', 'fuel', 'chassis'],
-            AssetType::Property => ['property_type_id', 'unit', 'size', 'address', 'floor', 'condo', 'latitude', 'longitude', 'geofence'],
+            AssetType::Property => ['property_type_id', 'unit', 'size', 'address', 'floor', 'condo', 'latitude', 'longitude', 'geofence', 'cep', 'street', 'number', 'neighborhood', 'city', 'state'],
             AssetType::Pet => ['pet_species_id', 'pet_breed_id', 'size', 'birthdate', 'weight', 'vaccines', 'microchip'],
         };
 

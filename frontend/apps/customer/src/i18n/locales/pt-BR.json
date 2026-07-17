@@ -316,7 +316,8 @@
     "paymentLabel": "Forma de pagamento",
     "yourAsset": "Seu ativo",
     "addAsset": "Adicionar novo",
-    "assetAutoPicked": "Selecionamos este por ser o seu único cadastrado. Toque em outro para trocar."
+    "assetAutoPicked": "Selecionamos este por ser o seu único cadastrado. Toque em outro para trocar.",
+    "shareNote": "Compartilhar minha anotação com o profissional"
   },
   "payment": {
     "pix": "Pix",
@@ -750,6 +751,12 @@
       "unit": "Unidade",
       "size": "Tamanho",
       "address": "Endereço",
+      "cep": "CEP",
+      "street": "Rua",
+      "number": "Número",
+      "neighborhood": "Bairro",
+      "city": "Cidade",
+      "state": "UF",
       "floor": "Andar",
       "condo": "Condomínio",
       "species": "Espécie",
@@ -874,6 +881,13 @@
       }
     },
     "details": { "title": "Detalhes", "sub": "Preencha o que souber. Dá para editar depois.", "more": "Mais detalhes (opcional)", "less": "Ocultar detalhes" },
+    "notes": {
+      "sectionLabel": "Anotações",
+      "private": "Suas anotações (privadas)",
+      "privateHint": "Só você vê — lembretes, exemplos, detalhes.",
+      "provider": "Recado para o profissional",
+      "providerHint": "Você escolhe compartilhar ao pedir um serviço."
+    },
     "location": { "title": "Onde fica?", "sub": "Marque no mapa para o profissional achar." },
     "area": {
       "title": "Área do imóvel",

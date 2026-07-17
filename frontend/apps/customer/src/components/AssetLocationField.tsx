@@ -4,11 +4,11 @@ import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Icon, Text, useTheme } from '@chamafacil/shared';
 import { GeoPoint } from '../api';
-import { getCurrentCoords } from '../location';
+import { AddressParts, getCurrentCoords } from '../location';
 import { GeofenceEditor } from './GeofenceEditor';
 
-/** Patch applied to the asset `detail` (latitude/longitude/address/geofence). */
-export interface AssetLocationPatch {
+/** Patch applied to the asset `detail` (location + structured address parts). */
+export interface AssetLocationPatch extends AddressParts {
   latitude?: number;
   longitude?: number;
   address?: string;
@@ -46,8 +46,8 @@ export function AssetLocationField({
   const useMyLocation = async () => {
     setLocating(true);
     try {
-      const c = await getCurrentCoords();
-      onChange({ latitude: c.latitude, longitude: c.longitude, ...(c.address ? { address: c.address } : {}) });
+      const { latitude, longitude, ...parts } = await getCurrentCoords();
+      onChange({ latitude, longitude, ...parts });
     } catch {
       /* best-effort */
     } finally {
