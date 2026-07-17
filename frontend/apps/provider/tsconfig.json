@@ -2,6 +2,10 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    // Resolves `import x from './foo.svg'` to a sibling `foo.d.svg.ts`, matching
+    // what react-native-svg-transformer does at runtime. Per-file declarations
+    // (not `declare module '*.svg'`) so a missing asset still errors.
+    "allowArbitraryExtensions": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [

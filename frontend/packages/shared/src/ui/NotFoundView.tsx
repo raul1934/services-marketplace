@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { Button } from './Button';
 import { EmptyState } from './EmptyState';
+import { IconName } from './Icon';
 import { BackBar } from './primitives';
 import { Screen } from './Screen';
 
@@ -24,7 +25,7 @@ export function NotFoundView({
 }: {
   title: string;
   body?: string;
-  icon?: string;
+  icon?: IconName;
   homeLabel: string;
   onHome: () => void;
   backLabel?: string;

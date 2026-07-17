@@ -3,7 +3,7 @@ import { LayoutRectangle, PanResponder, Pressable, TextInput, View } from 'react
 import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../theme';
 import { Text } from './Text';
-import { Icon } from './Icon';
+import { Icon, IconName } from './Icon';
 import { SuggPill } from './primitives';
 
 const RED = '#ef4444';
@@ -46,7 +46,7 @@ export function BudgetMeter({
   label: string;
   currency?: string;
   pill?: string;
-  pillIcon?: string;
+  pillIcon?: IconName;
   renderInfo?: (ctx: { word: BudgetZone; value: number; avg: number; color: string }) => React.ReactNode;
 }) {
   const t = useTheme();
@@ -184,7 +184,7 @@ export function BudgetMeter({
   );
 }
 
-function Stepper({ icon, onPress }: { icon: string; onPress: () => void }) {
+function Stepper({ icon, onPress }: { icon: IconName; onPress: () => void }) {
   const t = useTheme();
   return (
     <Pressable onPress={onPress} style={{ width: 40, height: 40, borderRadius: 13, borderWidth: 1, borderColor: t.colors.line, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center' }}>

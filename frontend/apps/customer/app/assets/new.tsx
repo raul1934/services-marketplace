@@ -21,8 +21,9 @@ export default function AddAsset() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   const create = useCreateAsset();
-  const { pick: pickMode, type: typeParam } = useLocalSearchParams<{ pick?: string; type?: string }>();
+  const { pick: pickMode, type: typeParam, guided: guidedParam } = useLocalSearchParams<{ pick?: string; type?: string; guided?: string }>();
   const picking = !!pickMode;
+  const guided = !!guidedParam;
 
   const [type, setType] = useState<AssetTypeKey>(
     ASSET_TYPES.includes(typeParam as AssetTypeKey) ? (typeParam as AssetTypeKey) : 'vehicle',
@@ -63,6 +64,14 @@ export default function AddAsset() {
             // back and return, instead of navigating into the asset detail.
             setCreatedAsset(a.id);
             router.back();
+          } else if (guided && type === 'property') {
+            // First-run onboarding (4.5/6.9): continue into the guided room setup
+            // instead of dropping onto the detail screen. Only for properties —
+            // the setup offers rooms by property type.
+            router.replace({
+              pathname: `/assets/${a.id}/setup`,
+              params: { propertyTypeId: String(detail.property_type_id ?? ''), nickname: nickname.trim() },
+            });
           } else {
             router.replace(`/assets/${a.id}`);
           }

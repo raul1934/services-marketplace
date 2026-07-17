@@ -151,9 +151,20 @@ export interface VehicleMake {
   models: { id: number; name: string }[];
 }
 
+/** A part this kind of property usually has — a suggestion, never a constraint. */
+export interface PartTypeSuggestion {
+  id: number;
+  name: string;
+  slug: string;
+  /** Pre-tick it for this type (an edícula's pool). Still just an empty slot. */
+  default_selected: boolean;
+}
+
 export interface PropertyType {
   id: number;
   name: string;
+  /** Nested like VehicleMake.models: the whole catalog arrives in one request. */
+  part_types?: PartTypeSuggestion[];
 }
 
 export interface PetSpecies {
@@ -177,6 +188,9 @@ export const assetsApi = {
     http.post<{ data: AssetReading; current_mileage: number | null }>(`assets/${id}/readings`, { body: payload }),
   parts: (id: number) => http.get<{ data: AssetPart[] }>(`assets/${id}/parts`).then(unwrap),
   addPart: (id: number, name: string) => http.post<{ data: AssetPart }>(`assets/${id}/parts`, { body: { name } }).then(unwrap),
+  /** Batch sibling of addPart: one transaction, so a retry can't duplicate. */
+  addParts: (id: number, names: string[]) =>
+    http.post<{ data: AssetPart[] }>(`assets/${id}/parts`, { body: { names } }).then(unwrap),
   updatePart: (id: number, partId: number, payload: { name?: string } & Partial<PartMeasurement>) =>
     http.put<{ data: AssetPart }>(`assets/${id}/parts/${partId}`, { body: payload }).then(unwrap),
   removePart: (id: number, partId: number) => http.del<{ ok: boolean }>(`assets/${id}/parts/${partId}`),

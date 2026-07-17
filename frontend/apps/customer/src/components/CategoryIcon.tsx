@@ -1,8 +1,8 @@
 import React from 'react';
-import { Icon, ICON_NAMES, ServiceCategory, useTheme } from '@chamafacil/shared';
+import { Icon, IconName, ServiceCategory, isIconName, useTheme } from '@chamafacil/shared';
 
 /** Per-type fallback icon (chamafacil set) when a category has no specific icon. */
-const TYPE_FALLBACK: Record<string, string> = {
+const TYPE_FALLBACK: Record<string, IconName> = {
   roadside: 'car',
   residential: 'wrench',
   condo: 'home',
@@ -26,6 +26,6 @@ export function CategoryIcon({
 }) {
   const t = useTheme();
   const icon = category?.icon ?? '';
-  const name = ICON_NAMES.includes(icon) ? icon : TYPE_FALLBACK[category?.type ?? 'roadside'] ?? 'wrench';
+  const name = isIconName(icon) ? icon : TYPE_FALLBACK[category?.type ?? 'roadside'] ?? 'wrench';
   return <Icon name={name} size={size} color={color ?? t.colors.accent} />;
 }

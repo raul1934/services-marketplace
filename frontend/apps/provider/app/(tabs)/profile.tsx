@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Badge, Button, Card, Icon, IconButton, LANGUAGES, Row, Screen, SectionLabel, Stars, THEME_MODES, Text, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
+import { Avatar, Badge, Button, Card, Icon, IconButton, IconName, LANGUAGES, Row, Screen, SectionLabel, Stars, THEME_MODES, Text, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
 
 export default function Profile() {
   const t = useTheme();
@@ -113,7 +113,7 @@ export default function Profile() {
   );
 }
 
-function MenuRow({ icon, label, value, onPress, first }: { icon: string; label: string; value?: string; onPress: () => void; first?: boolean }) {
+function MenuRow({ icon, label, value, onPress, first }: { icon: IconName; label: string; value?: string; onPress: () => void; first?: boolean }) {
   const t = useTheme();
   return (
     <Pressable onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 14, borderTopWidth: first ? 0 : 1, borderColor: t.colors.line }}>

@@ -4,9 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BrandMark, Button, Icon, Text, useTheme } from '@chamafacil/shared';
+import { BrandMark, Button, Icon, IconName, Text, useTheme } from '@chamafacil/shared';
 
-const SCENE_ICONS = ['location', 'dollar', 'star'];
+const SCENE_ICONS: IconName[] = ['location', 'dollar', 'star'];
 
 export default function Welcome() {
   const t = useTheme();

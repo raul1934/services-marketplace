@@ -15,6 +15,7 @@ import {
   Card,
   Field,
   Icon,
+  IconName,
   Price,
   QnaThread,
   Row,
@@ -529,7 +530,7 @@ function AssetCard({ asset }: { asset: Asset }) {
   );
 }
 
-function SumRow({ icon, k, v }: { icon: string; k: string; v: string }) {
+function SumRow({ icon, k, v }: { icon: IconName; k: string; v: string }) {
   const t = useTheme();
   return (
     <Row style={{ gap: 12, paddingVertical: 11 }}>

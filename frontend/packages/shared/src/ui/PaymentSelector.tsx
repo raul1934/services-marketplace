@@ -3,13 +3,13 @@ import { Pressable, View } from 'react-native';
 import { useTheme } from '../theme';
 import { PaymentMethod } from '../types';
 import { Text } from './Text';
-import { Icon } from './Icon';
+import { Icon, IconName } from './Icon';
 
 export interface PaymentOption {
   value: PaymentMethod;
   label: string;
   detail: string;
-  icon: string;
+  icon: IconName;
 }
 
 /**

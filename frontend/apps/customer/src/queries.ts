@@ -129,6 +129,15 @@ export function useAddPart(id: number) {
   });
 }
 
+/** Adds every ticked suggestion chip in one request. */
+export function useAddParts(id: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (names: string[]) => assetsApi.addParts(id, names),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['asset-parts', id] }),
+  });
+}
+
 export function useUpdatePart(id: number) {
   const qc = useQueryClient();
   return useMutation({

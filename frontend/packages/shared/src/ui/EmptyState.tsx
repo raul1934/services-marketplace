@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme';
 import { Button } from './Button';
-import { Icon } from './Icon';
+import { Icon, IconName } from './Icon';
 import { Text } from './Text';
 
 /**
@@ -19,7 +19,7 @@ export function EmptyState({
   tone = 'brand',
   fill = false,
 }: {
-  icon?: string;
+  icon?: IconName;
   title: string;
   body?: string;
   action?: { label: string; onPress: () => void; variant?: 'grad' | 'soft' | 'ghost' };

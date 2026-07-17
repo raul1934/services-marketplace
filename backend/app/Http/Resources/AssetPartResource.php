@@ -16,6 +16,7 @@ class AssetPartResource extends JsonResource
             'perimeter' => $this->perimeter,
             'points_count' => $this->points_count,
             'measured_at' => $this->measured_at,
+            'measurement_photos' => MediaResource::collection($this->whenLoaded('measurementPhotos')),
         ];
     }
 }

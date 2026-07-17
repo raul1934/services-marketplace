@@ -12,6 +12,7 @@ import { SkeletonScreen,
   Button,
   Card,
   Icon,
+  IconName,
   NotFoundView,
   RequestStatus,
   RequestUrgency,
@@ -379,7 +380,7 @@ export default function RequestDetail() {
   );
 }
 
-const ASSET_ICON: Record<string, string> = { vehicle: 'car', property: 'home', pet: 'paw' };
+const ASSET_ICON: Record<string, IconName> = { vehicle: 'car', property: 'home', pet: 'paw' };
 
 /** The asset (vehicle/property/pet) this request is tied to — brand logo + caption. */
 function RequestAssetCard({ asset, onPress }: { asset: Asset; onPress: () => void }) {

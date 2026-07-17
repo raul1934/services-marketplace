@@ -3,7 +3,7 @@ import { Animated, Pressable, View, ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
 import { focusRing } from '../lib/a11y';
 import { Text } from './Text';
-import { Icon } from './Icon';
+import { Icon, IconName } from './Icon';
 
 /** Round 40px icon button (chamafacil .iconbtn). */
 export function IconButton({
@@ -13,7 +13,7 @@ export function IconButton({
   accessibilityLabel,
   badge,
 }: {
-  name: string;
+  name: IconName;
   onPress?: () => void;
   size?: number;
   accessibilityLabel?: string;
@@ -175,7 +175,7 @@ export function Row({ children, style, gap = 13 }: { children: React.ReactNode; 
 }
 
 /** Category icon tile (chamafacil .cat-ic). */
-export function CatIc({ name, size = 52, grad, iconSize }: { name: string; size?: number; grad?: boolean; iconSize?: number }) {
+export function CatIc({ name, size = 52, grad, iconSize }: { name: IconName; size?: number; grad?: boolean; iconSize?: number }) {
   const t = useTheme();
   return (
     <View
@@ -289,7 +289,7 @@ export function Toggle({ on }: { on: boolean }) {
 }
 
 /** "Suggested by chamafacil" pill (chamafacil .sugg-pill). */
-export function SuggPill({ label, icon = 'sparkles' }: { label: string; icon?: string }) {
+export function SuggPill({ label, icon = 'sparkles' }: { label: string; icon?: IconName }) {
   const t = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.colors.accentSoft, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999 }}>

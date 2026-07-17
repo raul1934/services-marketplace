@@ -3,11 +3,12 @@ import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
 import { Avatar } from './Avatar';
-import { Icon } from './Icon';
+import { BrandMark } from './auth/BrandMark';
+import { Icon, IconName } from './Icon';
 import { Text } from './Text';
 
 export interface DrawerItem {
-  icon: string;
+  icon: IconName;
   label: string;
   badge?: number;
   danger?: boolean;
@@ -81,6 +82,13 @@ export function AppDrawer({
               <DrawerRow item={footer} onClose={onClose} />
             </View>
           ) : null}
+
+          {/* Brand signature: the only place the logged-in app carries the mark.
+              Muted and out of the way — the header is the user's identity, this
+              is the app's. Shared, so both apps get it. */}
+          <View style={{ alignItems: 'center', paddingTop: 14, opacity: 0.5 }}>
+            <BrandMark height={18} color={t.colors.ink3} />
+          </View>
         </View>
 
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={onClose} />

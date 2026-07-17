@@ -1,3 +1,4 @@
+import { IconName } from '@chamafacil/shared';
 import { AppNotification } from './api';
 
 /**
@@ -8,7 +9,7 @@ import { AppNotification } from './api';
  * meeting a newer server. It still lists, still reads, just doesn't navigate.
  */
 interface Link {
-  icon: string;
+  icon: IconName;
   /** Builds the route from the notification's payload, or null if it can't. */
   route?: (p: Record<string, string>) => string | null;
 }
@@ -57,9 +58,9 @@ const LINKS: Record<string, Link> = {
 };
 
 /** Fallback icon for a kind this app version doesn't know. */
-const DEFAULT_ICON = 'bell';
+const DEFAULT_ICON: IconName = 'bell';
 
-export function notificationIcon(n: AppNotification): string {
+export function notificationIcon(n: AppNotification): IconName {
   return (n.type && LINKS[n.type]?.icon) || DEFAULT_ICON;
 }
 

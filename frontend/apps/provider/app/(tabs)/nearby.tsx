@@ -13,6 +13,7 @@ import {
   EmptyState,
   Icon,
   IconButton,
+  IconName,
   RequestUrgency,
   Row,
   Screen,
@@ -402,7 +403,7 @@ function FilterButton({ active, onPress }: { active: boolean; onPress: () => voi
   );
 }
 
-function VT({ icon, label, on, onPress }: { icon: string; label: string; on: boolean; onPress: () => void }) {
+function VT({ icon, label, on, onPress }: { icon: IconName; label: string; on: boolean; onPress: () => void }) {
   const t = useTheme();
   return (
     <Pressable onPress={onPress} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 9, paddingHorizontal: 16, borderRadius: 999, backgroundColor: on ? t.colors.accent : 'transparent' }}>

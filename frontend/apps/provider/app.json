@@ -13,11 +13,6 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#4f46e5"
-    },
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -43,6 +38,15 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#4f46e5",
+          "imageWidth": 288
+        }
+      ],
       "expo-secure-store",
       "expo-location",
       "expo-image-picker",

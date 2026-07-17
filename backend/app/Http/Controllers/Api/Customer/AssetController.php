@@ -222,22 +222,43 @@ class AssetController extends Controller
     {
         $this->authorizeOwner($request, $asset);
 
-        return AssetPartResource::collection($asset->parts()->get());
+        return AssetPartResource::collection($asset->parts()->with('measurementPhotos')->get());
     }
 
-    /** Add a named part (room/area) to a property. */
+    /**
+     * Add named parts (rooms/areas) to a property.
+     *
+     * Takes either `name` (one part, the original shape — unchanged) or `names`
+     * (a batch). The batch exists for the suggestion chips: ticking six rooms
+     * and firing six POSTs means six ways to half-succeed on a phone network,
+     * and a retry would duplicate whatever landed. One transaction is all or
+     * nothing, so retrying is safe.
+     *
+     * The response mirrors the request: `name` → a single part, `names` → a list.
+     */
     public function addPart(Request $request, Asset $asset): JsonResponse
     {
         $this->authorizeOwner($request, $asset);
         abort_unless($asset->type === AssetType::Property, 422, __('messages.invalid_status'));
 
-        $data = $request->validate([
+        $batch = $request->has('names');
+        $data = $request->validate($batch ? [
+            'names' => ['required', 'array', 'min:1', 'max:40'],
+            'names.*' => ['required', 'string', 'max:80'],
+        ] : [
             'name' => ['required', 'string', 'max:80'],
         ]);
 
-        $part = $asset->parts()->create(['name' => $data['name']]);
+        if (! $batch) {
+            $part = $asset->parts()->create(['name' => $data['name']]);
 
-        return (new AssetPartResource($part))->response()->setStatusCode(201);
+            return (new AssetPartResource($part->load('measurementPhotos')))->response()->setStatusCode(201);
+        }
+
+        $parts = DB::transaction(fn () => collect($data['names'])
+            ->map(fn (string $name) => $asset->parts()->create(['name' => $name])->load('measurementPhotos')));
+
+        return AssetPartResource::collection($parts)->response()->setStatusCode(201);
     }
 
     /** Rename a part and/or store the AR measurement taken on the device. */
@@ -251,6 +272,9 @@ class AssetController extends Controller
             'area' => ['nullable', 'numeric', 'min:0'],
             'perimeter' => ['nullable', 'numeric', 'min:0'],
             'points_count' => ['nullable', 'integer', 'min:0'],
+            // Photos taken while measuring (upload-first); re-parented on save.
+            'media_ids' => ['nullable', 'array', 'max:5'],
+            'media_ids.*' => ['integer'],
         ]);
 
         if (array_key_exists('name', $data)) {
@@ -265,7 +289,11 @@ class AssetController extends Controller
         }
         $part->save();
 
-        return new AssetPartResource($part);
+        if (! empty($data['media_ids'])) {
+            $this->media->attach($data['media_ids'], $part, 'measurement', $request->user()->id);
+        }
+
+        return new AssetPartResource($part->load('measurementPhotos'));
     }
 
     /** Delete a part and its measurement. */
