@@ -858,5 +858,11 @@
     "addAndMeasure_plural": "Add {{count}} and measure the first",
     "skipToDetail": "Continue",
     "later": "Later"
+  },
+  "assetWizard": {
+    "type": { "title": "What are you registering?", "sub": "House, car or pet — whatever needs care." },
+    "details": { "title": "Details", "sub": "Fill in what you know. You can edit it later." },
+    "location": { "title": "Where is it?", "sub": "Drop a pin so the pro can find it." },
+    "identity": { "title": "Give it a name", "sub": "A photo and a nickname to recognise it." }
   }
 }
