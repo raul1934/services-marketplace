@@ -28,8 +28,9 @@ import {
   useAuth,
   useTheme,
 } from '@chamafacil/shared';
-import { useCategories, useMyRequests } from '../../src/queries';
+import { useCategories, useMyRequests, useUnreadCount } from '../../src/queries';
 import { CategoryIcon } from '../../src/components/CategoryIcon';
+import { HomeAssets } from '../../src/components/HomeAssets';
 
 function initialsOf(name?: string | null) {
   return (name ?? '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -76,6 +77,7 @@ export default function Home() {
   const { user, logout } = useAuth();
   const requests = useMyRequests();
   const categories = useCategories();
+  const unread = useUnreadCount();
   const [drawer, setDrawer] = useState(false);
 
   // Home shows only the most relevant active requests (capped below), so the
@@ -101,13 +103,20 @@ export default function Home() {
         left={<IconButton name="menu" accessibilityLabel={tr('common.menu')} onPress={() => setDrawer(true)} />}
         right={
           <Row gap={10}>
-            <IconButton name="bell" accessibilityLabel={tr('common.notifications')} />
+            <IconButton
+              name="bell"
+              accessibilityLabel={tr('common.notifications')}
+              badge={unread.data?.count}
+              onPress={() => router.push('/notifications')}
+            />
             <AvatarGrad initials={initialsOf(user?.name)} />
           </Row>
         }
       />
 
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
+        <HomeAssets />
+
         {requests.isLoading ? (
           <>
             <SectionLabel>{tr('home.activeRequest')}</SectionLabel>
@@ -171,18 +180,6 @@ export default function Home() {
           </LinearGradient>
         </Pressable>
 
-        <Card onPress={() => router.push('/medicao')}>
-          <Row gap={12}>
-            <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="camera" size={22} color={t.colors.accent} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text weight="800" style={{ fontSize: 15 }}>Medir com RA</Text>
-              <Text variant="caption">Meça cômodos e gere orçamento · POC</Text>
-            </View>
-            <Icon name="arrowR" size={18} color={t.colors.ink3} />
-          </Row>
-        </Card>
       </View>
 
       <AppDrawer
@@ -204,7 +201,6 @@ export default function Home() {
             items: [
               { icon: 'list', label: tr('drawer.myRequests'), onPress: () => router.push('/(tabs)/requests') },
               { icon: 'plus', label: tr('drawer.newRequest'), onPress: () => router.push('/categories') },
-              { icon: 'camera', label: 'Medir com RA (POC)', onPress: () => router.push('/medicao') },
             ],
           },
         ]}
