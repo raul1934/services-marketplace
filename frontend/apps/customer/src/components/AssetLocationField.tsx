@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
@@ -26,11 +26,20 @@ export function AssetLocationField({
   longitude,
   geofence,
   onChange,
+  height = 200,
+  hideArea,
+  autoLocate,
 }: {
   latitude?: number | null;
   longitude?: number | null;
   geofence?: GeoPoint[] | null;
   onChange: (patch: AssetLocationPatch) => void;
+  /** Map height; the wizard gives it more room than the edit form. */
+  height?: number;
+  /** Hide the "draw the area" button — the wizard promotes it to its own step. */
+  hideArea?: boolean;
+  /** With no pin yet, drop one on the device's current location on mount. */
+  autoLocate?: boolean;
 }) {
   const t = useTheme();
   const { t: tr } = useTranslation();
@@ -51,11 +60,21 @@ export function AssetLocationField({
     }
   };
 
+  // Pre-select the current location once, so the map opens on where you are
+  // instead of a fallback city center. Never overrides an existing pin.
+  const autoTried = useRef(false);
+  useEffect(() => {
+    if (!autoLocate || hasPin || autoTried.current) return;
+    autoTried.current = true;
+    useMyLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoLocate, hasPin]);
+
   return (
     <View style={{ gap: 10 }}>
       <Card padded={false} style={{ overflow: 'hidden' }}>
         <MapView
-          style={{ height: 200 }}
+          style={{ height }}
           region={{ latitude: center.latitude, longitude: center.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
           onPress={(e) => onChange({ latitude: e.nativeEvent.coordinate.latitude, longitude: e.nativeEvent.coordinate.longitude })}
         >
@@ -82,7 +101,7 @@ export function AssetLocationField({
       />
       {!hasPin && <Text variant="caption">{tr('assets.locationHint')}</Text>}
 
-      {hasPin && (
+      {hasPin && !hideArea && (
         <Button
           title={geofence?.length ? tr('assets.editArea', { count: geofence.length }) : tr('assets.addArea')}
           variant="ghost"
