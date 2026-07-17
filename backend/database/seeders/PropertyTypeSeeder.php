@@ -10,7 +10,7 @@ class PropertyTypeSeeder extends Seeder
 {
     private const TYPES = [
         'Apartamento', 'Casa', 'Casa em condomínio', 'Sobrado', 'Cobertura',
-        'Kitnet/Studio', 'Flat', 'Sala comercial', 'Loja', 'Galpão',
+        'Kitnet/Studio', 'Flat', 'Edícula', 'Sala comercial', 'Loja', 'Galpão',
         'Terreno', 'Chácara/Sítio', 'Fazenda', 'Garagem/Vaga',
     ];
 

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DevUserSeeder::class);
         $this->call(VehicleCatalogSeeder::class);
         $this->call(PropertyTypeSeeder::class);
+        $this->call(PartTypeSeeder::class);
         $this->call(PetCatalogSeeder::class);
         $this->call(AssetSeeder::class);
         $this->call(ServiceRequestSeeder::class);

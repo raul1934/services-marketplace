@@ -24,6 +24,7 @@ class PresentationSeeder extends Seeder
         $this->call(DevUserSeeder::class);
         $this->call(VehicleCatalogSeeder::class);
         $this->call(PropertyTypeSeeder::class);
+        $this->call(PartTypeSeeder::class);
         $this->call(PetCatalogSeeder::class);
         $this->call(AssetSeeder::class);
         // Intentionally NO ServiceRequestSeeder / DevJobSeeder / AssetHistorySeeder.
