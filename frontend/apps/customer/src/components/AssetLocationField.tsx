@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
@@ -42,12 +42,16 @@ export function AssetLocationField({
   const [editing, setEditing] = useState(false);
   const hasPin = latitude != null && longitude != null;
   const center = hasPin ? { latitude: latitude as number, longitude: longitude as number } : null;
+  const mapRef = useRef<MapView>(null);
 
   const useMyLocation = async () => {
     setLocating(true);
     try {
-      const { latitude, longitude, ...parts } = await getCurrentCoords();
-      onChange({ latitude, longitude, ...parts });
+      const { latitude: lat, longitude: lng, ...parts } = await getCurrentCoords();
+      onChange({ latitude: lat, longitude: lng, ...parts });
+      // Force a re-frame even if the coordinates repeat — a plain region prop
+      // wouldn't re-sync after the user zoomed away, so tapping again did nothing.
+      mapRef.current?.animateToRegion({ latitude: lat, longitude: lng, latitudeDelta: 0.01, longitudeDelta: 0.01 }, 250);
     } catch {
       /* best-effort */
     } finally {
@@ -62,6 +66,7 @@ export function AssetLocationField({
       {center ? (
         <Card padded={false} style={{ overflow: 'hidden' }}>
           <MapView
+            ref={mapRef}
             style={{ height }}
             region={{ latitude: center.latitude, longitude: center.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
             onPress={(e) => onChange({ latitude: e.nativeEvent.coordinate.latitude, longitude: e.nativeEvent.coordinate.longitude })}
