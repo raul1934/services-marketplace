@@ -17,6 +17,7 @@ export function AssetSelector({
   onSelect,
   onAddNew,
   loading,
+  note,
 }: {
   assetType: 'vehicle' | 'property' | 'pet';
   assets: Asset[];
@@ -24,6 +25,8 @@ export function AssetSelector({
   onSelect: (id: number) => void;
   onAddNew: () => void;
   loading?: boolean;
+  /** Explains a selection the app made for you. Shown under the list. */
+  note?: string;
 }) {
   const t = useTheme();
   const { t: tr } = useTranslation();
@@ -57,6 +60,15 @@ export function AssetSelector({
           );
         })
       )}
+
+      {note ? (
+        <Row gap={7}>
+          <Icon name="check" size={14} color={t.colors.ok} />
+          <Text variant="caption" color={t.colors.ink2} style={{ flex: 1 }}>
+            {note}
+          </Text>
+        </Row>
+      ) : null}
 
       <Button
         title={tr('createRequest.addAsset')}
