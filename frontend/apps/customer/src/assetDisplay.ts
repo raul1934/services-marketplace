@@ -1,7 +1,8 @@
+import { IconName } from '@chamafacil/shared';
 import { Asset } from './api';
 
 /** Asset type → icon name (shared by the asset list, selector, and review row). */
-export const ICON: Record<string, string> = { vehicle: 'car', property: 'home', pet: 'paw' };
+export const ICON: Record<string, IconName> = { vehicle: 'car', property: 'home', pet: 'paw' };
 
 /**
  * One-line caption from an asset's detail (make/model/plate/kind/unit/species/

@@ -11,6 +11,7 @@ import {
   DynamicFields,
   Field,
   Icon,
+  IconName,
   PaymentMethod,
   PaymentSelector,
   ReceptionType,
@@ -500,7 +501,7 @@ export default function NewRequest() {
   );
 }
 
-function SumRow({ icon, k, v, onPress, last }: { icon: string; k: string; v: string; onPress?: () => void; last?: boolean }) {
+function SumRow({ icon, k, v, onPress, last }: { icon: IconName; k: string; v: string; onPress?: () => void; last?: boolean }) {
   const t = useTheme();
   const body = (
     <Row style={{ gap: 12, paddingVertical: 11, borderTopWidth: 0 }}>

@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   Icon,
+  IconName,
   ProviderDocumentType,
   Row,
   Screen,
@@ -187,7 +188,7 @@ export default function Onboarding() {
   );
 }
 
-function SumRow({ icon, k, v }: { icon: string; k: string; v: string }) {
+function SumRow({ icon, k, v }: { icon: IconName; k: string; v: string }) {
   const t = useTheme();
   return (
     <Row style={{ gap: 12, paddingVertical: 11 }}>

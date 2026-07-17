@@ -636,6 +636,11 @@
     "parts": {
       "title": "Cômodos e áreas",
       "addPart": "Adicionar cômodo",
+      "addOther": "Outro cômodo",
+      "suggestHint": "Pré-selecionamos com base no tipo do imóvel — desmarque o que não tiver.",
+      "addChosen": "Adicionar {{count}} cômodo",
+      "addChosen_plural": "Adicionar {{count}} cômodos",
+      "addNone": "Selecione os cômodos",
       "add": "Adicionar",
       "empty": "Nenhum cômodo ainda. Adicione as partes do imóvel (sala, quarto, piscina…) e meça cada uma com a câmera.",
       "unmeasured": "Sem medição",
@@ -713,6 +718,17 @@
     "kmNone": "Nenhuma leitura ainda",
     "history": "Histórico de serviços",
     "historyEmpty": "Nenhum serviço ainda",
+    "tabs": {
+      "history": "Histórico"
+    },
+    "timeline": {
+      "empty": "Nada aconteceu ainda",
+      "emptyBody": "Serviços, medições e leituras de km aparecem aqui em ordem.",
+      "measured": "{{name}} medido",
+      "reading": "Leitura de km",
+      "more": "Há eventos mais antigos para carregar.",
+      "loadingMore": "Carregando mais eventos…"
+    },
     "source": {
       "customer": "Você",
       "provider": "Oficina"
@@ -831,5 +847,16 @@
         "body": "O profissional já recebe o que é, onde fica e o tamanho. Menos conversa, proposta mais certeira."
       }
     ]
+  },
+  "assetSetup": {
+    "title": "Cômodos e áreas",
+    "heading": "Quais cômodos seu imóvel tem?",
+    "headingNamed": "Quais cômodos {{name}} tem?",
+    "hint": "Pré-selecionamos com base no tipo do imóvel — desmarque o que não tiver. Você poderá adicionar mais depois.",
+    "noneForType": "Sem sugestões para este tipo — você pode adicionar cômodos no detalhe do imóvel.",
+    "addAndMeasure": "Adicionar {{count}} e medir o primeiro",
+    "addAndMeasure_plural": "Adicionar {{count}} e medir o primeiro",
+    "skipToDetail": "Continuar",
+    "later": "Depois"
   }
 }

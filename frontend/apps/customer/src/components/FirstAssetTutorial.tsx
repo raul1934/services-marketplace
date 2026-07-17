@@ -4,10 +4,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Icon, Text, useTheme } from '@chamafacil/shared';
+import { Icon, IconName, Text, useTheme } from '@chamafacil/shared';
 
 /** One icon per step, in step order. */
-const ICONS = ['home', 'camera', 'wrench'];
+const ICONS: IconName[] = ['home', 'camera', 'wrench'];
 
 /**
  * First-run tutorial: the full-screen welcome for someone with no assets yet.
@@ -40,7 +40,9 @@ export function FirstAssetTutorial({ onDone }: { onDone: () => void }) {
 
   const start = () => {
     onDone();
-    router.push('/assets/new');
+    // `guided`: if they register a property, continue into the room setup
+    // (offer the rooms, measure the first) instead of the plain detail screen.
+    router.push('/assets/new?guided=1');
   };
 
   return (

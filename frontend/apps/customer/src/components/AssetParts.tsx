@@ -1,34 +1,81 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card, Field, Icon, Row, SectionLabel, Text, useTheme } from '@chamafacil/shared';
+import { Alert, Button, Card, Chip, Field, Icon, Row, SectionLabel, Text, useTheme } from '@chamafacil/shared';
 import { AssetPart } from '../api';
-import { useAddPart, useAssetParts, useRemovePart } from '../queries';
+import { useAddPart, useAddParts, useAssetParts, usePropertyTypes, useRemovePart } from '../queries';
 
 /**
  * "Cômodos e áreas" section for a property asset: name the parts (pool, hallway,
  * living room…), measure each in AR, and see the totals. Parts and their AR
  * measurements are persisted on the backend (see AssetController::parts).
+ *
+ * The parts a property type usually has arrive nested in `usePropertyTypes()`
+ * (cached for a day), so the chips cost no request. They **suggest**: the free
+ * text field below them still names anything, and `asset_parts.name` stays a
+ * plain string.
+ *
+ * Why pre-ticking is honest: a part is an empty slot to measure (`area` null →
+ * "Sem medição"). We pre-select a *choice*, never invent a *fact* — nothing here
+ * ever fills in a size nobody measured.
  */
-export function AssetParts({ assetId }: { assetId: number }) {
+export function AssetParts({ assetId, propertyTypeId }: { assetId: number; propertyTypeId?: number | null }) {
   const t = useTheme();
   const { t: tr } = useTranslation();
   const router = useRouter();
   const { data: parts = [] } = useAssetParts(assetId);
+  const { data: types = [] } = usePropertyTypes(!!propertyTypeId);
   const addPart = useAddPart(assetId);
+  const addParts = useAddParts(assetId);
   const removePart = useRemovePart(assetId);
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
+  const [picked, setPicked] = useState<string[]>([]);
+
+  const suggestions = useMemo(
+    () => (propertyTypeId ? types.find((x) => x.id === propertyTypeId)?.part_types ?? [] : []),
+    [types, propertyTypeId],
+  );
+
+  // Don't suggest what the property already has, however it got named.
+  const offered = useMemo(() => {
+    const have = new Set(parts.map((p) => p.name.trim().toLowerCase()));
+    return suggestions.filter((s) => !have.has(s.name.toLowerCase()));
+  }, [suggestions, parts]);
+
+  // Seed the ticks from the catalog once, on the first load for this type —
+  // after that the ticks are the user's, and re-seeding would undo their taps.
+  const seeded = useRef<number | null>(null);
+  useEffect(() => {
+    if (!propertyTypeId || !suggestions.length || seeded.current === propertyTypeId) return;
+    seeded.current = propertyTypeId;
+    setPicked(suggestions.filter((s) => s.default_selected).map((s) => s.slug));
+  }, [propertyTypeId, suggestions]);
+
+  const toggle = (slug: string) =>
+    setPicked((prev) => (prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]));
+
+  const chosen = offered.filter((s) => picked.includes(s.slug));
+
+  const addChosen = () => {
+    if (!chosen.length) return;
+    addParts.mutate(
+      chosen.map((s) => s.name),
+      {
+        onSuccess: () => setPicked((prev) => prev.filter((s) => !chosen.some((c) => c.slug === s))),
+        onError: (e) => Alert.alert(tr('common.error'), (e as Error).message),
+      },
+    );
+  };
 
   const add = () => {
     const n = name.trim();
     if (!n) return;
     addPart.mutate(n, {
-      onSuccess: () => {
-        setName('');
-        setAdding(false);
-      },
+      // Keep the field open and focused: naming three rooms shouldn't mean
+      // reopening the form three times.
+      onSuccess: () => setName(''),
       onError: (e) => Alert.alert(tr('common.error'), (e as Error).message),
     });
   };
@@ -55,7 +102,9 @@ export function AssetParts({ assetId }: { assetId: number }) {
         ) : null}
       </Row>
 
-      {parts.length === 0 && !adding ? <Text variant="caption">{tr('assets.parts.empty')}</Text> : null}
+      {parts.length === 0 && !adding && !offered.length ? (
+        <Text variant="caption">{tr('assets.parts.empty')}</Text>
+      ) : null}
 
       {parts.map((p) => {
         const measured = p.points_count != null && p.points_count > 0;
@@ -90,6 +139,31 @@ export function AssetParts({ assetId }: { assetId: number }) {
         );
       })}
 
+      {/* Suggestion chips: one tap each, the usual ones already ticked. */}
+      {offered.length ? (
+        <Card style={{ gap: 10 }}>
+          <Row gap={6} style={{ alignItems: 'flex-start' }}>
+            <Icon name="sparkles" size={14} color={t.colors.ink3} />
+            <Text variant="caption" color={t.colors.ink3} style={{ flex: 1 }}>
+              {tr('assets.parts.suggestHint')}
+            </Text>
+          </Row>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {offered.map((s) => (
+              <Chip key={s.slug} label={s.name} active={picked.includes(s.slug)} onPress={() => toggle(s.slug)} />
+            ))}
+          </View>
+          <Button
+            // i18n runs compatibilityJSON v3 (no Intl.PluralRules under Hermes),
+            // whose only plural suffix is `_plural` — zero has to be its own key.
+            title={chosen.length ? tr('assets.parts.addChosen', { count: chosen.length }) : tr('assets.parts.addNone')}
+            onPress={addChosen}
+            loading={addParts.isPending}
+            disabled={!chosen.length}
+          />
+        </Card>
+      ) : null}
+
       {adding ? (
         <Card style={{ gap: 10 }}>
           <Field
@@ -101,7 +175,7 @@ export function AssetParts({ assetId }: { assetId: number }) {
             onSubmitEditing={add}
           />
           <Row gap={10}>
-            <Button title={tr('common.cancel')} variant="ghost" onPress={() => { setAdding(false); setName(''); }} style={{ flex: 1 }} />
+            <Button title={tr('common.close')} variant="ghost" onPress={() => { setAdding(false); setName(''); }} style={{ flex: 1 }} />
             <Button title={tr('assets.parts.add')} onPress={add} loading={addPart.isPending} disabled={!name.trim()} style={{ flex: 1 }} />
           </Row>
         </Card>
@@ -111,7 +185,10 @@ export function AssetParts({ assetId }: { assetId: number }) {
           style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed', borderColor: t.colors.line }}
         >
           <Icon name="plus" size={16} color={t.colors.accent} />
-          <Text variant="label" color={t.colors.accent}>{tr('assets.parts.addPart')}</Text>
+          {/* The escape hatch: the catalog suggests, it never restricts. */}
+          <Text variant="label" color={t.colors.accent}>
+            {tr(offered.length ? 'assets.parts.addOther' : 'assets.parts.addPart')}
+          </Text>
         </Pressable>
       )}
     </View>

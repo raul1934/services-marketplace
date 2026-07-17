@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { AvInit, BrandMark, Button, Icon, MiniMap, Text, useTheme } from '@chamafacil/shared';
+import { AvInit, BrandMark, Button, Icon, IconName, MiniMap, Text, useTheme } from '@chamafacil/shared';
 import { EnvSwitch } from '../../src/components/EnvSwitch';
 
 const TMINI_SHADOW = '0 22px 44px -18px rgba(15,23,42,0.55)';
@@ -21,7 +21,7 @@ function TMini({ children, style }: { children: React.ReactNode; style?: ViewSty
 }
 
 /** Small rounded category icon tile (chamafacil .cat-ic, scene size). */
-function CatIc({ name }: { name: string }) {
+function CatIc({ name }: { name: IconName }) {
   const t = useTheme();
   return (
     <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
@@ -31,7 +31,7 @@ function CatIc({ name }: { name: string }) {
 }
 
 /** Pill that floats over a scene (chamafacil .tut-float). */
-function TutFloat({ icon, label, style }: { icon: string; label: string; style?: ViewStyle }) {
+function TutFloat({ icon, label, style }: { icon: IconName; label: string; style?: ViewStyle }) {
   const t = useTheme();
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 7, backgroundColor: t.colors.surface, borderRadius: 999, paddingVertical: 8, paddingHorizontal: 13, boxShadow: FLOAT_SHADOW } as ViewStyle, style]}>
@@ -41,7 +41,7 @@ function TutFloat({ icon, label, style }: { icon: string; label: string; style?:
   );
 }
 
-const CATS = [
+const CATS: { ic: IconName; n: string }[] = [
   { ic: 'car', n: 'Estrada' },
   { ic: 'drop', n: 'Casa' },
   { ic: 'key', n: 'Chaveiro' },

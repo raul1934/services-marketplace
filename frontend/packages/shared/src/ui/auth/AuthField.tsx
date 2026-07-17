@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TextInput, TextInputProps, View } from 'react-native';
 import { useTheme } from '../../theme';
 import { Text } from '../Text';
-import { Icon } from '../Icon';
+import { Icon, IconName } from '../Icon';
 
 /** Icon-prefixed text input with focus ring (chamafacil .input). */
 export function AuthField({
@@ -10,7 +10,7 @@ export function AuthField({
   prefix,
   error,
   ...rest
-}: TextInputProps & { icon?: string; prefix?: string; error?: string }) {
+}: TextInputProps & { icon?: IconName; prefix?: string; error?: string }) {
   const t = useTheme();
   const [focus, setFocus] = useState(false);
   return (

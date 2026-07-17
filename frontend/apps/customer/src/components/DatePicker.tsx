@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { Icon, IconName, Row, Text, useTheme } from '@chamafacil/shared';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toStr = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
@@ -61,7 +61,7 @@ export function DatePicker({
     setOpen(false);
   };
 
-  const navBtn = (icon: string, onPress: () => void) => (
+  const navBtn = (icon: IconName, onPress: () => void) => (
     <Pressable onPress={onPress} style={{ width: 30, height: 30, borderRadius: 9, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' }}>
       <Icon name={icon} size={15} color={t.colors.ink2} />
     </Pressable>

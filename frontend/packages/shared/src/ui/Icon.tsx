@@ -55,8 +55,14 @@ import {
 } from 'lucide-react-native';
 import { useTheme } from '../theme';
 
-/** App icon names → lucide icons. Single source of truth for the icon set. */
-const ICONS: Record<string, LucideIcon> = {
+/**
+ * App icon names → lucide icons. Single source of truth for the icon set.
+ *
+ * `satisfies` (not `: Record<string, LucideIcon>`) is load-bearing: an
+ * annotation would widen `keyof typeof ICONS` to `string`, making `IconName`
+ * meaningless and letting a typo'd name through to the runtime fallback.
+ */
+const ICONS = {
   arrowR: ArrowRight,
   back: ArrowLeft,
   battery: BatteryCharging,
@@ -107,12 +113,17 @@ const ICONS: Record<string, LucideIcon> = {
   userX: UserX,
   wifi: Wifi,
   wrench: Wrench,
-};
+} satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;
 
 /** Runtime list of registered icon names (for validating dynamic/backend names). */
 export const ICON_NAMES: string[] = Object.keys(ICONS);
+
+/** Narrows an untrusted name (backend/i18n/older-app payload) to a real icon. */
+export function isIconName(name: string): name is IconName {
+  return Object.prototype.hasOwnProperty.call(ICONS, name);
+}
 
 /**
  * Renders a lucide icon by app name. `color` sets the stroke; `fill="current"`
@@ -125,7 +136,7 @@ export function Icon({
   fill = 'none',
   strokeWidth = 2,
 }: {
-  name: string;
+  name: IconName;
   size?: number;
   /** RN's canonical colour type, so navigation's `tabBarIcon({ color })` passes straight through. */
   color?: ColorValue;
@@ -133,7 +144,7 @@ export function Icon({
   strokeWidth?: number;
 }) {
   const t = useTheme();
-  const Comp = ICONS[name] ?? Search;
+  const Comp: LucideIcon = ICONS[name] ?? Search;
   // lucide types `color` as a plain string; ColorValue only differs for
   // PlatformColor/DynamicColorIOS, which we never pass. Cast once, here.
   const c = (color ?? t.colors.ink) as string;

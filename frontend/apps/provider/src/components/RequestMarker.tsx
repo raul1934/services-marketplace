@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Icon, Text } from '@chamafacil/shared';
+import { Icon, IconName, Text } from '@chamafacil/shared';
 
 /**
  * Map marker content for a nearby request: the category icon (in a white circle)
@@ -9,7 +9,7 @@ import { Icon, Text } from '@chamafacil/shared';
  * (native renders it; the web Leaflet stub reads these props to build an HTML
  * marker). The props are precomputed by the caller so both platforms match.
  */
-export function RequestMarker({ color, label, iconName }: { color: string; label: string; iconName: string }) {
+export function RequestMarker({ color, label, iconName }: { color: string; label: string; iconName: IconName }) {
   return (
     <View style={{ alignItems: 'center', gap: 2 }}>
       <View

@@ -636,6 +636,11 @@
     "parts": {
       "title": "Rooms & areas",
       "addPart": "Add room",
+      "addOther": "Another room",
+      "suggestHint": "We pre-selected these from the property type — untick anything you don't have.",
+      "addChosen": "Add {{count}} room",
+      "addChosen_plural": "Add {{count}} rooms",
+      "addNone": "Pick the rooms",
       "add": "Add",
       "empty": "No rooms yet. Add the property's parts (living room, bedroom, pool…) and measure each with the camera.",
       "unmeasured": "Not measured",
@@ -713,6 +718,17 @@
     "kmNone": "No readings yet",
     "history": "Service history",
     "historyEmpty": "No services yet",
+    "tabs": {
+      "history": "History"
+    },
+    "timeline": {
+      "empty": "Nothing has happened yet",
+      "emptyBody": "Services, measurements and mileage readings show up here in order.",
+      "measured": "{{name}} measured",
+      "reading": "Mileage reading",
+      "more": "There are older events to load.",
+      "loadingMore": "Loading more events…"
+    },
     "source": {
       "customer": "You",
       "provider": "Shop"
@@ -831,5 +847,16 @@
         "body": "The pro already knows what it is, where it is, and how big. Less back-and-forth, sharper bids."
       }
     ]
+  },
+  "assetSetup": {
+    "title": "Rooms and areas",
+    "heading": "Which rooms does your property have?",
+    "headingNamed": "Which rooms does {{name}} have?",
+    "hint": "We pre-selected these based on the property type — untick anything it doesn't have. You can add more later.",
+    "noneForType": "No suggestions for this type — you can add rooms from the property detail.",
+    "addAndMeasure": "Add {{count}} and measure the first",
+    "addAndMeasure_plural": "Add {{count}} and measure the first",
+    "skipToDetail": "Continue",
+    "later": "Later"
   }
 }

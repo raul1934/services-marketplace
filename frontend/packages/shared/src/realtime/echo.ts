@@ -34,24 +34,29 @@ async function getEcho(): Promise<any> {
 
   // Lazy require so Metro only bundles these when realtime is actually used.
   // Pick the platform build explicitly: the RN entry pulls in NetInfo and would
-  // break on web, while the browser build lacks RN transports. pusher-js dist
-  // bundles are UMD (`module.exports = Pusher`) with no `.default` — take the
-  // module itself when `.default` is absent, otherwise laravel-echo receives
-  // `undefined` and throws "Pusher is not defined".
+  // break on web, while the browser build lacks RN transports.
+  //
+  // The constructor sits at a DIFFERENT key per build, which is what broke this
+  // for so long. The web bundle is `module.exports = Pusher` (the constructor
+  // itself), but the react-native/node bundles are `module.exports.Pusher = …`
+  // — a plain object `{ Pusher }` with no `.default`, despite the d.ts saying
+  // `export default class Pusher`. The old `.default ?? module` therefore handed
+  // laravel-echo the *object* `{ Pusher }` on device; Echo's connector then did
+  // `new options.Pusher(...)`, i.e. `new {}`, which is the real source of the
+  // "Object cannot be used as a constructor" throw — it came from *inside*
+  // `new Echo`, not from Echo. So unwrap Pusher the same way we unwrap Echo:
+  // take the first candidate that is actually callable.
   const pusherModule =
     Platform.OS === 'web' ? require('pusher-js') : require('pusher-js/react-native');
-  const Pusher: any = pusherModule.default ?? pusherModule;
+  const Pusher: any = [pusherModule?.default, pusherModule?.Pusher, pusherModule].find(
+    (c) => typeof c === 'function',
+  );
+  if (!Pusher) throw new Error('pusher-js: no constructor found in the module');
 
   // laravel-echo ships both a CJS (`main`) and an ESM (`module`) build, so how
   // deep the constructor sits depends on which one Metro picks; unwrap until we
-  // hold something callable.
-  //
-  // KNOWN BROKEN under Hermes: `new Echo(...)` below still throws "Object cannot
-  // be used as a constructor" even though this find() returned a value that
-  // reports `typeof === 'function'`. So realtime has never worked in the app —
-  // any screen that calls getEcho() throws. The unwrap is necessary but not
-  // sufficient; the real cause is still unknown. Don't trust this path until a
-  // fix is verified on-device.
+  // hold something callable. (Echo itself is a normal Babel-transpiled class and
+  // constructs fine under Hermes — verified; it was never the problem.)
   const echoModule = require('laravel-echo');
   const Echo: any = [echoModule?.default?.default, echoModule?.default, echoModule].find(
     (c) => typeof c === 'function',
