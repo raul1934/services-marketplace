@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { Alert } from '@chamafacil/shared';
 import MapView, { Marker, Polygon } from 'react-native-maps';
@@ -68,6 +68,14 @@ export default function NewRequest() {
   const assetList = flattenPages(assets.data?.pages);
   const [assetId, setAssetId] = useState<number | null>(null);
   const selectedAsset = assetList.find((a) => a.id === assetId);
+
+  // With exactly one asset of the needed type, picking it isn't a guess — it's
+  // the only answer. Choose it, and say so below (`autoPicked`), so the choice
+  // is visible rather than silent. Never overrides a pick already made.
+  const autoPicked = assetId != null && assetList.length === 1 && assetList[0].id === assetId;
+  useEffect(() => {
+    if (assetId == null && assetList.length === 1) setAssetId(assetList[0].id);
+  }, [assetId, assetList]);
 
   // Returning from /assets/new (pick mode): auto-select the asset just created.
   useFocusEffect(
@@ -274,6 +282,7 @@ export default function NewRequest() {
               onSelect={setAssetId}
               onAddNew={onAddNew}
               loading={assets.isLoading}
+              note={autoPicked ? tr('createRequest.assetAutoPicked') : undefined}
             />
           )}
           <Field label={tr('createRequest.whatHappened')} value={description} onChangeText={setDescription} placeholder={tr('createRequest.whatHappenedPlaceholder')} multiline voiceInput style={{ height: 84, textAlignVertical: 'top' }} />
