@@ -2,16 +2,14 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Badge, Button, Card, Icon, IconButton, LANGUAGES, Row, Screen, SectionLabel, Stars, Text, ThemeName, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
-
-const THEMES: ThemeName[] = ['sunset', 'trust', 'night'];
+import { Avatar, Badge, Button, Card, Icon, IconButton, LANGUAGES, Row, Screen, SectionLabel, Stars, THEME_MODES, Text, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
 
 export default function Profile() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr, i18n } = useTranslation();
   const { user, logout } = useAuth();
-  const { themeName, setTheme } = useThemeControls();
+  const { mode, setMode } = useThemeControls();
   const profile = user?.provider_profile;
 
   const pctRaw = (profile?.commission_rate ?? 0.05) * 100;
@@ -98,8 +96,8 @@ export default function Profile() {
       <Card style={{ gap: 12 }}>
         <Text variant="label">{tr('profile.appearance')}</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          {THEMES.map((name) => (
-            <Button key={name} title={tr(`profile.themes.${name}`)} size="sm" variant={themeName === name ? 'grad' : 'ghost'} onPress={() => setTheme(name)} />
+          {THEME_MODES.map((m) => (
+            <Button key={m} title={tr(`profile.themes.${m}`)} size="sm" variant={mode === m ? 'grad' : 'ghost'} onPress={() => setMode(m)} />
           ))}
         </View>
         <Text variant="label">{tr('profile.language')}</Text>

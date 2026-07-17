@@ -1,11 +1,14 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
+import { ThemeMode, loadSavedThemeMode, persistThemeMode } from '../lib/theme-pref';
 import { Theme, ThemeName, themes } from './themes';
 
 interface ThemeContextValue {
   theme: Theme;
   themeName: ThemeName;
-  setTheme: (name: ThemeName) => void;
+  /** What the user chose: follow the system, or force light/dark. */
+  mode: ThemeMode;
+  setMode: (mode: ThemeMode) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -15,18 +18,35 @@ export function ThemeProvider({
   initial = 'sunset',
 }: {
   children: React.ReactNode;
-  /** The light-mode theme for this app (used when the OS is in light mode). */
+  /** This app's brand palette — what light mode (and daylight `auto`) resolves to. */
   initial?: ThemeName;
 }) {
-  // Follow the OS light/dark setting: light -> the app's light theme, dark -> 'night'.
   const scheme = useColorScheme();
-  // A manual pick in the profile theme selector overrides the system scheme.
-  const [override, setOverride] = useState<ThemeName | null>(null);
-  const themeName: ThemeName = override ?? (scheme === 'dark' ? 'night' : initial);
-  const setTheme = useCallback((name: ThemeName) => setOverride(name), []);
+  const [mode, setModeState] = useState<ThemeMode>('auto');
+
+  // 'auto' is the honest starting point while the saved mode loads: it's the
+  // default *and* it matches the OS, so the first frame can't flash a palette
+  // the user didn't ask for.
+  useEffect(() => {
+    loadSavedThemeMode().then((saved) => {
+      if (saved) setModeState(saved);
+    });
+  }, []);
+
+  const setMode = useCallback((next: ThemeMode) => {
+    setModeState(next);
+    void persistThemeMode(next);
+  }, []);
+
+  // Modes, not palettes: which brand palette an app wears isn't the user's
+  // choice (offering it let a client pick the provider's colors) — only
+  // light-vs-dark is. `initial` is that app's brand palette.
+  const dark = mode === 'dark' || (mode === 'auto' && scheme === 'dark');
+  const themeName: ThemeName = dark ? 'night' : initial;
+
   const value = useMemo<ThemeContextValue>(
-    () => ({ theme: themes[themeName], themeName, setTheme }),
-    [themeName, setTheme],
+    () => ({ theme: themes[themeName], themeName, mode, setMode }),
+    [themeName, mode, setMode],
   );
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

@@ -29,8 +29,14 @@
   },
   "notFound": {
     "home": "Dashboard",
-    "route": { "title": "Page not found", "body": "This page doesn't exist or has moved." },
-    "job": { "title": "Job not found", "body": "This job doesn't exist or is no longer available." }
+    "route": {
+      "title": "Page not found",
+      "body": "This page doesn't exist or has moved."
+    },
+    "job": {
+      "title": "Job not found",
+      "body": "This job doesn't exist or is no longer available."
+    }
   },
   "enums": {
     "paymentMethod": {
@@ -278,7 +284,11 @@
     "statStatus": "Status",
     "sectionProfile": "Profile",
     "planSection": "Current plan",
-    "planNames": { "free": "Free", "pro": "Pro", "enterprise": "Enterprise" },
+    "planNames": {
+      "free": "Free",
+      "pro": "Pro",
+      "enterprise": "Enterprise"
+    },
     "planCommission": "{{pct}}% commission per job",
     "planValidUntil": "Valid until {{date}}",
     "planNoExpiry": "Free plan · no expiry",
@@ -291,9 +301,9 @@
     "appearance": "Appearance",
     "language": "Language",
     "themes": {
-      "sunset": "Sunset",
-      "trust": "Trust",
-      "night": "Night"
+      "auto": "Automatic",
+      "light": "Light",
+      "dark": "Dark"
     }
   },
   "editProfile": {

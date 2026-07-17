@@ -2,13 +2,11 @@ import React from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Button, Card, Icon, LANGUAGES, Row, Screen, Text, ThemeName, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
-
-const THEMES: ThemeName[] = ['sunset', 'trust', 'night'];
+import { Avatar, Button, Card, Icon, LANGUAGES, Row, Screen, THEME_MODES, Text, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
 
 export default function Profile() {
   const { user, logout } = useAuth();
-  const { themeName, setTheme } = useThemeControls();
+  const { mode, setMode } = useThemeControls();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const th = useTheme();
@@ -43,13 +41,13 @@ export default function Profile() {
       <Card style={{ gap: 12 }}>
         <Text variant="label">{t('profile.appearance')}</Text>
         <View style={{ flexDirection: 'row', gap: 8 }}>
-          {THEMES.map((name) => (
+          {THEME_MODES.map((m) => (
             <Button
-              key={name}
-              title={t(`profile.themes.${name}`)}
+              key={m}
+              title={t(`profile.themes.${m}`)}
               size="sm"
-              variant={themeName === name ? 'grad' : 'ghost'}
-              onPress={() => setTheme(name)}
+              variant={mode === m ? 'grad' : 'ghost'}
+              onPress={() => setMode(m)}
             />
           ))}
         </View>
