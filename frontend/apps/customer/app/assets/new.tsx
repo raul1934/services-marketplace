@@ -3,7 +3,7 @@ import { Image, Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Field, Icon, IconName, Text, Wiz, useTheme } from '@chamafacil/shared';
+import { Alert, Button, Field, Icon, IconName, SectionLabel, Text, Wiz, useTheme } from '@chamafacil/shared';
 import { useCategories, useCreateAsset } from '../../src/queries';
 import { setCreatedAsset } from '../../src/assetPick';
 import { ICON } from '../../src/assetDisplay';
@@ -11,6 +11,7 @@ import { ASSET_FIELDS, ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
 import { AssetDetailInput, GeoPoint } from '../../src/api';
 import { AssetLocationField } from '../../src/components/AssetLocationField';
 import { GeofenceEditor } from '../../src/components/GeofenceEditor';
+import { formatAddress } from '../../src/location';
 import { MakeModelPicker } from '../../src/components/MakeModelPicker';
 import { PetSpeciesBreedPicker } from '../../src/components/PetSpeciesBreedPicker';
 import { PropertyTypePicker } from '../../src/components/PropertyTypePicker';
@@ -61,6 +62,8 @@ export default function AddAsset() {
   const [step, setStep] = useState(1); // 1-based
   const [showExtra, setShowExtra] = useState(false); // optional free-text fields
   const [areaOpen, setAreaOpen] = useState(false); // geofence editor modal
+  const [privateNote, setPrivateNote] = useState('');
+  const [providerNote, setProviderNote] = useState('');
 
   // Free-text extras shown under "mais detalhes"; a property's address moves to
   // the location step (it belongs with the map pin), so it's excluded here.
@@ -102,8 +105,26 @@ export default function AddAsset() {
         /* non-fatal — create the asset without the photo */
       }
     }
+    // Compose a one-line address from the structured parts so the request flow
+    // (which reads detail.address) still has something readable to show.
+    const composed = formatAddress({
+      street: detail.street as string | undefined,
+      number: detail.number as string | undefined,
+      neighborhood: detail.neighborhood as string | undefined,
+      city: detail.city as string | undefined,
+      state: detail.state as string | undefined,
+    });
+    const detailOut = composed ? { ...detail, address: composed } : detail;
+
     create.mutate(
-      { type, nickname: nickname.trim(), detail, photo_media_id: photoMediaId },
+      {
+        type,
+        nickname: nickname.trim(),
+        detail: detailOut,
+        photo_media_id: photoMediaId,
+        ...(privateNote.trim() ? { private_note: privateNote.trim() } : {}),
+        ...(providerNote.trim() ? { provider_note: providerNote.trim() } : {}),
+      },
       {
         onSuccess: (a) => {
           if (picking) {
@@ -328,21 +349,50 @@ export default function AddAsset() {
               ) : null}
             </View>
           ) : null}
+
+          {/* Two notes: one only you ever see, one you may share with a pro. */}
+          <View style={{ gap: 12, marginTop: 4 }}>
+            <SectionLabel>{tr('assetWizard.notes.sectionLabel')}</SectionLabel>
+            <Field
+              label={tr('assetWizard.notes.private')}
+              hint={tr('assetWizard.notes.privateHint')}
+              value={privateNote}
+              onChangeText={setPrivateNote}
+              multiline
+            />
+            <Field
+              label={tr('assetWizard.notes.provider')}
+              hint={tr('assetWizard.notes.providerHint')}
+              value={providerNote}
+              onChangeText={setProviderNote}
+              multiline
+            />
+          </View>
         </>
       ) : null}
 
       {stepKey === 'location' ? (
         <>
-          {/* Address lives with the pin, not buried among the detail fields:
-              type it, or let "use my location" fill it by reverse-geocode.
-              multiline so a long street name wraps instead of scrolling off. */}
-          <Field
-            label={tr('assets.fields.address')}
-            value={(detail.address as string) ?? ''}
-            onChangeText={(v) => set('address', v)}
-            placeholder="Rua das Flores, 100"
-            multiline
-          />
+          {/* Structured address, in its own fields (and columns) — "use my
+              location" fills them by reverse-geocode, or type them. */}
+          <Field label={tr('assets.fields.cep')} value={(detail.cep as string) ?? ''} onChangeText={(v) => set('cep', v)} placeholder="00000-000" keyboardType="numeric" />
+          <Field label={tr('assets.fields.street')} value={(detail.street as string) ?? ''} onChangeText={(v) => set('street', v)} placeholder="Rua das Flores" />
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flex: 1 }}>
+              <Field label={tr('assets.fields.number')} value={(detail.number as string) ?? ''} onChangeText={(v) => set('number', v)} placeholder="100" keyboardType="numeric" />
+            </View>
+            <View style={{ flex: 2 }}>
+              <Field label={tr('assets.fields.neighborhood')} value={(detail.neighborhood as string) ?? ''} onChangeText={(v) => set('neighborhood', v)} placeholder="Centro" />
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ flex: 2 }}>
+              <Field label={tr('assets.fields.city')} value={(detail.city as string) ?? ''} onChangeText={(v) => set('city', v)} placeholder="São Paulo" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Field label={tr('assets.fields.state')} value={(detail.state as string) ?? ''} onChangeText={(v) => set('state', v.toUpperCase().slice(0, 2))} placeholder="SP" autoCapitalize="characters" maxLength={2} />
+            </View>
+          </View>
           <AssetLocationField
             latitude={detail.latitude as number | undefined}
             longitude={detail.longitude as number | undefined}

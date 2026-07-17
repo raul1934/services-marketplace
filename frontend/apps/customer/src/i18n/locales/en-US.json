@@ -316,7 +316,8 @@
     "paymentLabel": "Payment method",
     "yourAsset": "Your asset",
     "addAsset": "Add new",
-    "assetAutoPicked": "We picked this one — it's your only saved asset. Tap another to change it."
+    "assetAutoPicked": "We picked this one — it's your only saved asset. Tap another to change it.",
+    "shareNote": "Share my note with the professional"
   },
   "payment": {
     "pix": "Pix",
@@ -750,6 +751,12 @@
       "unit": "Unit",
       "size": "Size",
       "address": "Address",
+      "cep": "ZIP",
+      "street": "Street",
+      "number": "Number",
+      "neighborhood": "Neighborhood",
+      "city": "City",
+      "state": "State",
       "floor": "Floor",
       "condo": "Building",
       "species": "Species",
@@ -874,6 +881,13 @@
       }
     },
     "details": { "title": "Details", "sub": "Fill in what you know. You can edit it later.", "more": "More details (optional)", "less": "Hide details" },
+    "notes": {
+      "sectionLabel": "Notes",
+      "private": "Your notes (private)",
+      "privateHint": "Only you see these — reminders, details.",
+      "provider": "Note for the pro",
+      "providerHint": "You choose to share it when requesting a service."
+    },
     "location": { "title": "Where is it?", "sub": "Drop a pin so the pro can find it." },
     "area": {
       "title": "Property area",

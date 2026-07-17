@@ -98,6 +98,9 @@ export interface Asset {
   archived: boolean;
   created_at?: string;
   detail?: AssetDetail;
+  /** Owner-only; the API returns these only to the asset's owner. */
+  private_note?: string | null;
+  provider_note?: string | null;
 }
 
 /** Values written by the form into `detail` (ids for make/model, strings/ints,
@@ -110,6 +113,10 @@ export interface CreateAssetPayload {
   detail?: AssetDetailInput;
   /** Media id from a prior upload (upload-first); sets the asset photo. */
   photo_media_id?: number;
+  /** Owner-only note (never shown to providers). */
+  private_note?: string;
+  /** Note the owner may share with a provider per-request. */
+  provider_note?: string;
 }
 
 export interface AssetReading {
@@ -239,6 +246,8 @@ export interface CreateRequestPayload {
   availabilities?: { starts_at: string; ends_at: string }[];
   /** Ids of media uploaded during the wizard (upload-first), attached on create. */
   media_ids?: number[];
+  /** Let the provider see the asset's provider note for this request. */
+  share_asset_note?: boolean;
 }
 
 export const customerApi = {

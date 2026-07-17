@@ -20,6 +20,7 @@ import {
   SectionLabel,
   Segment,
   Text,
+  Toggle,
   Wiz,
   flattenPages,
   useTheme,
@@ -69,6 +70,8 @@ export default function NewRequest() {
   const assetList = flattenPages(assets.data?.pages);
   const [assetId, setAssetId] = useState<number | null>(null);
   const selectedAsset = assetList.find((a) => a.id === assetId);
+  // Whether to share the asset's provider note with the pro. Private by default.
+  const [shareNote, setShareNote] = useState(false);
 
   // With exactly one asset of the needed type, picking it isn't a guess — it's
   // the only answer. Choose it, and say so below (`autoPicked`), so the choice
@@ -180,6 +183,7 @@ export default function NewRequest() {
         entry_code: reception === ReceptionType.EntryCode ? entryCode.trim() || undefined : undefined,
         availabilities: urgency === RequestUrgency.Scheduled ? availabilities : undefined,
         media_ids: mediaIds,
+        share_asset_note: selectedAsset?.provider_note ? shareNote : undefined,
       });
 
       // Remember the captured location on the property asset for next time.
@@ -286,6 +290,21 @@ export default function NewRequest() {
               note={autoPicked ? tr('createRequest.assetAutoPicked') : undefined}
             />
           )}
+
+          {/* The asset carries a note for pros; sharing it is per-request and
+              off by default (it may hold a gate code, etc). */}
+          {selectedAsset?.provider_note ? (
+            <Pressable onPress={() => setShareNote((v) => !v)}>
+              <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <View style={{ flex: 1, gap: 3 }}>
+                  <Text weight="700" style={{ fontSize: 14.5 }}>{tr('createRequest.shareNote')}</Text>
+                  <Text variant="caption" color={t.colors.ink3} numberOfLines={2}>“{selectedAsset.provider_note}”</Text>
+                </View>
+                <Toggle on={shareNote} />
+              </Card>
+            </Pressable>
+          ) : null}
+
           <Field label={tr('createRequest.whatHappened')} value={description} onChangeText={setDescription} placeholder={tr('createRequest.whatHappenedPlaceholder')} multiline voiceInput style={{ height: 84, textAlignVertical: 'top' }} />
         </>
       )}
