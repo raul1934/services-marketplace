@@ -147,6 +147,31 @@ class AssetEnrichmentTest extends TestCase
         $this->postJson("/api/provider/v1/requests/{$noAsset->id}/odometer", ['mileage' => 1])->assertStatus(422);
     }
 
+    public function test_history_lists_the_assets_requests_newest_first(): void
+    {
+        $client = User::factory()->create();
+        $asset = $this->makeVehicleAsset($client);
+        // A second asset of the same owner: history must not bleed between them.
+        $other = $client->assets()->create(['type' => 'property', 'nickname' => 'Casa']);
+        $category = ServiceCategory::create(['type' => 'roadside', 'slug' => 'tow', 'name' => 'Guincho', 'sort_order' => 1, 'is_active' => true]);
+
+        $make = fn (Asset $on, string $description) => ServiceRequest::create([
+            'client_id' => $client->id, 'service_category_id' => $category->id, 'asset_id' => $on->id,
+            'description' => $description, 'latitude' => 0, 'longitude' => 0,
+            'status' => RequestStatus::Completed->value,
+        ]);
+        $make($asset, 'primeiro');
+        $make($asset, 'segundo');
+        $make($other, 'de outro carro');
+
+        Sanctum::actingAs($client, ['client']);
+        $this->getJson("/api/customer/v1/assets/{$asset->id}/history")
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.description', 'segundo')
+            ->assertJsonPath('data.1.description', 'primeiro');
+    }
+
     public function test_history_is_owner_only(): void
     {
         $client = User::factory()->create();
