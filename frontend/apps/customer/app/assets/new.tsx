@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Image, LayoutAnimation, Platform, Pressable, UIManager, View } from 'react-native';
+import { Image, Pressable, View } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Alert, Field, Icon, IconName, SectionLabel, Text, Wiz, useTheme } from '@chamafacil/shared';
@@ -27,11 +28,6 @@ const BENEFITS: Record<AssetTypeKey, IconName[]> = {
   property: ['camera', 'wrench', 'home'],
   pet: ['heart', 'shield', 'camera'],
 };
-
-// Old-arch Android needs this opt-in for LayoutAnimation; a no-op on Fabric.
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 /**
  * AddAssetScreen (C23) as a stepper — same chrome as the request wizard (Wiz),
@@ -173,55 +169,59 @@ export default function AddAsset() {
           {ASSET_TYPES.map((k) => {
             const active = type === k;
             return (
-              <Pressable
-                key={k}
-                onPress={() => {
-                  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                  setType(k);
-                  setDetail({});
-                }}
-                style={{
-                  padding: 16,
-                  borderRadius: t.radius.card,
-                  borderWidth: 1.5,
-                  borderColor: active ? t.colors.accent : t.colors.line,
-                  backgroundColor: active ? t.colors.accentSoft : t.colors.surface,
-                  gap: 12,
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-                  <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-                    <Icon name={ICON[k]} size={26} color={active ? t.colors.accentInk : t.colors.accent} />
-                  </View>
-                  <View style={{ flex: 1, gap: 4 }}>
-                    <Text weight="800" style={{ fontSize: 17 }}>{tr(`assets.type.${k}`)}</Text>
-                    <Text variant="caption" color={t.colors.ink3}>{tr(`assetWizard.type.options.${k}`)}</Text>
-                    {serviceCount(k) > 0 ? (
-                      <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, marginTop: 2 }}>
-                        <Icon name="wrench" size={11} color={active ? t.colors.accentInk : t.colors.accent} />
-                        <Text weight="800" style={{ fontSize: 11.5 }} color={active ? t.colors.accentInk : t.colors.accent}>
-                          {tr('assetWizard.type.serviceCount', { count: serviceCount(k) })}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  {active ? <Icon name="check" size={22} color={t.colors.accent} /> : null}
-                </View>
-
-                {/* Revealed only for the chosen type — the payoff, under the choice. */}
-                {active ? (
-                  <View style={{ gap: 2, borderTopWidth: 1, borderColor: t.colors.line, paddingTop: 8 }}>
-                    {BENEFITS[k].map((icon, i) => (
-                      <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 }}>
-                        <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: t.colors.bg, alignItems: 'center', justifyContent: 'center' }}>
-                          <Icon name={icon} size={15} color={t.colors.accent} />
+              // `layout` animates the card's own height and pushes the ones below
+              // as the benefits reveal grows/shrinks — the smooth expand/contract.
+              <Animated.View key={k} layout={LinearTransition.duration(240)}>
+                <Pressable
+                  onPress={() => { setType(k); setDetail({}); }}
+                  style={{
+                    padding: 16,
+                    borderRadius: t.radius.card,
+                    borderWidth: 1.5,
+                    borderColor: active ? t.colors.accent : t.colors.line,
+                    backgroundColor: active ? t.colors.accentSoft : t.colors.surface,
+                    gap: 12,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                    <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                      <Icon name={ICON[k]} size={26} color={active ? t.colors.accentInk : t.colors.accent} />
+                    </View>
+                    <View style={{ flex: 1, gap: 4 }}>
+                      <Text weight="800" style={{ fontSize: 17 }}>{tr(`assets.type.${k}`)}</Text>
+                      <Text variant="caption" color={t.colors.ink3}>{tr(`assetWizard.type.options.${k}`)}</Text>
+                      {serviceCount(k) > 0 ? (
+                        <View style={{ alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, marginTop: 2 }}>
+                          <Icon name="wrench" size={11} color={active ? t.colors.accentInk : t.colors.accent} />
+                          <Text weight="800" style={{ fontSize: 11.5 }} color={active ? t.colors.accentInk : t.colors.accent}>
+                            {tr('assetWizard.type.serviceCount', { count: serviceCount(k) })}
+                          </Text>
                         </View>
-                        <Text style={{ flex: 1, fontSize: 14 }}>{tr(`assetWizard.type.benefits.${k}.${i}`)}</Text>
-                      </View>
-                    ))}
+                      ) : null}
+                    </View>
+                    {active ? <Icon name="check" size={22} color={t.colors.accent} /> : null}
                   </View>
-                ) : null}
-              </Pressable>
+
+                  {/* Revealed only for the chosen type. entering/exiting fade it
+                      in and out while the card's `layout` animates the height. */}
+                  {active ? (
+                    <Animated.View
+                      entering={FadeIn.duration(220)}
+                      exiting={FadeOut.duration(140)}
+                      style={{ gap: 2, borderTopWidth: 1, borderColor: t.colors.line, paddingTop: 8 }}
+                    >
+                      {BENEFITS[k].map((icon, i) => (
+                        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 }}>
+                          <View style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: t.colors.bg, alignItems: 'center', justifyContent: 'center' }}>
+                            <Icon name={icon} size={15} color={t.colors.accent} />
+                          </View>
+                          <Text style={{ flex: 1, fontSize: 14 }}>{tr(`assetWizard.type.benefits.${k}.${i}`)}</Text>
+                        </View>
+                      ))}
+                    </Animated.View>
+                  ) : null}
+                </Pressable>
+              </Animated.View>
             );
           })}
         </View>
