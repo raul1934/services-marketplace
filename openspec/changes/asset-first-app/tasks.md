@@ -25,7 +25,7 @@ Metro: `npx expo start --dev-client --port 8081` + `adb reverse tcp:8081`.
 - [x] 2.2 Remove the "Medir com RA · POC" card from the home and the drawer.
 - [x] 2.3 Tile caption prefers the property's **address** over `kind · unit` (the nickname already says the type). *Correct by inspection only — prod assets have no address, so the difference is invisible with real data.*
 - [ ] 2.4 `app/medicao.tsx` is now orphaned but **kept on purpose**: it is 69 KB of self-contained WebView prototype including the **360° room viewer**, which native AR does not replace. Retiring it is a product call.
-- [ ] 2.5 "Ajuda rápida" is still 100% vehicle (Guincho, Bateria, Troca de Pneu, Combustível) on an asset-first home. Product decision, not layout.
+- [x] 2.5 **"Ajuda rápida" is now asset-first** — a fixed curated shortlist (`QUICK_HELP_SLUGS` in `home.tsx`): Guincho, Bateria (vehicle) + Encanador, Limpeza (home), instead of the catalog's first 4 (all vehicle, since roadside seeds first). **Product decision: fixed actions**, two vehicle + two home so it isn't 100% car on a property-led app. The single-asset pre-select the user asked for needs no new code — each category carries `asset_type`, and `request/new` already auto-picks the lone asset of that type (7.1); the fixed tiles just feed that path. **Seen on device**: tiles render Guincho/Bateria/Encanador/Limpeza. (Auto-pick itself not demoable on the test account — it has 2 properties + 0 vehicles, so no exactly-one-of-a-type case; the 7.1 path is unchanged and already covered.)
 
 ## 3. Alerts (the bell)
 - [x] 3.1 `Api/NotificationController.php`: `index` (paginated), `unreadCount`, `markRead`, `markAllRead`.

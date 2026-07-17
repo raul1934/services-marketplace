@@ -47,6 +47,13 @@ function stepOf(status: RequestStatus): number {
 const MAX_HOME_CARDS = 2;
 
 /**
+ * Fixed "Ajuda rápida" shortcuts, in display order: two vehicle (roadside), two
+ * home (residential). A curated shortlist, not the catalog's first 4 — those are
+ * all vehicle because roadside is seeded first. Edit this list to re-curate.
+ */
+const QUICK_HELP_SLUGS = ['guincho', 'bateria', 'encanador', 'limpeza'];
+
+/**
  * Priority for the home active-requests list (lower = shown first):
  * open+urgent → open (em cotação) → requote → open+scheduled → accepted/in-progress.
  * Terminal requests (completed/cancelled/expired) return 99 and are excluded.
@@ -92,7 +99,16 @@ export default function Home() {
       return ra === 3 ? nextDateMs(a) - nextDateMs(b) : nextDateMs(b) - nextDateMs(a);
     });
   const visibleRequests = candidates.slice(0, MAX_HOME_CARDS);
-  const topCats = categories.data?.slice(0, 4) ?? [];
+  // "Ajuda rápida" is a fixed, asset-first shortlist — not the first 4 by sort
+  // order, which were all vehicle (roadside seeds first). Two vehicle, two home,
+  // so the shortcut isn't 100% car on a property-led app. Each tile carries its
+  // category's asset_type, so /request/new pre-selects the lone asset of that
+  // type (see there) — tap Guincho with one car, it's already chosen.
+  const catBySlug = new Map((categories.data ?? []).map((c) => [c.slug, c]));
+  const topCats = QUICK_HELP_SLUGS.flatMap((s) => {
+    const c = catBySlug.get(s);
+    return c ? [c] : [];
+  });
   const firstName = user?.name?.split(' ')[0];
 
   return (
