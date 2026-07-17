@@ -2,9 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { Image, Pressable, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Field, Icon, SectionLabel, Segment, Text, Wiz, useTheme } from '@chamafacil/shared';
+import { Alert, Field, Icon, IconName, SectionLabel, Text, Wiz, useTheme } from '@chamafacil/shared';
 import { useCreateAsset } from '../../src/queries';
 import { setCreatedAsset } from '../../src/assetPick';
+import { ICON } from '../../src/assetDisplay';
 import { ASSET_FIELDS, ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
 import { AssetDetailInput, GeoPoint } from '../../src/api';
 import { AssetLocationField } from '../../src/components/AssetLocationField';
@@ -15,6 +16,17 @@ import { DatePicker } from '../../src/components/DatePicker';
 import { PickedPhoto, uploadPhotos, pickPhotos } from '../../src/photos';
 
 type StepKey = 'type' | 'details' | 'location' | 'identity';
+
+/**
+ * What each asset type unlocks — shown under the type cards so step 1 isn't a
+ * choice on an empty screen but a preview of what registering gets you. The copy
+ * lives in i18n (`assetWizard.type.benefits.<type>`); only the icons are here.
+ */
+const BENEFITS: Record<AssetTypeKey, IconName[]> = {
+  vehicle: ['wrench', 'car', 'camera'],
+  property: ['camera', 'wrench', 'home'],
+  pet: ['heart', 'shield', 'camera'],
+};
 
 /**
  * AddAssetScreen (C23) as a stepper — same chrome as the request wizard (Wiz),
@@ -144,11 +156,57 @@ export default function AddAsset() {
       footer={footer}
     >
       {stepKey === 'type' ? (
-        <Segment
-          items={ASSET_TYPES.map((k) => ({ value: k, label: tr(`assets.type.${k}`) }))}
-          value={type}
-          onChange={(v) => { setType(v as AssetTypeKey); setDetail({}); }}
-        />
+        // Big tappable cards (icon + name + one line), not a compact segment:
+        // step 1 was a tiny toggle on an empty screen, and this is the choice the
+        // whole flow branches on — it earns the room. Below them, what the type
+        // unlocks — so the rest of the step previews the payoff, not blank space.
+        <>
+        <View style={{ gap: 12 }}>
+          {ASSET_TYPES.map((k) => {
+            const active = type === k;
+            return (
+              <Pressable
+                key={k}
+                onPress={() => { setType(k); setDetail({}); }}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 14,
+                  padding: 16,
+                  borderRadius: t.radius.card,
+                  borderWidth: 1.5,
+                  borderColor: active ? t.colors.accent : t.colors.line,
+                  backgroundColor: active ? t.colors.accentSoft : t.colors.surface,
+                }}
+              >
+                <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: active ? t.colors.accent : t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon name={ICON[k]} size={26} color={active ? t.colors.accentInk : t.colors.accent} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text weight="800" style={{ fontSize: 17 }}>{tr(`assets.type.${k}`)}</Text>
+                  <Text variant="caption" color={t.colors.ink3}>{tr(`assetWizard.type.options.${k}`)}</Text>
+                </View>
+                {active ? <Icon name="check" size={22} color={t.colors.accent} /> : null}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* What this type unlocks — fills the step and reacts to the choice. */}
+        <View style={{ marginTop: 4, padding: 16, borderRadius: t.radius.card, backgroundColor: t.colors.surface2, gap: 2 }}>
+          <Text variant="caption" weight="800" color={t.colors.ink3} style={{ marginBottom: 6 }}>
+            {tr('assetWizard.type.benefitsTitle')}
+          </Text>
+          {BENEFITS[type].map((icon, i) => (
+            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 7 }}>
+              <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name={icon} size={16} color={t.colors.accent} />
+              </View>
+              <Text style={{ flex: 1, fontSize: 14 }}>{tr(`assetWizard.type.benefits.${type}.${i}`)}</Text>
+            </View>
+          ))}
+        </View>
+        </>
       ) : null}
 
       {stepKey === 'details' ? (

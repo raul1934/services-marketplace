@@ -860,7 +860,17 @@
     "later": "Depois"
   },
   "assetWizard": {
-    "type": { "title": "O que você quer cadastrar?", "sub": "Casa, carro ou pet — o que precisar de cuidado." },
+    "type": {
+      "title": "O que você quer cadastrar?",
+      "sub": "Casa, carro ou pet — o que precisar de cuidado.",
+      "options": { "vehicle": "Carro, moto, caminhão", "property": "Casa, apartamento, edícula", "pet": "Cão, gato e outros" },
+      "benefitsTitle": "O QUE DÁ PRA FAZER",
+      "benefits": {
+        "vehicle": ["Chamar guincho, bateria e mais", "Acompanhar a quilometragem", "Guardar fotos e documentos"],
+        "property": ["Medir cômodos em RA", "Pedir orçamentos de serviços", "Guardar o endereço no mapa"],
+        "pet": ["Chamar veterinário, banho e tosa", "Guardar a carteira de vacinas", "Guardar fotos do pet"]
+      }
+    },
     "details": { "title": "Detalhes", "sub": "Preencha o que souber. Dá para editar depois." },
     "location": { "title": "Onde fica?", "sub": "Marque no mapa para o profissional achar." },
     "identity": { "title": "Dê um nome", "sub": "Uma foto e um apelido para você reconhecer." }

@@ -860,7 +860,17 @@
     "later": "Later"
   },
   "assetWizard": {
-    "type": { "title": "What are you registering?", "sub": "House, car or pet — whatever needs care." },
+    "type": {
+      "title": "What are you registering?",
+      "sub": "House, car or pet — whatever needs care.",
+      "options": { "vehicle": "Car, motorcycle, truck", "property": "House, apartment, annex", "pet": "Dog, cat and others" },
+      "benefitsTitle": "WHAT YOU CAN DO",
+      "benefits": {
+        "vehicle": ["Call a tow, battery and more", "Track the mileage", "Keep photos and documents"],
+        "property": ["Measure rooms in AR", "Request service quotes", "Save the address on the map"],
+        "pet": ["Call a vet, grooming and more", "Keep the vaccination record", "Keep photos of your pet"]
+      }
+    },
     "details": { "title": "Details", "sub": "Fill in what you know. You can edit it later." },
     "location": { "title": "Where is it?", "sub": "Drop a pin so the pro can find it." },
     "identity": { "title": "Give it a name", "sub": "A photo and a nickname to recognise it." }
