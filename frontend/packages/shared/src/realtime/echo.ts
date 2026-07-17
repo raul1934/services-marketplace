@@ -41,7 +41,22 @@ async function getEcho(): Promise<any> {
   const pusherModule =
     Platform.OS === 'web' ? require('pusher-js') : require('pusher-js/react-native');
   const Pusher: any = pusherModule.default ?? pusherModule;
-  const Echo = require('laravel-echo').default;
+
+  // laravel-echo ships both a CJS (`main`) and an ESM (`module`) build, so how
+  // deep the constructor sits depends on which one Metro picks; unwrap until we
+  // hold something callable.
+  //
+  // KNOWN BROKEN under Hermes: `new Echo(...)` below still throws "Object cannot
+  // be used as a constructor" even though this find() returned a value that
+  // reports `typeof === 'function'`. So realtime has never worked in the app —
+  // any screen that calls getEcho() throws. The unwrap is necessary but not
+  // sufficient; the real cause is still unknown. Don't trust this path until a
+  // fix is verified on-device.
+  const echoModule = require('laravel-echo');
+  const Echo: any = [echoModule?.default?.default, echoModule?.default, echoModule].find(
+    (c) => typeof c === 'function',
+  );
+  if (!Echo) throw new Error('laravel-echo: no constructor found in the module');
 
   const token = await getToken();
 
