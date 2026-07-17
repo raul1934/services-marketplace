@@ -873,7 +873,7 @@
         "pet": ["Chamar veterinário, banho e tosa", "Guardar a carteira de vacinas", "Guardar fotos do pet"]
       }
     },
-    "details": { "title": "Detalhes", "sub": "Preencha o que souber. Dá para editar depois." },
+    "details": { "title": "Detalhes", "sub": "Preencha o que souber. Dá para editar depois.", "more": "Mais detalhes (opcional)", "less": "Ocultar detalhes" },
     "location": { "title": "Onde fica?", "sub": "Marque no mapa para o profissional achar." },
     "identity": { "title": "Dê um nome", "sub": "Uma foto e um apelido para você reconhecer." }
   }
