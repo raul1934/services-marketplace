@@ -378,6 +378,7 @@ export default function AddAsset() {
               value={privateNote}
               onChangeText={setPrivateNote}
               multiline
+              voiceInput
               style={{ height: 88, textAlignVertical: 'top' }}
             />
             <Field
@@ -386,6 +387,7 @@ export default function AddAsset() {
               value={providerNote}
               onChangeText={setProviderNote}
               multiline
+              voiceInput
               style={{ height: 88, textAlignVertical: 'top' }}
             />
           </View>
