@@ -19,9 +19,6 @@ import { PickedPhoto, uploadPhotos, pickPhotos } from '../../src/photos';
 
 type StepKey = 'type' | 'details' | 'location' | 'area';
 
-/** Fallback map center (São Paulo) when there's no pin yet. */
-const FALLBACK = { latitude: -23.56, longitude: -46.64 };
-
 /**
  * What each asset type unlocks — shown under the type cards so step 1 isn't a
  * choice on an empty screen but a preview of what registering gets you. The copy
@@ -352,7 +349,6 @@ export default function AddAsset() {
             geofence={(detail.geofence as GeoPoint[] | undefined) ?? null}
             onChange={(patch) => setDetail((s) => ({ ...s, ...patch }))}
             height={300}
-            autoLocate
             hideArea
           />
         </>
@@ -378,29 +374,31 @@ export default function AddAsset() {
             ))}
           </View>
 
+          {/* Drawing needs a real location to seed the map — no fallback. */}
           <Button
             title={(detail.geofence as GeoPoint[] | undefined)?.length ? tr('assets.editArea', { count: (detail.geofence as GeoPoint[]).length }) : tr('assetWizard.area.draw')}
             variant={(detail.geofence as GeoPoint[] | undefined)?.length ? 'soft' : undefined}
             full
+            disabled={detail.latitude == null || detail.longitude == null}
             onPress={() => setAreaOpen(true)}
             left={<Icon name="plus" size={16} color={(detail.geofence as GeoPoint[] | undefined)?.length ? t.colors.accent : t.colors.accentInk} />}
           />
-          <Text variant="caption" color={t.colors.ink3} center>{tr('assetWizard.area.optional')}</Text>
+          <Text variant="caption" color={t.colors.ink3} center>
+            {detail.latitude == null ? tr('assetWizard.area.needLocation') : tr('assetWizard.area.optional')}
+          </Text>
 
-          <GeofenceEditor
-            visible={areaOpen}
-            center={
-              detail.latitude != null && detail.longitude != null
-                ? { latitude: detail.latitude as number, longitude: detail.longitude as number }
-                : FALLBACK
-            }
-            value={(detail.geofence as GeoPoint[] | undefined) ?? null}
-            onClose={() => setAreaOpen(false)}
-            onSave={(poly) => {
-              setDetail((s) => ({ ...s, geofence: poly }));
-              setAreaOpen(false);
-            }}
-          />
+          {detail.latitude != null && detail.longitude != null ? (
+            <GeofenceEditor
+              visible={areaOpen}
+              center={{ latitude: detail.latitude as number, longitude: detail.longitude as number }}
+              value={(detail.geofence as GeoPoint[] | undefined) ?? null}
+              onClose={() => setAreaOpen(false)}
+              onSave={(poly) => {
+                setDetail((s) => ({ ...s, geofence: poly }));
+                setAreaOpen(false);
+              }}
+            />
+          ) : null}
         </View>
       ) : null}
     </Wiz>

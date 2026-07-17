@@ -1,13 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { Button, Card, Icon, Text, useTheme } from '@chamafacil/shared';
 import { GeoPoint } from '../api';
 import { getCurrentCoords } from '../location';
 import { GeofenceEditor } from './GeofenceEditor';
-
-const FALLBACK = { latitude: -23.56, longitude: -46.64 };
 
 /** Patch applied to the asset `detail` (latitude/longitude/address/geofence). */
 export interface AssetLocationPatch {
@@ -28,7 +26,6 @@ export function AssetLocationField({
   onChange,
   height = 200,
   hideArea,
-  autoLocate,
 }: {
   latitude?: number | null;
   longitude?: number | null;
@@ -38,15 +35,13 @@ export function AssetLocationField({
   height?: number;
   /** Hide the "draw the area" button — the wizard promotes it to its own step. */
   hideArea?: boolean;
-  /** With no pin yet, drop one on the device's current location on mount. */
-  autoLocate?: boolean;
 }) {
   const t = useTheme();
   const { t: tr } = useTranslation();
   const [locating, setLocating] = useState(false);
   const [editing, setEditing] = useState(false);
   const hasPin = latitude != null && longitude != null;
-  const center = hasPin ? { latitude: latitude as number, longitude: longitude as number } : FALLBACK;
+  const center = hasPin ? { latitude: latitude as number, longitude: longitude as number } : null;
 
   const useMyLocation = async () => {
     setLocating(true);
@@ -60,46 +55,44 @@ export function AssetLocationField({
     }
   };
 
-  // Pre-select the current location once, so the map opens on where you are
-  // instead of a fallback city center. Never overrides an existing pin.
-  const autoTried = useRef(false);
-  useEffect(() => {
-    if (!autoLocate || hasPin || autoTried.current) return;
-    autoTried.current = true;
-    useMyLocation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoLocate, hasPin]);
-
   return (
     <View style={{ gap: 10 }}>
-      <Card padded={false} style={{ overflow: 'hidden' }}>
-        <MapView
-          style={{ height }}
-          region={{ latitude: center.latitude, longitude: center.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
-          onPress={(e) => onChange({ latitude: e.nativeEvent.coordinate.latitude, longitude: e.nativeEvent.coordinate.longitude })}
-        >
-          {hasPin && (
+      {/* No fallback location: with no pin we show a prompt, not a map centered
+          on some arbitrary city, so the map only ever shows a real place. */}
+      {center ? (
+        <Card padded={false} style={{ overflow: 'hidden' }}>
+          <MapView
+            style={{ height }}
+            region={{ latitude: center.latitude, longitude: center.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
+            onPress={(e) => onChange({ latitude: e.nativeEvent.coordinate.latitude, longitude: e.nativeEvent.coordinate.longitude })}
+          >
             <Marker
               draggable
               coordinate={{ latitude: center.latitude, longitude: center.longitude }}
               pinColor={t.colors.accent}
               onDragEnd={(e) => onChange({ latitude: e.nativeEvent.coordinate.latitude, longitude: e.nativeEvent.coordinate.longitude })}
             />
-          )}
-          {geofence && geofence.length >= 2 && (
-            <Polygon coordinates={geofence} strokeColor={t.colors.accent} fillColor={`${t.colors.accent}33`} strokeWidth={2} />
-          )}
-        </MapView>
-      </Card>
+            {geofence && geofence.length >= 2 && (
+              <Polygon coordinates={geofence} strokeColor={t.colors.accent} fillColor={`${t.colors.accent}33`} strokeWidth={2} />
+            )}
+          </MapView>
+        </Card>
+      ) : (
+        <Card style={{ alignItems: 'center', gap: 8, paddingVertical: 28 }}>
+          <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="location" size={24} color={t.colors.accent} />
+          </View>
+          <Text variant="caption" center color={t.colors.ink3}>{tr('assets.locationHint')}</Text>
+        </Card>
+      )}
 
       <Button
         title={locating ? tr('assets.locating') : tr('assets.useLocation')}
-        variant="soft"
+        variant={hasPin ? 'soft' : undefined}
         full
         onPress={useMyLocation}
-        left={<Icon name="location" size={16} color={t.colors.accent} />}
+        left={<Icon name="location" size={16} color={hasPin ? t.colors.accent : t.colors.accentInk} />}
       />
-      {!hasPin && <Text variant="caption">{tr('assets.locationHint')}</Text>}
 
       {hasPin && !hideArea && (
         <Button
@@ -111,16 +104,18 @@ export function AssetLocationField({
         />
       )}
 
-      <GeofenceEditor
-        visible={editing}
-        center={center}
-        value={geofence ?? null}
-        onClose={() => setEditing(false)}
-        onSave={(poly) => {
-          onChange({ geofence: poly });
-          setEditing(false);
-        }}
-      />
+      {center && (
+        <GeofenceEditor
+          visible={editing}
+          center={center}
+          value={geofence ?? null}
+          onClose={() => setEditing(false)}
+          onSave={(poly) => {
+            onChange({ geofence: poly });
+            setEditing(false);
+          }}
+        />
+      )}
     </View>
   );
 }
