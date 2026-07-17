@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\JobPartController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\JobUpdateController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\Provider\CounterOfferController;
@@ -47,6 +48,13 @@ Route::prefix('provider/v1')->group(function () {
         Route::post('push/token', [PushTokenController::class, 'store']);
         Route::delete('push/token', [PushTokenController::class, 'destroy']);
         Route::post('uploads', [UploadController::class, 'store']);
+
+        // The bell. Not ability-gated: a user's notifications are their own
+        // regardless of which app is asking.
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('notifications/read-all', [NotificationController::class, 'markAllRead']);
+        Route::post('notifications/{id}/read', [NotificationController::class, 'markRead']);
     });
 
     // ── Provider (token ability: provider) ───────────────────

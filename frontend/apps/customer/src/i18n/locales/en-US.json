@@ -153,7 +153,12 @@
     "quickHelp": "Quick help",
     "reviewBids": "Review provider bids",
     "trackRequest": "Track service",
-    "seeAll": "See all ({{count}})"
+    "seeAll": "See all ({{count}})",
+    "assets": "My assets",
+    "assetsAll": "See all",
+    "assetsAdd": "Add",
+    "firstAssetTitle": "Add your first asset",
+    "firstAssetBody": "House, car or pet — save the details once and get quotes without repeating yourself."
   },
   "requests": {
     "title": "My requests",
@@ -183,9 +188,9 @@
     "language": "Language",
     "logout": "Sign out",
     "themes": {
-      "sunset": "Sunset",
-      "trust": "Trust",
-      "night": "Night"
+      "auto": "Automatic",
+      "light": "Light",
+      "dark": "Dark"
     }
   },
   "categories": {
@@ -310,7 +315,8 @@
     "detailsLabel": "Details",
     "paymentLabel": "Payment method",
     "yourAsset": "Your asset",
-    "addAsset": "Add new"
+    "addAsset": "Add new",
+    "assetAutoPicked": "We picked this one — it's your only saved asset. Tap another to change it."
   },
   "payment": {
     "pix": "Pix",
@@ -796,6 +802,34 @@
     },
     "scanning": "Detecting surface…",
     "scanHint": "Slowly wave the phone side to side, aiming at the surface.",
-    "surfaceFound": "Surface detected!"
+    "surfaceFound": "Surface detected!",
+    "shot": "Take measurement photo",
+    "shot_saved": "Photo kept",
+    "shot_failed": "Couldn't take the photo"
+  },
+  "notifications": {
+    "title": "Alerts",
+    "markAll": "Mark all",
+    "emptyTitle": "No alerts yet",
+    "emptyBody": "When something happens with your requests — a bid, an answer, a status change — you'll see it here.",
+    "untitled": "Alert"
+  },
+  "firstAsset": {
+    "skip": "Not now",
+    "cta": "Add my first asset",
+    "steps": [
+      {
+        "title": "Add what you look after",
+        "body": "Your house, your car, your pet — anything that will need work one day. We call it an asset."
+      },
+      {
+        "title": "Keep it all in one place",
+        "body": "Address, room measurements, mileage, photos. You fill it in once."
+      },
+      {
+        "title": "Get quotes without repeating",
+        "body": "The pro already knows what it is, where it is, and how big. Less back-and-forth, sharper bids."
+      }
+    ]
   }
 }
