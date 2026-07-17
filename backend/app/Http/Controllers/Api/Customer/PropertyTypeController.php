@@ -12,6 +12,10 @@ class PropertyTypeController extends Controller
 {
     public function index(): AnonymousResourceCollection
     {
-        return PropertyTypeResource::collection(PropertyType::orderBy('name')->get());
+        // Eager-load the parts so the client gets the whole catalog in one go
+        // (same shape as vehicle makes -> models).
+        return PropertyTypeResource::collection(
+            PropertyType::with('partTypes')->orderBy('name')->get(),
+        );
     }
 }
