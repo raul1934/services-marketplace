@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  */
 class Asset extends Model
 {
-    protected $fillable = ['user_id', 'type', 'nickname', 'detailable_type', 'detailable_id', 'photo_path', 'archived_at'];
+    protected $fillable = ['user_id', 'type', 'nickname', 'detailable_type', 'detailable_id', 'photo_path', 'private_note', 'provider_note', 'archived_at'];
 
     protected $casts = [
         'type' => AssetType::class,

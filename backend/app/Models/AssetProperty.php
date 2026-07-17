@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 /** Property characteristics for an asset (the `detailable` of a property asset). */
 class AssetProperty extends Model
 {
-    protected $fillable = ['property_type_id', 'unit', 'size', 'address', 'floor', 'condo', 'latitude', 'longitude', 'geofence'];
+    protected $fillable = [
+        'property_type_id', 'unit', 'size', 'address', 'floor', 'condo', 'latitude', 'longitude', 'geofence',
+        'cep', 'street', 'number', 'neighborhood', 'city', 'state',
+    ];
 
     protected $casts = [
         'latitude' => 'float',

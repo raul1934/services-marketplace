@@ -43,6 +43,7 @@ class RequestService
             'market_id' => $market?->id,
             'service_category_id' => $data['service_category_id'],
             'asset_id' => $data['asset_id'] ?? null,
+            'share_asset_note' => $data['share_asset_note'] ?? false,
             'description' => $data['description'],
             ...$location,
             'address' => $data['address'] ?? null,

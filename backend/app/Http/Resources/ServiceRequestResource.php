@@ -47,6 +47,12 @@ class ServiceRequestResource extends JsonResource
             'max_wait_minutes' => $this->max_wait_minutes,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'asset' => new AssetResource($this->whenLoaded('asset')),
+            // The asset's shareable provider_note: always to the owner, to the
+            // provider only when the owner opted into sharing on this request.
+            // The asset's private_note is never surfaced here.
+            'asset_provider_note' => ($user && $user->id === $this->client_id) || $this->share_asset_note
+                ? $this->asset?->provider_note
+                : null,
             'photos' => MediaResource::collection($this->whenLoaded('photos')),
             'before_photos' => MediaResource::collection($this->whenLoaded('beforePhotos')),
             'after_photos' => MediaResource::collection($this->whenLoaded('afterPhotos')),
