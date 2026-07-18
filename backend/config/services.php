@@ -61,4 +61,11 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT'),
     ],
 
+    'meta' => [
+        // Graph API version for social publishing (Facebook + Instagram). The
+        // per-connection access tokens live encrypted in social_connections,
+        // never in env.
+        'graph_version' => env('META_GRAPH_VERSION', 'v21.0'),
+    ],
+
 ];
