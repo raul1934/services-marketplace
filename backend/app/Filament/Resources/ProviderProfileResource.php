@@ -51,6 +51,12 @@ class ProviderProfileResource extends Resource
                     ->label('Online'),
                 Forms\Components\Toggle::make('is_approved')
                     ->label('Approved (uncheck to suspend)'),
+                Forms\Components\Select::make('market_id')
+                    ->label('Território (praça)')
+                    ->relationship('market', 'name', fn (Builder $query) => $query->where('is_active', true))
+                    ->searchable()
+                    ->preload()
+                    ->helperText('A praça que este prestador atende. Atribuída pela localização no 1º acesso; reatribua aqui.'),
                 Forms\Components\TextInput::make('rating_avg')
                     ->numeric()
                     ->disabled(),
