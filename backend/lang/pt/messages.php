@@ -32,4 +32,5 @@ return [
     'warranty_window_closed' => 'O prazo de garantia deste serviço expirou.',
     'proposal_not_pending' => 'Esta proposta não está mais pendente.',
     'counter_offer_not_pending' => 'Esta contraproposta já foi respondida.',
+    'out_of_coverage' => 'Ainda não atendemos na sua região. Guardamos o seu interesse e vamos avisar quando chegarmos aí.',
 ];

@@ -45,10 +45,17 @@ class ProviderService
             ],
         );
 
-        // Providers move — recompute which Market (city) they're currently in
-        // on every ping, unlike a request's market_id which is fixed at creation.
-        $market = app(MatchingService::class)->marketFor((float) $location['latitude'], (float) $location['longitude']);
-        $user->providerProfile?->update(['market_id' => $market?->id]);
+        // A provider's territory is assigned ONCE — from their first known
+        // location — then fixed (an admin/franchisee can reassign it). We no
+        // longer overwrite it on every ping, so the franchise territory is stable
+        // instead of following live GPS.
+        $profile = $user->providerProfile;
+        if ($profile && $profile->market_id === null) {
+            $market = app(MatchingService::class)->marketFor((float) $location['latitude'], (float) $location['longitude']);
+            if ($market) {
+                $profile->update(['market_id' => $market->id]);
+            }
+        }
 
         // Live tracking: push the new position to every active job's channel.
         ServiceRequest::where('accepted_provider_id', $user->id)

@@ -9,7 +9,9 @@ use App\Enums\RequestStatus;
 use App\Enums\RequestUrgency;
 use App\Enums\SurchargeStatus;
 use App\Events\RequestStatusUpdated;
+use App\Exceptions\OutOfCoverageException;
 use App\Jobs\DispatchNewRequestToProviders;
+use App\Models\CoverageLead;
 use App\Models\Media;
 use App\Models\Question;
 use App\Models\ServiceRequest;
@@ -37,6 +39,21 @@ class RequestService
             : ['latitude' => $data['latitude'], 'longitude' => $data['longitude']];
 
         $market = app(MatchingService::class)->marketFor($location['latitude'], $location['longitude']);
+
+        // Territory isolation: no active Market covers this point, so no
+        // franchisee serves it. Capture the demand as a lead and tell the
+        // customer, instead of creating an orphan request that fans out by radius.
+        if (config('matching.territory_isolation') && $market === null) {
+            CoverageLead::create([
+                'client_id' => $client->id,
+                'service_category_id' => $data['service_category_id'],
+                'latitude' => $location['latitude'],
+                'longitude' => $location['longitude'],
+                'address' => $data['address'] ?? null,
+            ]);
+
+            throw new OutOfCoverageException(__('messages.out_of_coverage'));
+        }
 
         $request = ServiceRequest::create([
             'client_id' => $client->id,

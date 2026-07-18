@@ -53,9 +53,17 @@ class MatchingService
             ->where(fn ($q) => $q
                 ->where('provider_profiles.rating_count', '<', 5)
                 ->orWhere('provider_profiles.rating_avg', '>=', 2.0))
-            ->whereBetween('provider_locations.latitude', [$latMin, $latMax])
-            ->whereBetween('provider_locations.longitude', [$lngMin, $lngMax])
-            ->whereRaw("{$haversine} <= ?", [$lat, $lng, $lat, $radiusKm])
+            // Territory isolation: only providers assigned to the request's Market
+            // (the franchisee's territory) get it — the geofence is the boundary,
+            // so no radius cap. Otherwise the legacy proximity radius applies.
+            ->when(
+                config('matching.territory_isolation'),
+                fn ($q) => $q->where('provider_profiles.market_id', $request->market_id),
+                fn ($q) => $q
+                    ->whereBetween('provider_locations.latitude', [$latMin, $latMax])
+                    ->whereBetween('provider_locations.longitude', [$lngMin, $lngMax])
+                    ->whereRaw("{$haversine} <= ?", [$lat, $lng, $lat, $radiusKm]),
+            )
             // Distance stays primary — this is proximity-first roadside dispatch.
             // rating_avg only breaks ties (rare, since distance is a float).
             ->orderBy('distance_km')
@@ -98,8 +106,12 @@ class MatchingService
     {
         $location = $provider->location;
         $categoryIds = $provider->categories()->pluck('service_categories.id');
+        $isolate = config('matching.territory_isolation');
+        $marketId = $provider->providerProfile?->market_id;
 
-        if (! $location || $categoryIds->isEmpty()) {
+        // No location, no categories, or — under isolation — no assigned territory
+        // means nothing to show.
+        if (! $location || $categoryIds->isEmpty() || ($isolate && ! $marketId)) {
             return null;
         }
 
@@ -115,9 +127,16 @@ class MatchingService
             ->where('status', RequestStatus::Open->value)
             ->when($urgency, fn ($q) => $q->where('urgency', $urgency->value))
             ->whereIn('service_category_id', $categoryIds)
-            ->whereBetween('latitude', [$latMin, $latMax])
-            ->whereBetween('longitude', [$lngMin, $lngMax])
-            ->whereRaw("{$haversine} <= ?", [$lat, $lng, $lat, $radiusKm])
+            // Territory isolation: only requests in the provider's own Market;
+            // else the legacy proximity radius.
+            ->when(
+                $isolate,
+                fn ($q) => $q->where('market_id', $marketId),
+                fn ($q) => $q
+                    ->whereBetween('latitude', [$latMin, $latMax])
+                    ->whereBetween('longitude', [$lngMin, $lngMax])
+                    ->whereRaw("{$haversine} <= ?", [$lat, $lng, $lat, $radiusKm]),
+            )
             ->orderBy('distance_km')
             ->with(['category', 'photos', 'availabilities', 'asset'])
             ->withCount('proposals');
@@ -220,7 +239,14 @@ class MatchingService
     {
         $r = self::EARTH_RADIUS_KM;
 
-        return "({$r} * acos(least(1, greatest(-1, "
+        // Clamp acos()'s input to [-1, 1] to avoid NaN from float rounding.
+        // Postgres/MySQL spell it least()/greatest(); SQLite (the test DB) uses
+        // the scalar min()/max() — pick by driver so matching runs on both.
+        $sqlite = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite';
+        $least = $sqlite ? 'min' : 'least';
+        $greatest = $sqlite ? 'max' : 'greatest';
+
+        return "({$r} * acos({$least}(1, {$greatest}(-1, "
             ."cos(radians(?)) * cos(radians({$latCol})) * cos(radians({$lngCol}) - radians(?)) "
             ."+ sin(radians(?)) * sin(radians({$latCol}))"
             .'))))';

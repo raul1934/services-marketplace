@@ -32,4 +32,5 @@ return [
     'warranty_window_closed' => 'The warranty window for this service has expired.',
     'proposal_not_pending' => 'This proposal is no longer pending.',
     'counter_offer_not_pending' => 'This counter-offer has already been answered.',
+    'out_of_coverage' => "We don't serve your area yet. We saved your interest and will let you know when we get there.",
 ];
