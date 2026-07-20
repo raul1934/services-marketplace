@@ -54,12 +54,14 @@ jobs:
             $COMPOSE run --rm --no-deps backend \
               composer install --no-dev --optimize-autoloader --no-interaction
             $COMPOSE up -d
-            # O Caddyfile é um bind mount read-only: quando só ele muda, o
-            # `up -d` não recria o container e o Caddy segue com a config antiga
-            # (ele lê o arquivo apenas no boot). Recarrega explicitamente — é
-            # graceful, sem derrubar conexões nem reemitir certificados.
-            $COMPOSE exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile \
-              || $COMPOSE restart caddy
+            # O Caddyfile é um bind mount de ARQUIVO ÚNICO. `git reset --hard`
+            # troca o arquivo por rename atômico (novo inode), mas o container em
+            # execução continua preso ao inode antigo — então um `caddy reload`
+            # lê a config velha de dentro do container e "tem sucesso" sem aplicar
+            # nada. Só recriar o container re-resolve o mount para o arquivo novo.
+            # Certificados vivem no volume chamafacil-caddy-data (preservado); o
+            # blip é subsegundo.
+            $COMPOSE up -d --force-recreate caddy
             $COMPOSE exec -T backend php artisan migrate --force
             # Dados de referência idempotentes (categorias, perguntas, catálogos) em todo deploy.
             $COMPOSE exec -T backend php artisan db:seed --class=ProductionSeeder --force
