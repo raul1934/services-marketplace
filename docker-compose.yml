@@ -33,6 +33,12 @@ services:
       DB_PORT: 5432
     volumes:
       - ./backend:/app
+      # vendor/ lives in a named volume, NOT the bind mount: ~17k files (98% of
+      # the tree) that never change while developing, and reading them across the
+      # Windows<->Linux filesystem bridge measured ~136x slower than container
+      # disk. App code stays bind-mounted so edits still hot-reload.
+      # Populate with: docker compose run --rm backend composer install
+      - backend-vendor:/app/vendor
     ports:
       - "19000:8000"
     depends_on:
@@ -50,6 +56,12 @@ services:
       DB_PORT: 5432
     volumes:
       - ./backend:/app
+      # vendor/ lives in a named volume, NOT the bind mount: ~17k files (98% of
+      # the tree) that never change while developing, and reading them across the
+      # Windows<->Linux filesystem bridge measured ~136x slower than container
+      # disk. App code stays bind-mounted so edits still hot-reload.
+      # Populate with: docker compose run --rm backend composer install
+      - backend-vendor:/app/vendor
     depends_on:
       db:
         condition: service_healthy
@@ -65,6 +77,12 @@ services:
       DB_PORT: 5432
     volumes:
       - ./backend:/app
+      # vendor/ lives in a named volume, NOT the bind mount: ~17k files (98% of
+      # the tree) that never change while developing, and reading them across the
+      # Windows<->Linux filesystem bridge measured ~136x slower than container
+      # disk. App code stays bind-mounted so edits still hot-reload.
+      # Populate with: docker compose run --rm backend composer install
+      - backend-vendor:/app/vendor
     ports:
       - "19080:8080"
     depends_on:
@@ -84,6 +102,12 @@ services:
       DB_PORT: 5432
     volumes:
       - ./backend:/app
+      # vendor/ lives in a named volume, NOT the bind mount: ~17k files (98% of
+      # the tree) that never change while developing, and reading them across the
+      # Windows<->Linux filesystem bridge measured ~136x slower than container
+      # disk. App code stays bind-mounted so edits still hot-reload.
+      # Populate with: docker compose run --rm backend composer install
+      - backend-vendor:/app/vendor
     depends_on:
       db:
         condition: service_healthy
@@ -128,6 +152,7 @@ services:
 
 volumes:
   chamafacil-db-data:
+  backend-vendor:
   chamafacil-caddy-data:
 
 # Pin the project's default network to a dedicated name + subnet that does not
