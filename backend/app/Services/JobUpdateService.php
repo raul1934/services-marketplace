@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\JobProgressUpdated;
 use App\Models\JobUpdate;
 use App\Models\ServiceRequest;
 use App\Models\User;
@@ -25,6 +26,8 @@ class JobUpdateService
                 'tag' => 'update',
             ]);
         }
+
+        JobProgressUpdated::dispatch($request->id, 'update_added');
 
         return $update;
     }

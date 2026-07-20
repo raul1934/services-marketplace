@@ -140,10 +140,17 @@ export interface DisputeUpdatedEvent {
   action: 'opened' | 'defense_filed' | 'resolved';
 }
 
+export interface JobProgressEvent {
+  request_id: number;
+  kind: 'part_added' | 'part_removed' | 'update_added';
+}
+
 export interface RequestChannelHandlers {
   onProposal?: (e: ProposalReceivedEvent) => void;
   onLocation?: (e: LocationUpdatedEvent) => void;
   onStatus?: (e: StatusUpdatedEvent) => void;
+  /** Provider added/removed a part or posted a timeline note on an active job. */
+  onProgress?: (e: JobProgressEvent) => void;
   onPartsApprovalRequested?: (e: PartsApprovalRequestedEvent) => void;
   onPartsApproved?: (e: PartsApprovedEvent) => void;
   onQuestion?: (e: QuestionUpdatedEvent) => void;
@@ -168,6 +175,7 @@ export async function subscribeToRequest(
   if (handlers.onProposal) channel.listen('.proposal.received', handlers.onProposal);
   if (handlers.onLocation) channel.listen('.location.updated', handlers.onLocation);
   if (handlers.onStatus) channel.listen('.status.updated', handlers.onStatus);
+  if (handlers.onProgress) channel.listen('.progress.updated', handlers.onProgress);
   if (handlers.onPartsApprovalRequested) channel.listen('.parts.approval_requested', handlers.onPartsApprovalRequested);
   if (handlers.onPartsApproved) channel.listen('.parts.approved', handlers.onPartsApproved);
   if (handlers.onQuestion) channel.listen('.question.updated', handlers.onQuestion);
