@@ -9,6 +9,7 @@ use App\Models\Market;
 use App\Models\Proposal;
 use App\Models\ServiceRequest;
 use App\Models\User;
+use App\Support\Geofence;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -156,6 +157,9 @@ class MatchingService
             ->where('proposals.status', ProposalStatus::Accepted->value)
             ->join('service_requests', 'service_requests.id', '=', 'proposals.service_request_id')
             ->where('service_requests.service_category_id', $categoryId)
+            // TEMP (test bots): bot bids are priced randomly, so letting them in
+            // would skew the pricing hint real providers see. Remove with app/Bots.
+            ->where('service_requests.is_test', false)
             ->whereBetween('service_requests.latitude', [$latMin, $latMax])
             ->whereBetween('service_requests.longitude', [$lngMin, $lngMax])
             ->whereRaw("{$haversine} <= ?", [$lat, $lng, $lat, $radiusKm])
@@ -202,37 +206,16 @@ class MatchingService
     }
 
     /**
-     * Standard ray-casting point-in-polygon test: count how many times a ray
-     * cast from the point to infinity crosses the polygon's edges — odd means
-     * inside, even means outside. $polygon is an array of {latitude,
-     * longitude} points (same shape as AssetProperty's geofence), treating
-     * lng/lat as plane coordinates, which is accurate enough at city scale.
+     * Ray-casting point-in-polygon test. The implementation lives in
+     * App\Support\Geofence so the inverse operation (sampling a random point
+     * inside a geofence) can share it; this stays as the in-service name the
+     * matching code reads by.
      *
      * @param  array<array{latitude:float,longitude:float}>  $polygon
      */
     private function pointInPolygon(float $lat, float $lng, array $polygon): bool
     {
-        $count = count($polygon);
-        if ($count < 3) {
-            return false;
-        }
-
-        $inside = false;
-        for ($i = 0, $j = $count - 1; $i < $count; $j = $i++) {
-            $latI = (float) $polygon[$i]['latitude'];
-            $lngI = (float) $polygon[$i]['longitude'];
-            $latJ = (float) $polygon[$j]['latitude'];
-            $lngJ = (float) $polygon[$j]['longitude'];
-
-            $intersects = ($latI > $lat) !== ($latJ > $lat)
-                && $lng < ($lngJ - $lngI) * ($lat - $latI) / ($latJ - $latI) + $lngI;
-
-            if ($intersects) {
-                $inside = ! $inside;
-            }
-        }
-
-        return $inside;
+        return Geofence::contains($lat, $lng, $polygon);
     }
 
     private function haversineSql(string $latCol, string $lngCol): string
