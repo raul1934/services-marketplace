@@ -15,11 +15,15 @@
 
 # Laravel API
 http://api.chamafacil.local {
+	# Mirrors Caddyfile.prod — JSON responses compress ~8x, and keeping dev in
+	# parity means payload sizes measured here match what production ships.
+	encode zstd gzip
 	reverse_proxy backend:8000
 }
 
 # Filament admin
 http://admin.chamafacil.local {
+	encode zstd gzip
 	reverse_proxy backend:8000
 }
 
