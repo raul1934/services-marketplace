@@ -30,6 +30,18 @@ export function Text({ variant = 'body', color, weight, center, style, ...rest }
   // Each Manrope weight is its own bundled family — pick it from the effective weight.
   const effWeight = weight ?? (base.fontWeight as string);
 
+  // `body` pins lineHeight to 21, sized for its 15px default. A caller that
+  // overrides fontSize (a 30px price, a 36px star) but not lineHeight would
+  // otherwise render a big glyph inside a 21px line box, clipping anything
+  // reaching past the x-height: "R$ 240,00" came out as "RS 240.00", losing the
+  // $ bar and the comma tail, and ★ lost its points. Drop the inherited value
+  // in that case and let the platform derive one from the actual font size.
+  const flat = StyleSheet.flatten(style) as { fontSize?: number; lineHeight?: number } | undefined;
+  const resolved =
+    flat?.fontSize != null && flat?.lineHeight == null && 'lineHeight' in base
+      ? { ...base, lineHeight: undefined }
+      : base;
+
   // Expose heading semantics (role + level) to assistive tech on web.
   const level = HEADING_LEVEL[variant];
   const headingProps: any = level
@@ -41,7 +53,7 @@ export function Text({ variant = 'body', color, weight, center, style, ...rest }
       {...headingProps}
       {...rest}
       style={[
-        base,
+        resolved,
         variant === 'mono'
           ? { fontFamily: Number(effWeight) >= 700 ? 'SpaceMono_700Bold' : 'SpaceMono_400Regular' }
           : { fontFamily: manropeFor(effWeight) },
