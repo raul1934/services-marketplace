@@ -82,6 +82,9 @@ class RequestController extends Controller
                 'photos', 'beforePhotos', 'afterPhotos', 'acceptedProposal',
                 'provider.providerProfile', 'availabilities', 'review', 'questions.provider', 'questions.answerPhotos', 'answers',
                 'surcharges.provider', 'surcharges.media', 'rescheduleRequests', 'jobParts',
+                // Feeds the "what's being done" panel that replaces the map once
+                // the provider is on site.
+                'jobUpdates.media',
             ])->loadCount('proposals')
         );
     }
@@ -132,11 +135,11 @@ class RequestController extends Controller
     public function reportNoShow(Request $request, ServiceRequest $serviceRequest): ServiceRequestResource
     {
         $this->authorizeOwner($request, $serviceRequest);
-        abort_unless(
-            in_array($serviceRequest->status, [RequestStatus::Accepted, RequestStatus::InProgress], true),
-            422,
-            __('messages.request_not_active'),
-        );
+        // Was: any active status, no clock. That let a client report a no-show
+        // for a provider standing in front of them (in_progress), or two minutes
+        // after acceptance. Both are now the model's business, so the rule holds
+        // wherever it's asked.
+        abort_unless($serviceRequest->canReportNoShow(), 422, __('messages.request_not_active'));
 
         $data = $request->validate(['reason' => ['nullable', 'string', 'max:255']]);
         $updated = $this->service->reportNoShow($serviceRequest, $data['reason'] ?? null);

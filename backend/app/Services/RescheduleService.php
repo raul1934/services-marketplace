@@ -36,6 +36,12 @@ class RescheduleService
             __('messages.reschedule_limit'),
         );
 
+        // The client may only move a job that hasn't started. Urgent jobs also
+        // wait out the promised arrival window — see ServiceRequest::canReschedule.
+        // The provider's own reschedule requests aren't gated by that clock:
+        // they're the party who knows they can't make it.
+        abort_if($role === 'client' && ! $request->canReschedule(), 422, __('messages.request_not_active'));
+
         $reschedule = $request->rescheduleRequests()->create([
             'requested_by_id' => $actor->id,
             'requested_by_role' => $role,

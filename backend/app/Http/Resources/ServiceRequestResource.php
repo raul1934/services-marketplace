@@ -31,6 +31,21 @@ class ServiceRequestResource extends JsonResource
                     && $this->status === \App\Enums\RequestStatus::Accepted,
                 fn () => $this->start_code,
             ),
+            // TEMP (test bots): drives the "conteúdo de teste" banner in both
+            // apps. Remove with app/Bots.
+            'is_test' => (bool) $this->is_test,
+            // TEMP (test bots): a bot client has no human to read the start_code
+            // aloud, so a real provider could never start an urgent bot job.
+            // Exposed ONLY on a test request, ONLY to the accepted provider,
+            // ONLY while accepted — is_test is true on bot rows only, so a real
+            // customer's code cannot leak through this. Remove with app/Bots.
+            'test_start_code' => $this->when(
+                $this->is_test
+                    && $user
+                    && $user->id === $this->accepted_provider_id
+                    && $this->status === \App\Enums\RequestStatus::Accepted,
+                fn () => $this->start_code,
+            ),
             'budget_max' => $this->budget_max !== null ? (float) $this->budget_max : null,
             'payment_method' => $this->payment_method,
             // Derived payment receipt (C20): mirrors RequestService::settleEarnings.
@@ -120,6 +135,20 @@ class ServiceRequestResource extends JsonResource
             ] : null),
             // Present only when the haversine query selected a distance_km column.
             'distance_km' => $this->when(isset($this->distance_km), fn () => round((float) $this->distance_km, 2)),
+            // Single source of truth for the pre-arrival actions, so the app
+            // doesn't re-derive (and drift from) the server's rule.
+            'can_reschedule' => $this->when(
+                $user && $user->id === $this->client_id,
+                fn () => $this->canReschedule(),
+            ),
+            'can_report_no_show' => $this->when(
+                $user && $user->id === $this->client_id,
+                fn () => $this->canReportNoShow(),
+            ),
+            'arrival_deadline' => $this->when(
+                $user && $user->id === $this->client_id,
+                fn () => $this->arrivalDeadline(),
+            ),
             'parts_approval_requested' => $this->parts_approval_requested_at !== null,
             'parts_approved' => $this->parts_approved_at !== null,
             'created_at' => $this->created_at,

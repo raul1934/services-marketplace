@@ -23,6 +23,7 @@ class ServiceRequest extends Model
         'description', 'latitude', 'longitude', 'address', 'reception_type', 'entry_code', 'start_code', 'budget_max',
         'payment_method',
         'urgency', 'max_wait_minutes', 'status',
+        'is_test', // TEMP — test bots. Remove with app/Bots.
         'cancelled_reason', 'accepted_at', 'started_at', 'completed_at', 'cancelled_at',
         'parts_approval_requested_at', 'parts_approved_at',
         'no_show_at', 'no_show_reason',
@@ -32,6 +33,7 @@ class ServiceRequest extends Model
         'status' => RequestStatus::class,
         'urgency' => RequestUrgency::class,
         'max_wait_minutes' => 'integer',
+        'is_test' => 'boolean', // TEMP — test bots. Remove with app/Bots.
         'share_asset_note' => 'boolean',
         'reception_type' => ReceptionType::class,
         'payment_method' => PaymentMethod::class,
@@ -46,6 +48,68 @@ class ServiceRequest extends Model
         'parts_approved_at' => 'datetime',
         'no_show_at' => 'datetime',
     ];
+
+    /**
+     * When the provider's promised arrival window closes.
+     *
+     * Urgent jobs: the client stated how long they'd wait (max_wait_minutes),
+     * counted from acceptance — that's the moment the provider committed. For a
+     * scheduled job the promise is the agreed window, so its start is the
+     * deadline. Null means there is nothing to be late for yet.
+     */
+    public function arrivalDeadline(): ?\Illuminate\Support\Carbon
+    {
+        // accepted_at is always set by ProposalService::accept, but fall back to
+        // created_at rather than return null: a row missing it would otherwise
+        // lock the client out of reporting a no-show forever, with no recourse.
+        $acceptedAt = $this->accepted_at ?? $this->created_at;
+
+        if ($acceptedAt === null) {
+            return null;
+        }
+
+        if ($this->urgency === RequestUrgency::Urgent) {
+            return $acceptedAt->copy()->addMinutes($this->max_wait_minutes ?? 30);
+        }
+
+        return $this->availabilities()->orderBy('starts_at')->value('starts_at');
+    }
+
+    /**
+     * Reporting a no-show only makes sense while the client is still waiting:
+     * once the provider is on site (in_progress) they demonstrably showed up,
+     * and before the promised window closes the complaint is premature.
+     */
+    public function canReportNoShow(): bool
+    {
+        if ($this->status !== RequestStatus::Accepted) {
+            return false;
+        }
+
+        $deadline = $this->arrivalDeadline();
+
+        return $deadline !== null && $deadline->isPast();
+    }
+
+    /**
+     * Rescheduling is a pre-arrival action too. Urgent jobs additionally wait
+     * for the promised window to lapse — until then the provider is simply on
+     * their way, and offering to move the job invites cancelling a pro who is
+     * two minutes out. Scheduled jobs can be moved at any point before they
+     * start, which is the whole point of having a booking.
+     */
+    public function canReschedule(): bool
+    {
+        if ($this->status !== RequestStatus::Accepted) {
+            return false;
+        }
+
+        if ($this->urgency !== RequestUrgency::Urgent) {
+            return true;
+        }
+
+        return $this->arrivalDeadline()?->isPast() ?? false;
+    }
 
     public function client(): BelongsTo
     {
