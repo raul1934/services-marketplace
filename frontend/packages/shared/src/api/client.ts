@@ -137,12 +137,24 @@ export async function request<T>(
     bodyInit = JSON.stringify(opts.body);
   }
 
-  const res = await fetch(buildUrl(path, opts.query), {
-    method,
-    headers,
-    body: bodyInit,
-    signal: opts.signal,
-  });
+  let res: Response;
+  try {
+    res = await fetch(buildUrl(path, opts.query), {
+      method,
+      headers,
+      body: bodyInit,
+      signal: opts.signal,
+    });
+  } catch (e) {
+    // A cancelled request (component unmounted, superseded query) — let it
+    // through untouched so callers can ignore it.
+    if (e instanceof Error && e.name === 'AbortError') throw e;
+    // No HTTP response at all: the server is unreachable — offline, DNS, refused
+    // or timed out (RN surfaces this as "Network request failed" /
+    // java.net.ConnectException). Turn the raw error into a friendly, localized
+    // message. status 0 marks it as a connectivity failure, not a server reply.
+    throw new ApiError(0, connectionErrorMessage(), undefined, e);
+  }
 
   if (res.status === 204) return undefined as T;
 
@@ -163,6 +175,13 @@ export async function request<T>(
   }
 
   return payload as T;
+}
+
+/** Friendly, localized message for a connection failure (no server response). */
+function connectionErrorMessage(): string {
+  return apiLocale === 'en'
+    ? 'Could not reach the server. Check your connection and try again.'
+    : 'Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.';
 }
 
 function safeJson(text: string): unknown {
