@@ -14,7 +14,7 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
-import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useRealtimeNotifications, useTheme } from '@chamafacil/shared';
+import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
 import { initServices } from '../src/init';
 import '../src/i18n';
@@ -32,10 +32,18 @@ function Gate() {
   const t = useTheme();
   const qc = useQueryClient();
 
+  // Android's nav bar icons follow the app theme (invisible otherwise).
+  useSystemBars();
+  const chime = useNotificationChime();
+
   usePushSync(status === 'authed', pushApi);
 
   // Live UI refresh from WebSocket notifications.
   useRealtimeNotifications(status === 'authed' ? user?.id : null, (n) => {
+    // A new job in the feed is worth hearing — the provider is usually driving
+    // or working, not watching the list.
+    chime();
+
     const rid = n.request_id ? Number(n.request_id) : null;
     qc.invalidateQueries({ queryKey: ['jobs'] });
     qc.invalidateQueries({ queryKey: ['bids'] });

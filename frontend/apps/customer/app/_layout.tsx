@@ -14,7 +14,7 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
-import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useRealtimeNotifications, useTheme } from '@chamafacil/shared';
+import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
 import { initServices } from '../src/init';
 import { loadEnv } from '../src/env';
@@ -34,10 +34,18 @@ function Gate() {
   const t = useTheme();
   const qc = useQueryClient();
 
+  // Android's nav bar icons follow the app theme (invisible otherwise).
+  useSystemBars();
+  const chime = useNotificationChime();
+
   usePushSync(status === 'authed', pushApi);
 
   // Live UI refresh: a notification over WebSocket invalidates the affected caches.
   useRealtimeNotifications(status === 'authed' ? user?.id : null, (n) => {
+    // The screen refreshed itself silently before this — a bid landing looked
+    // the same as nothing happening unless you were watching.
+    chime();
+
     const rid = n.request_id ? Number(n.request_id) : null;
     qc.invalidateQueries({ queryKey: ['requests'] });
     if (rid) {

@@ -10,6 +10,8 @@ export * from './lib/alert';
 export * from './lib/dictation';
 export * from './lib/format';
 export * from './lib/useRoute';
+export * from './lib/useSystemBars';
+export * from './lib/useNotificationChime';
 export * from './lib/language';
 export * from './lib/theme-pref';
 export * from './lib/push';
