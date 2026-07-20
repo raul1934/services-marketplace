@@ -26,11 +26,17 @@ chamafacil.app, www.chamafacil.app {
 
 # API Laravel.
 api.chamafacil.app {
+	# Respostas JSON são grandes e altamente compressíveis (/categories sozinho
+	# manda ~33 KB crus, que caem para ~4 KB). Sem isto o app paga o payload
+	# inteiro em cada chamada — o custo dominante no 4G, já que o backend em si
+	# responde em ~50 ms.
+	encode zstd gzip
 	reverse_proxy backend:8000
 }
 
 # Painel administrativo Filament (mesmo container do backend).
 admin.chamafacil.app {
+	encode zstd gzip
 	reverse_proxy backend:8000
 }
 
