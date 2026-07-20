@@ -27,8 +27,13 @@ return [
     | fanning out by radius. When false, matching is the legacy radius-only
     | behaviour and market_id is just a label. See MatchingService + RequestService.
     |
+    | Defaults to FALSE on purpose: switching it on before any Market geofence
+    | exists rejects every request as out-of-coverage and empties every provider
+    | feed. It must be opted into per environment, once the territories are
+    | drawn — never inherited silently by a deploy.
+    |
     */
 
-    'territory_isolation' => (bool) env('MATCHING_TERRITORY_ISOLATION', true),
+    'territory_isolation' => (bool) env('MATCHING_TERRITORY_ISOLATION', false),
 
 ];
