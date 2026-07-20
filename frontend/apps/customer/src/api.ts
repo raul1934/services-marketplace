@@ -295,7 +295,7 @@ export const customerApi = {
   getDispute: (id: number) => http.get<unknown>(`requests/${id}/dispute`),
 
   // Warranty / garantia (C41/C42).
-  openWarranty: (id: number, payload: { type: 'redo' | 'refund'; description?: string }) =>
+  openWarranty: (id: number, payload: { type: 'redo' | 'refund'; description?: string; media_ids?: number[] }) =>
     http.post<unknown>(`requests/${id}/warranty`, { body: payload }),
   warrantyClaims: (id: number) => http.get<Collection<unknown>>(`requests/${id}/warranty`).then(unwrapList),
 };

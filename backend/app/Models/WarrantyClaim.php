@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\WarrantyStatus;
 use App\Enums\WarrantyType;
+use App\Models\Concerns\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * A warranty claim (garantia): covers redo/refund up to the service value within
@@ -14,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class WarrantyClaim extends Model
 {
+    use HasMedia;
+
     protected $fillable = [
         'service_request_id', 'client_id', 'type', 'status', 'description', 'deadline_at', 'resolved_at',
     ];
@@ -33,5 +37,14 @@ class WarrantyClaim extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
+    }
+
+    /**
+     * Photos the client attached as evidence. Ops triages these claims without
+     * having seen the job, so the picture is usually the case.
+     */
+    public function photos(): MorphMany
+    {
+        return $this->mediaByTag('warranty');
     }
 }

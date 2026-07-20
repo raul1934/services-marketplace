@@ -14,6 +14,7 @@ class WarrantyResource extends JsonResource
             'type' => $this->type,
             'status' => $this->status,
             'description' => $this->description,
+            'photos' => MediaResource::collection($this->whenLoaded('photos')),
             'deadline_at' => $this->deadline_at,
             'created_at' => $this->created_at,
             'resolved_at' => $this->resolved_at,

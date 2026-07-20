@@ -22,7 +22,9 @@ class WarrantyController extends Controller
     {
         abort_unless($serviceRequest->client_id === $request->user()->id, 403);
 
-        return WarrantyResource::collection($serviceRequest->warrantyClaims()->latest()->get());
+        return WarrantyResource::collection(
+            $serviceRequest->warrantyClaims()->with('photos')->latest()->get()
+        );
     }
 
     public function store(Request $request, ServiceRequest $serviceRequest): JsonResponse
@@ -39,6 +41,10 @@ class WarrantyController extends Controller
         $data = $request->validate([
             'type' => ['required', Rule::enum(WarrantyType::class)],
             'description' => ['nullable', 'string', 'max:2000'],
+            // Same cap as a Q&A answer's photos — enough to show the problem
+            // from a couple of angles without turning triage into an album.
+            'media_ids' => ['nullable', 'array', 'max:5'],
+            'media_ids.*' => ['integer'],
         ]);
 
         $claim = $this->service->open(
@@ -46,6 +52,7 @@ class WarrantyController extends Controller
             $request->user(),
             WarrantyType::from($data['type']),
             $data['description'] ?? null,
+            $data['media_ids'] ?? [],
         );
 
         return (new WarrantyResource($claim))->response()->setStatusCode(201);

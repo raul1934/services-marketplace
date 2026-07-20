@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,10 @@ import {
   BackBar, Badge, Button, Card, Field, Icon, Row, Screen, SectionLabel, Segment, Text, WarrantyClaim, WarrantyType, useTheme,
 } from '@chamafacil/shared';
 import { useWarrantyClaims, useOpenWarranty } from '../../../src/queries';
+import { PickedPhoto, pickPhotos } from '../../../src/photos';
+
+/** Matches the server's `media_ids` cap in WarrantyController. */
+const MAX_PHOTOS = 5;
 
 /** V3Garantia + V3GarantiaStatus (C41/C42): claim a redo/refund and track it. */
 export default function WarrantyScreen() {
@@ -21,6 +25,12 @@ export default function WarrantyScreen() {
   const [type, setType] = useState<WarrantyType>('redo');
   const [description, setDescription] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [photos, setPhotos] = useState<PickedPhoto[]>([]);
+
+  const addPhotos = async () => {
+    const picked = await pickPhotos(MAX_PHOTOS - photos.length);
+    if (picked.length) setPhotos((cur) => [...cur, ...picked].slice(0, MAX_PHOTOS));
+  };
 
   if (isLoading) return <SkeletonScreen />;
 
@@ -31,9 +41,14 @@ export default function WarrantyScreen() {
 
   const submit = () =>
     open.mutate(
-      { type, description: description.trim() || undefined },
+      { type, description: description.trim() || undefined, photos },
       {
-        onSuccess: () => { Alert.alert(tr('common.ok'), tr('actions.warranty.openedMsg')); setDescription(''); setShowForm(false); },
+        onSuccess: () => {
+          Alert.alert(tr('common.ok'), tr('actions.warranty.openedMsg'));
+          setDescription('');
+          setPhotos([]);
+          setShowForm(false);
+        },
         onError: (e) => Alert.alert(tr('common.error'), (e as Error).message),
       },
     );
@@ -66,6 +81,13 @@ export default function WarrantyScreen() {
                   </View>
                   <Badge label={tr(`actions.warranty.status.${c.status}`)} tone={c.status === 'resolved' ? 'live' : 'open'} dot />
                 </Row>
+                {!!c.photos?.length && (
+                  <Row gap={8} style={{ flexWrap: 'wrap', marginTop: 10 }}>
+                    {c.photos.map((p) => (
+                      <Image key={p.id} source={{ uri: p.url }} style={{ width: 64, height: 64, borderRadius: 10 }} />
+                    ))}
+                  </Row>
+                )}
               </Card>
             ))}
           </View>
@@ -97,6 +119,44 @@ export default function WarrantyScreen() {
               voiceInput
               style={{ height: 90, textAlignVertical: 'top' }}
             />
+
+            {/* Ops triages these claims without having seen the job, so a photo
+                of what went wrong is usually the case itself. */}
+            <View style={{ gap: 8 }}>
+              <SectionLabel count={photos.length || undefined}>{tr('actions.warranty.photosLabel')}</SectionLabel>
+              <Text variant="caption" color={t.colors.ink3}>{tr('actions.warranty.photosHint')}</Text>
+
+              <Row gap={8} style={{ flexWrap: 'wrap' }}>
+                {photos.map((p, i) => (
+                  <Pressable key={`${p.uri}-${i}`} onPress={() => setPhotos((cur) => cur.filter((_, j) => j !== i))}>
+                    <Image source={{ uri: p.uri }} style={{ width: 76, height: 76, borderRadius: 12 }} />
+                    <View
+                      style={{
+                        position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: 11,
+                        backgroundColor: t.colors.danger, alignItems: 'center', justifyContent: 'center',
+                      }}
+                    >
+                      <Icon name="close" size={12} color="#fff" />
+                    </View>
+                  </Pressable>
+                ))}
+
+                {photos.length < MAX_PHOTOS && (
+                  <Pressable
+                    onPress={addPhotos}
+                    style={{
+                      width: 76, height: 76, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed',
+                      borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center', gap: 2,
+                    }}
+                  >
+                    <Icon name="camera" size={20} color={t.colors.ink3} />
+                    <Text variant="caption" color={t.colors.ink3} style={{ fontSize: 10 }}>
+                      {MAX_PHOTOS - photos.length}
+                    </Text>
+                  </Pressable>
+                )}
+              </Row>
+            </View>
           </>
         )}
       </View>

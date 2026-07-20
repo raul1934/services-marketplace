@@ -8,6 +8,7 @@ use App\Models\ServiceRequest;
 use App\Models\User;
 use App\Models\WarrantyClaim;
 use App\Notifications\WarrantyClaimOpened;
+use App\Services\MediaService;
 use App\Notifications\WarrantyStatusChanged;
 
 class WarrantyService
@@ -15,8 +16,16 @@ class WarrantyService
     /** Window within which a completed job can be claimed under warranty. */
     public const WINDOW_DAYS = 7;
 
-    public function open(ServiceRequest $request, User $client, WarrantyType $type, ?string $description): WarrantyClaim
-    {
+    public function __construct(private readonly MediaService $media) {}
+
+    /** @param  iterable<int>  $mediaIds  Photos already uploaded by the client. */
+    public function open(
+        ServiceRequest $request,
+        User $client,
+        WarrantyType $type,
+        ?string $description,
+        iterable $mediaIds = [],
+    ): WarrantyClaim {
         $claim = $request->warrantyClaims()->create([
             'client_id' => $client->id,
             'type' => $type->value,
@@ -24,6 +33,11 @@ class WarrantyService
             'description' => $description,
             'deadline_at' => $request->completed_at?->copy()->addDays(self::WINDOW_DAYS),
         ]);
+
+        // Evidence for the back-office, which triages without having seen the
+        // job. Same pre-upload flow the Q&A answers use: the app uploads while
+        // the client types, then hands over the ids.
+        $this->media->attach($mediaIds, $claim, 'warranty', $client->id);
 
         // Route to ops (back-office) for triage and new-provider assignment.
         User::where('is_admin', true)->get()

@@ -348,8 +348,18 @@ export const useWarrantyClaims = (id: number) =>
 export function useOpenWarranty(requestId: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { type: 'redo' | 'refund'; description?: string }) =>
-      customerApi.openWarranty(requestId, payload),
+    // Upload-first, like the Q&A answers: the photos become media rows, then the
+    // claim is opened referencing their ids. Keeps the claim request small and
+    // lets a failed upload surface before anything is created.
+    mutationFn: async (payload: { type: 'redo' | 'refund'; description?: string; photos?: PickedPhoto[] }) => {
+      const uploaded = payload.photos?.length ? await uploadPhotos(payload.photos) : [];
+
+      return customerApi.openWarranty(requestId, {
+        type: payload.type,
+        description: payload.description,
+        media_ids: uploaded.map((m) => m.id),
+      });
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['warranty', requestId] }),
   });
 }
