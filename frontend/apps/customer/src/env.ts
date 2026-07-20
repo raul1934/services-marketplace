@@ -7,8 +7,10 @@ import { config } from './config';
  * the initial target; the user can override it on the pre-login screen and it is
  * persisted, so a debug build can talk to local or production without rebuilding.
  *
- * On a physical device, "Dev" (localhost:19000) is reached over USB via
- * `adb reverse tcp:19000 tcp:19000` pointing at the dev backend on the machine.
+ * On a physical device the "Dev" host is reached over USB via `adb reverse`
+ * (the ports match the EXPO_PUBLIC_* vars in .env). The dev entry mirrors those
+ * build-time vars so .env is the single source of truth — no port is hardcoded
+ * here (previously it pinned :19000, which silently overrode any .env change).
  */
 export type EnvName = 'dev' | 'prod';
 const KEY = 'chamafacil.customer.env';
@@ -16,11 +18,11 @@ const KEY = 'chamafacil.customer.env';
 export const ENVS: Record<EnvName, { label: string; apiUrl: string; apiHost: string; reverbHost: string; reverbPort: number; reverbTLS: boolean }> = {
   dev: {
     label: 'Dev (local)',
-    apiUrl: 'http://localhost:19000/api/customer/v1',
-    apiHost: 'http://localhost:19000',
-    reverbHost: 'localhost',
-    reverbPort: 8080,
-    reverbTLS: false,
+    apiUrl: config.apiUrl,
+    apiHost: config.apiHost,
+    reverbHost: config.reverb.wsHost,
+    reverbPort: config.reverb.wsPort,
+    reverbTLS: config.reverb.forceTLS,
   },
   prod: {
     label: 'Produção',
