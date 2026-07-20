@@ -402,7 +402,24 @@
     "viewProposals": "Ver propostas ({{count}})",
     "viewReceipt": "Ver recibo",
     "startCodeLabel": "CÓDIGO DE INÍCIO",
-    "startCodeHint": "Informe este código ao prestador quando ele chegar para liberar o atendimento."
+    "startCodeHint": "Informe este código ao prestador quando ele chegar para liberar o atendimento.",
+    "tabs": {
+      "tracking": "Acompanhamento",
+      "request": "Solicitação",
+      "history": "Histórico"
+    },
+    "detailsLabel": "Dados da solicitação",
+    "descriptionLabel": "Descrição",
+    "addressLabel": "Endereço",
+    "paymentLabel": "Pagamento",
+    "actionsLabel": "Ações",
+    "answersLabel": "Respostas",
+    "noHistory": "Nada aconteceu ainda.",
+    "budgetLabel": "Orçamento",
+    "workLabel": "O que está sendo feito",
+    "workEmpty": "O profissional está trabalhando. As peças e observações aparecem aqui.",
+    "currentTotal": "Total atual",
+    "actionsLockedUntil": "O profissional está a caminho. As opções de remarcar ou relatar ausência liberam às {{time}}."
   },
   "receipt": {
     "title": "Recibo",
@@ -453,7 +470,9 @@
       "expired": "Chamado expirado",
       "disputed": "Disputa aberta",
       "review_submitted": "Avaliação enviada"
-    }
+    },
+    "colEvent": "Evento",
+    "colWhen": "Quando"
   },
   "rate": {
     "title": "Avalie o atendimento",
@@ -629,7 +648,9 @@
       "descLabel": "Descrição",
       "descPlaceholder": "O que deu errado?",
       "submit": "Acionar garantia",
-      "openedMsg": "Garantia acionada. Vamos te retornar em breve."
+      "openedMsg": "Garantia acionada. Vamos te retornar em breve.",
+      "photosLabel": "Fotos do problema",
+      "photosHint": "Ajuda muito a análise. Até 5 fotos."
     }
   },
   "assets": {
@@ -871,17 +892,38 @@
     "type": {
       "title": "O que você quer cadastrar?",
       "sub": "Casa, carro ou pet — o que precisar de cuidado.",
-      "options": { "vehicle": "Carro, moto, caminhão", "property": "Casa, apartamento, edícula", "pet": "Cão, gato e outros" },
+      "options": {
+        "vehicle": "Carro, moto, caminhão",
+        "property": "Casa, apartamento, edícula",
+        "pet": "Cão, gato e outros"
+      },
       "serviceCount": "{{count}} serviço",
       "serviceCount_plural": "{{count}} serviços",
       "benefitsTitle": "O QUE DÁ PRA FAZER",
       "benefits": {
-        "vehicle": ["Chamar guincho, bateria e mais", "Acompanhar a quilometragem", "Guardar fotos e documentos"],
-        "property": ["Medir cômodos em RA", "Pedir orçamentos de serviços", "Guardar o endereço no mapa"],
-        "pet": ["Chamar veterinário, banho e tosa", "Guardar a carteira de vacinas", "Guardar fotos do pet"]
+        "vehicle": [
+          "Chamar guincho, bateria e mais",
+          "Acompanhar a quilometragem",
+          "Guardar fotos e documentos"
+        ],
+        "property": [
+          "Medir cômodos em RA",
+          "Pedir orçamentos de serviços",
+          "Guardar o endereço no mapa"
+        ],
+        "pet": [
+          "Chamar veterinário, banho e tosa",
+          "Guardar a carteira de vacinas",
+          "Guardar fotos do pet"
+        ]
       }
     },
-    "details": { "title": "Detalhes", "sub": "Preencha o que souber. Dá para editar depois.", "more": "Mais detalhes (opcional)", "less": "Ocultar detalhes" },
+    "details": {
+      "title": "Detalhes",
+      "sub": "Preencha o que souber. Dá para editar depois.",
+      "more": "Mais detalhes (opcional)",
+      "less": "Ocultar detalhes"
+    },
     "notes": {
       "sectionLabel": "Anotações",
       "private": "Suas anotações (privadas)",
@@ -889,7 +931,10 @@
       "provider": "Recado para o profissional",
       "providerHint": "Você escolhe compartilhar ao pedir um serviço."
     },
-    "location": { "title": "Onde fica?", "sub": "Marque no mapa para o profissional achar." },
+    "location": {
+      "title": "Onde fica?",
+      "sub": "Marque no mapa para o profissional achar."
+    },
     "area": {
       "title": "Área do imóvel",
       "sub": "Opcional — ajuda o profissional a dimensionar o serviço.",

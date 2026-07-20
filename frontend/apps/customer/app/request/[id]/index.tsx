@@ -1,10 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Modal, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Image, Modal, Pressable, ScrollView, View, ViewStyle } from 'react-native';
 import MapView, { Marker, Polyline, Region } from 'react-native-maps';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { SkeletonScreen,
+  AnswerList,
   Asset,
   AvInit,
   BackBar,
@@ -19,6 +21,7 @@ import { SkeletonScreen,
   Row,
   Screen,
   SectionLabel,
+  Segment,
   ServiceRequest,
   Stars,
   Text,
@@ -29,18 +32,114 @@ import { SkeletonScreen,
   haversineKm,
   isActiveStatus,
   subscribeToRequest,
+  TestBanner, // TEMP — test bots. Remove with backend app/Bots.
   useRoute,
   useTheme,
 } from '@chamafacil/shared';
 import { keys, useApprovePart, useApproveParts, useJobReport, useRequest, useRequestEvents, useTracking } from '../../../src/queries';
 import { CategoryIcon } from '../../../src/components/CategoryIcon';
 import { EventFeed } from '../../../src/components/EventFeed';
+import { JobSubject } from '../../../src/components/JobSubject';
 import { ProposalsList } from '../../../src/components/ProposalsList';
 import { ReceiptView } from '../../../src/components/ReceiptView';
 import { ReviewForm } from '../../../src/components/ReviewForm';
 
 const AV_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#a855f7', '#ef4444', '#0ea5e9'];
 const initialsOf = (name?: string) => (name ?? '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+
+type RequestTab = 'tracking' | 'request' | 'history';
+
+/** How long the map stays where the user left it before snapping back. */
+const RECENTER_DELAY_MS = 10_000;
+
+/**
+ * Whether two regions are close enough to be "the same view".
+ *
+ * The map reports every region change through onRegionChangeComplete —
+ * including the ones we cause by re-centering. Without this check, our own
+ * recenter would look like a user gesture, re-arm the timer, and loop forever.
+ * Tolerances are relative to the delta so they hold at any zoom level.
+ */
+function isSameRegion(a: Region, b: Region): boolean {
+  const tolLat = Math.max(Math.abs(b.latitudeDelta) * 0.05, 1e-5);
+  const tolLng = Math.max(Math.abs(b.longitudeDelta) * 0.05, 1e-5);
+  const sameZoom =
+    b.latitudeDelta > 0 ? (() => { const r = a.latitudeDelta / b.latitudeDelta; return r > 0.75 && r < 1.33; })() : true;
+
+  return (
+    Math.abs(a.latitude - b.latitude) < tolLat &&
+    Math.abs(a.longitude - b.longitude) < tolLng &&
+    sameZoom
+  );
+}
+
+/**
+ * The live tracking map, which follows the job and the provider — but yields to
+ * the user.
+ *
+ * Panning or zooming used to be pointless here: the region prop is recomputed on
+ * every provider location update (they arrive over the websocket every few
+ * seconds), so the map snapped back almost immediately. Now a user gesture
+ * suspends the follow for {RECENTER_DELAY_MS}, then it re-frames both points.
+ *
+ * Both platforms run Leaflet (see the react-native-maps alias in
+ * metro.config.js — a WebView impl on native, a DOM stub on web), and BOTH sync
+ * the controlled `region` off primitive lat/lng/delta deps. So the prop alone
+ * cannot bring the map back when the user panned away and the target hasn't
+ * moved meanwhile — the primitives are unchanged, and the sync effect never
+ * re-runs.
+ *
+ * Hence: controlled region to follow the target, plus an imperative
+ * animateToRegion to force the snap-back. Native exposes that through the class
+ * ref; the web stub is a plain function component with no ref, so there the
+ * snap-back only lands when the target also moved. Native — the shipped app —
+ * always re-centers.
+ */
+function TrackingMap({
+  target,
+  style,
+  children,
+}: {
+  target: Region;
+  style?: ViewStyle;
+  children?: React.ReactNode;
+}) {
+  const { latitude, longitude, latitudeDelta, longitudeDelta } = target;
+  const [view, setView] = useState<Region>(target);
+  const [userMoved, setUserMoved] = useState(false);
+  // The last region WE applied, to tell our own moves from the user's.
+  const applied = useRef<Region>(target);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mapRef = useRef<MapView | null>(null);
+
+  // Follow the job/provider, unless the user is currently driving the map.
+  useEffect(() => {
+    if (userMoved) return;
+    const next = { latitude, longitude, latitudeDelta, longitudeDelta };
+    applied.current = next;
+    setView(next);
+    // The prop sync alone is not enough when the user panned but the target
+    // stands still: the impls key on primitives, which haven't changed. Nudging
+    // it imperatively is what actually brings the map back. No-op on web.
+    mapRef.current?.animateToRegion?.(next, 400);
+  }, [latitude, longitude, latitudeDelta, longitudeDelta, userMoved]);
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  const onRegionChangeComplete = (r: Region) => {
+    if (isSameRegion(r, applied.current)) return; // our own recenter echoing back
+    setUserMoved(true);
+    if (timer.current) clearTimeout(timer.current);
+    // Flipping userMoved back to false re-runs the effect above, which re-frames.
+    timer.current = setTimeout(() => setUserMoved(false), RECENTER_DELAY_MS);
+  };
+
+  return (
+    <MapView ref={mapRef} style={style} region={view} onRegionChangeComplete={onRegionChangeComplete}>
+      {children}
+    </MapView>
+  );
+}
 
 // Requests the user explicitly dismissed the rating modal for — resets on app
 // reload (intentionally not persisted), just enough to stop nagging every
@@ -54,6 +153,7 @@ export default function RequestDetail() {
   const qc = useQueryClient();
   const { id } = useLocalSearchParams<{ id: string }>();
   const requestId = Number(id);
+  const insets = useSafeAreaInsets();
 
   const { data: request, isLoading } = useRequest(requestId);
   const isOpen = request?.status === RequestStatus.Open;
@@ -72,6 +172,11 @@ export default function RequestDetail() {
   // focus effect can re-open it whenever the screen regains focus.
   const [rateOpen, setRateOpen] = useState(false);
   const canReview = request?.status === RequestStatus.Completed && !request?.review;
+
+  // Three tabs so the screen answers one question at a time: what's happening
+  // now, what was asked for, and what already happened. Defaults to tracking —
+  // the reason someone opens this screen mid-job.
+  const [tab, setTab] = useState<RequestTab>('tracking');
 
   // Road route (OSRM) from the provider's live position to the job, for the map.
   const routeFrom = live
@@ -96,6 +201,9 @@ export default function RequestDetail() {
         refresh();
       },
       onStatus: refresh,
+      // Parts and notes landing while the provider works — this is what makes
+      // the on-site panel fill in live instead of on pull-to-refresh.
+      onProgress: refresh,
       onPartsApprovalRequested: refresh,
       onPartsApproved: refresh,
       onSurchargeProposed: refresh,
@@ -138,6 +246,8 @@ export default function RequestDetail() {
   const active = isActiveStatus(request.status);
   const isRequote = request.status === RequestStatus.Requote;
   const isCompleted = request.status === RequestStatus.Completed;
+  // Provider is here and working — swap the map for the work itself.
+  const onSite = request.status === RequestStatus.InProgress;
   const pendingSurcharge = request.surcharges?.find((s) => s.status === 'pending');
   const pendingReschedule = request.reschedule_requests?.find((r) => r.status === 'pending' && r.requested_by_role === 'provider');
   const statusText = tr(`enums.requestStatus.${request.status}`);
@@ -169,195 +279,297 @@ export default function RequestDetail() {
     <Screen
       stickyHeader
       padded={false}
-      onEndReached={isOpen ? () => proposalsLoadMore.current?.() : undefined}
-      footer={canReview ? <Button title={tr('rate.promptCta')} full onPress={() => setRateOpen(true)} /> : undefined}
+      onEndReached={isOpen && tab === 'tracking' ? () => proposalsLoadMore.current?.() : undefined}
+      // Tabs live in the pinned footer, thumb-reachable and always visible —
+      // at the top of a long scroll they were out of reach exactly when you'd
+      // want to switch. The review CTA stacks above them when it applies.
+      footer={
+        <View style={{ gap: 10 }}>
+          {canReview && <Button title={tr('rate.promptCta')} full onPress={() => setRateOpen(true)} />}
+          <Segment
+            value={tab}
+            onChange={setTab}
+            items={[
+              { value: 'tracking', label: tr('requestDetail.tabs.tracking'), icon: 'navigate' },
+              { value: 'request', label: tr('requestDetail.tabs.request'), icon: 'list' },
+              { value: 'history', label: tr('requestDetail.tabs.history'), icon: 'clock' },
+            ]}
+          />
+        </View>
+      }
     >
-      <BackBar
-        title={categoryName ?? tr('requestDetail.fallbackTitle')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/requests'))}
-        right={<Badge label={statusText} tone={isOpen ? 'open' : active ? 'live' : 'neutral'} dot={active || isOpen} />}
-      />
+      {/* Screen pins its FIRST child when stickyHeader is set, so wrapping the
+          bar and the stepper together keeps both on screen while the body
+          scrolls — the progress is the one thing you always want visible. */}
+      <View>
+        <BackBar
+          title={categoryName ?? tr('requestDetail.fallbackTitle')}
+          onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/requests'))}
+          right={<Badge label={statusText} tone={isOpen ? 'open' : active ? 'live' : 'neutral'} dot={active || isOpen} />}
+        />
+        {active && <TrackSteps steps={trackSteps} current={trackStep} />}
+        {/* What the job is about, pinned: mid-job "is this the right car?" and
+            "did I show him the right thing?" shouldn't cost you the tab you're
+            watching. Renders nothing when there's no asset and no photos. */}
+        <JobSubject
+          asset={request.asset}
+          photos={request.photos}
+          onPressAsset={request.asset ? () => router.push(`/assets/${request.asset!.id}`) : undefined}
+        />
+      </View>
 
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 14 }}>
+        {/* TEMP — test bots. Remove with backend app/Bots. */}
+        {request.is_test && <TestBanner message="Chamado de teste gerado por bot." />}
+
+        {/* Context header, above the tabs so it stays true whichever tab is open.
+            The urgency badge sits on its own line rather than sharing the row
+            with the title: "Urgente · 30 min" is wide, and competing for width
+            was truncating the category the request is actually about. */}
         <Card>
-          <Row>
+          <Row gap={12} style={{ alignItems: 'flex-start' }}>
             <View style={{ width: 52, height: 52, borderRadius: 16, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
               <CategoryIcon category={request.category} size={24} />
             </View>
-            <View style={{ flex: 1 }}>
-              <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={1}>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text weight="800" style={{ fontSize: 15.5 }} numberOfLines={2}>
                 {request.category ? `${tr(`enums.categoryType.${request.category.type}`)} · ${categoryName}` : tr('requestDetail.fallbackTitle')}
               </Text>
               {request.address && <Text variant="caption" numberOfLines={1}>{request.address}</Text>}
+              {request.urgency === RequestUrgency.Urgent && (
+                <Badge
+                  label={request.max_wait_minutes != null ? tr('enums.urgency.urgentWithWait', { count: request.max_wait_minutes }) : tr('enums.urgency.urgent')}
+                  tone="urgent"
+                  dot
+                />
+              )}
             </View>
-            {request.urgency === RequestUrgency.Urgent && (
-              <Badge
-                label={request.max_wait_minutes != null ? tr('enums.urgency.urgentWithWait', { count: request.max_wait_minutes }) : tr('enums.urgency.urgent')}
-                tone="urgent"
-                dot
-              />
-            )}
           </Row>
         </Card>
 
-        {request.asset && <RequestAssetCard asset={request.asset} onPress={() => router.push(`/assets/${request.asset!.id}`)} />}
-
-        {(request.before_photos?.length || request.after_photos?.length) ? <JobPhotosView request={request} /> : null}
-
-        {/* Pre-bid Q&A now renders inside each bid (see ProposalsList / ProposalCard). */}
-        {isOpen && (
-          <ProposalsList
-            requestId={requestId}
-            budget={request.budget_max}
-            maxWaitMinutes={request.urgency === RequestUrgency.Urgent ? request.max_wait_minutes : null}
-            loadMoreRef={proposalsLoadMore}
-          />
-        )}
-
-        {active && (
+        {/* ── Tab: Solicitação — what was asked for ─────────────── */}
+        {tab === 'request' && (
           <View style={{ gap: 14 }}>
-            {/* Live map + ETA + progress strip (formerly the /track screen). */}
-            <Card padded={false} style={{ overflow: 'hidden' }}>
-              <MapView style={{ height: 220 }} region={region}>
-                {route && <Polyline coordinates={route.coords} strokeColor={t.colors.accent} strokeWidth={5} />}
-                <Marker coordinate={{ latitude: request.latitude, longitude: request.longitude }} pinColor={t.colors.accent} title={tr('requestDetail.fallbackTitle')} />
-                {provLat != null && provLng != null && (
-                  <Marker coordinate={{ latitude: provLat, longitude: provLng }} pinColor={t.colors.ok} title={request.provider?.name} />
-                )}
-              </MapView>
-              <View style={{ padding: 16 }}>
-                <Row>
-                  <Icon name="navigate" size={22} color={t.colors.accent} />
-                  <View style={{ flex: 1 }}>
-                    <Text weight="800" style={{ fontSize: 17 }}>{provAvailable ? distanceLabel(showKm) : tr('tracking.subtitle')}</Text>
-                    <Text variant="caption">{provAvailable ? tr('tracking.arrivingIn', { eta: etaLabel(showEta) }) : tr('tracking.unavailable')}</Text>
-                  </View>
-                  <Badge label={tr('tracking.live')} tone="live" dot />
-                </Row>
-              </View>
+            {/* Asset and the client's photos moved to the pinned JobSubject
+                strip, so they're on every tab instead of only this one. */}
+            <Card style={{ gap: 0 }}>
+              <DetailRow label={tr('requestDetail.descriptionLabel')} value={request.description} first />
+              {request.address && <DetailRow label={tr('requestDetail.addressLabel')} value={request.address} />}
+              {request.budget_max != null && (
+                <DetailRow label={tr('requestDetail.budgetLabel')} value={brl(request.budget_max)} />
+              )}
+              {/* `payment.*`, not `enums.paymentMethod.*` — the latter doesn't exist
+                  and rendered the raw key on screen. Same namespace ReceiptView uses. */}
+              {request.payment_method && (
+                <DetailRow label={tr('requestDetail.paymentLabel')} value={tr(`payment.${request.payment_method}`)} />
+              )}
             </Card>
 
-            <View style={{ flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 6 }}>
-              {trackSteps.map((label, i) => {
-                const done = i < trackStep;
-                const now = i === trackStep;
-                return (
-                  <React.Fragment key={i}>
-                    <View style={{ alignItems: 'center', gap: 6 }}>
-                      <View style={{ width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center', borderWidth: done || now ? 0 : 1, borderColor: t.colors.line, backgroundColor: done || now ? t.colors.accent : t.colors.surface2 }}>
-                        {done ? <Icon name="check" size={13} color={t.colors.accentInk} /> : <Text weight="800" style={{ fontSize: 12, color: now ? '#fff' : t.colors.ink3 }}>{i + 1}</Text>}
-                      </View>
-                      <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={done || now ? t.colors.ink : t.colors.ink3}>{label}</Text>
-                    </View>
-                    {i < trackSteps.length - 1 && <View style={{ flex: 1, height: 2, marginTop: 12, backgroundColor: i < trackStep ? t.colors.accent : t.colors.line }} />}
-                  </React.Fragment>
-                );
-              })}
-            </View>
+            {request.answers?.length ? (
+              <View style={{ gap: 8 }}>
+                <SectionLabel count={request.answers.length}>{tr('requestDetail.answersLabel')}</SectionLabel>
+                <Card><AnswerList answers={request.answers} /></Card>
+              </View>
+            ) : null}
 
-            {request.provider && (
-              <Card>
-                <Row>
-                  <AvInit initials={initialsOf(request.provider.name)} color={AV_COLORS[0]} />
-                  <View style={{ flex: 1 }}>
-                    <Text weight="800" style={{ fontSize: 15.5 }}>{request.provider.name}</Text>
-                    {request.provider.rating_avg != null && <Stars value={request.provider.rating_avg} size={13} />}
-                  </View>
-                </Row>
-              </Card>
-            )}
-            {/* Start-of-service code (C17): read it to the provider on arrival. */}
-            {request.start_code && (
-              <Card style={{ gap: 6, borderWidth: 1.5, borderColor: t.colors.accent, alignItems: 'center' }}>
-                <Text variant="label" color={t.colors.ink2}>{tr('requestDetail.startCodeLabel')}</Text>
-                <Text weight="800" style={{ fontSize: 30, letterSpacing: 6, color: t.colors.accent }}>{request.start_code}</Text>
-                <Text variant="caption" center>{tr('requestDetail.startCodeHint')}</Text>
-              </Card>
-            )}
-            {request.parts_approval_requested && !request.parts_approved && (
-              <Card style={{ gap: 10, borderWidth: 1.5, borderColor: t.colors.accent }}>
-                <Row gap={10}>
-                  <Icon name="shieldCheck" size={20} color={t.colors.accent} />
-                  <Text weight="800" style={{ flex: 1, fontSize: 14.5 }}>{tr('requestDetail.approvalTitle')}</Text>
-                </Row>
-                <Text variant="caption">{tr('requestDetail.approvalBody')}</Text>
-                {(jobParts.data ?? []).length > 0 && (
-                  <View style={{ gap: 6 }}>
-                    {(jobParts.data ?? []).map((p) => (
-                      <Row key={p.id} style={{ paddingVertical: 6, borderTopWidth: 1, borderColor: t.colors.line }}>
-                        <View style={{ flex: 1 }}>
-                          <Text weight="700" style={{ fontSize: 13.5 }}>{p.quantity}× {p.name}</Text>
-                          {p.unit_price != null && <Text variant="caption">{brl(p.unit_price * p.quantity)}</Text>}
-                        </View>
-                        {p.approved_at ? (
-                          <Row gap={4}>
-                            <Icon name="check" size={14} color={t.colors.ok} />
-                            <Text variant="caption" weight="700" color={t.colors.ok}>{tr('requestDetail.partApproved')}</Text>
-                          </Row>
-                        ) : (
-                          <Text weight="700" color={t.colors.accent} style={{ fontSize: 12.5 }} onPress={() => approvePart.mutate(p.id)}>
-                            {tr('requestDetail.approve')}
-                          </Text>
-                        )}
-                      </Row>
-                    ))}
-                  </View>
-                )}
-                <Button title={tr('requestDetail.approveAll')} full loading={approve.isPending} onPress={() => approve.mutate()} />
-              </Card>
-            )}
-            {request.parts_approved && (
-              <Row gap={8} style={{ backgroundColor: t.colors.okSoft, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 13 }}>
-                <Icon name="check" size={16} color={t.colors.ok} />
-                <Text weight="700" color={t.colors.ok} style={{ fontSize: 13.5 }}>{tr('requestDetail.approvedDone')}</Text>
-              </Row>
-            )}
-            {pendingSurcharge && (
-              <Card onPress={() => router.push(`/request/${requestId}/surcharge`)} style={{ gap: 8, borderWidth: 1.5, borderColor: t.colors.danger }}>
-                <Row gap={10}>
-                  <Icon name="flash" size={20} color={t.colors.danger} />
-                  <Text weight="800" style={{ flex: 1, fontSize: 14.5 }}>{tr('actions.surcharge.proposedTitle')}</Text>
-                  <Text weight="800" color={t.colors.danger}>{brl(pendingSurcharge.amount)}</Text>
-                </Row>
-                <Text variant="caption" numberOfLines={1}>{pendingSurcharge.reason}</Text>
-              </Card>
-            )}
-            {pendingReschedule && (
-              <Button title={tr('actions.reschedule.incomingTitle')} variant="soft" full onPress={() => router.push(`/request/${requestId}/reschedule`)} left={<Icon name="calendar" size={16} color={t.colors.accent} />} />
-            )}
-            <Row gap={14} style={{ justifyContent: 'center' }}>
-              <Text weight="700" color={t.colors.ink3} style={{ fontSize: 12.5 }} onPress={() => router.push(`/request/${requestId}/reschedule`)}>{tr('actions.reschedule.title')}</Text>
-              <Text weight="700" color={t.colors.ink3} style={{ fontSize: 12.5 }} onPress={() => router.push(`/request/${requestId}/no-show`)}>{tr('actions.noShow.title')}</Text>
-            </Row>
+            {(request.before_photos?.length || request.after_photos?.length) ? <JobPhotosView request={request} /> : null}
           </View>
         )}
 
-        {isRequote && (
-          <Card onPress={() => router.push(`/request/${requestId}/requote`)} style={{ gap: 8, borderWidth: 1.5, borderColor: t.colors.danger }}>
+        {/* ── Tab: Histórico — everything that already happened ──── */}
+        {tab === 'history' && <EventFeed events={events ?? []} variant="table" />}
+
+        {/* ── Tab: Acompanhamento — the current state of the job ── */}
+        {tab === 'tracking' && (
+          <View style={{ gap: 14 }}>
+          {/* The money, stated once and plainly — it used to be a caption hidden
+              in the event feed's header. */}
+          {request.accepted_proposal && <ApprovedValueCard request={request} />}
+
+          {/* Pre-bid Q&A now renders inside each bid (see ProposalsList / ProposalCard). */}
+          {isOpen && (
+            <ProposalsList
+              requestId={requestId}
+              budget={request.budget_max}
+              maxWaitMinutes={request.urgency === RequestUrgency.Urgent ? request.max_wait_minutes : null}
+              loadMoreRef={proposalsLoadMore}
+            />
+          )}
+
+          {active && (
+            <View style={{ gap: 14 }}>
+              {/* En route → map + ETA. On site → what's being done instead: the map
+                answers "where is he", which stops being a question once he's
+                here. The stepper in the header still carries the status. */}
+              {onSite ? (
+                <JobProgressPanel request={request} />
+              ) : (
+                <Card padded={false} style={{ overflow: 'hidden' }}>
+                  <TrackingMap target={region} style={{ height: 220 }}>
+                    {route && <Polyline coordinates={route.coords} strokeColor={t.colors.accent} strokeWidth={5} />}
+                    <Marker coordinate={{ latitude: request.latitude, longitude: request.longitude }} pinColor={t.colors.accent} title={tr('requestDetail.fallbackTitle')} />
+                    {provLat != null && provLng != null && (
+                      <Marker coordinate={{ latitude: provLat, longitude: provLng }} pinColor={t.colors.ok} title={request.provider?.name} />
+                    )}
+                  </TrackingMap>
+                  <View style={{ padding: 16 }}>
+                    <Row>
+                      <Icon name="navigate" size={22} color={t.colors.accent} />
+                      <View style={{ flex: 1 }}>
+                        <Text weight="800" style={{ fontSize: 17 }}>{provAvailable ? distanceLabel(showKm) : tr('tracking.subtitle')}</Text>
+                        <Text variant="caption">{provAvailable ? tr('tracking.arrivingIn', { eta: etaLabel(showEta) }) : tr('tracking.unavailable')}</Text>
+                      </View>
+                      <Badge label={tr('tracking.live')} tone="live" dot />
+                    </Row>
+                  </View>
+                </Card>
+              )}
+
+              {/* The stepper moved to the pinned header (see TrackSteps). */}
+              {request.provider && (
+                <Card>
+                  <Row>
+                    <AvInit initials={initialsOf(request.provider.name)} color={AV_COLORS[0]} />
+                    <View style={{ flex: 1 }}>
+                      <Text weight="800" style={{ fontSize: 15.5 }}>{request.provider.name}</Text>
+                      {request.provider.rating_avg != null && <Stars value={request.provider.rating_avg} size={13} />}
+                    </View>
+                  </Row>
+                </Card>
+              )}
+              {/* Start-of-service code (C17): read it to the provider on arrival. */}
+              {request.start_code && (
+                <Card style={{ gap: 6, borderWidth: 1.5, borderColor: t.colors.accent, alignItems: 'center' }}>
+                  <Text variant="label" color={t.colors.ink2}>{tr('requestDetail.startCodeLabel')}</Text>
+                  <Text weight="800" style={{ fontSize: 30, letterSpacing: 6, color: t.colors.accent }}>{request.start_code}</Text>
+                  <Text variant="caption" center>{tr('requestDetail.startCodeHint')}</Text>
+                </Card>
+              )}
+              {request.parts_approval_requested && !request.parts_approved && (
+                <Card style={{ gap: 10, borderWidth: 1.5, borderColor: t.colors.accent }}>
+                  <Row gap={10}>
+                    <Icon name="shieldCheck" size={20} color={t.colors.accent} />
+                    <Text weight="800" style={{ flex: 1, fontSize: 14.5 }}>{tr('requestDetail.approvalTitle')}</Text>
+                  </Row>
+                  <Text variant="caption">{tr('requestDetail.approvalBody')}</Text>
+                  {(jobParts.data ?? []).length > 0 && (
+                    <View style={{ gap: 6 }}>
+                      {(jobParts.data ?? []).map((p) => (
+                        <Row key={p.id} style={{ paddingVertical: 6, borderTopWidth: 1, borderColor: t.colors.line }}>
+                          <View style={{ flex: 1 }}>
+                            <Text weight="700" style={{ fontSize: 13.5 }}>{p.quantity}× {p.name}</Text>
+                            {p.unit_price != null && <Text variant="caption">{brl(p.unit_price * p.quantity)}</Text>}
+                          </View>
+                          {p.approved_at ? (
+                            <Row gap={4}>
+                              <Icon name="check" size={14} color={t.colors.ok} />
+                              <Text variant="caption" weight="700" color={t.colors.ok}>{tr('requestDetail.partApproved')}</Text>
+                            </Row>
+                          ) : (
+                            <Text weight="700" color={t.colors.accent} style={{ fontSize: 12.5 }} onPress={() => approvePart.mutate(p.id)}>
+                              {tr('requestDetail.approve')}
+                            </Text>
+                          )}
+                        </Row>
+                      ))}
+                    </View>
+                  )}
+                  <Button title={tr('requestDetail.approveAll')} full loading={approve.isPending} onPress={() => approve.mutate()} />
+                </Card>
+              )}
+              {request.parts_approved && (
+                <Row gap={8} style={{ backgroundColor: t.colors.okSoft, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 13 }}>
+                  <Icon name="check" size={16} color={t.colors.ok} />
+                  <Text weight="700" color={t.colors.ok} style={{ fontSize: 13.5 }}>{tr('requestDetail.approvedDone')}</Text>
+                </Row>
+              )}
+              {pendingSurcharge && (
+                <Card onPress={() => router.push(`/request/${requestId}/surcharge`)} style={{ gap: 8, borderWidth: 1.5, borderColor: t.colors.danger }}>
+                  <Row gap={10}>
+                    <Icon name="flash" size={20} color={t.colors.danger} />
+                    <Text weight="800" style={{ flex: 1, fontSize: 14.5 }}>{tr('actions.surcharge.proposedTitle')}</Text>
+                    <Text weight="800" color={t.colors.danger}>{brl(pendingSurcharge.amount)}</Text>
+                  </Row>
+                  <Text variant="caption" numberOfLines={1}>{pendingSurcharge.reason}</Text>
+                </Card>
+              )}
+              {pendingReschedule && (
+                <Button title={tr('actions.reschedule.incomingTitle')} variant="soft" full onPress={() => router.push(`/request/${requestId}/reschedule`)} left={<Icon name="calendar" size={16} color={t.colors.accent} />} />
+              )}
+              {/* Pre-arrival escape hatches. The server decides when they apply
+                  (ServiceRequest::canReschedule / canReportNoShow) and says so in
+                  the payload — the app only renders that answer, so the two can't
+                  drift. One per row: side by side, "Profissional não apareceu"
+                  wrapped to two lines and the pair read as one control. */}
+              {(request.can_reschedule || request.can_report_no_show) && (
+                <View style={{ gap: 8 }}>
+                  <SectionLabel>{tr('requestDetail.actionsLabel')}</SectionLabel>
+                  {request.can_reschedule && (
+                    <Button
+                      title={tr('actions.reschedule.title')}
+                      variant="ghost"
+                      full
+                      onPress={() => router.push(`/request/${requestId}/reschedule`)}
+                      left={<Icon name="calendar" size={16} color={t.colors.ink} />}
+                    />
+                  )}
+                  {request.can_report_no_show && (
+                    <Button
+                      title={tr('actions.noShow.title')}
+                      variant="ghost"
+                      full
+                      onPress={() => router.push(`/request/${requestId}/no-show`)}
+                      left={<Icon name="userX" size={16} color={t.colors.ink} />}
+                    />
+                  )}
+                </View>
+              )}
+
+              {/* Still inside the promised window: say when the options unlock
+                  rather than showing dead buttons or nothing at all. */}
+              {!request.can_reschedule && !request.can_report_no_show && !onSite && request.arrival_deadline && (
+                <Row gap={8} style={{ paddingHorizontal: 4 }}>
+                  <Icon name="clock" size={14} color={t.colors.ink3} />
+                  <Text variant="caption" color={t.colors.ink3} style={{ flex: 1 }}>
+                    {tr('requestDetail.actionsLockedUntil', {
+                      time: new Date(request.arrival_deadline).toLocaleTimeString(undefined, {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }),
+                    })}
+                  </Text>
+                </Row>
+              )}
+            </View>
+          )}
+
+          {isRequote && (
+            <Card onPress={() => router.push(`/request/${requestId}/requote`)} style={{ gap: 8, borderWidth: 1.5, borderColor: t.colors.danger }}>
+              <Row gap={10}>
+                <Icon name="edit" size={20} color={t.colors.danger} />
+                <Text weight="800" style={{ flex: 1, fontSize: 15 }}>{tr('actions.requote.title')}</Text>
+              </Row>
+              <Text variant="caption">{tr('actions.requote.explain')}</Text>
+              <Button title={tr('actions.requote.title')} variant="soft" full onPress={() => router.push(`/request/${requestId}/requote`)} />
+            </Card>
+          )}
+
+          {/* Completed → receipt + consolidated summary. Rating is prompted on top (modal below). */}
+          {isCompleted && <ReceiptView request={request} />}
+          {isCompleted && <CompletedSummary request={request} />}
+          {isCompleted && (
             <Row gap={10}>
-              <Icon name="edit" size={20} color={t.colors.danger} />
-              <Text weight="800" style={{ flex: 1, fontSize: 15 }}>{tr('actions.requote.title')}</Text>
+              <View style={{ flex: 1 }}>
+                <Button title={tr('actions.warranty.title')} variant="ghost" full onPress={() => router.push(`/request/${requestId}/warranty`)} left={<Icon name="shieldCheck" size={16} color={t.colors.ink} />} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Button title={tr('actions.dispute.title')} variant="ghost" full onPress={() => router.push(`/request/${requestId}/dispute`)} left={<Icon name="shield" size={16} color={t.colors.ink} />} />
+              </View>
             </Row>
-            <Text variant="caption">{tr('actions.requote.explain')}</Text>
-            <Button title={tr('actions.requote.title')} variant="soft" full onPress={() => router.push(`/request/${requestId}/requote`)} />
-          </Card>
-        )}
+          )}
 
-        {/* Completed → receipt + consolidated summary. Rating is prompted on top (modal below). */}
-        {isCompleted && <ReceiptView request={request} />}
-        {isCompleted && <CompletedSummary request={request} />}
-        {isCompleted && (
-          <Row gap={10}>
-            <View style={{ flex: 1 }}>
-              <Button title={tr('actions.warranty.title')} variant="ghost" full onPress={() => router.push(`/request/${requestId}/warranty`)} left={<Icon name="shieldCheck" size={16} color={t.colors.ink} />} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Button title={tr('actions.dispute.title')} variant="ghost" full onPress={() => router.push(`/request/${requestId}/dispute`)} left={<Icon name="shield" size={16} color={t.colors.ink} />} />
-            </View>
-          </Row>
+          </View>
         )}
-
-        <EventFeed events={events ?? []} approvedValue={request.accepted_proposal?.price} />
       </View>
 
       {/* Rating prompt: opens on top when completed+unrated, re-prompts on focus
@@ -366,7 +578,10 @@ export default function RequestDetail() {
         <Pressable onPress={dismissRate} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}>
           <Pressable onPress={() => {}} style={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 12, maxHeight: '92%' }}>
             <View style={{ alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: t.colors.line, marginBottom: 6 }} />
-            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }}>
+            {/* The sheet reaches the bottom of the screen, so a fixed padding
+                left the submit button under Android's navigation bar. Pad by
+                the real inset instead. */}
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom }}>
               <Row style={{ marginBottom: 8 }}>
                 <Text weight="800" style={{ flex: 1, fontSize: 17 }}>{tr('rate.title')}</Text>
                 <Pressable onPress={dismissRate} hitSlop={8}><Icon name="close" size={22} color={t.colors.ink3} /></Pressable>
@@ -380,36 +595,196 @@ export default function RequestDetail() {
   );
 }
 
-const ASSET_ICON: Record<string, IconName> = { vehicle: 'car', property: 'home', pet: 'paw' };
+/**
+ * Job progress: Aceito → A caminho → Chegou → Concluído.
+ *
+ * Lives in the screen's pinned header rather than in the scroll body, so "where
+ * is this job right now" stays on screen while you read bids, parts or history.
+ * Sized down from the in-body version it replaced (26px dots → 22px) to earn its
+ * permanent place without crowding the title.
+ */
+function TrackSteps({ steps, current }: { steps: string[]; current: number }) {
+  const t = useTheme();
 
-/** The asset (vehicle/property/pet) this request is tied to — brand logo + caption. */
-function RequestAssetCard({ asset, onPress }: { asset: Asset; onPress: () => void }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 22, paddingBottom: 12 }}>
+      {steps.map((label, i) => {
+        const done = i < current;
+        const now = i === current;
+        return (
+          <React.Fragment key={i}>
+            <View style={{ alignItems: 'center', gap: 5 }}>
+              <View
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 11,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderWidth: done || now ? 0 : 1,
+                  borderColor: t.colors.line,
+                  backgroundColor: done || now ? t.colors.accent : t.colors.surface2,
+                }}
+              >
+                {done ? (
+                  <Icon name="check" size={11} color={t.colors.accentInk} />
+                ) : (
+                  <Text weight="800" style={{ fontSize: 11, lineHeight: 14, color: now ? '#fff' : t.colors.ink3 }}>
+                    {i + 1}
+                  </Text>
+                )}
+              </View>
+              <Text
+                style={{ fontSize: 10, lineHeight: 13, fontWeight: '700' }}
+                color={done || now ? t.colors.ink : t.colors.ink3}
+              >
+                {label}
+              </Text>
+            </View>
+            {i < steps.length - 1 && (
+              <View style={{ flex: 1, height: 2, marginTop: 10, backgroundColor: i < current ? t.colors.accent : t.colors.line }} />
+            )}
+          </React.Fragment>
+        );
+      })}
+    </View>
+  );
+}
+
+/**
+ * What the provider is doing, shown once they're on site.
+ *
+ * Replaces the map at that point: the map answers "where is he", which stops
+ * being a question the moment he arrives. From then on the live question is
+ * "what is he doing to my thing" — parts going on the bill, notes and photos
+ * from the job. Updates arrive over the request channel (progress.updated).
+ */
+function JobProgressPanel({ request }: { request: ServiceRequest }) {
   const t = useTheme();
   const { t: tr } = useTranslation();
-  const d = asset.detail ?? {};
-  const caption =
-    [d.make, d.model, d.plate, d.kind, d.unit, d.species, d.breed].filter(Boolean).join(' · ') ||
-    tr(`assets.type.${asset.type}`);
+  const parts = request.job_parts ?? [];
+  const updates = [...(request.job_updates ?? [])].reverse(); // newest first
+  const partsTotal = parts.reduce((sum, p) => sum + (p.unit_price ?? 0) * p.quantity, 0);
+
+  if (!parts.length && !updates.length) {
+    return (
+      <Card style={{ gap: 6, alignItems: 'center', paddingVertical: 22 }}>
+        <Icon name="wrench" size={22} color={t.colors.ink3} />
+        <Text variant="caption" center color={t.colors.ink2}>
+          {tr('requestDetail.workEmpty')}
+        </Text>
+      </Card>
+    );
+  }
+
   return (
-    <Card onPress={onPress}>
-      <Row gap={12}>
-        <View style={{ width: 46, height: 46, borderRadius: 13, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
-          {d.make_logo_url ? (
-            <Image source={{ uri: d.make_logo_url }} style={{ width: 32, height: 32 }} resizeMode="contain" />
-          ) : (
-            <Icon name={ASSET_ICON[asset.type] ?? 'car'} size={22} color={t.colors.accent} />
-          )}
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text variant="caption" weight="700" color={t.colors.ink3}>{tr('requestDetail.assetLabel')}</Text>
-          <Text weight="800" style={{ fontSize: 14.5 }}>{asset.nickname}</Text>
-          <Text variant="caption" numberOfLines={1}>{caption}</Text>
-        </View>
-        <Icon name="arrowR" size={18} color={t.colors.ink3} />
+    <View style={{ gap: 10 }}>
+      <Row>
+        <SectionLabel count={parts.length || undefined}>{tr('requestDetail.workLabel')}</SectionLabel>
+        <View style={{ flex: 1 }} />
+        {partsTotal > 0 && (
+          <Text weight="800" style={{ fontSize: 13.5 }} color={t.colors.accent}>
+            {brl(partsTotal)}
+          </Text>
+        )}
       </Row>
+
+      {parts.length > 0 && (
+        <Card padded={false} style={{ paddingHorizontal: 16 }}>
+          {parts.map((p, i) => (
+            <Row key={p.id} style={{ paddingVertical: 11, borderTopWidth: i ? 1 : 0, borderColor: t.colors.line, gap: 10 }}>
+              <Icon name="wrench" size={15} color={t.colors.ink3} />
+              <Text weight="700" style={{ flex: 1, fontSize: 14 }} numberOfLines={1}>
+                {p.quantity}× {p.name}
+              </Text>
+              {p.approved_at ? <Icon name="check" size={14} color={t.colors.ok} /> : null}
+              <Text weight="700" style={{ fontSize: 13.5 }}>
+                {p.unit_price != null ? brl(p.unit_price * p.quantity) : '—'}
+              </Text>
+            </Row>
+          ))}
+        </Card>
+      )}
+
+      {updates.map((u) => (
+        <Card key={u.id} style={{ gap: 8 }}>
+          <Row gap={10} style={{ alignItems: 'flex-start' }}>
+            <Icon name="camera" size={15} color={t.colors.accent} />
+            <View style={{ flex: 1 }}>
+              {u.body ? <Text style={{ fontSize: 14 }}>{u.body}</Text> : null}
+              {u.photo_url ? (
+                <Image source={{ uri: u.photo_url }} style={{ width: '100%', height: 160, borderRadius: 12, marginTop: 8 }} />
+              ) : null}
+            </View>
+          </Row>
+        </Card>
+      ))}
+    </View>
+  );
+}
+
+/** One `label · value` line inside the request-details card. */
+function DetailRow({ label, value, first }: { label: string; value: string; first?: boolean }) {
+  const t = useTheme();
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+        paddingVertical: 10,
+        borderTopWidth: first ? 0 : 1,
+        borderColor: t.colors.line,
+      }}
+    >
+      <Text variant="caption" weight="700" color={t.colors.ink3} style={{ width: 92 }}>
+        {label}
+      </Text>
+      <Text weight="700" style={{ flex: 1, fontSize: 13.5 }}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+/**
+ * The agreed price, stated once and unmissably. It used to be a caption in the
+ * event feed's header, which is the last place someone looks for "what am I
+ * paying". When parts or surcharges have moved the total, both numbers show —
+ * the approved figure is what was agreed, the total is what it is now.
+ */
+function ApprovedValueCard({ request }: { request: ServiceRequest }) {
+  const t = useTheme();
+  const { t: tr } = useTranslation();
+  const approved = request.accepted_proposal?.price;
+  const total = request.settlement?.total;
+
+  if (approved == null) return null;
+
+  const moved = total != null && Math.abs(total - approved) >= 0.01;
+
+  return (
+    <Card style={{ gap: 4, alignItems: 'center', borderWidth: 1.5, borderColor: t.colors.ok }}>
+      <Text variant="label" color={t.colors.ink2}>{tr('eventFeed.approvedValue')}</Text>
+      {/* lineHeight is REQUIRED here. The `body` variant hardcodes lineHeight 21;
+          overriding fontSize to 30 without it leaves a 30px glyph in a 21px line
+          box, which clips anything reaching past the x-height — "R$ 240,00"
+          rendered as "RS 240.00" on device, losing the $ bar and the comma tail. */}
+      <Text weight="800" style={{ fontSize: 30, lineHeight: 38, color: t.colors.ok }}>{brl(approved)}</Text>
+      {moved && (
+        <Row gap={6}>
+          <Icon name="flash" size={13} color={t.colors.ink3} />
+          <Text variant="caption" color={t.colors.ink3}>
+            {tr('requestDetail.currentTotal')} · {brl(total!)}
+          </Text>
+        </Row>
+      )}
     </Card>
   );
 }
+
+// RequestAssetCard lived here; it's now the pinned JobSubject strip
+// (src/components/JobSubject.tsx), which also carries the client's photos.
 
 /** Consolidated summary shown when a request is completed: provider, timeline, parts. */
 function CompletedSummary({ request }: { request: ServiceRequest }) {

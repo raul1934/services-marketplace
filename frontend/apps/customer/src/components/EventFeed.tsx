@@ -41,20 +41,42 @@ const ICONS: Record<RequestEventType, IconName> = {
 };
 
 /**
- * Bottom-pinned activity feed for a request: the approved value plus the
- * request's events. Collapsed it shows the {COLLAPSED} most recent (latest at
- * the bottom, growing upward); tapping "view all" expands to the full list.
+ * Activity feed for a request. Two shapes:
+ *
+ * - `feed` (default): the {COLLAPSED} most recent events, expandable. Used
+ *   inline next to other content, where it must not dominate the screen.
+ * - `table`: every event with a column header, no collapsing. Used on the
+ *   History tab, where the list IS the content and scanning it by column
+ *   (what happened · how much · when) is the point.
+ *
  * Events arrive ascending (oldest → newest), so `slice(-N)` keeps the latest.
  */
-export function EventFeed({ events, approvedValue }: { events: RequestEvent[]; approvedValue?: number | null }) {
+export function EventFeed({
+  events,
+  approvedValue,
+  variant = 'feed',
+}: {
+  events: RequestEvent[];
+  approvedValue?: number | null;
+  variant?: 'feed' | 'table';
+}) {
   const t = useTheme();
   const { t: tr } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const isTable = variant === 'table';
 
-  if (!events.length) return null;
+  if (!events.length) {
+    return isTable ? (
+      <Card>
+        <Text variant="caption" center color={t.colors.ink3}>
+          {tr('requestDetail.noHistory')}
+        </Text>
+      </Card>
+    ) : null;
+  }
 
-  const hidden = Math.max(0, events.length - COLLAPSED);
-  const visible = expanded ? events : events.slice(-COLLAPSED);
+  const hidden = isTable ? 0 : Math.max(0, events.length - COLLAPSED);
+  const visible = isTable || expanded ? events : events.slice(-COLLAPSED);
 
   const timeLabel = (iso: string) => {
     const { unit, count } = relativeParts(iso);
@@ -73,11 +95,31 @@ export function EventFeed({ events, approvedValue }: { events: RequestEvent[]; a
         )}
       </Row>
 
-      <Card style={{ gap: 14 }}>
-        {visible.map((e) => {
+      <Card style={isTable ? { gap: 0 } : { gap: 14 }}>
+        {isTable && (
+          <Row gap={12} style={{ paddingBottom: 9 }}>
+            <View style={{ width: 30 }} />
+            <Text variant="caption" weight="800" color={t.colors.ink3} style={{ flex: 1, fontSize: 11 }}>
+              {tr('eventFeed.colEvent')}
+            </Text>
+            <Text variant="caption" weight="800" color={t.colors.ink3} style={{ fontSize: 11 }}>
+              {tr('eventFeed.colWhen')}
+            </Text>
+          </Row>
+        )}
+        {visible.map((e, i) => {
           const caption = captionOf(e);
           return (
-            <Row key={e.id} style={{ alignItems: 'flex-start' }} gap={12}>
+            <Row
+              key={e.id}
+              style={{
+                alignItems: 'flex-start',
+                ...(isTable
+                  ? { paddingVertical: 10, borderTopWidth: 1, borderColor: t.colors.line }
+                  : {}),
+              }}
+              gap={12}
+            >
               <View
                 style={{
                   width: 30,

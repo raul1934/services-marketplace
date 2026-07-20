@@ -402,7 +402,24 @@
     "viewProposals": "View proposals ({{count}})",
     "viewReceipt": "View receipt",
     "startCodeLabel": "START CODE",
-    "startCodeHint": "Give this code to the provider when they arrive to start the service."
+    "startCodeHint": "Give this code to the provider when they arrive to start the service.",
+    "tabs": {
+      "tracking": "Tracking",
+      "request": "Request",
+      "history": "History"
+    },
+    "detailsLabel": "Request details",
+    "descriptionLabel": "Description",
+    "addressLabel": "Address",
+    "paymentLabel": "Payment",
+    "actionsLabel": "Actions",
+    "answersLabel": "Answers",
+    "noHistory": "Nothing has happened yet.",
+    "budgetLabel": "Budget",
+    "workLabel": "Work in progress",
+    "workEmpty": "The pro is working. Parts and notes will show up here.",
+    "currentTotal": "Current total",
+    "actionsLockedUntil": "The pro is on the way. Rescheduling and no-show unlock at {{time}}."
   },
   "receipt": {
     "title": "Receipt",
@@ -453,7 +470,9 @@
       "expired": "Request expired",
       "disputed": "Dispute opened",
       "review_submitted": "Review submitted"
-    }
+    },
+    "colEvent": "Event",
+    "colWhen": "When"
   },
   "rate": {
     "title": "Rate your service",
@@ -629,7 +648,9 @@
       "descLabel": "Description",
       "descPlaceholder": "What went wrong?",
       "submit": "Open claim",
-      "openedMsg": "Warranty claim opened. We'll get back to you soon."
+      "openedMsg": "Warranty claim opened. We'll get back to you soon.",
+      "photosLabel": "Photos of the problem",
+      "photosHint": "Helps the review a lot. Up to 5 photos."
     }
   },
   "assets": {
@@ -871,17 +892,38 @@
     "type": {
       "title": "What are you registering?",
       "sub": "House, car or pet — whatever needs care.",
-      "options": { "vehicle": "Car, motorcycle, truck", "property": "House, apartment, annex", "pet": "Dog, cat and others" },
+      "options": {
+        "vehicle": "Car, motorcycle, truck",
+        "property": "House, apartment, annex",
+        "pet": "Dog, cat and others"
+      },
       "serviceCount": "{{count}} service",
       "serviceCount_plural": "{{count}} services",
       "benefitsTitle": "WHAT YOU CAN DO",
       "benefits": {
-        "vehicle": ["Call a tow, battery and more", "Track the mileage", "Keep photos and documents"],
-        "property": ["Measure rooms in AR", "Request service quotes", "Save the address on the map"],
-        "pet": ["Call a vet, grooming and more", "Keep the vaccination record", "Keep photos of your pet"]
+        "vehicle": [
+          "Call a tow, battery and more",
+          "Track the mileage",
+          "Keep photos and documents"
+        ],
+        "property": [
+          "Measure rooms in AR",
+          "Request service quotes",
+          "Save the address on the map"
+        ],
+        "pet": [
+          "Call a vet, grooming and more",
+          "Keep the vaccination record",
+          "Keep photos of your pet"
+        ]
       }
     },
-    "details": { "title": "Details", "sub": "Fill in what you know. You can edit it later.", "more": "More details (optional)", "less": "Hide details" },
+    "details": {
+      "title": "Details",
+      "sub": "Fill in what you know. You can edit it later.",
+      "more": "More details (optional)",
+      "less": "Hide details"
+    },
     "notes": {
       "sectionLabel": "Notes",
       "private": "Your notes (private)",
@@ -889,7 +931,10 @@
       "provider": "Note for the pro",
       "providerHint": "You choose to share it when requesting a service."
     },
-    "location": { "title": "Where is it?", "sub": "Drop a pin so the pro can find it." },
+    "location": {
+      "title": "Where is it?",
+      "sub": "Drop a pin so the pro can find it."
+    },
     "area": {
       "title": "Property area",
       "sub": "Optional — helps the pro size the job.",
