@@ -54,6 +54,12 @@ jobs:
             $COMPOSE run --rm --no-deps backend \
               composer install --no-dev --optimize-autoloader --no-interaction
             $COMPOSE up -d
+            # O Caddyfile é um bind mount read-only: quando só ele muda, o
+            # `up -d` não recria o container e o Caddy segue com a config antiga
+            # (ele lê o arquivo apenas no boot). Recarrega explicitamente — é
+            # graceful, sem derrubar conexões nem reemitir certificados.
+            $COMPOSE exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile \
+              || $COMPOSE restart caddy
             $COMPOSE exec -T backend php artisan migrate --force
             # Dados de referência idempotentes (categorias, perguntas, catálogos) em todo deploy.
             $COMPOSE exec -T backend php artisan db:seed --class=ProductionSeeder --force
