@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Icon, IconName, Row, Text, useTheme } from '@chamafacil/shared';
 
@@ -25,6 +26,12 @@ export function DatePicker({
   disableFuture?: boolean;
 }) {
   const t = useTheme();
+
+  // Modals render outside the screen's SafeAreaView, so the sheet has to
+
+  // clear Android's navigation bar itself.
+
+  const insets = useSafeAreaInsets();
   const { i18n } = useTranslation();
   const locale = i18n.language;
   const today = new Date();
@@ -82,7 +89,7 @@ export function DatePicker({
         <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }} onPress={() => setOpen(false)}>
           <Pressable
             onPress={(e) => e.stopPropagation?.()}
-            style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28, gap: 12 }}
+            style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28 + insets.bottom, gap: 12 }}
           >
             <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
             <Row>

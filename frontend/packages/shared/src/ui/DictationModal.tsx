@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme';
 import { useDictation } from '../lib/dictation';
@@ -36,6 +37,12 @@ export function DictationModal({
   cancelLabel?: string;
 }) {
   const t = useTheme();
+
+  // Modals render outside the screen's SafeAreaView, so the sheet has to
+
+  // clear Android's navigation bar itself.
+
+  const insets = useSafeAreaInsets();
   const [finalText, setFinalText] = useState('');
   const [partial, setPartial] = useState('');
   const pulse = useRef(new Animated.Value(0)).current;
@@ -98,7 +105,7 @@ export function DictationModal({
       <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }} onPress={cancel}>
         <Pressable
           onPress={(e) => e.stopPropagation?.()}
-          style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28, gap: 18 }}
+          style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28 + insets.bottom, gap: 18 }}
         >
           <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
           <Text variant="h3" center>{title}</Text>
