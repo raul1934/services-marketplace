@@ -18,6 +18,7 @@ import {
   SectionLabel,
   SlideToConfirm,
   Stars,
+  TestBadge, // TEMP — test bots. Remove with backend app/Bots.
   Text,
   brl,
   etaLabel,
@@ -312,7 +313,11 @@ function ProposalCard({
       <Row style={{ alignItems: 'flex-start' }}>
         <AvInit initials={initialsOf(proposal.provider_name)} color={AV_COLORS[index % AV_COLORS.length]} />
         <View style={{ flex: 1 }}>
-          <Text weight="800" style={{ fontSize: 15.5 }}>{proposal.provider_name ?? tr('requestDetail.fallbackProvider')}</Text>
+          <Row gap={6} style={{ alignItems: 'center' }}>
+            <Text weight="800" style={{ fontSize: 15.5 }}>{proposal.provider_name ?? tr('requestDetail.fallbackProvider')}</Text>
+            {/* TEMP — test bots. Remove with backend app/Bots. */}
+            {proposal.is_test && <TestBadge />}
+          </Row>
           <Row gap={6} style={{ marginTop: 2 }}>
             <Stars value={proposal.provider_rating_avg ?? 0} size={13} />
             <Text variant="caption" weight="600">{(proposal.provider_rating_avg ?? 0).toFixed(1)} · {proposal.provider_rating_count ?? 0} {tr('requestDetail.jobs')}</Text>

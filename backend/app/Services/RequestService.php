@@ -161,6 +161,12 @@ class RequestService
         if (! $request->accepted_provider_id) {
             return;
         }
+        // TEMP (test bots): a job posted by a bot client is not real revenue —
+        // don't credit a real provider's wallet or inflate their jobs_completed
+        // for it. Remove this guard with app/Bots.
+        if ($request->is_test) {
+            return;
+        }
         $exists = WalletTransaction::where('service_request_id', $request->id)
             ->where('type', WalletTransaction::TYPE_CREDIT)->exists();
         if ($exists) {

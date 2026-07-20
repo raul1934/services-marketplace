@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Image, Modal, Pressable, ScrollView, View } from 'react-native';
 import MapView, { Marker, Polygon, Polyline } from 'react-native-maps';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import {
   Asset,
@@ -18,6 +19,7 @@ import {
   Screen,
   SlideToConfirm,
   Stars,
+  TestBanner, // TEMP — test bots. Remove with backend app/Bots.
   Text,
   brl,
   calcPayout,
@@ -54,6 +56,7 @@ export default function JobScreen() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
   const requestId = Number(id);
   const { data: request, isLoading } = useJob(requestId);
 
@@ -240,12 +243,19 @@ export default function JobScreen() {
     <Screen stickyHeader padded={false} footer={footer}>
       {backBar}
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
+        {/* TEMP — test bots. Remove with backend app/Bots. */}
+        {request.is_test && <TestBanner message="Chamado de teste gerado por bot." />}
         {summaryCard}
         {mapCard(false)}
         {request.asset && <AssetCard asset={request.asset} />}
         <Management request={request} />
       </View>
-      <StartCodeModal requestId={requestId} visible={codeOpen} onClose={() => setCodeOpen(false)} />
+      <StartCodeModal
+        requestId={requestId}
+        visible={codeOpen}
+        onClose={() => setCodeOpen(false)}
+        testStartCode={request.test_start_code} // TEMP — test bots.
+      />
 
       {/* Rate-client prompt: opens on top when completed+unrated, re-prompts on
           focus until dismissed once, closeable. */}
@@ -253,7 +263,9 @@ export default function JobScreen() {
         <Pressable onPress={dismissRate} style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}>
           <Pressable onPress={() => {}} style={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingTop: 12, maxHeight: '92%' }}>
             <View style={{ alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: t.colors.line, marginBottom: 6 }} />
-            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }}>
+            {/* Same fix as the customer app's rating sheet: a fixed padding put
+                the submit button under Android's navigation bar. */}
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom }}>
               <Row style={{ marginBottom: 8 }}>
                 <Text weight="800" style={{ flex: 1, fontSize: 17 }}>{tr('rateClient.title')}</Text>
                 <Pressable onPress={dismissRate} hitSlop={8}><Icon name="close" size={22} color={t.colors.ink3} /></Pressable>

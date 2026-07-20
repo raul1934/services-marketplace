@@ -27,6 +27,8 @@ class ProposalResource extends JsonResource
             'deposit_percentage' => $this->deposit_percentage !== null ? (int) $this->deposit_percentage : null,
             'deposit_amount' => $this->deposit_amount !== null ? (float) $this->deposit_amount : null,
             'status' => $this->status,
+            // TEMP (test bots): drives the "TESTE" badge on the bid card. Remove with app/Bots.
+            'is_test' => (bool) $this->is_test,
             'created_at' => $this->created_at,
             'provider_name' => $this->when($provider !== null, fn () => $this->provider->name),
             'provider_rating_avg' => $this->when($profile !== null, fn () => (float) $profile->rating_avg),

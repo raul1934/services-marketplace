@@ -103,7 +103,20 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                // TEMP (test bots): hide bot accounts by default so they don't
+                // clutter the user list. A filter, not a global scope — a scope
+                // would also hide them when you're deliberately debugging the
+                // bots. Remove with app/Bots.
+                Tables\Filters\TernaryFilter::make('is_bot')
+                    ->label('Contas de teste')
+                    ->placeholder('Ocultar bots')
+                    ->trueLabel('Somente bots')
+                    ->falseLabel('Somente reais')
+                    ->queries(
+                        true: fn ($query) => $query->where('is_bot', true),
+                        false: fn ($query) => $query->where('is_bot', false),
+                        blank: fn ($query) => $query->where('is_bot', false),
+                    ),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

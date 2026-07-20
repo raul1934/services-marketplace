@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, OtpInput, Text, useTheme } from '@chamafacil/shared';
+import { Button, Card, OtpInput, TestBanner, Text, useTheme } from '@chamafacil/shared';
 import { useStartJob } from '../queries';
 
 /**
@@ -9,7 +9,23 @@ import { useStartJob } from '../queries';
  * code + the verified start mutation; on success the job query refreshes (the
  * screen flips to in_progress) and the modal closes. A wrong code shows an error.
  */
-export function StartCodeModal({ requestId, visible, onClose }: { requestId: number; visible: boolean; onClose: () => void }) {
+export function StartCodeModal({
+  requestId,
+  visible,
+  onClose,
+  testStartCode,
+}: {
+  requestId: number;
+  visible: boolean;
+  onClose: () => void;
+  /**
+   * TEMP (test bots): on a bot-generated job there is no human client to read
+   * the code aloud, so the backend hands it to the accepted provider directly.
+   * Shown here so the urgent start flow is actually testable. Always null on
+   * real jobs. Remove with backend app/Bots.
+   */
+  testStartCode?: string | null;
+}) {
   const t = useTheme();
   const { t: tr } = useTranslation();
   const [code, setCode] = useState('');
@@ -46,6 +62,8 @@ export function StartCodeModal({ requestId, visible, onClose }: { requestId: num
               <Text weight="800" style={{ fontSize: 17 }}>{tr('job.startCodeTitle')}</Text>
               <Text variant="caption">{tr('job.startCodeHint')}</Text>
             </View>
+            {/* TEMP — test bots. Remove with backend app/Bots. */}
+            {testStartCode ? <TestBanner message={`Chamado de teste — código: ${testStartCode}`} /> : null}
             <OtpInput value={code} onChange={(v) => { setError(''); setCode(v); }} length={4} />
             {error ? <Text variant="caption" color={t.colors.danger}>{error}</Text> : null}
             <Button

@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         __DIR__.'/../routes/channels.php',
         ['middleware' => ['auth:sanctum']],
     )
+    // TEMP (test bots): only app/Console/Commands is auto-discovered, and the
+    // bot commands live under app/Bots so the whole feature deletes as one
+    // directory. Remove this line with app/Bots.
+    ->withCommands([__DIR__.'/../app/Bots/Console'])
     ->withMiddleware(function (Middleware $middleware): void {
         // Localize responses (validation + custom messages) from the X-Locale header.
         $middleware->api(prepend: [\App\Http\Middleware\SetLocale::class]);

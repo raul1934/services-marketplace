@@ -28,6 +28,7 @@ class User extends Authenticatable implements FilamentUser
         'is_client',
         'is_provider',
         'is_admin',
+        'is_bot', // TEMP — test bots. Remove with app/Bots.
         'avatar_path',
         'rating_avg',
         'rating_count',
@@ -48,6 +49,7 @@ class User extends Authenticatable implements FilamentUser
             'is_client' => 'boolean',
             'is_provider' => 'boolean',
             'is_admin' => 'boolean',
+            'is_bot' => 'boolean', // TEMP — test bots. Remove with app/Bots.
             'rating_avg' => 'decimal:2',
             'rating_count' => 'integer',
             'no_show_count' => 'integer',

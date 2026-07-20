@@ -29,6 +29,9 @@
         <env name="MAIL_MAILER" value="array"/>
         <!-- Legacy radius matching by default in tests; TerritoryIsolationTest opts in per-test. -->
         <env name="MATCHING_TERRITORY_ISOLATION" value="false"/>
+        <!-- TEMP (test bots): observers stay inert so the existing suite is unaffected;
+             the bot tests opt in per-test. Remove with app/Bots. -->
+        <env name="BOTS_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>

@@ -12,10 +12,12 @@ class Proposal extends Model
     protected $fillable = [
         'service_request_id', 'provider_id', 'price', 'eta_minutes', 'comment',
         'deposit_required', 'deposit_percentage', 'deposit_amount', 'status',
+        'is_test', // TEMP — test bots. Remove with app/Bots.
     ];
 
     protected $casts = [
         'status' => ProposalStatus::class,
+        'is_test' => 'boolean', // TEMP — test bots. Remove with app/Bots.
         'price' => 'decimal:2',
         'eta_minutes' => 'integer',
         'deposit_required' => 'boolean',

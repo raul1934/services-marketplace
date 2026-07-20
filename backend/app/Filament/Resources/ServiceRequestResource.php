@@ -134,6 +134,18 @@ class ServiceRequestResource extends Resource
                     ->relationship('market', 'name'),
                 SelectFilter::make('status')
                     ->options(collect(RequestStatus::cases())->mapWithKeys(fn ($s) => [$s->value => $s->name])),
+                // TEMP (test bots): bot-generated requests are hidden by default
+                // so ops metrics read true at a glance. Remove with app/Bots.
+                Tables\Filters\TernaryFilter::make('is_test')
+                    ->label('Chamados de teste')
+                    ->placeholder('Ocultar testes')
+                    ->trueLabel('Somente testes')
+                    ->falseLabel('Somente reais')
+                    ->queries(
+                        true: fn ($query) => $query->where('is_test', true),
+                        false: fn ($query) => $query->where('is_test', false),
+                        blank: fn ($query) => $query->where('is_test', false),
+                    ),
             ])
             ->actions([
                 Tables\Actions\Action::make('map')

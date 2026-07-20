@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Badge, Card, RequestStatus, RequestUrgency, ServiceRequest, Text, brl, distanceLabel, useTheme } from '@chamafacil/shared';
+import { Badge, Card, RequestStatus, RequestUrgency, ServiceRequest, TestBadge, Text, brl, distanceLabel, useTheme } from '@chamafacil/shared';
 import { CategoryIcon } from './CategoryIcon';
 
 /** Request card for the provider side — nearby open requests, bids and jobs. */
@@ -40,6 +40,8 @@ export function JobCard({
             {request.description}
           </Text>
         </View>
+        {/* TEMP — test bots. Remove with backend app/Bots. */}
+        {request.is_test && <TestBadge />}
         {request.urgency === RequestUrgency.Urgent ? (
           <Badge
             label={request.max_wait_minutes != null ? tr('enums.urgency.urgentWithWait', { count: request.max_wait_minutes }) : tr('enums.urgency.urgent')}
