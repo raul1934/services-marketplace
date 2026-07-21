@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Card, EmptyState, Icon, PaginatedList, Row, Text, relativeParts, useTheme } from '@chamafacil/shared';
+import { BackBar, Card, EmptyState, Icon, PaginatedList, Row, Text, focusRing, relativeParts, useTheme } from '@chamafacil/shared';
 import { AppNotification } from '../src/api';
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications, useUnreadCount } from '../src/queries';
 import { notificationIcon, notificationRoute } from '../src/notificationLinks';
@@ -36,7 +36,12 @@ export default function NotificationsScreen() {
           onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))}
           right={
             unread.data?.count ? (
-              <Pressable onPress={() => markAll.mutate()} hitSlop={8} disabled={markAll.isPending}>
+              <Pressable
+                onPress={() => markAll.mutate()}
+                hitSlop={8}
+                disabled={markAll.isPending}
+                style={({ focused }: any) => focusRing(t.colors.accent, focused)}
+              >
                 <Text weight="700" color={t.colors.accent} style={{ fontSize: 13 }}>
                   {tr('notifications.markAll')}
                 </Text>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Chip, Icon, RequestStatus, Row, Text, useTheme } from '@chamafacil/shared';
+import { Chip, Icon, RequestStatus, Row, Text, focusRing, useTheme } from '@chamafacil/shared';
 
 /** Status filter buckets for the My-requests list. */
 export type RequestFilter = 'all' | 'open' | 'active' | 'completed' | 'cancelled';
@@ -57,7 +57,7 @@ export function RequestFilterSheet({
           <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
           <Row style={{ justifyContent: 'space-between' }}>
             <Text variant="h3">{tr('requests.filterTitle')}</Text>
-            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={tr('common.close')} hitSlop={8}>
+            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={tr('common.close')} hitSlop={8} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
               <Icon name="close" size={22} color={t.colors.ink3} />
             </Pressable>
           </Row>

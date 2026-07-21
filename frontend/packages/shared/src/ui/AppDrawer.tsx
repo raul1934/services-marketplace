@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
+import { focusRing } from '../lib/a11y';
 import { Avatar } from './Avatar';
 import { BrandMark } from './auth/BrandMark';
 import { Icon, IconName } from './Icon';
@@ -57,7 +58,7 @@ export function AppDrawer({
               <Text weight="800" style={{ fontSize: 17 }} numberOfLines={1}>{name ?? '—'}</Text>
               {subtitle ? <Text variant="caption" numberOfLines={1}>{subtitle}</Text> : null}
             </View>
-            <Pressable onPress={onClose} hitSlop={10}>
+            <Pressable onPress={onClose} hitSlop={10} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
               <Icon name="close" size={22} color={t.colors.ink2} />
             </Pressable>
           </View>
@@ -103,7 +104,11 @@ function DrawerRow({ item, onClose }: { item: DrawerItem; onClose: () => void })
   return (
     <Pressable
       onPress={() => { onClose(); item.onPress(); }}
-      style={({ pressed }) => [{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 13 }, pressed && { backgroundColor: t.colors.surface2 }]}
+      style={({ pressed, focused }: any) => [
+        { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 13 },
+        pressed && { backgroundColor: t.colors.surface2 },
+        focusRing(t.colors.accent, focused),
+      ]}
     >
       <Icon name={item.icon} size={20} color={item.danger ? t.colors.danger : t.colors.ink2} />
       <Text weight="700" style={{ flex: 1, fontSize: 15 }} color={color}>{item.label}</Text>

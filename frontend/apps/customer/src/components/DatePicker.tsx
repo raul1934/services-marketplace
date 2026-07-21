@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Icon, IconName, Row, Text, useTheme } from '@chamafacil/shared';
+import { Icon, IconName, Row, Text, useTheme, withFocusRing } from '@chamafacil/shared';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toStr = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
@@ -69,7 +69,7 @@ export function DatePicker({
   };
 
   const navBtn = (icon: IconName, onPress: () => void) => (
-    <Pressable onPress={onPress} style={{ width: 30, height: 30, borderRadius: 9, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' }}>
+    <Pressable onPress={onPress} style={withFocusRing(t.colors.accent, { width: 30, height: 30, borderRadius: 9, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' })}>
       <Icon name={icon} size={15} color={t.colors.ink2} />
     </Pressable>
   );
@@ -79,7 +79,7 @@ export function DatePicker({
       {label ? <Text variant="label">{label}</Text> : null}
       <Pressable
         onPress={openPicker}
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.surface2, borderRadius: t.radius.field, borderWidth: 1.5, borderColor: t.colors.line, paddingHorizontal: 14, minHeight: 50 }}
+        style={withFocusRing(t.colors.accent, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.surface2, borderRadius: t.radius.field, borderWidth: 1.5, borderColor: t.colors.line, paddingHorizontal: 14, minHeight: 50 })}
       >
         <Text style={{ fontSize: 15, fontWeight: '500', color: display ? t.colors.ink : t.colors.ink3 }}>{display || placeholder}</Text>
         <Icon name="calendar" size={18} color={t.colors.ink3} />
@@ -114,7 +114,7 @@ export function DatePicker({
                     <Pressable
                       onPress={() => select(d)}
                       disabled={isFuture(d)}
-                      style={{ flex: 1, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: isSel(d) ? t.colors.accent : 'transparent', opacity: isFuture(d) ? 0.3 : 1 }}
+                      style={withFocusRing(t.colors.accent, { flex: 1, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: isSel(d) ? t.colors.accent : 'transparent', opacity: isFuture(d) ? 0.3 : 1 })}
                     >
                       <Text weight="700" style={{ fontSize: 13 }} color={isSel(d) ? '#fff' : t.colors.ink}>{d}</Text>
                     </Pressable>

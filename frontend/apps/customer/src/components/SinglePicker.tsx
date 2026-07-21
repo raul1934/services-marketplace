@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Field, Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { Field, Icon, Row, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
 import { PickerField } from './LinkedPicker';
 
 /** Generic single-level id picker (search + select). Used for property type. */
@@ -49,7 +49,7 @@ export function SinglePicker({
             <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
             <Row style={{ justifyContent: 'space-between' }}>
               <Text variant="h3">{placeholder}</Text>
-              <Pressable onPress={() => setOpen(false)} accessibilityRole="button" hitSlop={8}>
+              <Pressable onPress={() => setOpen(false)} accessibilityRole="button" hitSlop={8} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
                 <Icon name="close" size={22} color={t.colors.ink3} />
               </Pressable>
             </Row>
@@ -61,7 +61,7 @@ export function SinglePicker({
                   <Pressable
                     key={r.id}
                     onPress={() => { onChange(r.id); setOpen(false); }}
-                    style={{ paddingVertical: 13, borderBottomWidth: 1, borderColor: t.colors.line, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                    style={withFocusRing(t.colors.accent, { paddingVertical: 13, borderBottomWidth: 1, borderColor: t.colors.line, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' })}
                   >
                     <Text style={{ fontSize: 15, fontWeight: active ? '800' : '500', color: active ? t.colors.accent : t.colors.ink }}>{r.name}</Text>
                     {active ? <Icon name="check" size={18} color={t.colors.accent} /> : null}
