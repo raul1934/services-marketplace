@@ -53,6 +53,12 @@ export function Field({ label, error, hint, right, voiceInput, style, ...rest }:
       >
         <TextInput
           ref={inputRef}
+          // The visible label is the field's name, and the error (or hint) is its
+          // description — otherwise a screen reader lands on an unnamed box and
+          // the red text below is just loose prose it may never reach.
+          accessibilityLabel={rest.accessibilityLabel ?? label}
+          accessibilityHint={error ?? hint}
+          aria-invalid={!!error}
           placeholderTextColor={t.colors.ink3}
           onFocus={(e) => {
             setFocused(true);
@@ -86,7 +92,9 @@ export function Field({ label, error, hint, right, voiceInput, style, ...rest }:
         {right}
       </View>
       {error ? (
-        <Text variant="caption" color={t.colors.danger}>
+        // Assertive: a rejected field is the reason the form did not submit, so
+        // it should interrupt rather than wait to be discovered.
+        <Text variant="caption" color={t.colors.danger} accessibilityLiveRegion="assertive" accessibilityRole="alert">
           {error}
         </Text>
       ) : hint ? (
