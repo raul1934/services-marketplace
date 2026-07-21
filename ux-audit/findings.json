@@ -45,7 +45,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "password-recovery-and-verification"
+      "change": "password-recovery-and-verification",
+      "issue": 1
     },
     {
       "id": "AUTH-03",
@@ -81,7 +82,8 @@
       ],
       "note": "rotulo persistente entrou; o placeholder segue em ink3 (~2.6:1)",
       "quick_win": 16,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 2
     },
     {
       "id": "AUTH-05",
@@ -115,7 +117,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 3
     },
     {
       "id": "REQ-02",
@@ -131,7 +134,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 4
     },
     {
       "id": "NAV-01",
@@ -147,7 +151,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "discovery-and-primary-action"
+      "change": "discovery-and-primary-action",
+      "issue": 5
     },
     {
       "id": "ASSET-01",
@@ -163,7 +168,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "discovery-and-primary-action"
+      "change": "discovery-and-primary-action",
+      "issue": 6
     },
     {
       "id": "A11Y-01",
@@ -179,7 +185,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-confirmation-controls"
+      "change": "accessible-confirmation-controls",
+      "issue": 7
     },
     {
       "id": "A11Y-02",
@@ -195,7 +202,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-confirmation-controls"
+      "change": "accessible-confirmation-controls",
+      "issue": 8
     },
     {
       "id": "EXC-01",
@@ -211,7 +219,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "consolidate-exception-screens"
+      "change": "consolidate-exception-screens",
+      "issue": 9
     },
     {
       "id": "DS-01",
@@ -229,7 +238,8 @@
       ],
       "note": "accent escurecido p/ 4.29:1; soft/ok/ink3 seguem <4.5:1",
       "quick_win": 17,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 10
     },
     {
       "id": "GLOB-01",
@@ -245,7 +255,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "offline-and-error-recovery"
+      "change": "offline-and-error-recovery",
+      "issue": 11
     },
     {
       "id": "AUTH-06",
@@ -261,7 +272,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "offline-and-error-recovery"
+      "change": "offline-and-error-recovery",
+      "issue": 12
     },
     {
       "id": "AUTH-07",
@@ -277,7 +289,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 13
     },
     {
       "id": "AUTH-08",
@@ -293,7 +306,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "account-self-service"
+      "change": "account-self-service",
+      "issue": 14
     },
     {
       "id": "AUTH-18",
@@ -309,7 +323,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "password-recovery-and-verification"
+      "change": "password-recovery-and-verification",
+      "issue": 15
     },
     {
       "id": "HOME-01",
@@ -343,7 +358,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "discovery-and-primary-action"
+      "change": "discovery-and-primary-action",
+      "issue": 16
     },
     {
       "id": "REQ-03",
@@ -359,7 +375,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "slim-request-detail"
+      "change": "slim-request-detail",
+      "issue": 17
     },
     {
       "id": "REQ-04",
@@ -375,7 +392,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 18
     },
     {
       "id": "REQ-05",
@@ -409,7 +427,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 19
     },
     {
       "id": "REQ-07",
@@ -443,7 +462,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 20
     },
     {
       "id": "PROP-01",
@@ -459,7 +479,8 @@
       "commits": [],
       "note": null,
       "quick_win": 21,
-      "change": "negotiation-and-proposal-clarity"
+      "change": "negotiation-and-proposal-clarity",
+      "issue": 21
     },
     {
       "id": "PROP-02",
@@ -475,7 +496,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "negotiation-and-proposal-clarity"
+      "change": "negotiation-and-proposal-clarity",
+      "issue": 22
     },
     {
       "id": "PROP-03",
@@ -509,7 +531,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "consolidate-exception-screens"
+      "change": "consolidate-exception-screens",
+      "issue": 23
     },
     {
       "id": "ASSET-02",
@@ -525,7 +548,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 24
     },
     {
       "id": "PROF-01",
@@ -541,7 +565,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "account-self-service"
+      "change": "account-self-service",
+      "issue": 25
     },
     {
       "id": "PROF-02",
@@ -593,7 +618,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 26
     },
     {
       "id": "DS-03",
@@ -609,7 +635,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 27
     },
     {
       "id": "DS-04",
@@ -625,7 +652,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 28
     },
     {
       "id": "DS-07",
@@ -641,7 +669,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-confirmation-controls"
+      "change": "accessible-confirmation-controls",
+      "issue": 29
     },
     {
       "id": "A11Y-03",
@@ -677,7 +706,8 @@
       ],
       "note": "roles nas propostas e no cancelar; welcome/login/register/verify seguem",
       "quick_win": 23,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 30
     },
     {
       "id": "A11Y-05",
@@ -693,7 +723,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 31
     },
     {
       "id": "GLOB-02",
@@ -709,7 +740,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "offline-and-error-recovery"
+      "change": "offline-and-error-recovery",
+      "issue": 32
     },
     {
       "id": "CONS-01",
@@ -779,7 +811,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 33
     },
     {
       "id": "AUTH-10",
@@ -795,7 +828,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 34
     },
     {
       "id": "AUTH-11",
@@ -811,7 +845,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 35
     },
     {
       "id": "AUTH-12",
@@ -827,7 +862,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 36
     },
     {
       "id": "AUTH-13",
@@ -861,7 +897,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 37
     },
     {
       "id": "AUTH-15",
@@ -879,7 +916,8 @@
       ],
       "note": "KeyboardAvoidingView no wizard; login.tsx segue sem",
       "quick_win": 12,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 38
     },
     {
       "id": "AUTH-16",
@@ -895,7 +933,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "password-recovery-and-verification"
+      "change": "password-recovery-and-verification",
+      "issue": 39
     },
     {
       "id": "HOME-03",
@@ -911,7 +950,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "discovery-and-primary-action"
+      "change": "discovery-and-primary-action",
+      "issue": 40
     },
     {
       "id": "HOME-04",
@@ -927,7 +967,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "discovery-and-primary-action"
+      "change": "discovery-and-primary-action",
+      "issue": 41
     },
     {
       "id": "NAV-02",
@@ -943,7 +984,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "discovery-and-primary-action"
+      "change": "discovery-and-primary-action",
+      "issue": 42
     },
     {
       "id": "REQ-09",
@@ -959,7 +1001,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 43
     },
     {
       "id": "REQ-10",
@@ -975,7 +1018,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "slim-request-detail"
+      "change": "slim-request-detail",
+      "issue": 44
     },
     {
       "id": "REQ-11",
@@ -991,7 +1035,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "slim-request-detail"
+      "change": "slim-request-detail",
+      "issue": 45
     },
     {
       "id": "REQ-12",
@@ -1007,7 +1052,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "slim-request-detail"
+      "change": "slim-request-detail",
+      "issue": 46
     },
     {
       "id": "REQ-13",
@@ -1023,7 +1069,8 @@
       "commits": [],
       "note": null,
       "quick_win": 24,
-      "change": "express-request-flow"
+      "change": "express-request-flow",
+      "issue": 47
     },
     {
       "id": "REQ-14",
@@ -1057,7 +1104,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "slim-request-detail"
+      "change": "slim-request-detail",
+      "issue": 48
     },
     {
       "id": "REQ-16",
@@ -1073,7 +1121,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "slim-request-detail"
+      "change": "slim-request-detail",
+      "issue": 49
     },
     {
       "id": "PROP-04",
@@ -1089,7 +1138,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "negotiation-and-proposal-clarity"
+      "change": "negotiation-and-proposal-clarity",
+      "issue": 50
     },
     {
       "id": "PROP-05",
@@ -1105,7 +1155,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "negotiation-and-proposal-clarity"
+      "change": "negotiation-and-proposal-clarity",
+      "issue": 51
     },
     {
       "id": "PROP-06",
@@ -1139,7 +1190,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "consolidate-exception-screens"
+      "change": "consolidate-exception-screens",
+      "issue": 52
     },
     {
       "id": "EXC-04",
@@ -1173,7 +1225,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "consolidate-exception-screens"
+      "change": "consolidate-exception-screens",
+      "issue": 53
     },
     {
       "id": "NOTIF-01",
@@ -1189,7 +1242,8 @@
       "commits": [],
       "note": null,
       "quick_win": 27,
-      "change": "notification-hygiene"
+      "change": "notification-hygiene",
+      "issue": 54
     },
     {
       "id": "NOTIF-02",
@@ -1205,7 +1259,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "notification-hygiene"
+      "change": "notification-hygiene",
+      "issue": 55
     },
     {
       "id": "NOTIF-03",
@@ -1221,7 +1276,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "notification-hygiene"
+      "change": "notification-hygiene",
+      "issue": 56
     },
     {
       "id": "DS-05",
@@ -1237,7 +1293,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 57
     },
     {
       "id": "DS-06",
@@ -1253,7 +1310,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 58
     },
     {
       "id": "A11Y-06",
@@ -1269,7 +1327,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 59
     },
     {
       "id": "A11Y-07",
@@ -1285,7 +1344,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 60
     },
     {
       "id": "A11Y-08",
@@ -1301,7 +1361,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 61
     },
     {
       "id": "A11Y-09",
@@ -1317,7 +1378,8 @@
       "commits": [],
       "note": null,
       "quick_win": 18,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 62
     },
     {
       "id": "A11Y-10",
@@ -1333,7 +1395,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 63
     },
     {
       "id": "A11Y-11",
@@ -1349,7 +1412,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 64
     },
     {
       "id": "A11Y-12",
@@ -1365,7 +1429,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 65
     },
     {
       "id": "GLOB-04",
@@ -1381,7 +1446,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "offline-and-error-recovery"
+      "change": "offline-and-error-recovery",
+      "issue": 66
     },
     {
       "id": "PERF-01",
@@ -1397,7 +1463,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 67
     },
     {
       "id": "CONS-03",
@@ -1449,7 +1516,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "negotiation-and-proposal-clarity"
+      "change": "negotiation-and-proposal-clarity",
+      "issue": 68
     },
     {
       "id": "AUTH-17",
@@ -1465,7 +1533,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "harden-auth-forms"
+      "change": "harden-auth-forms",
+      "issue": 69
     },
     {
       "id": "REQ-17",
@@ -1481,7 +1550,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "slim-request-detail"
+      "change": "slim-request-detail",
+      "issue": 70
     },
     {
       "id": "REQ-18",
@@ -1533,7 +1603,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "consolidate-exception-screens"
+      "change": "consolidate-exception-screens",
+      "issue": 71
     },
     {
       "id": "EXC-07",
@@ -1549,7 +1620,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "consolidate-exception-screens"
+      "change": "consolidate-exception-screens",
+      "issue": 72
     },
     {
       "id": "NOTIF-04",
@@ -1565,7 +1637,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "notification-hygiene"
+      "change": "notification-hygiene",
+      "issue": 73
     },
     {
       "id": "NOTIF-05",
@@ -1581,7 +1654,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "notification-hygiene"
+      "change": "notification-hygiene",
+      "issue": 74
     },
     {
       "id": "PROF-04",
@@ -1597,7 +1671,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "account-self-service"
+      "change": "account-self-service",
+      "issue": 75
     },
     {
       "id": "PROF-05",
@@ -1613,7 +1688,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "account-self-service"
+      "change": "account-self-service",
+      "issue": 76
     },
     {
       "id": "DS-08",
@@ -1629,7 +1705,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 77
     },
     {
       "id": "DS-09",
@@ -1645,7 +1722,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 78
     },
     {
       "id": "DS-10",
@@ -1661,7 +1739,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "design-system-foundations"
+      "change": "design-system-foundations",
+      "issue": 79
     },
     {
       "id": "A11Y-13",
@@ -1677,7 +1756,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 80
     },
     {
       "id": "A11Y-14",
@@ -1693,7 +1773,8 @@
       "commits": [],
       "note": null,
       "quick_win": null,
-      "change": "accessible-semantics-sweep"
+      "change": "accessible-semantics-sweep",
+      "issue": 81
     },
     {
       "id": "PERF-02",

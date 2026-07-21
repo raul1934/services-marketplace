@@ -23,6 +23,13 @@ import sys
 import time
 import collections
 
+# The Windows console is cp1252 and dies on "→" — which it did, mid-run, *after*
+# the issue had been created but *before* the number was written back, leaving an
+# issue on GitHub that the next run would have duplicated. Never let logging be
+# able to break the bookkeeping.
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 JSON_PATH = os.path.join(HERE, 'findings.json')
 GH = os.path.join(os.environ.get('ProgramFiles', r'C:\Program Files'), 'GitHub CLI', 'gh.exe')
@@ -90,6 +97,34 @@ def run(args, **kw):
     return subprocess.run(args, capture_output=True, text=True, encoding='utf-8', **kw)
 
 
+def reconcile(doc):
+    """Adopt issues that already exist on GitHub, matching on the `[ID]` title prefix.
+
+    Makes the script idempotent whatever went wrong last time — a crash between
+    creating and recording, a partial run, or someone opening one by hand.
+    """
+    r = run([GH, 'issue', 'list', '--limit', '400', '--state', 'all',
+             '--json', 'number,title'])
+    if r.returncode != 0:
+        print('aviso: nao consegui listar issues (%s) — seguindo sem reconciliar'
+              % r.stderr.strip()[:80])
+        return 0
+    on_hub = {}
+    for i in json.loads(r.stdout or '[]'):
+        m = re.match(r'\[([A-Z0-9-]+)\]', i['title'])
+        if m:
+            on_hub[m.group(1)] = i['number']
+    adopted = 0
+    for f in doc['findings']:
+        if not f.get('issue') and f['id'] in on_hub:
+            f['issue'] = on_hub[f['id']]
+            adopted += 1
+    if adopted:
+        save(doc)
+        print('reconciliadas: %d issue(s) que ja existiam e nao estavam registradas' % adopted)
+    return adopted
+
+
 def ensure_labels(findings, dry):
     wanted = collections.OrderedDict()
     wanted['auditoria-ux'] = ('0366d6', 'Achado da auditoria de UX/UI/acessibilidade')
@@ -120,6 +155,8 @@ def main():
 
     doc = load()
     findings = doc['findings']
+    if not args.labels:
+        reconcile(doc)
     todo = [f for f in findings if f['status'] != 'done' and not f.get('issue')]
 
     if args.labels:
@@ -158,9 +195,9 @@ def main():
         url = r.stdout.strip().splitlines()[-1]
         m = re.search(r'/issues/(\d+)', url)
         f['issue'] = int(m.group(1)) if m else url
+        save(doc)  # before anything that can throw, logging included
         created += 1
         print('%-10s #%-5s %s' % (f['id'], f.get('issue'), f['title'][:52]))
-        save(doc)
         time.sleep(args.delay)
 
     print('criadas: %d' % created)
