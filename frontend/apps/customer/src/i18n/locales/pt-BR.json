@@ -687,6 +687,8 @@
     "detailsLabel": "Detalhes",
     "nickname": "Apelido",
     "nicknamePlaceholder": "Civic do pai",
+    "nicknameOptional": "Apelido (opcional)",
+    "nicknameAutoHint": "Se deixar em branco, salvamos como \"{{name}}\" — dá para mudar depois.",
     "nicknameError": "Dê um apelido ao ativo.",
     "save": "Salvar",
     "savedBody": "Ativo atualizado.",
