@@ -54,6 +54,7 @@ class ActiveRequestSync extends BaseAppNotification
         return [
             'request_id' => (string) $this->requestId,
             'active_action' => $terminal ? 'clear' : 'upsert',
+            'active_status' => $this->status->value,
             'active_title' => ServiceRequest::find($this->requestId)?->category?->name ?? 'Chamado em andamento',
             'active_body' => match ($this->status) {
                 RequestStatus::Accepted => 'Prestador a caminho',

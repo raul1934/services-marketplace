@@ -35,6 +35,7 @@ TaskManager.defineTask(TASK, async ({ data, error }: { data: unknown; error: unk
       requestId: Number(d.request_id),
       title: String(d.active_title),
       body: String(d.active_body ?? ''),
+      status: d.active_status ? String(d.active_status) : undefined,
     });
   }
 });

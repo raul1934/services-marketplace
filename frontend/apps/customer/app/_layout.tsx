@@ -14,7 +14,7 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
-import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
+import { addActiveRequestTapListener, addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
 import { useActiveRequestNotification } from '../src/useActiveRequestNotification';
 import { registerActiveRequestBackgroundTask } from '../src/activeRequestBackgroundTask';
@@ -78,6 +78,13 @@ function Gate() {
       const rid = data.request_id ? Number(data.request_id) : null;
       if (rid) router.push(`/request/${rid}`);
     });
+  }, [status, router]);
+
+  // The ongoing "chamado em andamento" tracker is a Notifee notification, whose
+  // taps come through Notifee's own event system (not expo-notifications above).
+  useEffect(() => {
+    if (status !== 'authed') return;
+    return addActiveRequestTapListener((rid) => router.push(`/request/${rid}`));
   }, [status, router]);
 
   // Load the persisted Dev/Prod choice and point the API client at it (once).

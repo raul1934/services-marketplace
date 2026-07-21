@@ -73,21 +73,28 @@ export function useActiveRequestNotification(enabled: boolean): void {
         ? t(`categories.${active.category.slug}`, { defaultValue: active.category.name })
         : t('activeRequest.fallbackTitle');
 
-      // Multi-line body → Android BigText (a larger notification when expanded):
-      // status, then the assigned pro + rating + ETA, then the tap hint.
-      const lines = [t(`activeRequest.body.${active.status}`, { defaultValue: t('activeRequest.tapToTrack') })];
-      // The requests list may not embed the provider participant; fall back to
-      // the accepted proposal, which carries the pro's name and rating.
+      const statusText = t(`activeRequest.body.${active.status}`, { defaultValue: t('activeRequest.tapToTrack') });
+
+      // Secondary line (shown expanded): the assigned pro + rating + ETA. The
+      // requests list may not embed the provider participant; fall back to the
+      // accepted proposal, which carries the pro's name and rating.
+      const detailParts: string[] = [];
       const provider = active.provider?.name ?? active.accepted_proposal?.provider_name;
       if (provider) {
         const rating = active.provider?.rating_avg ?? active.accepted_proposal?.provider_rating_avg;
-        lines.push(rating ? `${provider} · ★ ${rating.toFixed(1)}` : provider);
+        detailParts.push(rating ? `${provider} · ★ ${rating.toFixed(1)}` : provider);
       }
       const eta = active.accepted_proposal?.eta_minutes;
-      if (eta != null) lines.push(t('tracking.arrivingIn', { eta: etaLabel(eta) }));
-      lines.push(t('activeRequest.tapToTrack'));
+      if (eta != null) detailParts.push(t('tracking.arrivingIn', { eta: etaLabel(eta) }));
 
-      void upsertActiveRequestNotification({ requestId: active.id, title, body: lines.join('\n') });
+      // `status` drives the progress bar (indeterminate while open, staged after).
+      void upsertActiveRequestNotification({
+        requestId: active.id,
+        title,
+        body: statusText,
+        status: active.status,
+        detail: detailParts.join(' · ') || undefined,
+      });
     },
     [enabled],
   );

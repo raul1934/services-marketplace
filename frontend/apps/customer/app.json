@@ -55,6 +55,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/adaptive-icon.png",
+          "color": "#d9481f"
+        }
+      ],
+      "./plugins/withNotifeeRepo",
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash.png",
