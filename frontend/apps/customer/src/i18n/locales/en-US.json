@@ -313,7 +313,8 @@
     "yourAsset": "Your asset",
     "addAsset": "Add new",
     "assetAutoPicked": "We picked this one — it's your only saved asset. Tap another to change it.",
-    "shareNote": "Share my note with the professional"
+    "shareNote": "Share my note with the professional",
+    "removePhoto": "Remove photo"
   },
   "payment": {
     "pix": "Pix",
@@ -822,7 +823,8 @@
     "markAll": "Mark all",
     "emptyTitle": "No alerts yet",
     "emptyBody": "When something happens with your requests — a bid, an answer, a status change — you'll see it here.",
-    "untitled": "Alert"
+    "untitled": "Alert",
+    "unread": "Unread"
   },
   "firstAsset": {
     "skip": "Not now",

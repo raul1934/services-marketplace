@@ -63,10 +63,15 @@ function FieldControl({ field, value, onChange }: { field: CategoryQuestion; val
               <Pressable
                 key={o.value}
                 onPress={() => onChange(o.value)}
+                accessibilityRole="button"
+                // Chosen was border + fill colour only; nothing said "selected".
+                accessibilityState={{ selected: active }}
+                accessibilityLabel={o.label}
                 style={{
                   paddingVertical: 8,
                   paddingHorizontal: 14,
-                  borderRadius: 999,
+                  // Was a hardcoded 999 — the trust palette asks for 12 (DS-09).
+                  borderRadius: t.radius.btn,
                   borderWidth: 1.5,
                   borderColor: active ? t.colors.accent : t.colors.line,
                   backgroundColor: active ? t.colors.accentSoft : t.colors.surface,

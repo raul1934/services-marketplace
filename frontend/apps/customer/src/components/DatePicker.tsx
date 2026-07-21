@@ -69,7 +69,9 @@ export function DatePicker({
   };
 
   const navBtn = (icon: IconName, onPress: () => void) => (
-    <Pressable onPress={onPress} style={withFocusRing(t.colors.accent, { width: 30, height: 30, borderRadius: 9, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' })}>
+    // 30px drawn, 44dp reachable: the arrows sit in a tight header row, so the
+    // target grows through hitSlop rather than the box.
+    <Pressable onPress={onPress} hitSlop={8} accessibilityRole="button" style={withFocusRing(t.colors.accent, { width: 30, height: 30, borderRadius: 9, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' })}>
       <Icon name={icon} size={15} color={t.colors.ink2} />
     </Pressable>
   );

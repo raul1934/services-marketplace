@@ -38,7 +38,11 @@ export default function NotificationsScreen() {
             unread.data?.count ? (
               <Pressable
                 onPress={() => markAll.mutate()}
-                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={tr('notifications.markAll')}
+                // The label is ~18px tall, so hitSlop is doing all the work of
+                // reaching a 44dp target; 8 left it around 34.
+                hitSlop={14}
                 disabled={markAll.isPending}
                 style={({ focused }: any) => focusRing(t.colors.accent, focused)}
               >
@@ -94,7 +98,17 @@ function NotificationRow({ notification: n, onPress }: { notification: AppNotifi
             </Text>
           ) : null}
         </View>
-        {isUnread ? <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.accent }} /> : null}
+        {/* The dot is the only thing marking a notification unread, and a dot is
+            not information a screen reader can convey — it needs the word. The
+            label rides on the dot rather than the row so the row's own text is
+            not rewritten. */}
+        {isUnread ? (
+          <View
+            accessible
+            accessibilityLabel={tr('notifications.unread')}
+            style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: t.colors.accent }}
+          />
+        ) : null}
       </Row>
     </Card>
   );
