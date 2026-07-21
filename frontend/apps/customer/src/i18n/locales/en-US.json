@@ -871,10 +871,10 @@
     "fallbackTitle": "Active request",
     "tapToTrack": "Tap to track",
     "body": {
-      "open": "Waiting for bids · tap to track",
-      "accepted": "Pro on the way · tap to track",
-      "in_progress": "In progress · tap to track",
-      "requote": "Re-quote pending · tap to track"
+      "open": "Waiting for bids",
+      "accepted": "Pro on the way",
+      "in_progress": "In progress",
+      "requote": "Re-quote pending"
     }
   },
   "notifications": {

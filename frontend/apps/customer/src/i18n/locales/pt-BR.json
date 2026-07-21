@@ -871,10 +871,10 @@
     "fallbackTitle": "Chamado em andamento",
     "tapToTrack": "Toque para acompanhar",
     "body": {
-      "open": "Aguardando propostas · toque para acompanhar",
-      "accepted": "Prestador a caminho · toque para acompanhar",
-      "in_progress": "Em atendimento · toque para acompanhar",
-      "requote": "Recotação pendente · toque para acompanhar"
+      "open": "Aguardando propostas",
+      "accepted": "Prestador a caminho",
+      "in_progress": "Em atendimento",
+      "requote": "Recotação pendente"
     }
   },
   "notifications": {

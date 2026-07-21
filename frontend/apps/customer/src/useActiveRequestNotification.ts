@@ -5,6 +5,7 @@ import {
   RequestStatus,
   ServiceRequest,
   clearActiveRequestNotification,
+  etaLabel,
   flattenPages,
   upsertActiveRequestNotification,
 } from '@chamafacil/shared';
@@ -71,8 +72,22 @@ export function useActiveRequestNotification(enabled: boolean): void {
       const title = active.category
         ? t(`categories.${active.category.slug}`, { defaultValue: active.category.name })
         : t('activeRequest.fallbackTitle');
-      const body = t(`activeRequest.body.${active.status}`, { defaultValue: t('activeRequest.tapToTrack') });
-      void upsertActiveRequestNotification({ requestId: active.id, title, body });
+
+      // Multi-line body → Android BigText (a larger notification when expanded):
+      // status, then the assigned pro + rating + ETA, then the tap hint.
+      const lines = [t(`activeRequest.body.${active.status}`, { defaultValue: t('activeRequest.tapToTrack') })];
+      // The requests list may not embed the provider participant; fall back to
+      // the accepted proposal, which carries the pro's name and rating.
+      const provider = active.provider?.name ?? active.accepted_proposal?.provider_name;
+      if (provider) {
+        const rating = active.provider?.rating_avg ?? active.accepted_proposal?.provider_rating_avg;
+        lines.push(rating ? `${provider} · ★ ${rating.toFixed(1)}` : provider);
+      }
+      const eta = active.accepted_proposal?.eta_minutes;
+      if (eta != null) lines.push(t('tracking.arrivingIn', { eta: etaLabel(eta) }));
+      lines.push(t('activeRequest.tapToTrack'));
+
+      void upsertActiveRequestNotification({ requestId: active.id, title, body: lines.join('\n') });
     },
     [enabled],
   );
