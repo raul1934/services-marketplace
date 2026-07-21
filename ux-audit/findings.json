@@ -757,8 +757,10 @@
       "solution": "Remover exempt em produção ou gatear.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "2ea172a"
+      ],
       "note": null,
       "quick_win": null,
       "change": "housekeeping-gates-and-dead-code"
@@ -1491,8 +1493,10 @@
       "solution": "Rewrite no roteador.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "2ea172a"
+      ],
       "note": null,
       "quick_win": null,
       "change": "housekeeping-gates-and-dead-code"
@@ -1507,8 +1511,10 @@
       "solution": "Documentar como alias intencional.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "2ea172a"
+      ],
       "note": null,
       "quick_win": null,
       "change": "housekeeping-gates-and-dead-code"
@@ -1699,8 +1705,10 @@
       "solution": "Remover código morto.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "2ea172a"
+      ],
       "note": null,
       "quick_win": null,
       "change": "housekeeping-gates-and-dead-code"
