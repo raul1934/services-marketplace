@@ -313,7 +313,8 @@
     "yourAsset": "Seu ativo",
     "addAsset": "Adicionar novo",
     "assetAutoPicked": "Selecionamos este por ser o seu único cadastrado. Toque em outro para trocar.",
-    "shareNote": "Compartilhar minha anotação com o profissional"
+    "shareNote": "Compartilhar minha anotação com o profissional",
+    "removePhoto": "Remover foto"
   },
   "payment": {
     "pix": "Pix",
@@ -822,7 +823,8 @@
     "markAll": "Marcar todas",
     "emptyTitle": "Nenhum aviso ainda",
     "emptyBody": "Quando algo acontecer nos seus chamados — uma proposta, uma resposta, uma mudança de status — avisamos aqui.",
-    "untitled": "Aviso"
+    "untitled": "Aviso",
+    "unread": "Não lida"
   },
   "firstAsset": {
     "skip": "Agora não",

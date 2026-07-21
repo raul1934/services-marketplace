@@ -39,6 +39,12 @@ export function Segment<T extends string>({
           <Pressable
             key={it.value}
             onPress={() => onChange(it.value)}
+            accessibilityRole="button"
+            // Which option is chosen was communicated by background colour and a
+            // shadow alone, so a screen reader read the same sentence whichever
+            // one was active — and the request screen's three tabs are a Segment.
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={it.label}
             style={{
               flex: 1,
               paddingVertical: 9,

@@ -468,6 +468,12 @@ export default function NewRequest() {
                 <Image source={{ uri: p.uri }} style={{ width: 80, height: 80, borderRadius: 14 }} />
                 <Pressable
                   onPress={() => setPhotos((cur) => cur.filter((x) => x.uri !== p.uri))}
+                  accessibilityRole="button"
+                  accessibilityLabel={tr('createRequest.removePhoto')}
+                  // The badge stays 24px because it sits on an 80px thumbnail and
+                  // any bigger covers the photo; hitSlop is what makes the target
+                  // reachable without changing the drawing.
+                  hitSlop={10}
                   style={{ position: 'absolute', top: -6, right: -6, width: 24, height: 24, borderRadius: 12, backgroundColor: t.colors.ink, alignItems: 'center', justifyContent: 'center' }}
                 >
                   <Icon name="close" size={13} color="#fff" />
