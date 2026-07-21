@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
+  ACTIVE_REQUEST_STEPS,
   RequestStatus,
   ServiceRequest,
+  activeRequestStep,
   clearActiveRequestNotification,
   etaLabel,
   flattenPages,
@@ -78,7 +80,12 @@ export function useActiveRequestNotification(enabled: boolean): void {
       // Secondary line (shown expanded): the assigned pro + rating + ETA. The
       // requests list may not embed the provider participant; fall back to the
       // accepted proposal, which carries the pro's name and rating.
+      // Same stage numbering as the tracker on the request screen, spelled out —
+      // a notification can't draw the stepper, only a bar.
       const detailParts: string[] = [];
+      const step = activeRequestStep(active.status);
+      if (step) detailParts.push(t('activeRequest.step', { step, total: ACTIVE_REQUEST_STEPS }));
+
       const provider = active.provider?.name ?? active.accepted_proposal?.provider_name;
       if (provider) {
         const rating = active.provider?.rating_avg ?? active.accepted_proposal?.provider_rating_avg;
@@ -87,6 +94,9 @@ export function useActiveRequestNotification(enabled: boolean): void {
       const eta = active.accepted_proposal?.eta_minutes;
       if (eta != null) detailParts.push(t('tracking.arrivingIn', { eta: etaLabel(eta) }));
 
+      // Provider phone → enables the "Ligar" action on the notification.
+      const phone = active.provider?.phone ?? undefined;
+
       // `status` drives the progress bar (indeterminate while open, staged after).
       void upsertActiveRequestNotification({
         requestId: active.id,
@@ -94,6 +104,7 @@ export function useActiveRequestNotification(enabled: boolean): void {
         body: statusText,
         status: active.status,
         detail: detailParts.join(' · ') || undefined,
+        phone,
       });
     },
     [enabled],

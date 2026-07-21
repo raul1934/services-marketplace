@@ -870,6 +870,7 @@
   "activeRequest": {
     "fallbackTitle": "Active request",
     "tapToTrack": "Tap to track",
+    "step": "Step {{step}} of {{total}}",
     "body": {
       "open": "Waiting for bids",
       "accepted": "Pro on the way",

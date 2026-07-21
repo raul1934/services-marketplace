@@ -870,6 +870,7 @@
   "activeRequest": {
     "fallbackTitle": "Chamado em andamento",
     "tapToTrack": "Toque para acompanhar",
+    "step": "Passo {{step}} de {{total}}",
     "body": {
       "open": "Aguardando propostas",
       "accepted": "Prestador a caminho",
