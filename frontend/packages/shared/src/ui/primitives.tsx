@@ -292,7 +292,7 @@ export function Toggle({ on }: { on: boolean }) {
 export function SuggPill({ label, icon = 'sparkles' }: { label: string; icon?: IconName }) {
   const t = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.colors.accentSoft, paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: t.colors.accentSoft, paddingHorizontal: 9, paddingVertical: 4, borderRadius: t.radius.btn }}>
       <Icon name={icon} size={12} color={t.colors.accent} fill="current" />
       <Text style={{ fontSize: 11.5, fontWeight: '800', color: t.colors.accent }}>{label}</Text>
     </View>

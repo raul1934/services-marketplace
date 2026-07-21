@@ -24,7 +24,7 @@ export function Badge({ label, tone = 'neutral', dot }: { label: string; tone?: 
         backgroundColor: c.bg,
         paddingHorizontal: 10,
         paddingVertical: 5,
-        borderRadius: 999,
+        borderRadius: t.radius.btn,
         alignSelf: 'flex-start',
       }}
     >
