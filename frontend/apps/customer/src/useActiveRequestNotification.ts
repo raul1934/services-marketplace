@@ -122,6 +122,11 @@ export function useActiveRequestNotification(enabled: boolean): void {
         status: active.status,
         detail: detailParts.join(' · ') || undefined,
         phone,
+        labels: {
+          channel: t('activeRequest.channelName'),
+          track: t('activeRequest.track'),
+          call: t('activeRequest.call'),
+        },
       });
     },
     [enabled],

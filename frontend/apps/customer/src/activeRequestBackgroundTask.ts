@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
+import i18n from 'i18next';
 import { clearActiveRequestNotification, upsertActiveRequestNotification } from '@chamafacil/shared';
 
 /**
@@ -57,6 +58,13 @@ TaskManager.defineTask(TASK, async ({ data, error }: { data: unknown; error: unk
       title: String(d.active_title),
       body: String(d.active_body ?? ''),
       status: d.active_status ? String(d.active_status) : undefined,
+      // Reachable here because index.js imports i18n before this module — a
+      // headless start never evaluates the layout that used to load it.
+      labels: {
+        channel: i18n.t('activeRequest.channelName'),
+        track: i18n.t('activeRequest.track'),
+        call: i18n.t('activeRequest.call'),
+      },
     });
   }
 });

@@ -805,6 +805,9 @@
   },
   "activeRequest": {
     "fallbackTitle": "Chamado em andamento",
+    "channelName": "Chamado em andamento",
+    "track": "Acompanhar",
+    "call": "Ligar",
     "tapToTrack": "Toque para acompanhar",
     "step": "Passo {{step}} de {{total}}",
     "body": {
