@@ -314,6 +314,7 @@ export default function RequestDetail() {
           scrolls — the progress is the one thing you always want visible. */}
       <View>
         <BackBar
+          backLabel={tr('common.back')}
           title={categoryName ?? tr('requestDetail.fallbackTitle')}
           onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/requests'))}
           right={<Badge label={statusText} tone={isOpen ? 'open' : active ? 'live' : 'neutral'} dot={active || isOpen} />}

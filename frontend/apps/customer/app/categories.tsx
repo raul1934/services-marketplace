@@ -16,7 +16,7 @@ export default function Categories() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('categories.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))} />
+      <BackBar backLabel={tr('common.back')} title={tr('categories.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 22 }}>
         {isLoading ? (
           <View style={{ gap: 22 }}>

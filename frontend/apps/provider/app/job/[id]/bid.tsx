@@ -90,7 +90,7 @@ export default function BidScreen() {
   if (activeProposal) {
     return (
       <Screen stickyHeader padded={false}>
-        <BackBar title={categoryName ?? tr('job.fallbackTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/dashboard'))} />
+        <BackBar backLabel={tr('common.back')} title={categoryName ?? tr('job.fallbackTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/dashboard'))} />
         <View style={{ paddingHorizontal: 20, paddingTop: 40, alignItems: 'center', gap: 8 }}>
           <Icon name="check" size={44} color={t.colors.ok} />
           <Text variant="h3">{tr('job.alreadyBidTitle')}</Text>

@@ -26,7 +26,7 @@ export default function ReceiptScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('receipt.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${requestId}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('receipt.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${requestId}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28 }}>
         <ReceiptView request={request} header />
       </View>

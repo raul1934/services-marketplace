@@ -61,7 +61,7 @@ export default function Verify() {
 
   return (
     <Screen stickyHeader scroll={false} padded={false}>
-      <BackBar title={tr('otp.header')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/login'))} />
+      <BackBar backLabel={tr('common.back')} title={tr('otp.header')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(auth)/login'))} />
       <View style={{ flex: 1, paddingHorizontal: 26, paddingTop: 8, gap: 18 }}>
         <View>
           <Text style={{ fontSize: 27, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.6 }}>{tr('otp.title')}</Text>

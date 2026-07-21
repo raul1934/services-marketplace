@@ -44,7 +44,7 @@ export default function EditProfile() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('editProfile.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/profile'))} />
+      <BackBar backLabel={tr('common.back')} title={tr('editProfile.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/profile'))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <View style={{ alignItems: 'center', marginTop: 6 }}>
           <Pressable onPress={changeAvatar}>

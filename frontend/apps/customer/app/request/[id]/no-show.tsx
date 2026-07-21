@@ -33,7 +33,7 @@ export default function NoShowScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('actions.noShow.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.noShow.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <Card flat style={{ alignItems: 'center', gap: 8, paddingVertical: 22 }}>
           <Icon name="clock" size={40} color={t.colors.accent} />

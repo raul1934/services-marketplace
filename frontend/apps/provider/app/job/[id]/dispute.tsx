@@ -33,7 +33,7 @@ export default function ProviderDisputeScreen() {
   if (!dispute) {
     return (
       <Screen stickyHeader padded={false}>
-        <BackBar title={tr('actions.dispute.defenseTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${requestId}`))} />
+        <BackBar backLabel={tr('common.back')} title={tr('actions.dispute.defenseTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${requestId}`))} />
         <EmptyState fill icon="shield" title={tr('actions.dispute.none')} body={tr('actions.dispute.noneBody')} />
       </Screen>
     );
@@ -66,7 +66,7 @@ export default function ProviderDisputeScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar
+      <BackBar backLabel={tr('common.back')}
         title={tr('actions.dispute.defenseTitle')}
         onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${requestId}`))}
         right={<Badge label={tr(`actions.dispute.status.${dispute.status}`)} tone={resolved ? 'live' : 'urgent'} dot />}

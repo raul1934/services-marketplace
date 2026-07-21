@@ -72,7 +72,7 @@ export default function AssetSetup() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('assetSetup.title')} onBack={goToDetail} />
+      <BackBar backLabel={tr('common.back')} title={tr('assetSetup.title')} onBack={goToDetail} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 16 }}>
         <Text weight="800" style={{ fontSize: 22, lineHeight: 28 }}>
           {nickname ? tr('assetSetup.headingNamed', { name: nickname }) : tr('assetSetup.heading')}

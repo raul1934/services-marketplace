@@ -58,7 +58,7 @@ export default function SurchargeScreen() {
 
   return (
     <Screen stickyHeader padded={false} footer={footer}>
-      <BackBar title={tr('actions.surcharge.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.surcharge.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ flex: 1, paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         {!pending ? (
           <EmptyState fill tone="muted" icon="check" title={tr('actions.surcharge.nonePending')} />
