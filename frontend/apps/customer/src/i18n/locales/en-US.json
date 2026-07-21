@@ -804,6 +804,9 @@
   },
   "activeRequest": {
     "fallbackTitle": "Active request",
+    "channelName": "Request in progress",
+    "track": "Track",
+    "call": "Call",
     "tapToTrack": "Tap to track",
     "step": "Step {{step}} of {{total}}",
     "body": {
