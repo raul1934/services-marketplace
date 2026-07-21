@@ -39,7 +39,7 @@ Esforço: **P** (pequeno, poucas linhas) · **M** (médio). Impacto: **Alto / M�
 | 24 | **Endereço de fonte única** | Endereço muda entre etapa 2 e revisão/detalhe (`07` vs `12`) | **M** | **Médio** | Reusar o mesmo reverse-geocode/valor em todas as telas | REQ-13 | aberto |
 | 25 | **Cores distintas por status na lista** | Aceito/Em atendimento/Concluído todos verdes (`20`) | **P** | **Médio** | Mapear cada status a uma cor/badge distinta | CONS-04 | ✔ `c4a4a9c` |
 | 26 | **Toast ao reenviar OTP** | Reenvio sem feedback; usuário não sabe se funcionou (`verify.tsx:45`) | **P** | **Médio** | Toast "Código reenviado" após `resend()` | AUTH-13 | ✔ `41ade70` |
-| 27 | **Anel do sino pulsa só na chegada** | Loop infinito = ruído + bateria (`primitives.tsx:51-59`) | **P** | **Baixo** | Pulsar 1× ao chegar não-lida e parar, em vez de `Animated.loop` | NOTIF-01 | aberto |
+| 27 | **Anel do sino pulsa só na chegada** | Loop infinito = ruído + bateria (`primitives.tsx:51-59`) | **P** | **Baixo** | Pulsar 1× ao chegar não-lida e parar, em vez de `Animated.loop` | NOTIF-01 | ✔ `36f07d2` |
 
 ---
 
