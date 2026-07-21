@@ -17,6 +17,7 @@ export default function Verify() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(24);
+  const [resent, setResent] = useState(false);
 
   useEffect(() => {
     if (seconds <= 0) return;
@@ -48,8 +49,10 @@ export default function Verify() {
     try {
       const res = await requestOtp(phone);
       setSeconds(24);
+      setResent(true);
       if (res.debug_code) setCode(res.debug_code);
     } catch (e) {
+      setResent(false);
       setError((e as Error).message);
     }
   };
@@ -78,6 +81,7 @@ export default function Verify() {
             <Text color={t.colors.accent} weight="800" onPress={resend}>{tr('otp.resend')}</Text>
           )}
         </Text>
+        {resent && seconds > 0 ? <Text variant="caption" color={t.colors.ok} center>{tr('otp.resent')}</Text> : null}
         <View style={{ flex: 1 }} />
 
         <Text center style={{ fontSize: 11, color: t.colors.ink3, lineHeight: 16 }}>

@@ -44,10 +44,10 @@ export default function Register() {
           <Text style={{ color: t.colors.ink2, fontSize: 14, marginTop: 5 }}>{tr('register.subtitle')}</Text>
         </View>
 
-        <AuthField icon="user" value={form.name} onChangeText={set('name')} placeholder={tr('register.namePlaceholder')} error={errors.name} />
-        <AuthField icon="mail" value={form.email} onChangeText={set('email')} autoCapitalize="none" keyboardType="email-address" placeholder={tr('register.emailPlaceholder')} error={errors.email} />
-        <AuthField icon="phone" prefix="+55" value={form.phone} onChangeText={set('phone')} keyboardType="phone-pad" placeholder={tr('register.phonePlaceholder')} error={errors.phone} />
-        <AuthField icon="key" value={form.password} onChangeText={set('password')} secureTextEntry placeholder={tr('register.passwordPlaceholder')} error={errors.password} />
+        <AuthField icon="user" label={tr('register.name')} value={form.name} onChangeText={set('name')} textContentType="name" autoComplete="name" placeholder={tr('register.namePlaceholder')} error={errors.name} />
+        <AuthField icon="mail" label={tr('register.email')} value={form.email} onChangeText={set('email')} autoCapitalize="none" keyboardType="email-address" textContentType="emailAddress" autoComplete="email" placeholder={tr('register.emailPlaceholder')} error={errors.email} />
+        <AuthField icon="phone" label={tr('register.phone')} prefix="+55" value={form.phone} onChangeText={set('phone')} keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" placeholder={tr('register.phonePlaceholder')} error={errors.phone} />
+        <AuthField icon="key" label={tr('register.password')} value={form.password} onChangeText={set('password')} secureTextEntry textContentType="newPassword" autoComplete="new-password" placeholder={tr('register.passwordPlaceholder')} error={errors.password} />
 
         {formError ? <Text variant="caption" color={t.colors.danger}>{formError}</Text> : null}
 

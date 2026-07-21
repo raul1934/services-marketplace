@@ -119,6 +119,7 @@
     "verify": "Verificar e continuar",
     "resendIn": "Reenviar em {{seconds}}s",
     "resend": "Reenviar código",
+    "resent": "Código reenviado",
     "header": "Verificar",
     "wrongNumber": "Número errado?",
     "edit": "Editar"
@@ -169,7 +170,8 @@
     "noMatchTitle": "Nenhum chamado encontrado",
     "noMatchBody": "Nenhum chamado corresponde a esse filtro.",
     "clearFilter": "Limpar filtro",
-    "resultCount": "{{count}} chamado(s)",
+    "resultCount": "{{count}} chamado",
+    "resultCount_plural": "{{count}} chamados",
     "status": {
       "all": "Todos",
       "open": "Em cotação",
@@ -179,7 +181,8 @@
     }
   },
   "requestCard": {
-    "proposals": "{{count}} proposta(s)",
+    "proposals": "{{count}} proposta",
+    "proposals_plural": "{{count}} propostas",
     "upTo": "até {{value}}"
   },
   "profile": {
@@ -187,6 +190,8 @@
     "appearance": "Aparência",
     "language": "Idioma",
     "logout": "Sair",
+    "logoutConfirmTitle": "Sair da conta?",
+    "logoutConfirmBody": "Você precisará entrar de novo para pedir ajuda.",
     "themes": {
       "auto": "Automático",
       "light": "Claro",
@@ -271,7 +276,8 @@
     "urgentNow": "Urgente — encontrar ajuda agora",
     "maxWaitLabel": "Tempo máximo de espera",
     "maxWaitOption": "{{count}} min",
-    "windowsCount": "{{count}} janela(s)",
+    "windowsCount": "{{count}} janela",
+    "windowsCount_plural": "{{count}} janelas",
     "wizConfirmTitle": "Confirmar e pedir",
     "wizConfirmSub": "Vamos avisar prestadores verificados perto de você.",
     "gpsCaptured": "Localização GPS capturada",
@@ -280,7 +286,8 @@
     "useLocation": "Usar minha localização",
     "summaryService": "Serviço",
     "summaryDescription": "Descrição",
-    "summaryPhotos": "{{count}} foto(s)",
+    "summaryPhotos": "{{count}} foto",
+    "summaryPhotos_plural": "{{count}} fotos",
     "summaryBudget": "Orçamento",
     "summaryPayment": "Pagamento",
     "editStep": "Editar",
@@ -310,6 +317,8 @@
     "slideRequested": "Chamado enviado!",
     "needDescription": "Descreva o que aconteceu (mín. 5 caracteres).",
     "needLocation": "Defina sua localização.",
+    "needAsset": "Selecione ou cadastre um ativo para continuar.",
+    "needWhen": "Escolha pelo menos um dia e horário.",
     "locationErrorTitle": "Localização",
     "photosErrorTitle": "Fotos",
     "detailsLabel": "Detalhes",
@@ -340,6 +349,7 @@
     "proposalsLabel": "Propostas",
     "bestMatch": "Melhor opção",
     "jobs": "serviços",
+    "newProvider": "Novo · sem avaliações",
     "acceptBid": "Aceitar proposta",
     "declineBid": "Recusar",
     "declineConfirmTitle": "Recusar esta proposta?",
@@ -535,7 +545,9 @@
       "requoteHint": "Acima de 50% o pedido vai para re-cotação do cliente.",
       "matchWarning": "Acréscimos frequentes pioram seu match.",
       "send": "Enviar para aprovação",
-      "sentMsg": "Acréscimo enviado ao cliente."
+      "sentMsg": "Acréscimo enviado ao cliente.",
+      "approvedMsg": "Acréscimo aprovado.",
+      "refusedMsg": "Acréscimo recusado. O combinado original foi mantido."
     },
     "requote": {
       "title": "Re-cotação",
@@ -569,6 +581,8 @@
       "reasonPlaceholder": "Por que remarcar?",
       "send": "Enviar pedido",
       "sent": "Pedido de remarcação enviado.",
+      "acceptedMsg": "Nova data confirmada.",
+      "declinedMsg": "Você recusou a nova data.",
       "incomingTitle": "O profissional pediu para remarcar",
       "incomingTitleClient": "O cliente pediu para remarcar",
       "accept": "Aceitar nova data",
@@ -586,6 +600,7 @@
       "waitSub": "Dar mais tempo ao profissional",
       "reopen": "Reabrir para outro profissional",
       "reopenedMsg": "Chamado reaberto sem custo.",
+      "cancelledMsg": "Chamado cancelado e saldo reaberto.",
       "cancel": "Cancelar com reembolso",
       "refundHint": "Cancelar reabre seu saldo integralmente."
     },

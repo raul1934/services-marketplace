@@ -27,7 +27,7 @@ export default function NoShowScreen() {
 
   const onCancel = () =>
     cancel.mutate(undefined, {
-      onSuccess: () => router.replace('/(tabs)/requests'),
+      onSuccess: () => { Alert.alert(tr('common.ok'), tr('actions.noShow.cancelledMsg')); router.replace('/(tabs)/requests'); },
       onError: (e) => Alert.alert(tr('common.error'), (e as Error).message),
     });
 

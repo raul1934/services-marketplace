@@ -28,7 +28,13 @@ export default function SurchargeScreen() {
   const onResolve = (surchargeId: number, approve: boolean) =>
     resolve.mutate(
       { surchargeId, approve },
-      { onSuccess: () => router.back(), onError: (e) => Alert.alert(tr('common.error'), (e as Error).message) },
+      {
+        onSuccess: () => {
+          Alert.alert(tr('common.ok'), tr(approve ? 'actions.surcharge.approvedMsg' : 'actions.surcharge.refusedMsg'));
+          router.back();
+        },
+        onError: (e) => Alert.alert(tr('common.error'), (e as Error).message),
+      },
     );
 
   const newTotal = pending ? combinado + approvedSum + pending.amount : 0;

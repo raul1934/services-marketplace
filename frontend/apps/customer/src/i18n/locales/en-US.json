@@ -119,6 +119,7 @@
     "verify": "Verify & continue",
     "resendIn": "Resend in {{seconds}}s",
     "resend": "Resend code",
+    "resent": "Code resent",
     "header": "Verify",
     "wrongNumber": "Wrong number?",
     "edit": "Edit"
@@ -169,7 +170,8 @@
     "noMatchTitle": "No requests found",
     "noMatchBody": "No requests match this filter.",
     "clearFilter": "Clear filter",
-    "resultCount": "{{count}} request(s)",
+    "resultCount": "{{count}} request",
+    "resultCount_plural": "{{count}} requests",
     "status": {
       "all": "All",
       "open": "Open",
@@ -179,7 +181,8 @@
     }
   },
   "requestCard": {
-    "proposals": "{{count}} bid(s)",
+    "proposals": "{{count}} bid",
+    "proposals_plural": "{{count}} bids",
     "upTo": "up to {{value}}"
   },
   "profile": {
@@ -187,6 +190,8 @@
     "appearance": "Appearance",
     "language": "Language",
     "logout": "Sign out",
+    "logoutConfirmTitle": "Sign out?",
+    "logoutConfirmBody": "You'll need to sign in again to request help.",
     "themes": {
       "auto": "Automatic",
       "light": "Light",
@@ -271,7 +276,8 @@
     "urgentNow": "Urgent — find help now",
     "maxWaitLabel": "Max wait time",
     "maxWaitOption": "{{count}} min",
-    "windowsCount": "{{count}} window(s)",
+    "windowsCount": "{{count}} window",
+    "windowsCount_plural": "{{count}} windows",
     "wizConfirmTitle": "Confirm & request",
     "wizConfirmSub": "We'll ping verified pros near you.",
     "gpsCaptured": "GPS location captured",
@@ -280,7 +286,8 @@
     "useLocation": "Use my location",
     "summaryService": "Service",
     "summaryDescription": "Description",
-    "summaryPhotos": "{{count}} photo(s)",
+    "summaryPhotos": "{{count}} photo",
+    "summaryPhotos_plural": "{{count}} photos",
     "summaryBudget": "Budget",
     "summaryPayment": "Payment",
     "editStep": "Edit",
@@ -310,6 +317,8 @@
     "slideRequested": "Request sent!",
     "needDescription": "Describe what happened (min. 5 characters).",
     "needLocation": "Set your location.",
+    "needAsset": "Select or add an asset to continue.",
+    "needWhen": "Pick at least one day and time.",
     "locationErrorTitle": "Location",
     "photosErrorTitle": "Photos",
     "detailsLabel": "Details",
@@ -340,6 +349,7 @@
     "proposalsLabel": "Proposals",
     "bestMatch": "Best match",
     "jobs": "jobs",
+    "newProvider": "New · no reviews",
     "acceptBid": "Accept this bid",
     "declineBid": "Decline",
     "declineConfirmTitle": "Decline this bid?",
@@ -535,7 +545,9 @@
       "requoteHint": "Above 50% the request goes to client re-quote.",
       "matchWarning": "Frequent surcharges hurt your match.",
       "send": "Send for approval",
-      "sentMsg": "Surcharge sent to the client."
+      "sentMsg": "Surcharge sent to the client.",
+      "approvedMsg": "Surcharge approved.",
+      "refusedMsg": "Surcharge refused. The original agreement stands."
     },
     "requote": {
       "title": "Re-quote",
@@ -569,6 +581,8 @@
       "reasonPlaceholder": "Why reschedule?",
       "send": "Send request",
       "sent": "Reschedule request sent.",
+      "acceptedMsg": "New date confirmed.",
+      "declinedMsg": "You declined the new date.",
       "incomingTitle": "The pro asked to reschedule",
       "incomingTitleClient": "The client asked to reschedule",
       "accept": "Accept new date",
@@ -586,6 +600,7 @@
       "waitSub": "Give the pro more time",
       "reopen": "Reopen to another pro",
       "reopenedMsg": "Request reopened at no cost.",
+      "cancelledMsg": "Request cancelled and balance released.",
       "cancel": "Cancel with refund",
       "refundHint": "Cancelling restores your balance in full."
     },
