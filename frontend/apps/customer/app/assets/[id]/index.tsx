@@ -10,7 +10,6 @@ import {
   EmptyState,
   FieldDisplay,
   Icon,
-  IconName,
   NotFoundView,
   Row,
   Screen,
@@ -23,11 +22,10 @@ import {
 import { useAddReading, useAsset, useAssetHistory, useAssetParts, useAssetReadings } from '../../../src/queries';
 import { AssetPart, AssetReading } from '../../../src/api';
 import { ASSET_FIELDS, AssetTypeKey } from '../../../src/assetFields';
+import { ICON } from '../../../src/assetDisplay';
 import { RequestCard } from '../../../src/components/RequestCard';
 import { RecordKmSheet } from '../../../src/components/RecordKmSheet';
 import { AssetParts } from '../../../src/components/AssetParts';
-
-const ICON: Record<string, IconName> = { vehicle: 'car', property: 'home', pet: 'paw' };
 
 type TabKey = 'identity' | 'history';
 

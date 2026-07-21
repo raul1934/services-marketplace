@@ -1,7 +1,9 @@
 import { IconName } from '@chamafacil/shared';
 import { Asset } from './api';
 
-/** Asset type → icon name (shared by the asset list, selector, and review row). */
+/** Asset type → icon name. Single source for every surface that draws an asset:
+ *  list, detail, selector, creation flow and review row. Add new types here only —
+ *  a local copy silently drifts and leaves one screen showing the wrong glyph. */
 export const ICON: Record<string, IconName> = { vehicle: 'car', property: 'home', pet: 'paw' };
 
 /**
