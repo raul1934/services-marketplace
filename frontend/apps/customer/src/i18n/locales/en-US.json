@@ -115,6 +115,7 @@
   },
   "otp": {
     "title": "Verify your phone",
+    "a11yHint": "{{count}}-digit field",
     "subtitle": "We sent a 6-digit code to {{phone}}.",
     "verify": "Verify & continue",
     "resendIn": "Resend in {{seconds}}s",

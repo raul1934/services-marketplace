@@ -66,7 +66,7 @@ export default function Verify() {
         </View>
 
         {/* The error lives inside OtpInput so it is announced with the field. */}
-        <OtpInput value={code} onChange={onChange} label={tr('otp.title')} error={error} />
+        <OtpInput value={code} onChange={onChange} label={tr('otp.title')} hint={tr('otp.a11yHint', { count: 6 })} error={error} />
 
         <Button title={tr('otp.verify')} full loading={loading} disabled={code.length < 6} onPress={() => verify(code)} />
 
