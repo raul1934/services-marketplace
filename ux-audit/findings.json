@@ -4,7 +4,8 @@
   "statuses": {
     "open": "nao iniciado",
     "partial": "parcialmente feito - ver `note`",
-    "done": "entregue - ver `commits`"
+    "done": "entregue - ver `commits`",
+    "invalid": "falso positivo - ver `note`"
   },
   "effort": {
     "P": "pequeno",
@@ -1684,9 +1685,9 @@
       "solution": "Chamar `setApiLocale` na troca.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
+      "status": "invalid",
       "commits": [],
-      "note": null,
+      "note": "o sync existe, so nao fica em profile.tsx: i18n/index.ts:22-23 registra setApiLocale no evento languageChanged, que o changeLanguage do perfil dispara",
       "quick_win": null,
       "change": "account-self-service",
       "issue": 76

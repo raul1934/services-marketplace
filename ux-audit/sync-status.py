@@ -41,6 +41,10 @@ def cell_for(item, short=False):
         if short:
             return ('◐ %s' % shas).strip() or '◐ parcial'
         return '◐ parcial — %s' % (item.get('note') or 'ver findings.json')
+    if item['status'] == 'invalid':
+        # Kept in the table rather than deleted: a finding proven wrong is worth
+        # recording, or the next sweep re-reports it.
+        return '✗ inválido' if short else '✗ inválido — %s' % (item.get('note') or 'ver findings.json')
     return 'aberto'
 
 
