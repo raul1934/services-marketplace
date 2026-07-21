@@ -47,13 +47,19 @@ class ExpoChannel
                 'to' => $token,
                 'data' => $payload['data'] ?? [],
                 'priority' => 'high',
-                'channelId' => 'default',
             ];
             if ($hasAlert) {
                 $message['title'] = $payload['title'];
                 $message['body'] = $payload['body'];
                 $message['sound'] = 'default';
+                $message['channelId'] = 'default';
             } else {
+                // Nothing that implies a visible alert — not even `channelId`.
+                // Expo turns any such hint into an FCM *notification* message, which
+                // Android then renders itself as a blank card on
+                // fcm_fallback_notification_channel and, worse, never wakes the
+                // background task. Verified on device: dropping channelId is what
+                // makes this an actual data message.
                 $message['_contentAvailable'] = true;
             }
 

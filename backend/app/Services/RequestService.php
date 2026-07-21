@@ -272,9 +272,8 @@ class RequestService
         }
 
         $request->client->notify(new RequestStatusChanged($request->id, $status));
-        // Silent data push that keeps the persistent "chamado em andamento"
-        // notification in sync while the app is backgrounded/killed.
-        $request->client->notify(new \App\Notifications\ActiveRequestSync($request->id, $status));
+        // The silent data push that syncs the ongoing notification rides on the
+        // event below — see SyncActiveRequestNotification.
         RequestStatusUpdated::dispatch($request->id, $status->value);
 
         return $request->fresh();

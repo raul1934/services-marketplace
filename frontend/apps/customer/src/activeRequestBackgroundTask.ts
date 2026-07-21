@@ -7,9 +7,13 @@ import { clearActiveRequestNotification, upsertActiveRequestNotification } from 
  * notification in sync even when the app is backgrounded or killed. Status-change
  * pushes (see backend RequestStatusChanged) carry `active_action`/`active_title`/
  * `active_body`; this task upserts or clears the ongoing notification from that
- * data, off the UI thread. `defineTask` MUST run at module import so the task is
- * registered before Android delivers a push to a headless (killed-app) launch —
- * this file is imported from the app entry (_layout).
+ * data, off the UI thread.
+ *
+ * `defineTask` MUST run at module import, before Android delivers a push to a
+ * headless (killed-app) launch — which is why this file is imported from
+ * index.js and not from a screen or layout: nothing under app/ is evaluated in
+ * a headless start, so the task would be registered natively but never defined
+ * in JS, and the push would wake the app to do nothing.
  */
 
 const TASK = 'active-request-push';
@@ -18,7 +22,24 @@ const TASK = 'active-request-push';
 function extractData(data: unknown): Record<string, unknown> {
   const d = data as any;
   if (!d || typeof d !== 'object') return {};
-  return (d.notification?.request?.content?.data ?? d.notification?.data ?? d.data ?? d) as Record<string, unknown>;
+  const envelope = (d.notification?.request?.content?.data ?? d.notification?.data ?? d.data ?? d) as
+    | Record<string, unknown>
+    | undefined;
+
+  // On Android an Expo data message doesn't hand over the fields directly: the
+  // envelope carries Expo's own keys (scopeKey, experienceId, projectId) and the
+  // real payload as a JSON *string* under `dataString` (mirrored in `body`).
+  // Reading the envelope as-is silently yields no `type`, and the task no-ops.
+  const nested = envelope?.dataString ?? envelope?.body;
+  if (typeof nested === 'string') {
+    try {
+      return JSON.parse(nested) as Record<string, unknown>;
+    } catch {
+      /* not JSON after all — fall back to the envelope */
+    }
+  }
+
+  return envelope ?? {};
 }
 
 TaskManager.defineTask(TASK, async ({ data, error }: { data: unknown; error: unknown }) => {
