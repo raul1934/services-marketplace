@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, View } from 'react-native';
+import { Image, View } from 'react-native';
 import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
-  BackBar, Badge, Button, Card, Dispute, Field, Icon, Row, Screen, SectionLabel, Text, useTheme,
+  BackBar, Badge, Button, Card, Dispute, Icon, Row, Screen, SectionLabel, Text, useTheme,
 } from '@chamafacil/shared';
 import { useDispute, useOpenDispute } from '../../../src/queries';
-import { appendPhoto, pickPhotos, PickedPhoto } from '../../../src/photos';
+import { appendPhoto, PickedPhoto } from '../../../src/photos';
+import { ClaimForm } from '../../../src/components/ClaimForm';
 
 /** V3Disputa + V3DisputaStatus (C37/C38): open a dispute or view its mediation status. */
 export default function DisputeScreen() {
@@ -23,15 +24,6 @@ export default function DisputeScreen() {
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
 
   if (isLoading) return <SkeletonScreen />;
-
-  const addPhotos = async () => {
-    try {
-      const picked = await pickPhotos(5 - photos.length);
-      if (picked.length) setPhotos((cur) => [...cur, ...picked].slice(0, 5));
-    } catch (e) {
-      Alert.alert(tr('common.error'), (e as Error).message);
-    }
-  };
 
   const submit = async () => {
     if (claim.trim().length < 10) {
@@ -54,32 +46,28 @@ export default function DisputeScreen() {
         {dispute ? (
           <DisputeStatus dispute={dispute} />
         ) : (
-          <>
-            <Card flat style={{ gap: 6 }}>
-              <Row gap={10}><Icon name="shield" size={20} color={t.colors.danger} /><Text weight="800" style={{ flex: 1, fontSize: 15 }}>{tr('actions.dispute.openTitle')}</Text></Row>
-              <Text variant="caption">{tr('actions.dispute.openHint')}</Text>
-            </Card>
-            <Field
-              label={tr('actions.dispute.claimLabel')}
-              value={claim}
-              onChangeText={setClaim}
-              placeholder={tr('actions.dispute.claimPlaceholder')}
-              multiline
-              voiceInput
-              style={{ height: 110, textAlignVertical: 'top' }}
-            />
-            <SectionLabel>{tr('actions.dispute.evidenceLabel')}</SectionLabel>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {photos.map((p, i) => <Image key={i} source={{ uri: p.uri }} style={{ width: 72, height: 72, borderRadius: 12 }} />)}
-              {photos.length < 5 && (
-                <Pressable onPress={addPhotos} style={{ width: 72, height: 72, borderRadius: 12, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.colors.line, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon name="camera" size={20} color={t.colors.accent} />
-                </Pressable>
-              )}
-            </View>
-            <Button title={tr('actions.dispute.submit')} variant="danger" full loading={open.isPending} onPress={submit} />
-            <Text variant="caption" center>{tr('actions.dispute.retentionNotice')}</Text>
-          </>
+          <ClaimForm
+            header={(
+              <Card flat style={{ gap: 6 }}>
+                <Row gap={10}><Icon name="shield" size={20} color={t.colors.danger} /><Text weight="800" style={{ flex: 1, fontSize: 15 }}>{tr('actions.dispute.openTitle')}</Text></Row>
+                <Text variant="caption">{tr('actions.dispute.openHint')}</Text>
+              </Card>
+            )}
+            description={claim}
+            onChangeDescription={setClaim}
+            descriptionLabel={tr('actions.dispute.claimLabel')}
+            descriptionPlaceholder={tr('actions.dispute.claimPlaceholder')}
+            descriptionHeight={110}
+            photosLabel={tr('actions.dispute.evidenceLabel')}
+            photos={photos}
+            onChangePhotos={setPhotos}
+            footer={(
+              <>
+                <Button title={tr('actions.dispute.submit')} variant="danger" full loading={open.isPending} onPress={submit} />
+                <Text variant="caption" center>{tr('actions.dispute.retentionNotice')}</Text>
+              </>
+            )}
+          />
         )}
       </View>
     </Screen>
