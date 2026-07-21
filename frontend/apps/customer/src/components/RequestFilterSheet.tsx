@@ -1,8 +1,7 @@
 import React from 'react';
-import { Modal, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Chip, Icon, Row, Text, focusRing, useTheme } from '@chamafacil/shared';
+import { Chip, Sheet } from '@chamafacil/shared';
 import { RequestStatusFilter } from '../api';
 
 /**
@@ -30,45 +29,24 @@ export function RequestFilterSheet({
   onChange: (f: RequestFilter) => void;
   onClose: () => void;
 }) {
-  const t = useTheme();
-
-  // Modals render outside the screen's SafeAreaView, so the sheet has to
-
-  // clear Android's navigation bar itself.
-
-  const insets = useSafeAreaInsets();
   const { t: tr } = useTranslation();
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }} onPress={onClose}>
-        <Pressable
-          onPress={(e) => e.stopPropagation?.()}
-          style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28 + insets.bottom, gap: 18 }}
-        >
-          <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
-          <Row style={{ justifyContent: 'space-between' }}>
-            <Text variant="h3">{tr('requests.filterTitle')}</Text>
-            <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel={tr('common.close')} hitSlop={8} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
-              <Icon name="close" size={22} color={t.colors.ink3} />
-            </Pressable>
-          </Row>
+    <Sheet visible={visible} onClose={onClose} title={tr('requests.filterTitle')} closeLabel={tr('common.close')}>
 
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-            {REQUEST_FILTERS.map((f) => (
-              <Chip
-                key={f}
-                label={tr(`requests.status.${f}`)}
-                active={f === value}
-                onPress={() => {
-                  onChange(f);
-                  onClose();
-                }}
-              />
-            ))}
-          </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        {REQUEST_FILTERS.map((f) => (
+          <Chip
+            key={f}
+            label={tr(`requests.status.${f}`)}
+            active={f === value}
+            onPress={() => {
+              onChange(f);
+              onClose();
+            }}
+          />
+        ))}
+      </View>
+    </Sheet>
   );
 }

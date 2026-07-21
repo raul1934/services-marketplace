@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Image, Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Field, Icon, Row, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
+import { Field, Icon, Row, Sheet, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
 
 export interface LinkedItem {
   id: number;
@@ -83,14 +83,8 @@ export function LinkedPicker({
         onPress={() => parentId && open('child')}
       />
 
-      <Modal visible={picking !== null} transparent animationType="fade" onRequestClose={() => setPicking(null)}>
-        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }} onPress={() => setPicking(null)}>
-          <Pressable
-            onPress={(e) => e.stopPropagation?.()}
-            style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 24 + insets.bottom, gap: 14, maxHeight: '80%' }}
-          >
-            <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
-            <Row style={{ justifyContent: 'space-between' }}>
+      <Sheet visible={picking !== null} onClose={() => setPicking(null)} maxHeight={'85%'}>
+<Row style={{ justifyContent: 'space-between' }}>
               <Text variant="h3">{picking === 'parent' ? labels.selectParent : labels.selectChild}</Text>
               <Pressable onPress={() => setPicking(null)} accessibilityRole="button" hitSlop={8} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
                 <Icon name="close" size={22} color={t.colors.ink3} />
@@ -119,9 +113,7 @@ export function LinkedPicker({
               })}
               {rows.length === 0 ? <Text variant="caption" style={{ paddingVertical: 16 }} center>—</Text> : null}
             </ScrollView>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          </Sheet>
     </>
   );
 }
