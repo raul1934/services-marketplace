@@ -58,6 +58,12 @@ export const sunset: Theme = {
     surface2: '#f6f8fc',
     ink: '#15233b',
     ink2: '#5b6b82',
+    // NOT fixed, and not an oversight — see DS-01. At #95a2b6 this is 2.59:1 on
+    // white, so it fails as text. But darkening it enough to reach 4.5:1 lands on
+    // ~#5d6d85, which is `ink2` (#5b6b82) with extra steps: the palette has no
+    // room for three text levels that all pass AA. The fix is a product decision
+    // — either ink3 becomes decorative-only and its text moves to ink2, or the
+    // scale drops to two levels. Both are sweeps across ~100 call sites.
     ink3: '#95a2b6',
     line: '#e7ecf3',
     line2: '#eef2f7',
@@ -67,11 +73,16 @@ export const sunset: Theme = {
     accent2: '#ffb23e',
     accentInk: '#ffffff',
     accentSoft: '#fff0ea',
-    ok: '#12b981',
+    // Deepened for the same reason as `accent` above: these are used as text and
+    // as icons, and both were failing WCAG. `ok` was #12b981 (2.54:1 on white,
+    // below even the 3:1 that non-text UI needs) and `warn` was #f59e0b (2.15:1).
+    // Now 5.34:1 and 6.04:1 — AA as body text, on white and on `bg` alike.
+    // The soft variants are backgrounds and stay bright.
+    ok: '#0a7a56',
     okSoft: '#e3f7ef',
     danger: '#f0455b',
     dangerSoft: '#fdebee',
-    warn: '#f59e0b',
+    warn: '#a04a08',
     statusbarInk: '#15233b',
   },
   grad: ['#ff8a4c', '#ff5a6e', '#ffb23e'],
@@ -99,11 +110,12 @@ export const trust: Theme = {
     accent2: '#0ea5a5',
     accentInk: '#ffffff',
     accentSoft: '#ecebfd',
-    ok: '#0ea5a5',
+    // 3.02:1 before — same failure as sunset's, same fix. Now 5.73:1.
+    ok: '#0b7272',
     okSoft: '#e2f6f6',
     danger: '#e11d48',
     dangerSoft: '#fde7ec',
-    warn: '#d97706',
+    warn: '#a04a08',
     statusbarInk: '#0b1220',
   },
   grad: ['#6258f5', '#4f46e5'],
