@@ -867,6 +867,16 @@
     "shot_saved": "Foto guardada",
     "shot_failed": "Não deu para tirar a foto"
   },
+  "activeRequest": {
+    "fallbackTitle": "Chamado em andamento",
+    "tapToTrack": "Toque para acompanhar",
+    "body": {
+      "open": "Aguardando propostas · toque para acompanhar",
+      "accepted": "Prestador a caminho · toque para acompanhar",
+      "in_progress": "Em atendimento · toque para acompanhar",
+      "requote": "Recotação pendente · toque para acompanhar"
+    }
+  },
   "notifications": {
     "title": "Avisos",
     "markAll": "Marcar todas",

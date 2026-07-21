@@ -16,6 +16,7 @@ import {
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
+import { useActiveRequestNotification } from '../src/useActiveRequestNotification';
 import { initServices } from '../src/init';
 import { loadEnv } from '../src/env';
 import { SplashBrand } from '../src/components/SplashBrand';
@@ -39,6 +40,10 @@ function Gate() {
   const chime = useNotificationChime();
 
   usePushSync(status === 'authed', pushApi);
+
+  // Persistent "chamado em andamento" notification, kept in sync with the most
+  // relevant active request (reacts to the realtime cache invalidations below).
+  useActiveRequestNotification(status === 'authed');
 
   // Live UI refresh: a notification over WebSocket invalidates the affected caches.
   useRealtimeNotifications(status === 'authed' ? user?.id : null, (n) => {

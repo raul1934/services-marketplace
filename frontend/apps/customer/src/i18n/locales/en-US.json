@@ -867,6 +867,16 @@
     "shot_saved": "Photo kept",
     "shot_failed": "Couldn't take the photo"
   },
+  "activeRequest": {
+    "fallbackTitle": "Active request",
+    "tapToTrack": "Tap to track",
+    "body": {
+      "open": "Waiting for bids · tap to track",
+      "accepted": "Pro on the way · tap to track",
+      "in_progress": "In progress · tap to track",
+      "requote": "Re-quote pending · tap to track"
+    }
+  },
   "notifications": {
     "title": "Alerts",
     "markAll": "Mark all",
