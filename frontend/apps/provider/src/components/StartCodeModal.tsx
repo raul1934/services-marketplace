@@ -70,6 +70,7 @@ export function StartCodeModal({
               onChange={(v) => { setError(''); setCode(v); }}
               length={4}
               label={tr('job.startCodeTitle')}
+              hint={tr('otp.a11yHint', { count: 4 })}
               error={error}
             />
             <Button
