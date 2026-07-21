@@ -6,6 +6,7 @@ export * from './realtime/useRealtimeNotifications';
 export * from './auth/AuthProvider';
 export * from './auth/useGoogleSignIn';
 export * from './ui';
+export * from './lib/a11y';
 export * from './lib/alert';
 export * from './lib/dictation';
 export * from './lib/format';

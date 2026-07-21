@@ -2,6 +2,7 @@ import React from 'react';
 import { Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
+import { withFocusRing } from '../lib/a11y';
 import { Text } from './Text';
 import { Icon } from './Icon';
 import { Button } from './Button';
@@ -51,7 +52,7 @@ export function Wiz({
      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {/* header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 8 }}>
-        <Pressable onPress={onBack} style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' }}>
+        <Pressable onPress={onBack} style={withFocusRing(t.colors.accent, { width: 38, height: 38, borderRadius: 19, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' })}>
           <Icon name={step === 1 ? 'close' : 'back'} size={20} color={t.colors.ink} />
         </Pressable>
         <Text style={{ fontSize: 19, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.2 }} numberOfLines={1}>{cat}</Text>
@@ -84,7 +85,7 @@ export function Wiz({
         ) : footer.primary ? (
           <>
             {footer.back && (
-              <Pressable onPress={footer.back} style={{ height: 50, paddingHorizontal: 18, borderRadius: t.radius.btn, borderWidth: 1.5, borderColor: t.colors.line, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+              <Pressable onPress={footer.back} style={withFocusRing(t.colors.accent, { height: 50, paddingHorizontal: 18, borderRadius: t.radius.btn, borderWidth: 1.5, borderColor: t.colors.line, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center' })}>
                 <Icon name="back" size={18} color={t.colors.ink} />
               </Pressable>
             )}
