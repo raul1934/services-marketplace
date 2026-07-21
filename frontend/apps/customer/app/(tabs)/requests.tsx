@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, Icon, PaginatedList, RequestStatus, Row, ServiceRequest, Text, flattenPages, useTheme } from '@chamafacil/shared';
+import { EmptyState, Icon, PaginatedList, RequestStatus, Row, ServiceRequest, Text, useTheme } from '@chamafacil/shared';
 import { useMyRequests } from '../../src/queries';
 import { RequestCard } from '../../src/components/RequestCard';
-import { RequestFilter, RequestFilterSheet, matchesFilter } from '../../src/components/RequestFilterSheet';
+import { RequestFilter, RequestFilterSheet } from '../../src/components/RequestFilterSheet';
 
 // In progress first, then open to bid, then everything else (completed/cancelled/expired) —
 // keeps whatever's actionable for the customer at the top instead of strict recency.
@@ -27,17 +27,15 @@ export default function Requests() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
-  const query = useMyRequests();
   const [filter, setFilter] = useState<RequestFilter>('all');
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const active = filter !== 'all';
-  const matches = (r: ServiceRequest) => matchesFilter(r.status, filter);
-  // Filter acts on the loaded pages (server-side filtering is a future follow-up).
-  const filteredCount = useMemo(
-    () => flattenPages(query.data?.pages).filter(matches).length,
-    [query.data, filter],
-  );
+  // The filter is applied by the API, so the list paginates within the filtered
+  // set and the count below comes from the server's total — counting the loaded
+  // pages would under-report it (20 loaded of 40 can't report 25 completed).
+  const query = useMyRequests(filter === 'all' ? undefined : filter);
+  const filteredCount = query.data?.pages[0]?.meta.total ?? 0;
 
   const header = (
     <View style={{ paddingTop: 16, paddingBottom: 4, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -103,7 +101,7 @@ export default function Requests() {
     <>
       <PaginatedList<ServiceRequest>
         query={query}
-        selectItems={(items) => byStatusPriority(items.filter(matches))}
+        selectItems={byStatusPriority}
         keyExtractor={(r) => String(r.id)}
         renderItem={(r) => <RequestCard request={r} onPress={() => router.push(`/request/${r.id}`)} />}
         header={header}

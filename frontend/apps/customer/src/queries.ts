@@ -1,11 +1,12 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, nextPageParam } from '@chamafacil/shared';
-import { assetsApi, categoriesApi, customerApi, CreateAssetPayload, CreateRequestPayload, ProposalSort, jobReportApi, notificationsApi, vehicleCatalogApi, propertyTypesApi, petSpeciesApi, AddReadingPayload, AssetDetailInput } from './api';
+import { assetsApi, categoriesApi, customerApi, CreateAssetPayload, CreateRequestPayload, ProposalSort, RequestStatusFilter, jobReportApi, notificationsApi, vehicleCatalogApi, propertyTypesApi, petSpeciesApi, AddReadingPayload, AssetDetailInput } from './api';
 import { PickedPhoto, uploadPhotos } from './photos';
 
 export const keys = {
   categories: ['categories'] as const,
   myRequests: ['requests'] as const,
+  myRequestsList: (status?: RequestStatusFilter) => ['requests', status ?? 'all'] as const,
   request: (id: number) => ['request', id] as const,
   events: (id: number) => ['events', id] as const,
   proposals: (id: number, sort: ProposalSort) => ['proposals', id, sort] as const,
@@ -155,10 +156,17 @@ export function useRemovePart(id: number) {
   });
 }
 
-export const useMyRequests = () =>
+/**
+ * The customer's requests, optionally narrowed to a status bucket server-side.
+ * The bucket is part of the query key (under the `keys.myRequests` prefix, so
+ * every existing invalidation still hits all of them) and each bucket keeps its
+ * own page cursor — the filter can't be applied to already-loaded pages without
+ * lying about how many results there are.
+ */
+export const useMyRequests = (status?: RequestStatusFilter) =>
   useInfiniteQuery({
-    queryKey: keys.myRequests,
-    queryFn: ({ pageParam }) => customerApi.myRequests(pageParam),
+    queryKey: keys.myRequestsList(status),
+    queryFn: ({ pageParam }) => customerApi.myRequests(pageParam, status),
     initialPageParam: 1,
     getNextPageParam: nextPageParam,
   });

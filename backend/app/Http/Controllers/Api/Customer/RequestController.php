@@ -11,6 +11,7 @@ use App\Http\Resources\RequestEventResource;
 use App\Http\Resources\ServiceRequestResource;
 use App\Models\AssetVehicle;
 use App\Models\ServiceRequest;
+use App\Notifications\PartsApproved;
 use App\Services\RequestEventService;
 use App\Services\RequestService;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -21,18 +22,53 @@ use Illuminate\Validation\Rule;
 
 class RequestController extends Controller
 {
+    /** Status buckets the My-requests list can be filtered by (mirrors the app's filter sheet). */
+    private const STATUS_FILTERS = ['open', 'active', 'completed', 'cancelled'];
+
     public function __construct(private readonly RequestService $service) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {
+        // `?status=<bucket>` filters in SQL rather than in the app. The list is
+        // paginated, so a client-side filter only ever sees the pages already
+        // fetched: with 40 requests and 20 loaded it would render (and count)
+        // at most those 20, making the result count under-report the real
+        // number. Filtering here also makes `meta.total` the honest count.
+        $data = $request->validate([
+            'status' => ['nullable', Rule::in(self::STATUS_FILTERS)],
+        ]);
+
         $requests = $request->user()->requests()
+            ->when(
+                $data['status'] ?? null,
+                fn ($query, string $bucket) => $query->whereIn('status', self::bucketStatuses($bucket)),
+            )
             ->with(['category', 'photos', 'availabilities'])
             ->withCount('proposals')
             ->latest()
             ->orderByDesc('id')
-            ->paginate($this->perPage($request));
+            ->paginate($this->perPage($request))
+            ->withQueryString();
 
         return ServiceRequestResource::collection($requests);
+    }
+
+    /**
+     * Statuses each filter bucket covers. Kept in one place so the app and the
+     * API can't drift on what "active" or "cancelled" means.
+     *
+     * @return list<string>
+     */
+    private static function bucketStatuses(string $bucket): array
+    {
+        $statuses = match ($bucket) {
+            'open' => [RequestStatus::Open],
+            'active' => [RequestStatus::Accepted, RequestStatus::InProgress, RequestStatus::Requote],
+            'completed' => [RequestStatus::Completed],
+            'cancelled' => [RequestStatus::Cancelled, RequestStatus::Expired],
+        };
+
+        return array_map(fn (RequestStatus $status) => $status->value, $statuses);
     }
 
     public function store(Request $request): JsonResponse
@@ -124,7 +160,7 @@ class RequestController extends Controller
         // approved individually or via "approve all" ends up the same way.
         $serviceRequest->jobParts()->whereNull('approved_at')->update(['approved_at' => now()]);
         if ($serviceRequest->provider) {
-            $serviceRequest->provider->notify(new \App\Notifications\PartsApproved($serviceRequest->id));
+            $serviceRequest->provider->notify(new PartsApproved($serviceRequest->id));
         }
         \App\Events\PartsApproved::dispatch($serviceRequest->id);
 
@@ -146,7 +182,6 @@ class RequestController extends Controller
 
         return new ServiceRequestResource($updated->load('category'));
     }
-
 
     private function authorizeOwner(Request $request, ServiceRequest $serviceRequest): void
     {

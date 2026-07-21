@@ -2,26 +2,18 @@ import React from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Chip, Icon, RequestStatus, Row, Text, useTheme } from '@chamafacil/shared';
+import { Chip, Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { RequestStatusFilter } from '../api';
 
-/** Status filter buckets for the My-requests list. */
-export type RequestFilter = 'all' | 'open' | 'active' | 'completed' | 'cancelled';
+/**
+ * Status filter buckets for the My-requests list. `all` is the "no filter"
+ * option; the others are sent to the API as `?status=`, which owns the
+ * bucket → statuses mapping (there is no client-side equivalent, on purpose).
+ */
+export type RequestFilter = 'all' | RequestStatusFilter;
 
 /** Order the filter chips appear in the sheet (and in the header indicator). */
 export const REQUEST_FILTERS: RequestFilter[] = ['all', 'open', 'active', 'completed', 'cancelled'];
-
-/** Which statuses each bucket includes; `all` matches everything. */
-const BUCKETS: Record<Exclude<RequestFilter, 'all'>, RequestStatus[]> = {
-  open: [RequestStatus.Open],
-  active: [RequestStatus.Accepted, RequestStatus.InProgress, RequestStatus.Requote],
-  completed: [RequestStatus.Completed],
-  cancelled: [RequestStatus.Cancelled, RequestStatus.Expired],
-};
-
-/** True when a request of `status` should show under the selected `filter`. */
-export function matchesFilter(status: RequestStatus, filter: RequestFilter): boolean {
-  return filter === 'all' || BUCKETS[filter].includes(status);
-}
 
 /**
  * Bottom sheet for filtering the My-requests list by status. Single-select:
