@@ -86,9 +86,15 @@ export default function Login() {
 
         <Button title={mode === 'phone' ? tr('login.sendCode') : tr('login.submit')} full loading={loading} onPress={submit} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} style={{ marginTop: 4 }} />
 
-        <DividerOr label={tr('common.or')} />
-        <GoogleButton label={tr('common.googleContinue')} loading={google.loading} onPress={google.signIn} />
-        {google.error ? <Text variant="caption" color={t.colors.danger} center>{google.error}</Text> : null}
+        {/* Hide the whole "or / Google" block when the SDK isn't configured:
+            the button could only ever fail, and a lone divider reads as a bug. */}
+        {google.available ? (
+          <>
+            <DividerOr label={tr('common.or')} />
+            <GoogleButton label={tr('common.googleContinue')} loading={google.loading} onPress={google.signIn} />
+            {google.error ? <Text variant="caption" color={t.colors.danger} center>{google.error}</Text> : null}
+          </>
+        ) : null}
 
         <View style={{ flex: 1 }} />
 

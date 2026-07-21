@@ -38,6 +38,16 @@ export function configureGoogleSignIn(webClientId: string) {
   }
 }
 
+/**
+ * Whether Google sign-in can actually run: native module present *and* a
+ * webClientId configured. Screens use this to decide whether to offer the
+ * button at all — without it the user is led into a dead end whose only
+ * possible outcome is the `auth.googleUnavailable` error.
+ */
+export function isGoogleSignInAvailable(): boolean {
+  return !!getGoogleSignin() && !!configuredWebClientId;
+}
+
 export function useGoogleSignIn() {
   const { social } = useAuth();
   const { t } = useTranslation();
@@ -70,5 +80,7 @@ export function useGoogleSignIn() {
     }
   }, [t, social]);
 
-  return { signIn, loading, error };
+  // `configureGoogleSignIn` runs in each app's initServices() before the first
+  // render, so this is stable for the lifetime of the screen.
+  return { signIn, loading, error, available: isGoogleSignInAvailable() };
 }
