@@ -7,7 +7,7 @@
  * shared package stays usable in contexts that don't need realtime.
  */
 import { Platform } from 'react-native';
-import { getToken } from '../api/client';
+import { getToken, onTokenChange } from '../api/client';
 
 export interface RealtimeConfig {
   /** Reverb app key (REVERB_APP_KEY). */
@@ -22,15 +22,86 @@ export interface RealtimeConfig {
 }
 
 let echo: any = null;
+/**
+ * In-flight (or settled) connection. Kept instead of only the instance because
+ * building one is async: two screens mounting together used to race past the
+ * `if (echo)` check and open two sockets.
+ */
+let echoPromise: Promise<any> | null = null;
 let cfg: RealtimeConfig | null = null;
+
+/**
+ * Every live channel subscription, so a rebuilt connection can re-listen to
+ * exactly what the mounted screens asked for. Keyed by an opaque id (not by
+ * channel name) because two screens may legitimately watch the same channel.
+ */
+interface ChannelBinding {
+  name: string;
+  attach: (e: any) => void;
+}
+let nextBindingId = 1;
+const bindings = new Map<number, ChannelBinding>();
 
 export function configureRealtime(config: RealtimeConfig) {
   cfg = config;
 }
 
-async function getEcho(): Promise<any> {
-  if (echo) return echo;
+/**
+ * The Echo instance bakes the bearer token into the /broadcasting/auth headers
+ * at construction time, so a token that changes underneath it (re-login after a
+ * 401, a refreshed token) leaves the socket authorizing with a dead credential:
+ * new channel subscriptions get rejected and the app just stops receiving
+ * events, silently. Rebuild the connection and re-subscribe whenever the token
+ * changes; on sign-out (`null`) only tear down — logout already does that, and
+ * there is nothing to reconnect as.
+ */
+onTokenChange((token) => {
+  if (!echo && !echoPromise) return; // nothing live: the next connect reads the new token
+  if (!token) {
+    disconnectRealtime();
+    return;
+  }
+  void resubscribeWithFreshToken();
+});
+
+async function resubscribeWithFreshToken() {
+  teardown();
+  if (bindings.size === 0) return; // nobody is listening; reconnect lazily on demand
+  try {
+    const e = await getEcho();
+    for (const binding of bindings.values()) binding.attach(e);
+  } catch {
+    /* realtime is additive — push + polling still deliver */
+  }
+}
+
+/**
+ * Bumped on every teardown so a connection that was still being built when the
+ * session ended can notice it is obsolete and disconnect itself, instead of
+ * quietly becoming the live socket again.
+ */
+let generation = 0;
+
+function teardown() {
+  generation++;
+  echo?.disconnect();
+  echo = null;
+  echoPromise = null;
+}
+
+function getEcho(): Promise<any> {
+  if (!echoPromise) {
+    echoPromise = createEcho().catch((err) => {
+      echoPromise = null; // let the next subscriber retry instead of caching the failure
+      throw err;
+    });
+  }
+  return echoPromise;
+}
+
+async function createEcho(): Promise<any> {
   if (!cfg) throw new Error('Realtime not configured — call configureRealtime().');
+  const builtFor = generation;
 
   // Lazy require so Metro only bundles these when realtime is actually used.
   // Pick the platform build explicitly: the RN entry pulls in NetInfo and would
@@ -65,7 +136,7 @@ async function getEcho(): Promise<any> {
 
   const token = await getToken();
 
-  echo = new Echo({
+  const instance = new Echo({
     broadcaster: 'reverb',
     Pusher,
     key: cfg.appKey,
@@ -83,6 +154,13 @@ async function getEcho(): Promise<any> {
     },
   });
 
+  if (builtFor !== generation) {
+    // The session ended (logout / another token change) while we were building.
+    instance.disconnect();
+    throw new Error('Realtime connection superseded');
+  }
+
+  echo = instance;
   return echo;
 }
 
@@ -169,24 +247,43 @@ export async function subscribeToRequest(
   requestId: number,
   handlers: RequestChannelHandlers,
 ): Promise<() => void> {
-  const e = await getEcho();
-  const channel = e.private(`request.${requestId}`);
+  const name = `request.${requestId}`;
+  const attach = (e: any) => {
+    const channel = e.private(name);
 
-  if (handlers.onProposal) channel.listen('.proposal.received', handlers.onProposal);
-  if (handlers.onLocation) channel.listen('.location.updated', handlers.onLocation);
-  if (handlers.onStatus) channel.listen('.status.updated', handlers.onStatus);
-  if (handlers.onProgress) channel.listen('.progress.updated', handlers.onProgress);
-  if (handlers.onPartsApprovalRequested) channel.listen('.parts.approval_requested', handlers.onPartsApprovalRequested);
-  if (handlers.onPartsApproved) channel.listen('.parts.approved', handlers.onPartsApproved);
-  if (handlers.onQuestion) channel.listen('.question.updated', handlers.onQuestion);
-  if (handlers.onSurchargeProposed) channel.listen('.surcharge.proposed', handlers.onSurchargeProposed);
-  if (handlers.onSurchargeResolved) channel.listen('.surcharge.resolved', handlers.onSurchargeResolved);
-  if (handlers.onRescheduleRequested) channel.listen('.reschedule.requested', handlers.onRescheduleRequested);
-  if (handlers.onRescheduleResolved) channel.listen('.reschedule.resolved', handlers.onRescheduleResolved);
-  if (handlers.onDispute) channel.listen('.dispute.updated', handlers.onDispute);
+    if (handlers.onProposal) channel.listen('.proposal.received', handlers.onProposal);
+    if (handlers.onLocation) channel.listen('.location.updated', handlers.onLocation);
+    if (handlers.onStatus) channel.listen('.status.updated', handlers.onStatus);
+    if (handlers.onProgress) channel.listen('.progress.updated', handlers.onProgress);
+    if (handlers.onPartsApprovalRequested) channel.listen('.parts.approval_requested', handlers.onPartsApprovalRequested);
+    if (handlers.onPartsApproved) channel.listen('.parts.approved', handlers.onPartsApproved);
+    if (handlers.onQuestion) channel.listen('.question.updated', handlers.onQuestion);
+    if (handlers.onSurchargeProposed) channel.listen('.surcharge.proposed', handlers.onSurchargeProposed);
+    if (handlers.onSurchargeResolved) channel.listen('.surcharge.resolved', handlers.onSurchargeResolved);
+    if (handlers.onRescheduleRequested) channel.listen('.reschedule.requested', handlers.onRescheduleRequested);
+    if (handlers.onRescheduleResolved) channel.listen('.reschedule.resolved', handlers.onRescheduleResolved);
+    if (handlers.onDispute) channel.listen('.dispute.updated', handlers.onDispute);
+  };
+
+  return register(name, attach, await getEcho());
+}
+
+/**
+ * Remember a subscription (so a token-triggered reconnect can replay it), apply
+ * it to the current connection and hand back the unsubscribe.
+ */
+function register(name: string, attach: (e: any) => void, e: any): () => void {
+  const id = nextBindingId++;
+  bindings.set(id, { name, attach });
+  attach(e);
 
   return () => {
-    e.leave(`request.${requestId}`);
+    bindings.delete(id);
+    // Echo leaves per channel, not per listener: only actually leave once the
+    // last screen watching this channel is gone. `echo` is null after a logout
+    // or mid-reconnect, in which case there is nothing to leave.
+    const stillWatched = Array.from(bindings.values()).some((b) => b.name === name);
+    if (echo && !stillWatched) echo.leave(name);
   };
 }
 
@@ -215,19 +312,18 @@ export async function subscribeToUser(
   userId: number,
   onNotification: (n: AppNotificationEvent) => void,
 ): Promise<() => void> {
-  const e = await getEcho();
   const name = `App.Models.User.${userId}`;
-  e.private(name).notification((n: AppNotificationEvent) => onNotification(n));
-
-  return () => {
-    e.leave(name);
+  const attach = (e: any) => {
+    e.private(name).notification((n: AppNotificationEvent) => onNotification(n));
   };
+
+  return register(name, attach, await getEcho());
 }
 
 /** Tear down the whole connection (e.g. on logout). */
 export function disconnectRealtime() {
-  if (echo) {
-    echo.disconnect();
-    echo = null;
-  }
+  // Drop the remembered subscriptions too: they belong to the session that is
+  // ending, and must not be replayed onto the next user's connection.
+  bindings.clear();
+  teardown();
 }
