@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, View } from 'react-native';
+import { Image, View } from 'react-native';
 import { SkeletonScreen, Alert } from '@chamafacil/shared';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
-  BackBar, Badge, Button, Card, Field, Icon, Row, Screen, SectionLabel, Segment, Text, WarrantyClaim, WarrantyType, useTheme,
+  BackBar, Badge, Button, Card, Icon, Row, Screen, SectionLabel, Segment, Text, WarrantyClaim, WarrantyType, useTheme,
 } from '@chamafacil/shared';
 import { useWarrantyClaims, useOpenWarranty } from '../../../src/queries';
-import { PickedPhoto, pickPhotos } from '../../../src/photos';
-
-/** Matches the server's `media_ids` cap in WarrantyController. */
-const MAX_PHOTOS = 5;
+import { PickedPhoto } from '../../../src/photos';
+import { ClaimForm } from '../../../src/components/ClaimForm';
 
 /** V3Garantia + V3GarantiaStatus (C41/C42): claim a redo/refund and track it. */
 export default function WarrantyScreen() {
@@ -26,11 +24,6 @@ export default function WarrantyScreen() {
   const [description, setDescription] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [photos, setPhotos] = useState<PickedPhoto[]>([]);
-
-  const addPhotos = async () => {
-    const picked = await pickPhotos(MAX_PHOTOS - photos.length);
-    if (picked.length) setPhotos((cur) => [...cur, ...picked].slice(0, MAX_PHOTOS));
-  };
 
   if (isLoading) return <SkeletonScreen />;
 
@@ -100,64 +93,30 @@ export default function WarrantyScreen() {
         )}
 
         {formVisible && (
-          <>
-            <SectionLabel>{tr('actions.warranty.newTitle')}</SectionLabel>
-            <Segment
-              items={[
-                { value: 'redo', label: tr('actions.warranty.type.redo') },
-                { value: 'refund', label: tr('actions.warranty.type.refund') },
-              ]}
-              value={type}
-              onChange={(v) => setType(v as WarrantyType)}
-            />
-            <Field
-              label={tr('actions.warranty.descLabel')}
-              value={description}
-              onChangeText={setDescription}
-              placeholder={tr('actions.warranty.descPlaceholder')}
-              multiline
-              voiceInput
-              style={{ height: 90, textAlignVertical: 'top' }}
-            />
-
-            {/* Ops triages these claims without having seen the job, so a photo
-                of what went wrong is usually the case itself. */}
-            <View style={{ gap: 8 }}>
-              <SectionLabel count={photos.length || undefined}>{tr('actions.warranty.photosLabel')}</SectionLabel>
-              <Text variant="caption" color={t.colors.ink3}>{tr('actions.warranty.photosHint')}</Text>
-
-              <Row gap={8} style={{ flexWrap: 'wrap' }}>
-                {photos.map((p, i) => (
-                  <Pressable key={`${p.uri}-${i}`} onPress={() => setPhotos((cur) => cur.filter((_, j) => j !== i))}>
-                    <Image source={{ uri: p.uri }} style={{ width: 76, height: 76, borderRadius: 12 }} />
-                    <View
-                      style={{
-                        position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: 11,
-                        backgroundColor: t.colors.danger, alignItems: 'center', justifyContent: 'center',
-                      }}
-                    >
-                      <Icon name="close" size={12} color="#fff" />
-                    </View>
-                  </Pressable>
-                ))}
-
-                {photos.length < MAX_PHOTOS && (
-                  <Pressable
-                    onPress={addPhotos}
-                    style={{
-                      width: 76, height: 76, borderRadius: 12, borderWidth: 1, borderStyle: 'dashed',
-                      borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center', gap: 2,
-                    }}
-                  >
-                    <Icon name="camera" size={20} color={t.colors.ink3} />
-                    <Text variant="caption" color={t.colors.ink3} style={{ fontSize: 10 }}>
-                      {MAX_PHOTOS - photos.length}
-                    </Text>
-                  </Pressable>
-                )}
-              </Row>
-            </View>
-          </>
+          <ClaimForm
+            header={(
+              <>
+                <SectionLabel>{tr('actions.warranty.newTitle')}</SectionLabel>
+                <Segment
+                  items={[
+                    { value: 'redo', label: tr('actions.warranty.type.redo') },
+                    { value: 'refund', label: tr('actions.warranty.type.refund') },
+                  ]}
+                  value={type}
+                  onChange={(v) => setType(v as WarrantyType)}
+                />
+              </>
+            )}
+            description={description}
+            onChangeDescription={setDescription}
+            descriptionLabel={tr('actions.warranty.descLabel')}
+            descriptionPlaceholder={tr('actions.warranty.descPlaceholder')}
+            descriptionHeight={90}
+            photosLabel={tr('actions.warranty.photosLabel')}
+            photosHint={tr('actions.warranty.photosHint')}
+            photos={photos}
+            onChangePhotos={setPhotos}
+          />
         )}
       </View>
     </Screen>
