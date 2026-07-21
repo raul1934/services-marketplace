@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "655869293958",
+    "project_id": "chamafacil-aded9",
+    "storage_bucket": "chamafacil-aded9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655869293958:android:895f7c5d50dab313546807",
+        "android_client_info": {
+          "package_name": "com.chamafacil.customer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdFxpxPPlElCWp2ShJBx2zDCjiM1-xHSw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
