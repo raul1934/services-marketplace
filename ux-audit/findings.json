@@ -545,8 +545,10 @@
       "solution": "Tornar nickname opcional no fluxo picker.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "9170f27"
+      ],
       "note": null,
       "quick_win": null,
       "change": "express-request-flow",
@@ -825,8 +827,10 @@
       "solution": "Role/state + esconder quando não configurado.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "7d60fe3"
+      ],
       "note": null,
       "quick_win": null,
       "change": "harden-auth-forms",
@@ -1015,8 +1019,11 @@
       "solution": "Filtro server-side.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "ce3a07c",
+        "46491ce"
+      ],
       "note": null,
       "quick_win": null,
       "change": "slim-request-detail",
@@ -1222,8 +1229,10 @@
       "solution": "`ClaimForm` único parametrizado.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "03e8f80"
+      ],
       "note": null,
       "quick_win": null,
       "change": "consolidate-exception-screens",
@@ -1239,8 +1248,10 @@
       "solution": "Pulsar só na chegada e parar.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "36f07d2"
+      ],
       "note": null,
       "quick_win": 27,
       "change": "notification-hygiene",
@@ -1273,8 +1284,10 @@
       "solution": "Reassinar socket no refresh de token.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "66f054d"
+      ],
       "note": null,
       "quick_win": null,
       "change": "notification-hygiene",
@@ -1358,9 +1371,11 @@
       "solution": "Aplicar focusRing em todos os Pressable.",
       "effort": "M",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "partial",
+      "commits": [
+        "9805a77"
+      ],
+      "note": "anel aplicado em 11 superficies (sheets, pickers, DatePicker, AppDrawer, Wiz, marcar-todas); BackBar ficou de fora — vive em primitives.tsx, que estava bloqueado por PR aberto",
       "quick_win": null,
       "change": "accessible-semantics-sweep",
       "issue": 61
@@ -1409,8 +1424,11 @@
       "solution": "Label no input + `liveRegion` + borda de erro.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "abf1f8a",
+        "0afe813"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
@@ -1426,8 +1444,10 @@
       "solution": "Role/label agregado no Card clicável.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "1fb79dc"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
@@ -1634,8 +1654,10 @@
       "solution": "Rate-limit compartilhado.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "4bb18f0"
+      ],
       "note": null,
       "quick_win": null,
       "change": "notification-hygiene",
@@ -1651,9 +1673,11 @@
       "solution": "Avaliar setar badge no ícone.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "invalid",
+      "commits": [
+        "4f7e0d3"
+      ],
+      "note": "decidido NAO ligar: ninguem sobe o badge com o app fechado (backend nao envia o campo) e ninguem o zeraria ao abrir o app; o canal do tracker ainda fixaria marca durante todo chamado ativo. Revisitar junto de NOTIF-02.",
       "quick_win": null,
       "change": "notification-hygiene",
       "issue": 74
@@ -1736,8 +1760,10 @@
       "solution": "Fonte única em `assetDisplay`.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "4ee4493"
+      ],
       "note": null,
       "quick_win": null,
       "change": "design-system-foundations",
@@ -1753,8 +1779,10 @@
       "solution": "Marcar decorativo / dar label.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "40c4b9e"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
