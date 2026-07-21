@@ -25,6 +25,15 @@ export function Card({ flat, onPress, padded = true, style, children, ...rest }:
     return (
       <Pressable
         onPress={onPress}
+        // A pressable card is a button, but nothing said so out loud: a screen
+        // reader read the inner texts as ordinary content, with no clue the card
+        // could be activated. `accessible` also collapses the children into one
+        // node, so the card is announced as a single item instead of a stream of
+        // loose fragments. Callers that can phrase that sentence better pass
+        // their own accessibilityLabel — `rest` is spread last so any of these
+        // defaults can be overridden.
+        accessible
+        accessibilityRole="button"
         style={({ pressed, hovered, focused }: any) => [
           base,
           (pressed || hovered) && { opacity: 0.92 },
