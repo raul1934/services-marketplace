@@ -1,5 +1,4 @@
 {
-  "brand": "Chama Fácil",
   "tabs": {
     "home": "Início",
     "requests": "Chamados",
@@ -8,13 +7,10 @@
   "common": {
     "continue": "Continuar",
     "back": "Voltar",
-    "save": "Salvar",
     "cancel": "Cancelar",
     "all": "Todos",
-    "retry": "Tentar de novo",
     "error": "Erro",
     "thanks": "Obrigado!",
-    "haveAccount": "Já tenho conta",
     "or": "ou",
     "googleContinue": "Continuar com Google",
     "googleSignup": "Cadastrar com Google",
@@ -94,8 +90,7 @@
     ],
     "skip": "Pular",
     "next": "Próximo",
-    "getStarted": "Começar",
-    "createAccount": "Criar conta"
+    "getStarted": "Começar"
   },
   "login": {
     "title": "Bem-vindo de volta",
@@ -109,7 +104,6 @@
     "password": "Senha",
     "passwordPlaceholder": "••••••••",
     "submit": "Continuar",
-    "toRegister": "Não tem conta? Criar agora",
     "toRegisterPrefix": "Novo na Chama Fácil?",
     "toRegisterLink": "Criar conta"
   },
@@ -145,12 +139,10 @@
   },
   "home": {
     "greeting": "Olá,",
-    "name": "{{name}} 👋",
     "fallbackName": "tudo bem? 👋",
     "activeRequest": "Chamado em andamento",
     "needHelpTitle": "Precisa de ajuda agora?",
     "needHelpBody": "Descreva o que aconteceu e receba propostas de prestadores por perto.",
-    "askHelp": "Pedir ajuda",
     "quickHelp": "Ajuda rápida",
     "reviewBids": "Ver propostas dos prestadores",
     "trackRequest": "Acompanhar atendimento",
@@ -278,8 +270,6 @@
     "maxWaitOption": "{{count}} min",
     "windowsCount": "{{count}} janela",
     "windowsCount_plural": "{{count}} janelas",
-    "wizConfirmTitle": "Confirmar e pedir",
-    "wizConfirmSub": "Vamos avisar prestadores verificados perto de você.",
     "gpsCaptured": "Localização GPS capturada",
     "assetLocationUsed": "Usando a localização salva do seu ativo",
     "accessLabel": "Acesso",
@@ -290,7 +280,6 @@
     "summaryPhotos_plural": "{{count}} fotos",
     "summaryBudget": "Orçamento",
     "summaryPayment": "Pagamento",
-    "editStep": "Editar",
     "tellUs": "Conte o que aconteceu",
     "thisJob": "Este serviço",
     "whatHappened": "O que aconteceu?",
@@ -306,8 +295,6 @@
       "high": "alta"
     },
     "when": "Quando",
-    "urgent": "Urgente",
-    "schedule": "Agendar",
     "photos": "Fotos",
     "addPhoto": "Adicionar",
     "tapLocation": "Toque para usar sua localização",
@@ -321,7 +308,6 @@
     "needWhen": "Escolha pelo menos um dia e horário.",
     "locationErrorTitle": "Localização",
     "photosErrorTitle": "Fotos",
-    "detailsLabel": "Detalhes",
     "paymentLabel": "Forma de pagamento",
     "yourAsset": "Seu ativo",
     "addAsset": "Adicionar novo",
@@ -345,7 +331,6 @@
   },
   "requestDetail": {
     "fallbackTitle": "Chamado",
-    "budgetUpTo": "Orçamento até {{value}}",
     "proposalsLabel": "Propostas",
     "bestMatch": "Melhor opção",
     "jobs": "serviços",
@@ -368,7 +353,6 @@
     "approveAll": "Aprovar valor",
     "partApproved": "Aprovado",
     "approvedDone": "Você aprovou o valor",
-    "assetLabel": "Ativo",
     "summaryLabel": "Resumo do atendimento",
     "servedBy": "Atendido por",
     "tlAccepted": "Aceito em",
@@ -378,11 +362,7 @@
     "beforeAfter": "Antes & depois",
     "beforeLabel": "Antes",
     "afterLabel": "Depois",
-    "qnaLabel": "Perguntas dos profissionais",
     "bidQnaLabel": "Perguntas para você",
-    "preBid": "Pré-proposta",
-    "qnaHelper": "Suas respostas são vistas só por quem está propondo neste trabalho.",
-    "askedBy": "{{name}} perguntou",
     "answerCta": "Responder",
     "answerPlaceholder": "Sua resposta",
     "attachPhoto": "Anexar foto",
@@ -394,23 +374,15 @@
     },
     "waitingTitle": "Aguardando propostas",
     "waitingBody": "Avisaremos assim que um prestador responder.",
-    "arrivesIn": "chega em {{eta}}",
-    "slideAccept": "Arraste para aceitar",
-    "slideAccepted": "Aceito!",
     "cancelRequest": "Cancelar chamado",
     "cancelConfirmTitle": "Cancelar chamado",
     "cancelConfirmBody": "Tem certeza?",
-    "provider": "Prestador",
-    "trackLive": "Acompanhar ao vivo",
-    "rate": "Avaliar atendimento",
     "fallbackProvider": "Prestador",
     "deltaAbove": "{{value}} acima do orçamento",
     "deltaBelow": "{{value}} abaixo do orçamento",
     "deltaOn": "No seu orçamento",
     "insured": "com seguro",
     "withinWait": "Dentro do seu tempo de espera",
-    "viewProposals": "Ver propostas ({{count}})",
-    "viewReceipt": "Ver recibo",
     "startCodeLabel": "CÓDIGO DE INÍCIO",
     "startCodeHint": "Informe este código ao prestador quando ele chegar para liberar o atendimento.",
     "tabs": {
@@ -418,7 +390,6 @@
       "request": "Solicitação",
       "history": "Histórico"
     },
-    "detailsLabel": "Dados da solicitação",
     "descriptionLabel": "Descrição",
     "addressLabel": "Endereço",
     "paymentLabel": "Pagamento",
@@ -442,18 +413,15 @@
     "settledOn": "Liquidado em {{date}}"
   },
   "tracking": {
-    "title": "A caminho",
     "subtitle": "Prestador a caminho",
     "live": "Ao vivo",
-    "moving": "Em movimento",
     "arrivingIn": "Chega em ~{{eta}}",
     "unavailable": "Localização indisponível no momento.",
     "stepAccepted": "Aceito",
     "stepOnWay": "A caminho",
     "stepArrived": "Chegou",
     "stepDone": "Concluído",
-    "call": "Ligar",
-    "message": "Mensagem"
+    "call": "Ligar"
   },
   "eventFeed": {
     "title": "Atividade",
@@ -514,8 +482,6 @@
   "actions": {
     "surcharge": {
       "title": "Acréscimo na chegada",
-      "composeTitle": "Compor acréscimo",
-      "composeHint": "Explique o motivo e anexe uma foto. O cliente aprova pelo valor.",
       "nonePending": "Nenhum acréscimo pendente",
       "proposedTitle": "Acréscimo proposto",
       "tier": {
@@ -535,17 +501,6 @@
       "slideApproved": "Aprovado",
       "refuse": "Recusar acréscimo",
       "refuseHint": "Recusar mantém o combinado original.",
-      "amountLabel": "Valor do acréscimo",
-      "amountError": "Informe um valor válido.",
-      "reasonLabel": "Motivo",
-      "reasonError": "Descreva o motivo do acréscimo.",
-      "reasonPlaceholder": "O que mudou no serviço?",
-      "photoLabel": "Foto (obrigatória)",
-      "photoError": "Anexe ao menos uma foto.",
-      "requoteHint": "Acima de 50% o pedido vai para re-cotação do cliente.",
-      "matchWarning": "Acréscimos frequentes pioram seu match.",
-      "send": "Enviar para aprovação",
-      "sentMsg": "Acréscimo enviado ao cliente.",
       "approvedMsg": "Acréscimo aprovado.",
       "refusedMsg": "Acréscimo recusado. O combinado original foi mantido."
     },
@@ -567,7 +522,6 @@
       "title": "Remarcação",
       "proposeTitle": "Propor nova data",
       "proposeHint": "Escolha uma data e período. A outra parte precisa aceitar.",
-      "proInfo": "Remarcação com 24h de antecedência é de boa-fé.",
       "dateLabel": "Data",
       "dateError": "Use o formato AAAA-MM-DD.",
       "periodLabel": "Período",
@@ -584,12 +538,9 @@
       "acceptedMsg": "Nova data confirmada.",
       "declinedMsg": "Você recusou a nova data.",
       "incomingTitle": "O profissional pediu para remarcar",
-      "incomingTitleClient": "O cliente pediu para remarcar",
       "accept": "Aceitar nova data",
       "decline": "Não consigo",
       "declineHint": "Se recusar, o profissional pode cancelar e reabrimos o chamado.",
-      "declinePro": "Recusar",
-      "declineProHint": "Se recusar, o job sai com você e é reaberto para outros.",
       "lateWarning": "Menos de 24h — conta como falta."
     },
     "noShow": {
@@ -629,19 +580,7 @@
       "party": {
         "client": "Cliente",
         "provider": "Profissional"
-      },
-      "defenseTitle": "Defesa na disputa",
-      "claimFromClient": "Alegação do cliente",
-      "myVersionLabel": "Minha versão",
-      "myVersionPlaceholder": "Descreva o seu lado...",
-      "evidenceProHint": "Anexe fotos do antes/depois ou comprovantes.",
-      "evidenceLabelPro": "Evidências",
-      "sendDefense": "Enviar defesa",
-      "defenseSent": "Defesa enviada para a mediação.",
-      "defenseFiled": "Defesa enviada",
-      "none": "Nenhuma disputa neste atendimento",
-      "resolvedTitle": "Disputa resolvida",
-      "retentionNoticePro": "Seu repasse fica retido até a mediação concluir."
+      }
     },
     "warranty": {
       "title": "Garantia",
@@ -698,7 +637,6 @@
     "editTitle": "Editar ativo",
     "emptyTitle": "Nenhum ativo ainda",
     "emptyBody": "Cadastre um veículo, imóvel ou pet para consolidar o histórico.",
-    "typeLabel": "Tipo",
     "detailsLabel": "Detalhes",
     "nickname": "Apelido",
     "nicknamePlaceholder": "Civic do pai",
@@ -731,7 +669,6 @@
     "mileage": "Km atual",
     "mileageEmpty": "Sem leitura ainda",
     "recordKm": "Registrar km",
-    "kmHistory": "Histórico de km",
     "kmPlaceholder": "Ex.: 52000",
     "kmNote": "Observação (opcional)",
     "kmDate": "Data da leitura",
@@ -753,9 +690,6 @@
     },
     "kmService": "Vincular a um serviço (opcional)",
     "kmError": "Informe um valor de km válido.",
-    "kmNone": "Nenhuma leitura ainda",
-    "history": "Histórico de serviços",
-    "historyEmpty": "Nenhum serviço ainda",
     "tabs": {
       "history": "Histórico"
     },
@@ -862,7 +796,6 @@
     },
     "scanning": "Detectando superfície…",
     "scanHint": "Balance o celular devagar de um lado para o outro, apontando para a superfície.",
-    "surfaceFound": "Superfície detectada!",
     "shot": "Tirar foto da medição",
     "shot_saved": "Foto guardada",
     "shot_failed": "Não deu para tirar a foto"
@@ -925,7 +858,6 @@
       },
       "serviceCount": "{{count}} serviço",
       "serviceCount_plural": "{{count}} serviços",
-      "benefitsTitle": "O QUE DÁ PRA FAZER",
       "benefits": {
         "vehicle": [
           "Chamar guincho, bateria e mais",
@@ -964,15 +896,11 @@
     "area": {
       "title": "Área do imóvel",
       "sub": "Opcional — ajuda o profissional a dimensionar o serviço.",
-      "tutorialTitle": "Como desenhar a área",
       "steps": [
         "Toque em \"Desenhar área\" para abrir o mapa.",
         "Arraste os pontos até cobrir o terreno ou a construção.",
         "O tamanho em m² aparece sozinho; salve quando estiver bom."
       ],
-      "draw": "Desenhar área",
-      "start": "Iniciar medição",
-      "notNow": "Agora não",
       "optional": "Você pode pular e definir depois.",
       "needLocation": "Defina a localização na etapa anterior para desenhar a área."
     }

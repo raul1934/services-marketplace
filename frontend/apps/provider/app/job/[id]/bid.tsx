@@ -29,6 +29,7 @@ import {
   brl,
   calcPayout,
   distanceLabel,
+  etaLabel,
   PLATFORM_FEE_RATE,
   RequestUrgency,
   useAuth,
@@ -295,7 +296,7 @@ export default function BidScreen() {
           <Card>
             <SumRow icon="briefcase" k={tr('bid.sumJob')} v={categoryName ?? '—'} />
             <SumRow icon="dollar" k={tr('job.priceLabel')} v={brl(price)} />
-            <SumRow icon="clock" k={tr('bid.arrivalTime')} v={`~${eta} min`} />
+            <SumRow icon="clock" k={tr('bid.arrivalTime')} v={`~${etaLabel(eta)}`} />
             {request.distance_km != null && <SumRow icon="pin" k={tr('bid.distance')} v={distanceLabel(request.distance_km)} />}
             {request.payment_method && <SumRow icon={request.payment_method} k={tr('bid.paymentLabel')} v={tr(`enums.paymentMethod.${request.payment_method}`)} />}
           </Card>

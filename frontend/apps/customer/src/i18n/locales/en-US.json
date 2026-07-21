@@ -1,5 +1,4 @@
 {
-  "brand": "Chama Fácil",
   "tabs": {
     "home": "Home",
     "requests": "Requests",
@@ -8,13 +7,10 @@
   "common": {
     "continue": "Continue",
     "back": "Back",
-    "save": "Save",
     "cancel": "Cancel",
     "all": "All",
-    "retry": "Try again",
     "error": "Error",
     "thanks": "Thank you!",
-    "haveAccount": "I already have an account",
     "or": "or",
     "googleContinue": "Continue with Google",
     "googleSignup": "Sign up with Google",
@@ -94,8 +90,7 @@
     ],
     "skip": "Skip",
     "next": "Next",
-    "getStarted": "Get started",
-    "createAccount": "Create account"
+    "getStarted": "Get started"
   },
   "login": {
     "title": "Welcome back",
@@ -109,7 +104,6 @@
     "password": "Password",
     "passwordPlaceholder": "••••••••",
     "submit": "Continue",
-    "toRegister": "No account? Create one",
     "toRegisterPrefix": "New to Chama Fácil?",
     "toRegisterLink": "Create account"
   },
@@ -145,12 +139,10 @@
   },
   "home": {
     "greeting": "Hi,",
-    "name": "{{name}} 👋",
     "fallbackName": "there 👋",
     "activeRequest": "Active request",
     "needHelpTitle": "Need help now?",
     "needHelpBody": "Describe what happened and get bids from nearby providers.",
-    "askHelp": "Ask for help",
     "quickHelp": "Quick help",
     "reviewBids": "Review provider bids",
     "trackRequest": "Track service",
@@ -278,8 +270,6 @@
     "maxWaitOption": "{{count}} min",
     "windowsCount": "{{count}} window",
     "windowsCount_plural": "{{count}} windows",
-    "wizConfirmTitle": "Confirm & request",
-    "wizConfirmSub": "We'll ping verified pros near you.",
     "gpsCaptured": "GPS location captured",
     "assetLocationUsed": "Using your asset's saved location",
     "accessLabel": "Access",
@@ -290,7 +280,6 @@
     "summaryPhotos_plural": "{{count}} photos",
     "summaryBudget": "Budget",
     "summaryPayment": "Payment",
-    "editStep": "Edit",
     "tellUs": "Tell us what happened",
     "thisJob": "This job",
     "whatHappened": "What happened?",
@@ -306,8 +295,6 @@
       "high": "high"
     },
     "when": "When",
-    "urgent": "Urgent",
-    "schedule": "Schedule",
     "photos": "Photos",
     "addPhoto": "Add",
     "tapLocation": "Tap to use your location",
@@ -321,7 +308,6 @@
     "needWhen": "Pick at least one day and time.",
     "locationErrorTitle": "Location",
     "photosErrorTitle": "Photos",
-    "detailsLabel": "Details",
     "paymentLabel": "Payment method",
     "yourAsset": "Your asset",
     "addAsset": "Add new",
@@ -345,7 +331,6 @@
   },
   "requestDetail": {
     "fallbackTitle": "Request",
-    "budgetUpTo": "Budget up to {{value}}",
     "proposalsLabel": "Proposals",
     "bestMatch": "Best match",
     "jobs": "jobs",
@@ -368,7 +353,6 @@
     "approveAll": "Approve total",
     "partApproved": "Approved",
     "approvedDone": "You approved the total",
-    "assetLabel": "Asset",
     "summaryLabel": "Service summary",
     "servedBy": "Served by",
     "tlAccepted": "Accepted on",
@@ -378,11 +362,7 @@
     "beforeAfter": "Before & after",
     "beforeLabel": "Before",
     "afterLabel": "After",
-    "qnaLabel": "Questions from pros",
     "bidQnaLabel": "Questions for you",
-    "preBid": "Pre-bid",
-    "qnaHelper": "Your answers are shared only with pros bidding on this job.",
-    "askedBy": "{{name}} asked",
     "answerCta": "Answer",
     "answerPlaceholder": "Your answer",
     "attachPhoto": "Attach photo",
@@ -394,23 +374,15 @@
     },
     "waitingTitle": "Waiting for bids",
     "waitingBody": "We'll let you know as soon as a provider responds.",
-    "arrivesIn": "arrives in {{eta}}",
-    "slideAccept": "Slide to accept",
-    "slideAccepted": "Accepted!",
     "cancelRequest": "Cancel request",
     "cancelConfirmTitle": "Cancel request",
     "cancelConfirmBody": "Are you sure?",
-    "provider": "Provider",
-    "trackLive": "Track live",
-    "rate": "Rate service",
     "fallbackProvider": "Provider",
     "deltaAbove": "{{value}} over budget",
     "deltaBelow": "{{value}} under budget",
     "deltaOn": "On your budget",
     "insured": "insured",
     "withinWait": "Within your wait time",
-    "viewProposals": "View proposals ({{count}})",
-    "viewReceipt": "View receipt",
     "startCodeLabel": "START CODE",
     "startCodeHint": "Give this code to the provider when they arrive to start the service.",
     "tabs": {
@@ -418,7 +390,6 @@
       "request": "Request",
       "history": "History"
     },
-    "detailsLabel": "Request details",
     "descriptionLabel": "Description",
     "addressLabel": "Address",
     "paymentLabel": "Payment",
@@ -442,18 +413,15 @@
     "settledOn": "Settled on {{date}}"
   },
   "tracking": {
-    "title": "On the way",
     "subtitle": "Provider on the way",
     "live": "Live",
-    "moving": "Moving",
     "arrivingIn": "Arriving in ~{{eta}}",
     "unavailable": "Location unavailable right now.",
     "stepAccepted": "Accepted",
     "stepOnWay": "On the way",
     "stepArrived": "Arrived",
     "stepDone": "Done",
-    "call": "Call",
-    "message": "Message"
+    "call": "Call"
   },
   "eventFeed": {
     "title": "Activity",
@@ -514,8 +482,6 @@
   "actions": {
     "surcharge": {
       "title": "Surcharge on arrival",
-      "composeTitle": "Compose surcharge",
-      "composeHint": "Explain the reason and attach a photo. The client approves by amount.",
       "nonePending": "No pending surcharge",
       "proposedTitle": "Surcharge proposed",
       "tier": {
@@ -535,17 +501,6 @@
       "slideApproved": "Approved",
       "refuse": "Refuse surcharge",
       "refuseHint": "Refusing keeps the original agreement.",
-      "amountLabel": "Surcharge amount",
-      "amountError": "Enter a valid amount.",
-      "reasonLabel": "Reason",
-      "reasonError": "Describe the reason for the surcharge.",
-      "reasonPlaceholder": "What changed in the service?",
-      "photoLabel": "Photo (required)",
-      "photoError": "Attach at least one photo.",
-      "requoteHint": "Above 50% the request goes to client re-quote.",
-      "matchWarning": "Frequent surcharges hurt your match.",
-      "send": "Send for approval",
-      "sentMsg": "Surcharge sent to the client.",
       "approvedMsg": "Surcharge approved.",
       "refusedMsg": "Surcharge refused. The original agreement stands."
     },
@@ -567,7 +522,6 @@
       "title": "Reschedule",
       "proposeTitle": "Propose a new date",
       "proposeHint": "Pick a date and period. The other party must accept.",
-      "proInfo": "Rescheduling 24h ahead is good-faith.",
       "dateLabel": "Date",
       "dateError": "Use the format YYYY-MM-DD.",
       "periodLabel": "Period",
@@ -584,12 +538,9 @@
       "acceptedMsg": "New date confirmed.",
       "declinedMsg": "You declined the new date.",
       "incomingTitle": "The pro asked to reschedule",
-      "incomingTitleClient": "The client asked to reschedule",
       "accept": "Accept new date",
       "decline": "I can't",
       "declineHint": "If you decline, the pro may cancel and we reopen the request.",
-      "declinePro": "Decline",
-      "declineProHint": "If you decline, the job leaves you and reopens to others.",
       "lateWarning": "Under 24h — counts as a no-show."
     },
     "noShow": {
@@ -629,19 +580,7 @@
       "party": {
         "client": "Client",
         "provider": "Pro"
-      },
-      "defenseTitle": "Dispute defense",
-      "claimFromClient": "Client's claim",
-      "myVersionLabel": "My version",
-      "myVersionPlaceholder": "Describe your side...",
-      "evidenceProHint": "Attach before/after photos or receipts.",
-      "evidenceLabelPro": "Evidence",
-      "sendDefense": "Send defense",
-      "defenseSent": "Defense sent to mediation.",
-      "defenseFiled": "Defense filed",
-      "none": "No dispute on this job",
-      "resolvedTitle": "Dispute resolved",
-      "retentionNoticePro": "Your payout is held until mediation concludes."
+      }
     },
     "warranty": {
       "title": "Warranty",
@@ -698,7 +637,6 @@
     "editTitle": "Edit asset",
     "emptyTitle": "No assets yet",
     "emptyBody": "Register a vehicle, property or pet to consolidate its history.",
-    "typeLabel": "Type",
     "detailsLabel": "Details",
     "nickname": "Nickname",
     "nicknamePlaceholder": "Dads Civic",
@@ -731,7 +669,6 @@
     "mileage": "Current mileage",
     "mileageEmpty": "No reading yet",
     "recordKm": "Record mileage",
-    "kmHistory": "Mileage history",
     "kmPlaceholder": "e.g. 52000",
     "kmNote": "Note (optional)",
     "kmDate": "Reading date",
@@ -753,9 +690,6 @@
     },
     "kmService": "Link to a service (optional)",
     "kmError": "Enter a valid mileage.",
-    "kmNone": "No readings yet",
-    "history": "Service history",
-    "historyEmpty": "No services yet",
     "tabs": {
       "history": "History"
     },
@@ -862,7 +796,6 @@
     },
     "scanning": "Detecting surface…",
     "scanHint": "Slowly wave the phone side to side, aiming at the surface.",
-    "surfaceFound": "Surface detected!",
     "shot": "Take measurement photo",
     "shot_saved": "Photo kept",
     "shot_failed": "Couldn't take the photo"
@@ -925,7 +858,6 @@
       },
       "serviceCount": "{{count}} service",
       "serviceCount_plural": "{{count}} services",
-      "benefitsTitle": "WHAT YOU CAN DO",
       "benefits": {
         "vehicle": [
           "Call a tow, battery and more",
@@ -964,15 +896,11 @@
     "area": {
       "title": "Property area",
       "sub": "Optional — helps the pro size the job.",
-      "tutorialTitle": "How to draw the area",
       "steps": [
         "Tap \"Draw area\" to open the map.",
         "Drag the points to cover the lot or building.",
         "The size in m² updates itself; save when it looks right."
       ],
-      "draw": "Draw area",
-      "start": "Start measuring",
-      "notNow": "Not now",
       "optional": "You can skip and set it later.",
       "needLocation": "Set the location on the previous step to draw the area."
     }
