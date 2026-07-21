@@ -108,6 +108,23 @@ flowchart TD
 - Adicionar `accessibilityRole="button"` + label ao "Marcar todas". [P]
 - Rótulo textual ao dot de não-lida. [P]
 
+## Rastreador ao vivo — implementação e o que o teste em aparelho revelou (2026-07-21)
+
+Esta seção é posterior à auditoria: nasceu de construir a notificação persistente de "chamado em andamento" e testá-la num Galaxy real (Android 14 / One UI 6.1), não da leitura de código. Achados canônicos: **NOTIF-06 a NOTIF-10** em `findings.md`.
+
+**Três bugs faziam o sync em background ser um no-op completo** — e o conjunto *parecia* funcionar, porque o logcat imprimia `Finished task 'active-request-push'` de qualquer jeito:
+
+1. O payload do Expo no Android **não entrega os campos direto**: o envelope traz `scopeKey`/`experienceId`/`projectId` e a carga real como **string JSON** em `data.dataString`. Lendo o envelope, `type` era `undefined` e o handler retornava na primeira linha.
+2. O `ExpoChannel` mandava `channelId` junto do push silencioso. O Expo converte qualquer indício de alerta visível em **mensagem de notificação do FCM** — o Android então desenhava um card vazio no `fcm_fallback_notification_channel` e **nunca acordava a task**.
+3. `TaskManager.defineTask` e `notifee.onBackgroundEvent` eram avaliados só quando `_layout` os importava. Num start **headless** nada sob `app/` roda, então a task ficava registrada nativamente e indefinida em JS.
+
+**Lição transversal:** handler que precisa existir sem UI tem que ser registrado no *entry point* (`index.js`), nunca numa tela, layout ou provider.
+
+**Sobre persistência no Android 14 (API 34):** `setOngoing(true)` **não** impede mais o usuário de deslizar a notificação para fora — verificado no aparelho. E **foreground service não resolveria**: desde a API 34 a notificação dele também é dispensável (só resiste ao "Apagar" e à tela bloqueada). As únicas indispensáveis são `CallStyle`, mídia e política de dispositivo. A solução adotada foi repor após a dispensa, com orçamento de 3 reposições por estágio — persistente sem virar inescapável.
+
+**Limites conhecidos:** *force stop* pelas configurações mata tudo (flag `FLAG_STOPPED` do Android, sem contorno); a barra de progresso sai **azul** no One UI, que impõe o accent do sistema e ignora `color`; e o botão "Ligar" está implementado mas nunca renderiza, porque a listagem `/requests` não expõe `provider.phone` — decisão de privacidade em aberto (ver `findings.md`).
+
+
 ## Score
 - UX: 6/10
 - UI: 6/10
