@@ -31,7 +31,7 @@ export default function NotificationsScreen() {
       padded={false}
       keyExtractor={(n) => n.id}
       header={
-        <BackBar
+        <BackBar backLabel={tr('common.back')}
           title={tr('notifications.title')}
           onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))}
           right={

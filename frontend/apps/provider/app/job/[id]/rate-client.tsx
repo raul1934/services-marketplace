@@ -16,7 +16,7 @@ export default function RateClient() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('rateClient.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('rateClient.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28 }}>
         <RateClientForm requestId={requestId} request={request} onSubmitted={() => (router.canGoBack() ? router.back() : router.replace(`/job/${id}`))} />
       </View>

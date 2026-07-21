@@ -32,7 +32,7 @@ export default function CustomerNoShowScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('actions.customerNoShow.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.customerNoShow.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <Card flat style={{ alignItems: 'center', gap: 8, paddingVertical: 22 }}>
           <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: t.colors.dangerSoft, alignItems: 'center', justifyContent: 'center' }}>

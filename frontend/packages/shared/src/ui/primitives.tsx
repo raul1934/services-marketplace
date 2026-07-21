@@ -143,13 +143,20 @@ export function AppBar({ sub, title, left, right }: { sub?: string; title: strin
 }
 
 /** Back bar: round back button + inline title + optional trailing (chamafacil .backbar). */
-export function BackBar({ title, onBack, right }: { title: string; onBack?: () => void; right?: React.ReactNode }) {
+export function BackBar({ title, onBack, right, backLabel }: { title: string; onBack?: () => void; right?: React.ReactNode; backLabel: string }) {
   const t = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 }}>
       <Pressable
         onPress={onBack}
-        style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' }}
+        accessibilityRole="button"
+        // Required, like IconButton's: this package renders strings, it doesn't
+        // author them, and "back" is the one control every screen here has.
+        accessibilityLabel={backLabel}
+        style={({ focused }: any) => [
+          { width: 38, height: 38, borderRadius: 19, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' },
+          focusRing(t.colors.accent, focused),
+        ]}
       >
         <Icon name="back" size={20} color={t.colors.ink} />
       </Pressable>
@@ -202,8 +209,19 @@ export function CatIc({ name, size = 52, grad, iconSize }: { name: IconName; siz
 
 /** Vertical category tile with label (chamafacil CatTile). Accepts a custom icon node. */
 export function CatTile({ icon, label, onPress }: { icon: React.ReactNode; label: string; onPress?: () => void }) {
+  const t = useTheme();
   return (
-    <Pressable onPress={onPress} style={{ alignItems: 'center', gap: 8 }}>
+    // `accessible` collapses the icon and the caption into one node, and the role
+    // is what tells a screen reader this is actionable at all — the device dump
+    // showed these announcing as a bare "ViewGroup" with the category name, so
+    // the shortcuts read as decoration (A11Y-15).
+    <Pressable
+      onPress={onPress}
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ focused }: any) => [{ alignItems: 'center', gap: 8 }, focusRing(t.colors.accent, focused)]}
+    >
       {icon}
       <Text center weight="700" style={{ fontSize: 12.5, lineHeight: 15 }} numberOfLines={2}>
         {label}

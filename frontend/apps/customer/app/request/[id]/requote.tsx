@@ -50,7 +50,7 @@ export default function RequoteScreen() {
 
   return (
     <Screen stickyHeader padded={false} footer={footer}>
-      <BackBar title={tr('actions.requote.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.requote.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <Card flat style={{ gap: 8 }}>
           <Row gap={10}>

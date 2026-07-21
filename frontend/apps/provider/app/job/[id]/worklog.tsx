@@ -113,7 +113,7 @@ export default function WorklogScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar
+      <BackBar backLabel={tr('common.back')}
         title={tr('job.worklogTitle')}
         onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${requestId}`))}
       />

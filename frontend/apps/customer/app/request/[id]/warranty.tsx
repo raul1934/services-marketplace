@@ -52,7 +52,7 @@ export default function WarrantyScreen() {
 
   return (
     <Screen stickyHeader padded={false} footer={footer}>
-      <BackBar title={tr('actions.warranty.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.warranty.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <Card flat style={{ gap: 6 }}>
           <Row gap={10}><Icon name="shieldCheck" size={20} color={t.colors.ok} /><Text weight="800" style={{ flex: 1, fontSize: 15 }}>{tr('actions.warranty.coverTitle')}</Text></Row>

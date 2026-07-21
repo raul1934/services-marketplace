@@ -150,6 +150,7 @@ export default function AssetDetail() {
   return (
     <Screen stickyHeader padded={false} onEndReached={() => tab === 'history' && hasMore && loadMore()}>
       <BackBar
+        backLabel={tr('common.back')}
         title={asset.nickname}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/assets'))}
         right={

@@ -151,7 +151,15 @@ function FirstAssetCard() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   return (
-    <Pressable onPress={() => router.push('/assets/new')}>
+    // Same gradient card, same missing role as the one on the home (A11Y-15).
+    // DS-05 wants these two extracted into one component — when that happens,
+    // this belongs there rather than duplicated a third time.
+    <Pressable
+      onPress={() => router.push('/assets/new')}
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={tr('home.firstAssetTitle')}
+    >
       <LinearGradient
         colors={t.grad as unknown as readonly [string, string, ...string[]]}
         start={{ x: 0, y: 0 }}

@@ -41,7 +41,7 @@ export default function DisputeScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('actions.dispute.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.dispute.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         {dispute ? (
           <DisputeStatus dispute={dispute} />

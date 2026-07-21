@@ -82,7 +82,7 @@ export default function Config() {
 
   return (
     <Screen stickyHeader>
-      <BackBar title={tr('config.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/profile'))} />
+      <BackBar backLabel={tr('common.back')} title={tr('config.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/profile'))} />
 
       <Text variant="label" style={{ marginBottom: 10 }}>
         {tr('config.servicesLabel')}

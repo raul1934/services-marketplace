@@ -134,6 +134,7 @@ export default function JobScreen() {
 
   const backBar = (
     <BackBar
+      backLabel={tr('common.back')}
       title={categoryName ?? tr('job.fallbackTitle')}
       onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/dashboard'))}
       right={<Badge label={statusText} tone={isOpen ? 'open' : 'live'} dot={isOpen || isActiveStatus(status)} />}

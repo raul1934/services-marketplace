@@ -16,7 +16,7 @@ export default function Rate() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('rate.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('rate.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28 }}>
         <ReviewForm requestId={requestId} request={request} onSubmitted={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       </View>

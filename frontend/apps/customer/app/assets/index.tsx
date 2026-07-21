@@ -27,7 +27,7 @@ export default function AssetsScreen() {
       keyExtractor={(a) => String(a.id)}
       header={
         <View>
-          <BackBar
+          <BackBar backLabel={tr('common.back')}
             title={tr('assets.title')}
             onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/profile'))}
           />

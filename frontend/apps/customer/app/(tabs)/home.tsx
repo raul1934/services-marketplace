@@ -133,7 +133,15 @@ export default function Home() {
         {/* Primary "ask for help now" action as the hero: the app's #1 job, and
             it was previously the last card — pushed below the fold and clipped by
             the tab bar at rest. Here it's always visible without scrolling. */}
-        <Pressable onPress={() => router.push('/categories')}>
+        {/* The app's primary action. It reached the accessibility tree as a bare
+            ViewGroup, so a screen reader read the pitch without saying it could
+            be acted on — the one control that most needs to say so (A11Y-15). */}
+        <Pressable
+          onPress={() => router.push('/categories')}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={`${tr('home.needHelpTitle')}. ${tr('home.needHelpBody')}`}
+        >
           <LinearGradient
             colors={t.grad as unknown as readonly [string, string, ...string[]]}
             start={{ x: 0, y: 0 }}

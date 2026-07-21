@@ -91,7 +91,7 @@ export default function EditAsset() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('assets.editTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/assets/${assetId}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('assets.editTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/assets/${assetId}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <Pressable onPress={changePhoto} style={{ alignSelf: 'center', alignItems: 'center', gap: 6 }}>
           {asset.photo_url ? (

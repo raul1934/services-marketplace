@@ -33,7 +33,7 @@ export default function Earnings() {
       padded={false}
       onEndReached={() => { if (txns.hasNextPage && !txns.isFetchingNextPage) txns.fetchNextPage(); }}
     >
-      <BackBar title={tr('earnings.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/profile'))} />
+      <BackBar backLabel={tr('common.back')} title={tr('earnings.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/profile'))} />
       {wallet.isLoading || !w ? (
         <ActivityIndicator color={t.colors.accent} style={{ marginTop: 40 }} />
       ) : (

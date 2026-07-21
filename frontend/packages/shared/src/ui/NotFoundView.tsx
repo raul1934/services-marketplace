@@ -36,7 +36,11 @@ export function NotFoundView({
 }) {
   return (
     <Screen stickyHeader={showBackBar} scroll={false} padded={false}>
-      {showBackBar && onBack ? <BackBar title={backBarTitle ?? title} onBack={onBack} /> : null}
+      {/* `backLabel` also names the header's back button, the same way it names
+          the ghost button below — so the bar only appears when we can name it. */}
+      {showBackBar && onBack && backLabel ? (
+        <BackBar title={backBarTitle ?? title} onBack={onBack} backLabel={backLabel} />
+      ) : null}
       <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 20, gap: 18 }}>
         <EmptyState icon={icon} title={title} body={body} />
         <View style={{ gap: 10 }}>

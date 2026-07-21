@@ -70,7 +70,7 @@ export default function ProviderSurchargeScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('actions.surcharge.composeTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${requestId}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.surcharge.composeTitle')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/job/${requestId}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <Card flat style={{ gap: 6 }}>
           <Text variant="caption">{tr('actions.surcharge.composeHint')}</Text>

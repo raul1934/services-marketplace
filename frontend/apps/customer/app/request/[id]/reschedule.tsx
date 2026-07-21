@@ -65,7 +65,7 @@ export default function RescheduleScreen() {
 
   return (
     <Screen stickyHeader padded={false}>
-      <BackBar title={tr('actions.reschedule.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
+      <BackBar backLabel={tr('common.back')} title={tr('actions.reschedule.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         {incoming ? (
           <IncomingCard reschedule={incoming} busy={resolve.isPending} onAccept={() => answer(true)} onDecline={() => answer(false)} />
