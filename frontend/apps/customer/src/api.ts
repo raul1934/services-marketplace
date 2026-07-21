@@ -229,6 +229,12 @@ export const jobReportApi = {
 
 export type ProposalSort = 'price' | 'eta' | 'rating';
 
+/**
+ * Status buckets `GET /requests` filters by (`?status=`). The server owns the
+ * bucket → statuses mapping, so the app only ever sends the bucket name.
+ */
+export type RequestStatusFilter = 'open' | 'active' | 'completed' | 'cancelled';
+
 export interface CreateRequestPayload {
   service_category_id: number;
   asset_id?: number;
@@ -251,7 +257,8 @@ export interface CreateRequestPayload {
 }
 
 export const customerApi = {
-  myRequests: (page = 1) => http.get<Paginated<ServiceRequest>>('requests', { query: { page } }).then(unwrapPage),
+  myRequests: (page = 1, status?: RequestStatusFilter) =>
+    http.get<Paginated<ServiceRequest>>('requests', { query: { page, status } }).then(unwrapPage),
   createRequest: (payload: CreateRequestPayload) => http.post<{ data: ServiceRequest }>('requests', { body: payload }).then(unwrap),
   getRequest: (id: number) => http.get<{ data: ServiceRequest }>(`requests/${id}`).then(unwrap),
   events: (id: number) => http.get<Collection<RequestEvent>>(`requests/${id}/events`).then(unwrapList),
