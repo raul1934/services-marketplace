@@ -95,8 +95,10 @@ function Gate() {
   useEffect(() => {
     if (status === 'loading') return;
     const inAuth = segments[0] === '(auth)';
-    const exempt = segments[0] === 'medicao' || segments[0] === 'ar-medicao'; // POC screens — reachable without auth
-    if (status === 'guest' && !inAuth && !exempt) router.replace('/(auth)/welcome');
+    // No exemptions: the measurement POC is gone and `/ar-medicao` is only ever
+    // reached from an asset screen, which already requires a session. The old
+    // exemption let a signed-out user open both in production.
+    if (status === 'guest' && !inAuth) router.replace('/(auth)/welcome');
     else if (status === 'authed' && inAuth) router.replace('/(tabs)/home');
   }, [status, segments, router]);
 

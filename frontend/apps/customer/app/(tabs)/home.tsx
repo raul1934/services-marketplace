@@ -22,6 +22,8 @@ import {
   SkeletonTiles,
   Steps,
   Text,
+  ACTIVE_REQUEST_STEPS,
+  activeRequestStep,
   flattenPages,
   isActiveStatus,
   relativeParts,
@@ -34,13 +36,6 @@ import { HomeAssets } from '../../src/components/HomeAssets';
 
 function initialsOf(name?: string | null) {
   return (name ?? '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
-}
-
-/** 3-step lifecycle position from status (Created → Bids → On the way). */
-function stepOf(status: RequestStatus): number {
-  if (status === RequestStatus.Open) return 2;
-  if (isActiveStatus(status)) return 3;
-  return 3;
 }
 
 /** How many request cards the home shows before the "see all" button. */
@@ -239,6 +234,10 @@ function ActiveRequestCard({ request, onPress }: { request: ServiceRequest; onPr
   const rel = relativeParts(request.created_at);
   const ago = rel.unit === 'now' ? tr('time.now') : tr(`time.${rel.unit}Ago`, { count: rel.count });
   const isOpen = request.status === RequestStatus.Open;
+  // Same stage numbering as the request screen's tracker (and the ongoing
+  // notification). An open request has no stage yet — the bid count below says
+  // more than an invented notch would.
+  const step = activeRequestStep(request.status);
   return (
     <Card padded={false} style={{ overflow: 'hidden' }} onPress={onPress}>
       <View style={{ padding: 18 }}>
@@ -253,7 +252,7 @@ function ActiveRequestCard({ request, onPress }: { request: ServiceRequest; onPr
           {request.urgency === RequestUrgency.Urgent && <Badge label={tr('enums.urgency.urgent')} tone="urgent" dot />}
         </Row>
         <Row style={{ marginTop: 14 }}>
-          <Steps total={3} current={stepOf(request.status)} />
+          {step ? <Steps total={ACTIVE_REQUEST_STEPS} current={step} /> : null}
           <View style={{ flex: 1 }} />
           {isOpen ? (
             <Badge label={tr('requestCard.proposals', { count: request.proposals_count ?? 0 })} tone="open" dot />
