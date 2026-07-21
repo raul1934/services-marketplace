@@ -131,6 +131,26 @@ export default function Home() {
       />
 
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
+        {/* Primary "ask for help now" action as the hero: the app's #1 job, and
+            it was previously the last card — pushed below the fold and clipped by
+            the tab bar at rest. Here it's always visible without scrolling. */}
+        <Pressable onPress={() => router.push('/categories')}>
+          <LinearGradient
+            colors={t.grad as unknown as readonly [string, string, ...string[]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: t.radius.card, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text weight="800" color="#fff" style={{ fontSize: 17 }}>{tr('home.needHelpTitle')}</Text>
+              <Text color="rgba(255,255,255,0.9)" style={{ fontSize: 13, marginTop: 2 }}>{tr('home.needHelpBody')}</Text>
+            </View>
+            <View style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="plus" size={26} color="#fff" />
+            </View>
+          </LinearGradient>
+        </Pressable>
+
         <HomeAssets />
 
         {requests.isLoading ? (
@@ -178,23 +198,6 @@ export default function Home() {
             ))}
           </View>
         )}
-
-        <Pressable onPress={() => router.push('/categories')}>
-          <LinearGradient
-            colors={t.grad as unknown as readonly [string, string, ...string[]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ borderRadius: t.radius.card, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text weight="800" color="#fff" style={{ fontSize: 17 }}>{tr('home.needHelpTitle')}</Text>
-              <Text color="rgba(255,255,255,0.9)" style={{ fontSize: 13, marginTop: 2 }}>{tr('home.needHelpBody')}</Text>
-            </View>
-            <View style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="plus" size={26} color="#fff" />
-            </View>
-          </LinearGradient>
-        </Pressable>
 
       </View>
 
