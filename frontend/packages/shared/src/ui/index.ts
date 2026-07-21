@@ -9,6 +9,7 @@ export * from './Badge';
 export * from './Chip';
 export * from './Field';
 export * from './Segment';
+export * from './Sheet';
 export * from './PaymentSelector';
 export * from './DynamicFields';
 export * from './AnswerList';

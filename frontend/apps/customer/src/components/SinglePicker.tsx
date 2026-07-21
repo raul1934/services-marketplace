@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Field, Icon, Row, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
+import { Field, Icon, Row, Sheet, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
 import { PickerField } from './LinkedPicker';
 
 /** Generic single-level id picker (search + select). Used for property type. */
@@ -40,14 +40,8 @@ export function SinglePicker({
     <>
       <PickerField label={label} value={selectedName} placeholder={placeholder} onPress={() => { setSearch(''); setOpen(true); }} />
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }} onPress={() => setOpen(false)}>
-          <Pressable
-            onPress={(e) => e.stopPropagation?.()}
-            style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 24 + insets.bottom, gap: 14, maxHeight: '80%' }}
-          >
-            <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
-            <Row style={{ justifyContent: 'space-between' }}>
+      <Sheet visible={open} onClose={() => setOpen(false)} maxHeight={'80%'}>
+<Row style={{ justifyContent: 'space-between' }}>
               <Text variant="h3">{placeholder}</Text>
               <Pressable onPress={() => setOpen(false)} accessibilityRole="button" hitSlop={8} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
                 <Icon name="close" size={22} color={t.colors.ink3} />
@@ -70,9 +64,7 @@ export function SinglePicker({
               })}
               {rows.length === 0 ? <Text variant="caption" style={{ paddingVertical: 16 }} center>—</Text> : null}
             </ScrollView>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          </Sheet>
     </>
   );
 }
