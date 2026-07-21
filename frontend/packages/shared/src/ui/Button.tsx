@@ -19,6 +19,8 @@ interface Props {
   left?: React.ReactNode;
   right?: React.ReactNode;
   style?: ViewStyle;
+  /** Announce a segmented/toggle button's on state to screen readers. */
+  selected?: boolean;
 }
 
 export function Button({
@@ -32,6 +34,7 @@ export function Button({
   left,
   right,
   style,
+  selected,
 }: Props) {
   const t = useTheme();
   const height = size === 'lg' ? 56 : size === 'sm' ? 38 : 50;
@@ -79,7 +82,7 @@ export function Button({
     <Pressable
       onPress={isDisabled ? undefined : onPress}
       accessibilityRole="button"
-      accessibilityState={{ disabled: !!isDisabled }}
+      accessibilityState={{ disabled: !!isDisabled, selected }}
       style={({ pressed, hovered, focused }: any) => [
         { transform: [{ scale: pressed && !isDisabled ? 0.98 : 1 }] },
         hovered && !isDisabled ? { opacity: 0.92 } : null,

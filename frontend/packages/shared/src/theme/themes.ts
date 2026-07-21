@@ -61,7 +61,9 @@ export const sunset: Theme = {
     ink3: '#95a2b6',
     line: '#e7ecf3',
     line2: '#eef2f7',
-    accent: '#ff6a3d',
+    // Deepened from #ff6a3d so white text on a solid-accent CTA clears WCAG AA
+    // for large/UI text (4.29:1 vs 2.85:1 before) while staying the brand orange.
+    accent: '#d9481f',
     accent2: '#ffb23e',
     accentInk: '#ffffff',
     accentSoft: '#fff0ea',

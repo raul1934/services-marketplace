@@ -15,7 +15,13 @@ export function Stars({
 }) {
   const t = useTheme();
   return (
-    <View style={{ flexDirection: 'row', gap: 4 }}>
+    <View
+      style={{ flexDirection: 'row', gap: 4 }}
+      accessible
+      accessibilityRole={onChange ? 'adjustable' : 'image'}
+      accessibilityLabel={`${Math.round(value * 10) / 10} / 5`}
+      accessibilityValue={onChange ? { min: 1, max: 5, now: Math.round(value) } : undefined}
+    >
       {[1, 2, 3, 4, 5].map((i) => {
         const filled = i <= Math.round(value);
         const star = (

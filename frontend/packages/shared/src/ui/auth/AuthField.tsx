@@ -9,12 +9,16 @@ export function AuthField({
   icon,
   prefix,
   error,
+  label,
   ...rest
-}: TextInputProps & { icon?: IconName; prefix?: string; error?: string }) {
+}: TextInputProps & { icon?: IconName; prefix?: string; error?: string; label?: string }) {
   const t = useTheme();
   const [focus, setFocus] = useState(false);
   return (
     <View style={{ gap: 6 }}>
+      {/* A persistent label above the field — the placeholder alone disappears
+          the moment the user types, leaving no cue for what the field is. */}
+      {label ? <Text style={{ fontSize: 13, fontWeight: '700', color: t.colors.ink2 }}>{label}</Text> : null}
       <View
         style={{
           flexDirection: 'row',

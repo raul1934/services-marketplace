@@ -1,5 +1,5 @@
 import React from 'react';
-import { Animated, Pressable, ScrollView, View } from 'react-native';
+import { Animated, KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
 import { Text } from './Text';
@@ -45,6 +45,10 @@ export function Wiz({
     // Both edges: the sticky footer holds the wizard's primary action, and
     // without the bottom inset it renders under Android's nav buttons.
     <SafeAreaView style={{ flex: 1, backgroundColor: t.colors.bg }} edges={['top', 'bottom']}>
+     {/* Shrinks the body when the keyboard opens so the focused field (e.g. the
+         multiline description on step 1) scrolls above it instead of being
+         covered — "height" resizes on Android edge-to-edge, "padding" on iOS. */}
+     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {/* header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 8 }}>
         <Pressable onPress={onBack} style={{ width: 38, height: 38, borderRadius: 19, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' }}>
@@ -93,6 +97,7 @@ export function Wiz({
           </>
         ) : null}
       </View>
+     </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
