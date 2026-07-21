@@ -272,6 +272,8 @@ class RequestService
         }
 
         $request->client->notify(new RequestStatusChanged($request->id, $status));
+        // The silent data push that syncs the ongoing notification rides on the
+        // event below — see SyncActiveRequestNotification.
         RequestStatusUpdated::dispatch($request->id, $status->value);
 
         return $request->fresh();

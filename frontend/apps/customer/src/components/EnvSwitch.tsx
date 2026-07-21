@@ -11,6 +11,9 @@ import { EnvName, ENVS, getEnv, setEnv } from '../env';
 export function EnvSwitch({ onAccent, style }: { onAccent?: boolean; style?: ViewStyle }) {
   const t = useTheme();
   const [env, setE] = useState<EnvName>(getEnv());
+  // The DEV/PROD backend toggle must never reach end users: in a production
+  // (release) build it renders nothing, so it can't re-point the app's backend.
+  if (!__DEV__) return null;
   const idleFg = onAccent ? 'rgba(255,255,255,0.85)' : t.colors.ink3;
 
   return (

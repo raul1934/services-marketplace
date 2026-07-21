@@ -14,7 +14,9 @@ export function etaLabel(minutes: number | null | undefined): string {
   if (minutes < 60) return `${minutes} min`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
-  return m ? `${h}h${m}` : `${h}h`;
+  // Zero-pad the minutes so 64 min reads as "1h04" (clock-like), never the
+  // ambiguous "1h4". Whole hours drop the minutes entirely ("2h").
+  return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
 }
 
 export function distanceLabel(km: number | null | undefined): string {

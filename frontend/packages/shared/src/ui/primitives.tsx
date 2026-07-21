@@ -208,6 +208,9 @@ export function CatTile({ icon, label, onPress }: { icon: React.ReactNode; label
 /** Big price with small currency (chamafacil .price). */
 export function Price({ value, currency = 'R$', size = 22 }: { value: number | string; currency?: string; size?: number }) {
   const t = useTheme();
+  // Numbers are formatted pt-BR (two decimals, comma) so a price like 103.2 reads
+  // "103,20" instead of the JS default "103.2". Strings pass through untouched.
+  const shown = typeof value === 'number' ? value.toFixed(2).replace('.', ',') : value;
   return (
     <Text style={{ fontSize: size, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.4 }}>
       {/* One step lighter than the number, whatever the theme's head weight is —

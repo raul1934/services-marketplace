@@ -69,18 +69,19 @@ export default function Login() {
         />
 
         {mode === 'phone' ? (
-          <AuthField icon="phone" prefix="+55" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder={tr('login.phonePlaceholder')} error={errors.phone} />
+          <AuthField icon="phone" label={tr('login.tabPhone')} prefix="+55" value={phone} onChangeText={setPhone} keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" placeholder={tr('login.phonePlaceholder')} error={errors.phone} />
         ) : (
           <>
-            <AuthField icon="mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder={tr('login.emailPlaceholder')} error={errors.email} />
-            <AuthField icon="key" value={password} onChangeText={setPassword} secureTextEntry placeholder={tr('login.passwordPlaceholder')} error={errors.password} />
+            <AuthField icon="mail" label={tr('login.email')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" textContentType="emailAddress" autoComplete="email" placeholder={tr('login.emailPlaceholder')} error={errors.email} />
+            <AuthField icon="key" label={tr('login.password')} value={password} onChangeText={setPassword} secureTextEntry textContentType="password" autoComplete="current-password" placeholder={tr('login.passwordPlaceholder')} error={errors.password} />
           </>
         )}
 
         {formError ? (
           <View style={{ gap: 2 }}>
             <Text variant="caption" color={t.colors.danger}>{formError}</Text>
-            <Text variant="caption" color={t.colors.ink3}>API: {currentHost()}</Text>
+            {/* Backend host is a debugging aid only — never expose it to end users. */}
+            {__DEV__ ? <Text variant="caption" color={t.colors.ink3}>API: {currentHost()}</Text> : null}
           </View>
         ) : null}
 

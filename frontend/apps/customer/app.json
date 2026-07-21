@@ -35,6 +35,7 @@
     },
     "android": {
       "package": "com.chamafacil.customer",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -53,6 +54,14 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/adaptive-icon.png",
+          "color": "#d9481f"
+        }
+      ],
+      "./plugins/withNotifeeRepo",
       [
         "expo-splash-screen",
         {

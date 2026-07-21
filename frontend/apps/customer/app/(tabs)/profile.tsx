@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Button, Card, Icon, LANGUAGES, Row, Screen, THEME_MODES, Text, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
+import { Alert, Avatar, Button, Card, Icon, LANGUAGES, Row, Screen, THEME_MODES, Text, persistLanguage, useAuth, useTheme, useThemeControls } from '@chamafacil/shared';
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -12,7 +12,7 @@ export default function Profile() {
   const th = useTheme();
 
   return (
-    <Screen stickyHeader style={{ gap: 16 }}>
+    <Screen stickyHeader edges={['top']} style={{ gap: 16 }}>
       <View style={{ paddingTop: 16 }}>
         <Text variant="h1">{t('profile.title')}</Text>
       </View>
@@ -47,6 +47,7 @@ export default function Profile() {
               title={t(`profile.themes.${m}`)}
               size="sm"
               variant={mode === m ? 'grad' : 'ghost'}
+              selected={mode === m}
               onPress={() => setMode(m)}
             />
           ))}
@@ -59,6 +60,7 @@ export default function Profile() {
               title={l.label}
               size="sm"
               variant={i18n.language === l.code ? 'grad' : 'ghost'}
+              selected={i18n.language === l.code}
               onPress={() => {
                 i18n.changeLanguage(l.code);
                 persistLanguage(l.code);
@@ -68,7 +70,17 @@ export default function Profile() {
         </View>
       </Card>
 
-      <Button title={t('profile.logout')} variant="danger" full onPress={logout} />
+      <Button
+        title={t('profile.logout')}
+        variant="danger"
+        full
+        onPress={() =>
+          Alert.alert(t('profile.logoutConfirmTitle'), t('profile.logoutConfirmBody'), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('profile.logout'), style: 'destructive', onPress: logout },
+          ])
+        }
+      />
     </Screen>
   );
 }

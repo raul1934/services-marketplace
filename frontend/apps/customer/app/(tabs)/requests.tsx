@@ -109,6 +109,7 @@ export default function Requests() {
         header={header}
         listHeader={listHeader}
         empty={empty}
+        edges={['top']}
       />
 
       <RequestFilterSheet

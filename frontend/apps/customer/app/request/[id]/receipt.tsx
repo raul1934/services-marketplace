@@ -6,7 +6,14 @@ import { SkeletonScreen, BackBar, Screen, useTheme } from '@chamafacil/shared';
 import { useRequest } from '../../../src/queries';
 import { ReceiptView } from '../../../src/components/ReceiptView';
 
-/** V3PagamentoOk (C20): standalone receipt route. Also shown inline on the request detail. */
+/**
+ * V3PagamentoOk (C20): the receipt, also rendered inline on the request detail.
+ *
+ * This route is an **intentional** alias, not a leftover: the payment notification
+ * deep-links straight here, so the user lands on the receipt instead of having to
+ * find it inside the request screen. Unlike `proposals`/`track`, it renders its
+ * own content rather than redirecting — do not "clean it up".
+ */
 export default function ReceiptScreen() {
   const t = useTheme();
   const router = useRouter();

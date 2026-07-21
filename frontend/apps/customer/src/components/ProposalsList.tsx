@@ -16,7 +16,6 @@ import {
   QnaThread,
   Row,
   SectionLabel,
-  SlideToConfirm,
   Stars,
   TestBadge, // TEMP — test bots. Remove with backend app/Bots.
   Text,
@@ -125,9 +124,11 @@ export function ProposalsList({
       <Row>
         <SectionLabel count={items.length}>{tr('requestDetail.proposalsLabel')}</SectionLabel>
         <View style={{ flex: 1 }} />
-        <View style={{ width: 178 }}>
-          <SortSeg value={sort} onChange={setSort} />
-        </View>
+        {items.length > 0 && (
+          <View style={{ width: 178 }}>
+            <SortSeg value={sort} onChange={setSort} />
+          </View>
+        )}
       </Row>
 
       {proposals.isLoading ? (
@@ -158,9 +159,10 @@ export function ProposalsList({
       {proposals.isFetchingNextPage && <ActivityIndicator color={t.colors.accent} style={{ marginVertical: 8 }} />}
 
       <Text
+        accessibilityRole="button"
         center
         weight="700"
-        color={t.colors.ink3}
+        color={t.colors.danger}
         style={{ fontSize: 13, paddingVertical: 6 }}
         onPress={() =>
           Alert.alert(tr('requestDetail.cancelConfirmTitle'), tr('requestDetail.cancelConfirmBody'), [
@@ -318,10 +320,14 @@ function ProposalCard({
             {/* TEMP — test bots. Remove with backend app/Bots. */}
             {proposal.is_test && <TestBadge />}
           </Row>
-          <Row gap={6} style={{ marginTop: 2 }}>
-            <Stars value={proposal.provider_rating_avg ?? 0} size={13} />
-            <Text variant="caption" weight="600">{(proposal.provider_rating_avg ?? 0).toFixed(1)} · {proposal.provider_rating_count ?? 0} {tr('requestDetail.jobs')}</Text>
-          </Row>
+          {(proposal.provider_rating_count ?? 0) > 0 ? (
+            <Row gap={6} style={{ marginTop: 2 }}>
+              <Stars value={proposal.provider_rating_avg ?? 0} size={13} />
+              <Text variant="caption" weight="600">{(proposal.provider_rating_avg ?? 0).toFixed(1)} · {proposal.provider_rating_count} {tr('requestDetail.jobs')}</Text>
+            </Row>
+          ) : (
+            <Text variant="caption" weight="700" color={t.colors.ink3} style={{ marginTop: 2 }}>{tr('requestDetail.newProvider')}</Text>
+          )}
           {proposal.provider_insured && (
             <Row gap={4} style={{ marginTop: 4 }}>
               <Icon name="shieldCheck" size={12} color={t.colors.ok} />
@@ -378,17 +384,15 @@ function ProposalCard({
         </View>
       )}
       <View style={{ marginTop: 12, gap: 8 }}>
-        {best ? (
-          <SlideToConfirm compact label={tr('requestDetail.slideAccept')} doneLabel={tr('requestDetail.slideAccepted')} disabled={pending} onConfirm={onAccept} />
-        ) : (
-          <Button title={tr('requestDetail.acceptBid')} variant="grad" size="sm" full onPress={onAccept} />
-        )}
+        {/* One accept control for every proposal (no slide-on-best / button-on-rest
+            split) — consistent and reachable by keyboard/screen readers. */}
+        <Button title={tr('requestDetail.acceptBid')} variant="grad" size="sm" full disabled={pending} loading={pending} onPress={onAccept} />
         <Row style={{ justifyContent: 'center', gap: 16 }}>
-          <Text center weight="700" color={t.colors.ink3} style={{ fontSize: 12.5, opacity: declining ? 0.5 : 1 }} onPress={declining ? undefined : onDecline}>
+          <Text accessibilityRole="button" center weight="700" color={t.colors.ink2} style={{ fontSize: 12.5, opacity: declining ? 0.5 : 1 }} onPress={declining ? undefined : onDecline}>
             {tr('requestDetail.declineBid')}
           </Text>
           {!proposal.pending_counter_offer && (
-            <Text center weight="700" color={t.colors.accent} style={{ fontSize: 12.5 }} onPress={onCounter}>
+            <Text accessibilityRole="button" center weight="700" color={t.colors.accent} style={{ fontSize: 12.5 }} onPress={onCounter}>
               {tr('requestDetail.counterCta')}
             </Text>
           )}

@@ -54,7 +54,13 @@ export default function RescheduleScreen() {
   const answer = (accept: boolean) =>
     resolve.mutate(
       { rescheduleId: incoming!.id, accept },
-      { onSuccess: () => router.back(), onError: (e) => Alert.alert(tr('common.error'), (e as Error).message) },
+      {
+        onSuccess: () => {
+          Alert.alert(tr('common.ok'), tr(accept ? 'actions.reschedule.acceptedMsg' : 'actions.reschedule.declinedMsg'));
+          router.back();
+        },
+        onError: (e) => Alert.alert(tr('common.error'), (e as Error).message),
+      },
     );
 
   return (

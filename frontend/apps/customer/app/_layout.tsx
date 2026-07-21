@@ -14,8 +14,10 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
-import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
+import { addActiveRequestTapListener, addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
+import { useActiveRequestNotification } from '../src/useActiveRequestNotification';
+import { registerActiveRequestBackgroundTask } from '../src/activeRequestBackgroundTask';
 import { initServices } from '../src/init';
 import { loadEnv } from '../src/env';
 import { SplashBrand } from '../src/components/SplashBrand';
@@ -39,6 +41,16 @@ function Gate() {
   const chime = useNotificationChime();
 
   usePushSync(status === 'authed', pushApi);
+
+  // Persistent "chamado em andamento" notification, kept in sync with the most
+  // relevant active request (reacts to the realtime cache invalidations below).
+  useActiveRequestNotification(status === 'authed');
+
+  // Activate the background task that updates that notification from status-change
+  // pushes even when the app is killed (registration persists natively).
+  useEffect(() => {
+    void registerActiveRequestBackgroundTask();
+  }, []);
 
   // Live UI refresh: a notification over WebSocket invalidates the affected caches.
   useRealtimeNotifications(status === 'authed' ? user?.id : null, (n) => {
@@ -68,6 +80,13 @@ function Gate() {
     });
   }, [status, router]);
 
+  // The ongoing "chamado em andamento" tracker is a Notifee notification, whose
+  // taps come through Notifee's own event system (not expo-notifications above).
+  useEffect(() => {
+    if (status !== 'authed') return;
+    return addActiveRequestTapListener((rid) => router.push(`/request/${rid}`));
+  }, [status, router]);
+
   // Load the persisted Dev/Prod choice and point the API client at it (once).
   useEffect(() => {
     void loadEnv();
@@ -76,8 +95,10 @@ function Gate() {
   useEffect(() => {
     if (status === 'loading') return;
     const inAuth = segments[0] === '(auth)';
-    const exempt = segments[0] === 'medicao' || segments[0] === 'ar-medicao'; // POC screens — reachable without auth
-    if (status === 'guest' && !inAuth && !exempt) router.replace('/(auth)/welcome');
+    // No exemptions: the measurement POC is gone and `/ar-medicao` is only ever
+    // reached from an asset screen, which already requires a session. The old
+    // exemption let a signed-out user open both in production.
+    if (status === 'guest' && !inAuth) router.replace('/(auth)/welcome');
     else if (status === 'authed' && inAuth) router.replace('/(tabs)/home');
   }, [status, segments, router]);
 

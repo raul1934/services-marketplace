@@ -19,6 +19,7 @@ import {
   Row,
   SectionLabel,
   Segment,
+  SuccessSplash,
   Text,
   Toggle,
   Wiz,
@@ -66,6 +67,12 @@ export default function NewRequest() {
 
   // Asset selector — categories that map to an asset type require picking one.
   const assetType = category?.asset_type ?? null;
+  // "Who receives the pro" (adult with key / entry code) only makes sense at a
+  // fixed address the customer may not be at — a home. It's meaningless for a
+  // roadside call, where the customer is standing by the vehicle, so hide it.
+  const showAccess = category?.type !== 'roadside' && assetType !== 'vehicle';
+  // Set on a successful submit so the success splash plays before navigating.
+  const [submittedId, setSubmittedId] = useState<number | null>(null);
   const assets = useAssets(assetType ?? undefined, assetType != null);
   const assetList = flattenPages(assets.data?.pages);
   const [assetId, setAssetId] = useState<number | null>(null);
@@ -179,8 +186,8 @@ export default function NewRequest() {
           .map(([id, v]) => ({ question_id: Number(id), answer: v.trim() })),
         urgency,
         max_wait_minutes: urgency === RequestUrgency.Urgent ? Number(maxWaitMinutes) : undefined,
-        reception_type: reception,
-        entry_code: reception === ReceptionType.EntryCode ? entryCode.trim() || undefined : undefined,
+        reception_type: showAccess ? reception : undefined,
+        entry_code: showAccess && reception === ReceptionType.EntryCode ? entryCode.trim() || undefined : undefined,
         availabilities: urgency === RequestUrgency.Scheduled ? availabilities : undefined,
         media_ids: mediaIds,
         share_asset_note: selectedAsset?.provider_note ? shareNote : undefined,
@@ -193,7 +200,10 @@ export default function NewRequest() {
           .catch(() => {});
       }
 
-      router.replace(`/request/${req.id}`);
+      // Celebrate the send with a full-screen success splash, then land on the
+      // request. This gives the peak effort (the slide) a satisfying payoff
+      // instead of jumping straight into the "waiting for proposals" state.
+      setSubmittedId(req.id);
     } catch (e) {
       Alert.alert(tr('common.error'), e instanceof ApiError ? e.message : (e as Error).message);
     }
@@ -221,6 +231,22 @@ export default function NewRequest() {
       ? { primary: { label: tr('common.continue'), onPress: () => setStep(step + 1), disabled: !canContinue }, back: step > 1 ? () => setStep(step - 1) : undefined }
       : { slide: { label: tr('createRequest.slideRequest'), doneLabel: tr('createRequest.slideRequested'), onConfirm: submit, disabled: create.isPending }, back: () => setStep(step - 1) };
 
+  // When the step's requirement isn't met yet, say what's missing instead of
+  // leaving a silently-dead "Continue" button (the user can't tell why it's off).
+  const hint = canContinue
+    ? null
+    : stepKey === 'details'
+      ? description.trim().length < 5
+        ? tr('createRequest.needDescription')
+        : assetType != null && assetId == null
+          ? tr('createRequest.needAsset')
+          : null
+      : stepKey === 'location'
+        ? tr('createRequest.needLocation')
+        : stepKey === 'when'
+          ? tr('createRequest.needWhen')
+          : null;
+
   const accessLabel = reception === ReceptionType.EntryCode
     ? `${tr('enums.receptionType.entry_code')}${entryCode.trim() ? ` · ${entryCode.trim()}` : ''}`
     : tr('enums.receptionType.adult_key');
@@ -245,6 +271,8 @@ export default function NewRequest() {
   );
 
   return (
+    <>
+    {submittedId != null && <SuccessSplash onDone={() => router.replace(`/request/${submittedId}`)} />}
     <Wiz
       cat={categoryName ?? tr('createRequest.title')}
       step={step}
@@ -374,7 +402,7 @@ export default function NewRequest() {
               )}
             </>
           )}
-          {accessBlock}
+          {showAccess && accessBlock}
         </>
       )}
 
@@ -505,7 +533,7 @@ export default function NewRequest() {
             .map((q) => <SumRow key={q.id} icon="check" k={q.label} v={answers[q.id]} onPress={() => goTo('questions')} />)}
           <SumRow icon="camera" k={tr('createRequest.photos')} v={tr('createRequest.summaryPhotos', { count: photos.length })} onPress={() => goTo('photos')} />
           <SumRow icon="location" k={tr('createRequest.addressLabel')} v={assetLocation?.address || assetAddress || address || tr('createRequest.gpsCaptured')} onPress={() => goTo('location')} />
-          <SumRow icon="key" k={tr('createRequest.accessLabel')} v={accessLabel} onPress={() => goTo('location')} />
+          {showAccess && <SumRow icon="key" k={tr('createRequest.accessLabel')} v={accessLabel} onPress={() => goTo('location')} />}
           <SumRow
             icon="calendar"
             k={tr('createRequest.when')}
@@ -516,7 +544,12 @@ export default function NewRequest() {
           <SumRow icon={payment} k={tr('createRequest.summaryPayment')} v={tr(`payment.${payment}`)} onPress={() => goTo('money')} last />
         </Card>
       )}
+
+      {hint ? (
+        <Text center weight="600" color={t.colors.ink2} style={{ fontSize: 12.5, marginTop: 2 }}>{hint}</Text>
+      ) : null}
     </Wiz>
+    </>
   );
 }
 

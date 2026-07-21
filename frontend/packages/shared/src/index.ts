@@ -17,6 +17,7 @@ export * from './lib/theme-pref';
 export * from './lib/push';
 export * from './lib/appUpdate';
 export * from './lib/usePushSync';
+export * from './lib/activeRequestNotification';
 export * from './lib/payout';
 export * from './lib/webSetup';
 export * from './lib/fonts';

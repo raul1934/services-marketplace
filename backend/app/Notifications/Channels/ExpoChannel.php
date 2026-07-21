@@ -36,15 +36,35 @@ class ExpoChannel
         /** @var array{title:string,body:string,data:array<string,string>} $payload */
         $payload = $notification->toExpo($notifiable);
 
-        $messages = $tokens->map(fn (string $token) => [
-            'to' => $token,
-            'title' => $payload['title'],
-            'body' => $payload['body'],
-            'data' => $payload['data'] ?? [],
-            'sound' => 'default',
-            'priority' => 'high',
-            'channelId' => 'default',
-        ])->all();
+        // A notification with no title/body is a silent data message: it carries
+        // only `data` and `_contentAvailable`, which wakes the app's background
+        // task on Android even when the app is killed (a visible notification
+        // message would not). Used to sync the "chamado em andamento" tracker.
+        $hasAlert = ! empty($payload['title']) || ! empty($payload['body']);
+
+        $messages = $tokens->map(function (string $token) use ($payload, $hasAlert) {
+            $message = [
+                'to' => $token,
+                'data' => $payload['data'] ?? [],
+                'priority' => 'high',
+            ];
+            if ($hasAlert) {
+                $message['title'] = $payload['title'];
+                $message['body'] = $payload['body'];
+                $message['sound'] = 'default';
+                $message['channelId'] = 'default';
+            } else {
+                // Nothing that implies a visible alert — not even `channelId`.
+                // Expo turns any such hint into an FCM *notification* message, which
+                // Android then renders itself as a blank card on
+                // fcm_fallback_notification_channel and, worse, never wakes the
+                // background task. Verified on device: dropping channelId is what
+                // makes this an actual data message.
+                $message['_contentAvailable'] = true;
+            }
+
+            return $message;
+        })->all();
 
         try {
             Http::acceptJson()->post(self::ENDPOINT, $messages);

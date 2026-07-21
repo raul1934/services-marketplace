@@ -22,6 +22,8 @@ import {
   SkeletonTiles,
   Steps,
   Text,
+  ACTIVE_REQUEST_STEPS,
+  activeRequestStep,
   flattenPages,
   isActiveStatus,
   relativeParts,
@@ -34,13 +36,6 @@ import { HomeAssets } from '../../src/components/HomeAssets';
 
 function initialsOf(name?: string | null) {
   return (name ?? '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
-}
-
-/** 3-step lifecycle position from status (Created → Bids → On the way). */
-function stepOf(status: RequestStatus): number {
-  if (status === RequestStatus.Open) return 2;
-  if (isActiveStatus(status)) return 3;
-  return 3;
 }
 
 /** How many request cards the home shows before the "see all" button. */
@@ -112,7 +107,11 @@ export default function Home() {
   const firstName = user?.name?.split(' ')[0];
 
   return (
-    <Screen stickyHeader padded={false}>
+    // No bottom safe-area edge inside the tab navigator: the tab bar already
+    // reserves insets.bottom. Applying it here too shrinks the scroll area by
+    // that inset, leaving dead space above the tab bar and clipping the last
+    // row's labels ("Ajuda rápida") even though there's room.
+    <Screen stickyHeader padded={false} edges={['top']}>
       <AppBar
         sub={tr('home.greeting')}
         title={firstName ?? tr('home.fallbackName')}
@@ -130,7 +129,27 @@ export default function Home() {
         }
       />
 
-      <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
+      <View style={{ paddingHorizontal: 20, gap: 16 }}>
+        {/* Primary "ask for help now" action as the hero: the app's #1 job, and
+            it was previously the last card — pushed below the fold and clipped by
+            the tab bar at rest. Here it's always visible without scrolling. */}
+        <Pressable onPress={() => router.push('/categories')}>
+          <LinearGradient
+            colors={t.grad as unknown as readonly [string, string, ...string[]]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: t.radius.card, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text weight="800" color="#fff" style={{ fontSize: 17 }}>{tr('home.needHelpTitle')}</Text>
+              <Text color="rgba(255,255,255,0.9)" style={{ fontSize: 13, marginTop: 2 }}>{tr('home.needHelpBody')}</Text>
+            </View>
+            <View style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="plus" size={26} color="#fff" />
+            </View>
+          </LinearGradient>
+        </Pressable>
+
         <HomeAssets />
 
         {requests.isLoading ? (
@@ -179,23 +198,6 @@ export default function Home() {
           </View>
         )}
 
-        <Pressable onPress={() => router.push('/categories')}>
-          <LinearGradient
-            colors={t.grad as unknown as readonly [string, string, ...string[]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ borderRadius: t.radius.card, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text weight="800" color="#fff" style={{ fontSize: 17 }}>{tr('home.needHelpTitle')}</Text>
-              <Text color="rgba(255,255,255,0.9)" style={{ fontSize: 13, marginTop: 2 }}>{tr('home.needHelpBody')}</Text>
-            </View>
-            <View style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="plus" size={26} color="#fff" />
-            </View>
-          </LinearGradient>
-        </Pressable>
-
       </View>
 
       <AppDrawer
@@ -232,6 +234,10 @@ function ActiveRequestCard({ request, onPress }: { request: ServiceRequest; onPr
   const rel = relativeParts(request.created_at);
   const ago = rel.unit === 'now' ? tr('time.now') : tr(`time.${rel.unit}Ago`, { count: rel.count });
   const isOpen = request.status === RequestStatus.Open;
+  // Same stage numbering as the request screen's tracker (and the ongoing
+  // notification). An open request has no stage yet — the bid count below says
+  // more than an invented notch would.
+  const step = activeRequestStep(request.status);
   return (
     <Card padded={false} style={{ overflow: 'hidden' }} onPress={onPress}>
       <View style={{ padding: 18 }}>
@@ -246,7 +252,7 @@ function ActiveRequestCard({ request, onPress }: { request: ServiceRequest; onPr
           {request.urgency === RequestUrgency.Urgent && <Badge label={tr('enums.urgency.urgent')} tone="urgent" dot />}
         </Row>
         <Row style={{ marginTop: 14 }}>
-          <Steps total={3} current={stepOf(request.status)} />
+          {step ? <Steps total={ACTIVE_REQUEST_STEPS} current={step} /> : null}
           <View style={{ flex: 1 }} />
           {isOpen ? (
             <Badge label={tr('requestCard.proposals', { count: request.proposals_count ?? 0 })} tone="open" dot />
