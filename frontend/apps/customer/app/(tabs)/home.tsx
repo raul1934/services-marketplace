@@ -112,7 +112,11 @@ export default function Home() {
   const firstName = user?.name?.split(' ')[0];
 
   return (
-    <Screen stickyHeader padded={false}>
+    // No bottom safe-area edge inside the tab navigator: the tab bar already
+    // reserves insets.bottom. Applying it here too shrinks the scroll area by
+    // that inset, leaving dead space above the tab bar and clipping the last
+    // row's labels ("Ajuda rápida") even though there's room.
+    <Screen stickyHeader padded={false} edges={['top']}>
       <AppBar
         sub={tr('home.greeting')}
         title={firstName ?? tr('home.fallbackName')}
@@ -130,7 +134,7 @@ export default function Home() {
         }
       />
 
-      <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
+      <View style={{ paddingHorizontal: 20, gap: 16 }}>
         {/* Primary "ask for help now" action as the hero: the app's #1 job, and
             it was previously the last card — pushed below the fold and clipped by
             the tab bar at rest. Here it's always visible without scrolling. */}

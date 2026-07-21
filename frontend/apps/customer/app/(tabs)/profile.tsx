@@ -12,7 +12,7 @@ export default function Profile() {
   const th = useTheme();
 
   return (
-    <Screen stickyHeader style={{ gap: 16 }}>
+    <Screen stickyHeader edges={['top']} style={{ gap: 16 }}>
       <View style={{ paddingTop: 16 }}>
         <Text variant="h1">{t('profile.title')}</Text>
       </View>
