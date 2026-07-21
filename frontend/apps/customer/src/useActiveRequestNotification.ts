@@ -21,6 +21,17 @@ const TRACKABLE: RequestStatus[] = [
   RequestStatus.Requote, // recotação pendente
 ];
 
+/**
+ * The tracker's stage names in step order — the exact keys the request screen's
+ * TrackSteps renders, so the notification never invents its own vocabulary.
+ */
+const STEP_LABEL_KEYS = [
+  'tracking.stepAccepted',
+  'tracking.stepOnWay',
+  'tracking.stepArrived',
+  'tracking.stepDone',
+];
+
 /** Most relevant active request: an assigned job outranks an open one, then most recent. */
 function pickActive(list: ServiceRequest[]): ServiceRequest | null {
   const active = list.filter((r) => TRACKABLE.includes(r.status));
@@ -75,15 +86,21 @@ export function useActiveRequestNotification(enabled: boolean): void {
         ? t(`categories.${active.category.slug}`, { defaultValue: active.category.name })
         : t('activeRequest.fallbackTitle');
 
-      const statusText = t(`activeRequest.body.${active.status}`, { defaultValue: t('activeRequest.tapToTrack') });
-
-      // Secondary line (shown expanded): the assigned pro + rating + ETA. The
-      // requests list may not embed the provider participant; fall back to the
-      // accepted proposal, which carries the pro's name and rating.
-      // Same stage numbering as the tracker on the request screen, spelled out —
-      // a notification can't draw the stepper, only a bar.
-      const detailParts: string[] = [];
       const step = activeRequestStep(active.status);
+
+      // Name the stage the way the request screen's stepper does. Saying "Em
+      // atendimento" here while that screen called the very same stage "Chegou"
+      // left two names for one thing. Requote is an exception state rather than a
+      // stage, so it keeps its own label.
+      const statusText =
+        step && active.status !== RequestStatus.Requote
+          ? t(STEP_LABEL_KEYS[step - 1])
+          : t(`activeRequest.body.${active.status}`, { defaultValue: t('activeRequest.tapToTrack') });
+
+      // Secondary line (shown expanded): stage number, then the assigned pro +
+      // rating + ETA. The requests list may not embed the provider participant;
+      // fall back to the accepted proposal, which carries the pro's name and rating.
+      const detailParts: string[] = [];
       if (step) detailParts.push(t('activeRequest.step', { step, total: ACTIVE_REQUEST_STEPS }));
 
       const provider = active.provider?.name ?? active.accepted_proposal?.provider_name;

@@ -28,18 +28,32 @@ export interface ActiveRequestNotif {
   phone?: string;
 }
 
+/**
+ * How many times a swipe is undone before the tracker takes the hint. Persistent
+ * shouldn't mean undismissible: someone who swipes it away three times in a row
+ * means it. The count resets on the next real change (see `stageOf`), so the
+ * tracker comes back when there's genuinely something new to say.
+ */
+const MAX_REDISPLAYS = 3;
+
 /** What is on screen right now, so a user swipe can be undone. Null when cleared. */
 let current: ActiveRequestNotif | null = null;
+let dismissals = 0;
 
 // ...and mirrored to disk, because a dismissal can wake the app from a dead
 // process, where the in-memory copy is gone. SecureStore is what the rest of the
 // app persists preferences with, and it encrypts — this payload holds the pro's phone.
 const STORE_KEY = 'active_request_notif';
 
+/** Identity of "the same news", for deciding whether to forgive past dismissals. */
+function stageOf(n: ActiveRequestNotif | null): string {
+  return n ? `${n.requestId}:${n.status ?? ''}` : '';
+}
+
 async function remember(n: ActiveRequestNotif | null): Promise<void> {
   current = n;
   try {
-    if (n) await SecureStore.setItemAsync(STORE_KEY, JSON.stringify(n));
+    if (n) await SecureStore.setItemAsync(STORE_KEY, JSON.stringify({ n, dismissals }));
     else await SecureStore.deleteItemAsync(STORE_KEY);
   } catch {
     /* non-fatal — the in-memory copy still covers the live app */
@@ -50,7 +64,10 @@ async function lastShown(): Promise<ActiveRequestNotif | null> {
   if (current) return current;
   try {
     const raw = await SecureStore.getItemAsync(STORE_KEY);
-    return raw ? (JSON.parse(raw) as ActiveRequestNotif) : null;
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as { n: ActiveRequestNotif; dismissals?: number };
+    dismissals = saved.dismissals ?? 0;
+    return saved.n;
   } catch {
     return null;
   }
@@ -60,14 +77,21 @@ async function lastShown(): Promise<ActiveRequestNotif | null> {
  * Android 14 dropped the guarantee that `ongoing` notifications can't be swiped
  * away — and a foreground service wouldn't help, since its notification is
  * dismissible too from API 34 on. So the tracker earns its persistence: while the
- * job is still running, a dismissal puts it straight back. Cancelling it from the
- * app (clearActiveRequestNotification) doesn't emit DISMISSED, so completing or
- * cancelling a request still removes it for good.
+ * job is still running, a dismissal puts it straight back, up to MAX_REDISPLAYS.
+ * Cancelling it from the app (clearActiveRequestNotification) doesn't emit
+ * DISMISSED, so completing or cancelling a request still removes it for good.
  */
 async function onNotificationEvent({ type }: { type: EventType }): Promise<void> {
   if (type !== EventType.DISMISSED) return;
   const n = await lastShown();
-  if (n) await upsertActiveRequestNotification(n);
+  if (!n) return;
+
+  dismissals += 1;
+  if (dismissals > MAX_REDISPLAYS) {
+    await remember(n); // keep the payload — the next status change re-presents it
+    return;
+  }
+  await upsertActiveRequestNotification(n);
 }
 
 /**
@@ -126,6 +150,12 @@ export async function upsertActiveRequestNotification(n: ActiveRequestNotif): Pr
   if (Platform.OS === 'web') return;
   try {
     await ensureChannel();
+
+    // A genuinely new stage is new information, so it isn't held against the
+    // user's earlier swipes — the dismissal budget starts over. (This also
+    // hydrates the count from disk when the process is cold.)
+    const previous = await lastShown();
+    if (stageOf(previous) !== stageOf(n)) dismissals = 0;
     // Collapsed is what people actually see, and it only renders title + progress
     // bar — so the status goes in the title, and the body carries the pro + ETA.
     const heading = `${n.title} · ${n.body}`;
