@@ -36,6 +36,11 @@ export function AuthField({
         {icon ? <Icon name={icon} size={19} color={t.colors.ink3} /> : null}
         {prefix ? <Text style={{ fontSize: 15, fontWeight: '700', color: t.colors.ink2 }}>{prefix}</Text> : null}
         <TextInput
+          // Same as Field: the visible label names the input and the error
+          // describes it, so the reader announces both on the control itself.
+          accessibilityLabel={rest.accessibilityLabel ?? label}
+          accessibilityHint={error}
+          aria-invalid={!!error}
           placeholderTextColor={t.colors.ink3}
           onFocus={(e) => { setFocus(true); rest.onFocus?.(e); }}
           onBlur={(e) => { setFocus(false); rest.onBlur?.(e); }}
@@ -43,7 +48,11 @@ export function AuthField({
           {...rest}
         />
       </View>
-      {error ? <Text variant="caption" color={t.colors.danger}>{error}</Text> : null}
+      {error ? (
+        <Text variant="caption" color={t.colors.danger} accessibilityLiveRegion="assertive" accessibilityRole="alert">
+          {error}
+        </Text>
+      ) : null}
     </View>
   );
 }
