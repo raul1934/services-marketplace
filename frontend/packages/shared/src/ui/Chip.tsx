@@ -23,7 +23,7 @@ export function Chip({
         {
           paddingHorizontal: 14,
           paddingVertical: 9,
-          borderRadius: 999,
+          borderRadius: t.radius.btn,
           backgroundColor: active ? t.colors.accent : t.colors.surface,
           borderWidth: 1,
           borderColor: active ? t.colors.accent : t.colors.line,
