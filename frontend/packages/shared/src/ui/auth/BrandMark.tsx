@@ -21,7 +21,15 @@ export function BrandMark({
   const t = useTheme();
   const textColor = onAccent ? '#ffffff' : color ?? t.colors.accent;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: height * 0.32 }}>
+    // One element carrying the brand name, rather than the SVG and the wordmark
+    // announced as two separate stops that say the same thing. The name is not
+    // translated on purpose — it is a brand, not copy.
+    <View
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel="Chama Fácil"
+      style={{ flexDirection: 'row', alignItems: 'center', gap: height * 0.32 }}
+    >
       <ChamaLogo width={height * LOGO_RATIO} height={height} />
       <Text
         style={{
