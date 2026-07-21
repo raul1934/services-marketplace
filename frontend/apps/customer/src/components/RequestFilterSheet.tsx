@@ -2,7 +2,8 @@ import React from 'react';
 import { Modal, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Chip, Icon, RequestStatus, Row, Text, focusRing, useTheme } from '@chamafacil/shared';
+import { Chip, Icon, Row, Text, focusRing, useTheme } from '@chamafacil/shared';
+import { RequestStatusFilter } from '../api';
 
 /**
  * Status filter buckets for the My-requests list. `all` is the "no filter"
