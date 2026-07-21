@@ -191,6 +191,7 @@ export default function RequestDetail() {
 
   useEffect(() => {
     let off: (() => void) | undefined;
+    let cancelled = false;
     const refresh = () => {
       qc.invalidateQueries({ queryKey: keys.request(requestId) });
       qc.invalidateQueries({ queryKey: keys.events(requestId) });
@@ -212,8 +213,18 @@ export default function RequestDetail() {
       onRescheduleResolved: refresh,
       onDispute: refresh,
       onLocation: (e) => setLive({ lat: e.latitude, lng: e.longitude }),
-    }).then((fn) => (off = fn));
-    return () => off?.();
+    })
+      // Subscribing is async: if the screen unmounts (or the socket is rebuilt
+      // after a token change) before it resolves, drop the subscription instead
+      // of leaving it registered on a screen that is gone.
+      .then((fn) => (cancelled ? fn() : (off = fn)))
+      .catch(() => {
+        /* realtime is additive — pull-to-refresh and push still deliver */
+      });
+    return () => {
+      cancelled = true;
+      off?.();
+    };
   }, [requestId, qc]);
 
   // Re-prompt the rating each time a completed, unrated request regains focus.

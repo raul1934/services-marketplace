@@ -70,11 +70,34 @@ export async function getToken(): Promise<string | null> {
   return cachedToken;
 }
 
+/**
+ * Notified whenever the bearer token actually changes (login, re-login after a
+ * 401, logout). HTTP requests read the token per call so they never go stale,
+ * but long-lived consumers — the realtime socket — capture it once at connect
+ * time and need a nudge to rebuild. `null` means "signed out".
+ */
+type TokenListener = (token: string | null) => void;
+const tokenListeners = new Set<TokenListener>();
+
+export function onTokenChange(fn: TokenListener): () => void {
+  tokenListeners.add(fn);
+  return () => {
+    tokenListeners.delete(fn);
+  };
+}
+
 export async function setToken(token: string | null): Promise<void> {
   const { tokenKey } = requireConfig();
+  const previous = cachedToken;
   cachedToken = token;
   if (token) await tokenStore.set(tokenKey, token);
   else await tokenStore.remove(tokenKey);
+  // `previous` is undefined until the token is first read; treat that as "no
+  // change" only when we are also clearing, so bootstrap doesn't fire a bogus
+  // logout notification.
+  if ((previous ?? null) !== token) {
+    for (const listener of tokenListeners) listener(token);
+  }
 }
 
 export class ApiError extends Error {
