@@ -16,14 +16,22 @@ const CHIME = require('../../assets/notification.wav');
  * - `playsInSilentMode: false`, unlike the AR feedback chirps. Those are the
  *   point of the screen you're on; this fires while you may be in a meeting,
  *   so a silenced phone must stay silent. The haptic still lands.
- * - Rate-limited. A burst of updates (five bids arriving over a minute, a
- *   provider logging parts) would otherwise turn into a rattle.
+ * - Rate-limited, app-wide. A burst of updates (five bids arriving over a
+ *   minute, a provider logging parts) would otherwise turn into a rattle.
  */
 const MIN_GAP_MS = 4000;
 
+/**
+ * Module scope, not a ref: the gap is a property of the user's ears, not of a
+ * hook instance. The same event can reach two mounted listeners at once (a
+ * screen chiming alongside the root layout, or the old tree still mounted mid
+ * navigation), and per-instance refs let each of them claim its own quiet
+ * window — so the "rate-limited" chime fired twice, back to back.
+ */
+let lastPlayedAt = 0;
+
 export function useNotificationChime(): () => void {
   const player = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
-  const lastPlayedAt = useRef(0);
 
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: false }).catch(() => {});
@@ -42,8 +50,8 @@ export function useNotificationChime(): () => void {
 
   return useCallback(() => {
     const now = Date.now();
-    if (now - lastPlayedAt.current < MIN_GAP_MS) return;
-    lastPlayedAt.current = now;
+    if (now - lastPlayedAt < MIN_GAP_MS) return;
+    lastPlayedAt = now;
 
     try {
       player.current?.seekTo(0);
