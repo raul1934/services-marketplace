@@ -65,9 +65,8 @@ export default function Verify() {
           <Text style={{ color: t.colors.ink2, fontSize: 14, marginTop: 6 }}>{tr('otp.subtitle', { phone: pretty })}</Text>
         </View>
 
-        <OtpInput value={code} onChange={onChange} />
-
-        {error ? <Text variant="caption" color={t.colors.danger} center>{error}</Text> : null}
+        {/* The error lives inside OtpInput so it is announced with the field. */}
+        <OtpInput value={code} onChange={onChange} label={tr('otp.title')} error={error} />
 
         <Button title={tr('otp.verify')} full loading={loading} disabled={code.length < 6} onPress={() => verify(code)} />
 
