@@ -235,9 +235,10 @@
       "impact": "Alto",
       "status": "partial",
       "commits": [
-        "c4a4a9c"
+        "c4a4a9c",
+        "2d771d0"
       ],
-      "note": "accent escurecido p/ 4.29:1; soft/ok/ink3 seguem <4.5:1",
+      "note": "accent, ok e warn passam AA nos temas claros; ink3 segue em 2.59:1 e escureve-lo ate 4.5 o colapsa no ink2 — a paleta nao comporta 3 niveis de texto, decisao de design pendente",
       "quick_win": 17,
       "change": "design-system-foundations",
       "issue": 10
@@ -668,8 +669,10 @@
       "solution": "Componente Switch real com role/state.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "3f1a0c1"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-confirmation-controls",
@@ -705,9 +708,10 @@
       "impact": "Alto",
       "status": "partial",
       "commits": [
-        "41ade70"
+        "41ade70",
+        "36b817e"
       ],
-      "note": "roles nas propostas e no cancelar; welcome/login/register/verify seguem",
+      "note": "roles em propostas, cancelar, CatTile, cards gradiente e BackBar; resta varrer welcome/login/register/verify",
       "quick_win": 23,
       "change": "accessible-semantics-sweep",
       "issue": 30
@@ -1337,8 +1341,10 @@
       "solution": "`accessibilityState={{selected}}` + role.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "4dc7812"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
@@ -1354,8 +1360,10 @@
       "solution": "Associar erro ao input + live region.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "a1c9d2e"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
@@ -1373,9 +1381,10 @@
       "impact": "Baixo",
       "status": "partial",
       "commits": [
-        "9805a77"
+        "9805a77",
+        "36b817e"
       ],
-      "note": "anel aplicado em 11 superficies (sheets, pickers, DatePicker, AppDrawer, Wiz, marcar-todas); BackBar ficou de fora — vive em primitives.tsx, que estava bloqueado por PR aberto",
+      "note": "anel em 11 superficies + BackBar; falta foco visivel nativo (D-pad/switch), que exige onFocus/onBlur por controle e verificacao em aparelho",
       "quick_win": null,
       "change": "accessible-semantics-sweep",
       "issue": 61
@@ -1390,8 +1399,10 @@
       "solution": "Labels i18n + role em navegação.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "36b817e"
+      ],
       "note": null,
       "quick_win": 18,
       "change": "accessible-semantics-sweep",
@@ -1407,8 +1418,10 @@
       "solution": "hitSlop/tamanho ≥44dp.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "4dc7812"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
@@ -1726,8 +1739,10 @@
       "solution": "Consumir `t.headWeight`.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "0ce9480"
+      ],
       "note": null,
       "quick_win": null,
       "change": "design-system-foundations",
@@ -1743,8 +1758,10 @@
       "solution": "Usar `t.radius.btn`.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "43985ee"
+      ],
       "note": null,
       "quick_win": null,
       "change": "design-system-foundations",
@@ -1798,8 +1815,10 @@
       "solution": "Texto alternativo / rótulo.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "4dc7812"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
@@ -1997,8 +2016,10 @@
       "solution": "accessibilityRole=\"button\" no CatTile e no card gradiente (o GradientCTACard previsto em DS-05 e o lugar natural).",
       "effort": "P",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "36b817e"
+      ],
       "note": null,
       "quick_win": null,
       "change": "accessible-semantics-sweep",
