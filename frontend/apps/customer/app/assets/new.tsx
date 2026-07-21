@@ -4,7 +4,7 @@ import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanim
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Alert, Button, Card, Field, Icon, IconName, SectionLabel, Text, Wiz, useTheme } from '@chamafacil/shared';
-import { useCategories, useCreateAsset } from '../../src/queries';
+import { useCategories, useCreateAsset, usePetSpecies, usePropertyTypes, useVehicleMakes } from '../../src/queries';
 import { setCreatedAsset } from '../../src/assetPick';
 import { ICON } from '../../src/assetDisplay';
 import { ASSET_FIELDS, ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
@@ -67,6 +67,40 @@ export default function AddAsset() {
   const hasCoords = detail.latitude != null && detail.longitude != null;
   const geofence = (detail.geofence as GeoPoint[] | undefined) ?? null;
 
+  // Same catalogs the pickers below already load (shared query cache, so this
+  // costs no extra request) — read here to name the asset for the user when
+  // they skip the nickname.
+  const { data: makes = [] } = useVehicleMakes(type === 'vehicle');
+  const { data: species = [] } = usePetSpecies(type === 'pet');
+  const { data: propertyTypes = [] } = usePropertyTypes(type === 'property');
+
+  /**
+   * Fallback name used when the nickname is left empty: whatever the asset
+   * already told us about itself (make/model + plate, species/breed, property
+   * type), else the plain type label. Never empty — the API requires a
+   * nickname, and asking someone to christen their car before they can call a
+   * tow truck is not a price worth paying for a nicer list entry.
+   */
+  const autoNickname = useMemo(() => {
+    const parts: (string | null | undefined)[] = [];
+    if (type === 'vehicle') {
+      const make = makes.find((m) => m.id === detail.vehicle_make_id);
+      parts.push(make?.name, make?.models.find((m) => m.id === detail.vehicle_model_id)?.name, detail.plate as string);
+    } else if (type === 'pet') {
+      const sp = species.find((s) => s.id === detail.pet_species_id);
+      parts.push(sp?.name, sp?.breeds.find((b) => b.id === detail.pet_breed_id)?.name);
+    } else if (type === 'property') {
+      parts.push(propertyTypes.find((p) => p.id === detail.property_type_id)?.name, detail.neighborhood as string);
+    }
+    return parts.filter(Boolean).join(' ').trim().slice(0, 80) || tr(`assets.type.${type}`);
+  }, [type, detail, makes, species, propertyTypes, tr]);
+
+  // The nickname is how you'll recognise the asset later, so the standalone
+  // registration keeps asking for it. Opened as a picker, though, the asset is
+  // a means to an end (a request in progress) — there we accept an empty name
+  // and fall back to `autoNickname`.
+  const nameOk = picking || nickname.trim().length >= 2;
+
   // Free-text extras shown under "mais detalhes"; a property's address moves to
   // the location step (it belongs with the map pin), so it's excluded here.
   const extraFields = ASSET_FIELDS[type].filter((f) => !(type === 'property' && f.key === 'address'));
@@ -96,7 +130,7 @@ export default function AddAsset() {
   };
 
   const submit = async () => {
-    if (nickname.trim().length < 2) return Alert.alert(tr('common.error'), tr('assets.nicknameError'));
+    if (!nameOk) return Alert.alert(tr('common.error'), tr('assets.nicknameError'));
     // Upload-first: upload the photo (if any), then create with its media id.
     let photoMediaId: number | undefined;
     if (photo) {
@@ -121,7 +155,7 @@ export default function AddAsset() {
     create.mutate(
       {
         type,
-        nickname: nickname.trim(),
+        nickname: nickname.trim() || autoNickname,
         detail: detailOut,
         photo_media_id: photoMediaId,
         ...(privateNote.trim() ? { private_note: privateNote.trim() } : {}),
@@ -151,11 +185,11 @@ export default function AddAsset() {
     );
   };
 
-  // The name (on the details step) is the only requirement; location and area
-  // are optional, so no other step traps you.
+  // The name (on the details step) is the only requirement outside the picker;
+  // location and area are optional, so no other step traps you.
   const canContinue =
     stepKey === 'type' ||
-    (stepKey === 'details' && nickname.trim().length >= 2) ||
+    (stepKey === 'details' && nameOk) ||
     stepKey === 'location' ||
     stepKey === 'area';
 
@@ -166,7 +200,7 @@ export default function AddAsset() {
 
   const footer = isLast
     ? {
-        primary: { label: tr('assets.save'), onPress: submit, loading: create.isPending, disabled: nickname.trim().length < 2, pulse: true },
+        primary: { label: tr('assets.save'), onPress: submit, loading: create.isPending, disabled: !nameOk, pulse: true },
         back: clamped > 1 ? () => setStep(clamped - 1) : undefined,
       }
     : {
@@ -260,12 +294,15 @@ export default function AddAsset() {
 
       {stepKey === 'details' ? (
         <>
-          {/* Name first — what you'll call it — then a photo to recognise it. */}
+          {/* Name first — what you'll call it — then a photo to recognise it.
+              In the picker it's optional, and the hint says upfront which name
+              we'll save so skipping it isn't a leap of faith. */}
           <Field
-            label={tr('assets.nickname')}
+            label={picking ? tr('assets.nicknameOptional') : tr('assets.nickname')}
+            hint={picking ? tr('assets.nicknameAutoHint', { name: autoNickname }) : undefined}
             value={nickname}
             onChangeText={setNickname}
-            placeholder={tr('assets.nicknamePlaceholder')}
+            placeholder={picking ? autoNickname : tr('assets.nicknamePlaceholder')}
           />
           <Pressable onPress={pick} style={{ alignSelf: 'center', alignItems: 'center', gap: 6 }}>
             {photo ? (

@@ -640,6 +640,8 @@
     "detailsLabel": "Details",
     "nickname": "Nickname",
     "nicknamePlaceholder": "Dads Civic",
+    "nicknameOptional": "Nickname (optional)",
+    "nicknameAutoHint": "Leave it blank and we'll save it as \"{{name}}\" — you can rename it later.",
     "nicknameError": "Give the asset a nickname.",
     "save": "Save",
     "savedBody": "Asset updated.",
