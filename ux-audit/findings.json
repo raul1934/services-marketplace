@@ -12,7 +12,7 @@
     "M": "medio",
     "G": "grande"
   },
-  "total": 112,
+  "total": 113,
   "findings": [
     {
       "id": "AUTH-01",
@@ -1958,6 +1958,23 @@
       "note": null,
       "quick_win": null,
       "change": null
+    },
+    {
+      "id": "A11Y-15",
+      "module": "A11Y",
+      "severity": "Alto",
+      "title": "Atalhos da home e CTA gradiente sem papel de botao",
+      "description": "Os tiles de \"ajuda rapida\" (CatTile) e o card gradiente \"Precisa de ajuda agora?\" sao clicaveis mas saem na arvore de acessibilidade como ViewGroup, sem accessibilityRole. Um leitor de tela le o texto e nao informa que aquilo e acionavel — e o CTA gradiente e a acao primaria do app.",
+      "evidence": "arvore de acessibilidade do aparelho (uiautomator): `ViewGroup click \"Guincho\"`, `ViewGroup click \"Precisa de ajuda agora?, ...\"`; `primitives.tsx` (CatTile), `home.tsx`, `HomeAssets.tsx`",
+      "solution": "accessibilityRole=\"button\" no CatTile e no card gradiente (o GradientCTACard previsto em DS-05 e o lugar natural).",
+      "effort": "P",
+      "impact": "Alto",
+      "status": "open",
+      "commits": [],
+      "note": null,
+      "quick_win": null,
+      "change": "accessible-semantics-sweep",
+      "issue": 99
     }
   ],
   "changes": {
@@ -1995,7 +2012,8 @@
         "AUTH-07",
         "A11Y-07",
         "A11Y-08",
-        "A11Y-11"
+        "A11Y-11",
+        "A11Y-15"
       ],
       "path": "openspec/changes/accessible-semantics-sweep"
     },
