@@ -159,11 +159,11 @@ export function SectionLabel({ children, count, style }: { children: React.React
   const t = useTheme();
   return (
     <View style={[{ flexDirection: 'row', alignItems: 'center', gap: 8 }, style]}>
-      <Text style={{ fontSize: 12, fontWeight: '800', letterSpacing: 1, color: t.colors.ink3 }}>
+      <Text style={{ fontSize: 12, fontWeight: t.headWeight, letterSpacing: 1, color: t.colors.ink3 }}>
         {typeof children === 'string' ? children.toUpperCase() : children}
       </Text>
       {count != null && (
-        <Text style={{ fontSize: 12, fontWeight: '800', color: t.colors.accent }}>{count}</Text>
+        <Text style={{ fontSize: 12, fontWeight: t.headWeight, color: t.colors.accent }}>{count}</Text>
       )}
     </View>
   );
@@ -210,7 +210,9 @@ export function Price({ value, currency = 'R$', size = 22 }: { value: number | s
   const t = useTheme();
   return (
     <Text style={{ fontSize: size, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.4 }}>
-      <Text style={{ fontSize: 13, fontWeight: '700', color: t.colors.ink2 }}>{currency} </Text>
+      {/* One step lighter than the number, whatever the theme's head weight is —
+          the contrast is the point, so it cannot just reuse `headWeight`. */}
+      <Text style={{ fontSize: 13, fontWeight: t.headWeight === '800' ? '700' : '600', color: t.colors.ink2 }}>{currency} </Text>
       {value}
     </Text>
   );
