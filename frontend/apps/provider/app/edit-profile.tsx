@@ -59,7 +59,13 @@ export default function EditProfile() {
         <Field label={tr('editProfile.phone')} value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="+55 11 9..." />
         <Field label={tr('editProfile.bio')} value={bio} onChangeText={setBio} placeholder={tr('editProfile.bioPlaceholder')} multiline style={{ height: 84, textAlignVertical: 'top' }} />
 
-        <Card flat onPress={() => setInsured((v) => !v)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Card
+          flat
+          onPress={() => setInsured((v) => !v)}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: insured }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+        >
           <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="shieldCheck" size={20} color={t.colors.ok} />
           </View>

@@ -322,7 +322,13 @@ export default function NewRequest() {
           {/* The asset carries a note for pros; sharing it is per-request and
               off by default (it may hold a gate code, etc). */}
           {selectedAsset?.provider_note ? (
-            <Pressable onPress={() => setShareNote((v) => !v)}>
+            <Pressable
+              onPress={() => setShareNote((v) => !v)}
+              accessible
+              accessibilityRole="switch"
+              accessibilityState={{ checked: shareNote }}
+              accessibilityLabel={tr('createRequest.shareNote')}
+            >
               <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <View style={{ flex: 1, gap: 3 }}>
                   <Text weight="700" style={{ fontSize: 14.5 }}>{tr('createRequest.shareNote')}</Text>
