@@ -6,7 +6,7 @@
 
 ## 2. Dead code (PERF-02, CONS-06)
 - [x] 2.1 Delete `stepOf` from `app/(tabs)/home.tsx:40-44` and simplify the `Steps` usage that reads it.
-- [ ] 2.2 Sweep `pt-BR.json`/`en-US.json` for keys never referenced in code; remove or wire.
+- [x] 2.2 72 unreachable keys removed from both locales. Detection had to account for dynamic prefixes that do not end in a dot, plural siblings i18next resolves from the base key, and arrays indexed by position. `tracking.call` kept on purpose (dormant "Ligar" action).
 - [x] 2.3 `tsc --noEmit` clean for the customer app.
 
 ## 3. Routing (REQ-18, REQ-19)
@@ -14,8 +14,8 @@
 - [x] 3.2 Add a header comment to `receipt.tsx` naming it a deep-link alias for the receipt notification.
 
 ## 4. ETA (CONS-03)
-- [ ] 4.1 Make `etaLabel` the only ETA formatter; delete the ad-hoc formatting in the proposal card, notification builder and tracking screen.
-- [ ] 4.2 Verify the same request renders the same ETA string on all three surfaces.
+- [x] 4.1 The three customer surfaces already used `etaLabel`; the one escape was the provider bid summary formatting `~${eta} min` by hand.
+- [x] 4.2 Verified — all callers now go through `etaLabel`.
 
 ## 5. Close out
-- [ ] 5.1 Set the six findings to `done` in `ux-audit/findings.json`, run `python ux-audit/sync-status.py`, commit all three files.
+- [x] 5.1 Set the six findings to `done` in `ux-audit/findings.json`, run `python ux-audit/sync-status.py`, commit all three files.

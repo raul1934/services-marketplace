@@ -1409,11 +1409,11 @@
       "solution": "Formatter único de ETA.",
       "effort": "P",
       "impact": "Médio",
-      "status": "partial",
+      "status": "done",
       "commits": [
-        "c4a4a9c"
+        "da0590a"
       ],
-      "note": "etaLabel com zero-pad (\"1h04\"); as superficies ainda formatam diferente",
+      "note": null,
       "quick_win": 4,
       "change": "housekeeping-gates-and-dead-code"
     },
@@ -1741,8 +1741,10 @@
       "solution": "Limpar/usar as chaves.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
+      "status": "done",
+      "commits": [
+        "da0590a"
+      ],
       "note": null,
       "quick_win": null,
       "change": "housekeeping-gates-and-dead-code"
