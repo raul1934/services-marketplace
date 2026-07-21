@@ -321,11 +321,26 @@ export function Steps({ total, current }: { total: number; current: number }) {
   );
 }
 
-/** On/off pill toggle (chamafacil .toggle). */
+/**
+ * On/off pill toggle (chamafacil .toggle) — **drawing only**.
+ *
+ * Every place this is used, the whole row is the tap target, which is the right
+ * call: a 50px pill is a poor one. So the switch semantics belong to that row,
+ * not here — the interactive parent carries `accessibilityRole="switch"` and
+ * `accessibilityState={{ checked }}`, and this stays hidden so a screen reader
+ * announces one control instead of a control plus a mystery graphic.
+ *
+ * It used to be a bare `View` with no role anywhere in the tree, so the state it
+ * shows was invisible to anyone not looking at it (DS-07).
+ */
 export function Toggle({ on }: { on: boolean }) {
   const t = useTheme();
   return (
-    <View style={{ width: 50, height: 30, borderRadius: 15, backgroundColor: on ? t.colors.ok : t.colors.line, justifyContent: 'center' }}>
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={{ width: 50, height: 30, borderRadius: 15, backgroundColor: on ? t.colors.ok : t.colors.line, justifyContent: 'center' }}
+    >
       <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#fff', marginLeft: on ? 23 : 3 }} />
     </View>
   );

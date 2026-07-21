@@ -319,7 +319,13 @@ export default function BidScreen() {
           <Field label={tr('job.messageLabel')} value={comment} onChangeText={setComment} placeholder={tr('job.messagePlaceholder')} multiline voiceInput style={{ height: 64, textAlignVertical: 'top' }} />
 
           {/* optional deposit to reduce no-shows */}
-          <Pressable onPress={() => setDeposit((d) => !d)}>
+          <Pressable
+            onPress={() => setDeposit((d) => !d)}
+            accessible
+            accessibilityRole="switch"
+            accessibilityState={{ checked: deposit }}
+            accessibilityLabel={tr('bid.depositTitle', { percent: DEPOSIT_PCT })}
+          >
             <Card flat>
               <Row style={{ gap: 12 }}>
                 <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>

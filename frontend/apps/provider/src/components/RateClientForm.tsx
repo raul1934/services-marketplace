@@ -76,7 +76,14 @@ export function RateClientForm({
         style={{ height: 70, textAlignVertical: 'top' }}
       />
 
-      <Card flat onPress={() => setPreferred((p) => !p)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 }}>
+      <Card
+        flat
+        onPress={() => setPreferred((p) => !p)}
+        accessibilityRole="switch"
+        accessibilityState={{ checked: preferred }}
+        accessibilityLabel={tr('rateClient.preferredTitle')}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 }}
+      >
         <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
           <Icon name="heart" size={20} color={t.colors.accent} />
         </View>

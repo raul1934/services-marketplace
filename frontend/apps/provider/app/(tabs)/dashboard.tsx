@@ -80,7 +80,13 @@ export default function Dashboard() {
 
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}>
         {/* online card */}
-        <Pressable onPress={toggle}>
+        <Pressable
+          onPress={toggle}
+          accessible
+          accessibilityRole="switch"
+          accessibilityState={{ checked: online }}
+          accessibilityLabel={tr(online ? 'dashboard.youreOnline' : 'dashboard.youreOffline')}
+        >
           {online ? (
             <LinearGradient colors={t.grad as unknown as readonly [string, string, ...string[]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: t.radius.card, padding: 20, overflow: 'hidden' }}>
               <View style={{ position: 'absolute', right: -30, top: -30, width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.14)' }} />
