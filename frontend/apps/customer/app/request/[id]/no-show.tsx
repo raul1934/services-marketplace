@@ -36,7 +36,7 @@ export default function NoShowScreen() {
       <BackBar title={tr('actions.noShow.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         <Card flat style={{ alignItems: 'center', gap: 8, paddingVertical: 22 }}>
-          <Text style={{ fontSize: 40 }}>🕒</Text>
+          <Icon name="clock" size={40} color={t.colors.accent} />
           <Text variant="h3" center>{tr('actions.noShow.headline')}</Text>
           <Text variant="caption" center>{tr('actions.noShow.body', { name: request.provider?.name ?? tr('requestDetail.fallbackProvider') })}</Text>
         </Card>
