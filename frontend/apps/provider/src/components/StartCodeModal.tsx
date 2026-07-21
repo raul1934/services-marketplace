@@ -64,8 +64,14 @@ export function StartCodeModal({
             </View>
             {/* TEMP — test bots. Remove with backend app/Bots. */}
             {testStartCode ? <TestBanner message={`Chamado de teste — código: ${testStartCode}`} /> : null}
-            <OtpInput value={code} onChange={(v) => { setError(''); setCode(v); }} length={4} />
-            {error ? <Text variant="caption" color={t.colors.danger}>{error}</Text> : null}
+            {/* The error lives inside OtpInput so it is announced with the field. */}
+            <OtpInput
+              value={code}
+              onChange={(v) => { setError(''); setCode(v); }}
+              length={4}
+              label={tr('job.startCodeTitle')}
+              error={error}
+            />
             <Button
               title={tr('job.confirmStart')}
               full
