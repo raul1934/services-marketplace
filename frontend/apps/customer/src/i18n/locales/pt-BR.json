@@ -109,6 +109,7 @@
   },
   "otp": {
     "title": "Verifique seu telefone",
+    "a11yHint": "Campo de {{count}} dígitos",
     "subtitle": "Enviamos um código de 6 dígitos para {{phone}}.",
     "verify": "Verificar e continuar",
     "resendIn": "Reenviar em {{seconds}}s",
@@ -804,6 +805,9 @@
   },
   "activeRequest": {
     "fallbackTitle": "Chamado em andamento",
+    "channelName": "Chamado em andamento",
+    "track": "Acompanhar",
+    "call": "Ligar",
     "tapToTrack": "Toque para acompanhar",
     "step": "Passo {{step}} de {{total}}",
     "body": {

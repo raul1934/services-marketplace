@@ -20,15 +20,22 @@ export function OtpInput({
   onChange,
   length = 6,
   autoFocus = true,
-  label = 'Código de verificação',
+  label,
+  hint,
   error,
 }: {
   value: string;
   onChange: (v: string) => void;
   length?: number;
   autoFocus?: boolean;
-  /** Announced name of the field; defaults to the verification-code wording. */
-  label?: string;
+  /**
+   * Announced name of the field. Required rather than defaulted: this package is
+   * locale-neutral — every string it shows arrives already translated — and a
+   * default here would announce one language to speakers of the other.
+   */
+  label: string;
+  /** Announced hint, e.g. "6 digits". Pass it translated, same reason as `label`. */
+  hint?: string;
   /** Error message: shown under the boxes, announced, and reddens the border. */
   error?: string | null;
 }) {
@@ -80,7 +87,7 @@ export function OtpInput({
           autoComplete="sms-otp"
           maxLength={length}
           accessibilityLabel={label}
-          accessibilityHint={`${length} dígitos`}
+          accessibilityHint={hint}
           // The caret and glyphs stay invisible (the boxes draw them), but the
           // input keeps the full size of the row so it can be focused and tapped.
           style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0 }}

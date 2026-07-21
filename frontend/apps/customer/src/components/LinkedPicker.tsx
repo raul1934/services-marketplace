@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Image, Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Field, Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { Field, Icon, Row, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
 
 export interface LinkedItem {
   id: number;
@@ -92,7 +92,7 @@ export function LinkedPicker({
             <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
             <Row style={{ justifyContent: 'space-between' }}>
               <Text variant="h3">{picking === 'parent' ? labels.selectParent : labels.selectChild}</Text>
-              <Pressable onPress={() => setPicking(null)} accessibilityRole="button" hitSlop={8}>
+              <Pressable onPress={() => setPicking(null)} accessibilityRole="button" hitSlop={8} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
                 <Icon name="close" size={22} color={t.colors.ink3} />
               </Pressable>
             </Row>
@@ -105,7 +105,7 @@ export function LinkedPicker({
                   <Pressable
                     key={r.id}
                     onPress={() => select(r.id)}
-                    style={{ paddingVertical: 12, borderBottomWidth: 1, borderColor: t.colors.line, flexDirection: 'row', alignItems: 'center', gap: 12 }}
+                    style={withFocusRing(t.colors.accent, { paddingVertical: 12, borderBottomWidth: 1, borderColor: t.colors.line, flexDirection: 'row', alignItems: 'center', gap: 12 })}
                   >
                     {picking === 'parent' ? (
                       <View style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
@@ -135,7 +135,7 @@ export function PickerField({ label, value, placeholder, disabled, left, onPress
       <Pressable
         onPress={onPress}
         disabled={disabled}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.colors.surface2, borderRadius: t.radius.field, borderWidth: 1.5, borderColor: t.colors.line, paddingHorizontal: 14, minHeight: 50, opacity: disabled ? 0.55 : 1 }}
+        style={withFocusRing(t.colors.accent, { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.colors.surface2, borderRadius: t.radius.field, borderWidth: 1.5, borderColor: t.colors.line, paddingHorizontal: 14, minHeight: 50, opacity: disabled ? 0.55 : 1 })}
       >
         {left}
         <Text style={{ flex: 1, fontSize: 15, fontWeight: '500', color: isPh ? t.colors.ink3 : t.colors.ink }}>{value || placeholder}</Text>

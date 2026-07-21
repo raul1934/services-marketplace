@@ -44,19 +44,26 @@ function Badge({ count }: { count: number }) {
   const t = useTheme();
   const pulse = React.useRef(new Animated.Value(0)).current;
 
+  const previous = React.useRef(count);
+
   React.useEffect(() => {
+    // Ring once when something *arrives*, then rest. It used to loop forever for
+    // as long as anything was unread, which is not information — after the first
+    // second it is decoration that costs battery, and it never stops asking for
+    // attention it has already got. It also kept the app permanently non-idle,
+    // which silently breaks anything that waits for idle (uiautomator, Espresso).
+    const arrived = count > previous.current;
+    previous.current = count;
+    if (!arrived) return;
+
+    pulse.setValue(0);
     // Reanimated isn't a peer dep of this package, and RN's Animated is enough
-    // for one looping ring. `useNativeDriver` keeps it off the JS thread, so it
-    // survives the app being busy.
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
-        Animated.delay(900),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [pulse]);
+    // for one ring. `useNativeDriver` keeps it off the JS thread, so it plays
+    // even while the app is busy handling whatever just arrived.
+    const anim = Animated.timing(pulse, { toValue: 1, duration: 1400, useNativeDriver: true });
+    anim.start();
+    return () => anim.stop();
+  }, [count, pulse]);
 
   return (
     <View pointerEvents="none" style={{ position: 'absolute', top: -3, right: -3, alignItems: 'center', justifyContent: 'center' }}>
@@ -280,7 +287,20 @@ export function Steps({ total, current }: { total: number; current: number }) {
       nodes.push(<View key={`b${i}`} style={{ width: 22, height: 2, backgroundColor: i < current ? t.colors.accent : t.colors.line }} />);
     }
   }
-  return <View style={{ flexDirection: 'row', alignItems: 'center' }}>{nodes}</View>;
+  return (
+    // Hidden from screen readers on purpose. The digits inside the nodes are
+    // drawing, not prose: read aloud they land in the middle of the card's label
+    // as a bare "3, 4" — verified on device, where an in-progress tow announced
+    // as "Guincho, … Urgente, 3, 4, Em atendimento". Every screen that shows a
+    // stepper also shows the stage in words next to it, so nothing is lost.
+    <View
+      style={{ flexDirection: 'row', alignItems: 'center' }}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+    >
+      {nodes}
+    </View>
+  );
 }
 
 /** On/off pill toggle (chamafacil .toggle). */

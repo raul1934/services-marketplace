@@ -1,6 +1,12 @@
 // Push / ongoing notifications don't exist on web — no-op stubs that mirror the
 // native module's surface so callers compile and run under react-native-web.
 
+export interface NotifLabels {
+  channel: string;
+  track: string;
+  call: string;
+}
+
 export interface ActiveRequestNotif {
   requestId: number;
   title: string;
@@ -8,6 +14,7 @@ export interface ActiveRequestNotif {
   status?: string;
   detail?: string;
   phone?: string;
+  labels: NotifLabels;
 }
 
 export const ACTIVE_REQUEST_STEPS = 4;

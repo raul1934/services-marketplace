@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme';
 import { useDictation } from '../lib/dictation';
+import { withFocusRing } from '../lib/a11y';
 import { Button } from './Button';
 import { Icon } from './Icon';
 import { Text } from './Text';
@@ -111,7 +112,7 @@ export function DictationModal({
           <Text variant="h3" center>{title}</Text>
 
           {/* mic with pulsing ring */}
-          <Pressable onPress={d.toggle} style={{ alignSelf: 'center', alignItems: 'center', justifyContent: 'center', width: 120, height: 120 }}>
+          <Pressable onPress={d.toggle} style={withFocusRing(t.colors.accent, { alignSelf: 'center', alignItems: 'center', justifyContent: 'center', width: 120, height: 120, borderRadius: 60 })}>
             {d.listening && (
               <Animated.View
                 style={{ position: 'absolute', width: 96, height: 96, borderRadius: 48, backgroundColor: t.colors.accent, opacity: ringOpacity, transform: [{ scale: ringScale }] }}

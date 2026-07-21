@@ -24,8 +24,25 @@ export interface ActiveRequestNotif {
   status?: string;
   /** Optional secondary line (provider · ETA) shown when expanded. */
   detail?: string;
-  /** Provider phone — adds a "Ligar" action when present. */
+  /** Provider phone — adds the call action when present. */
   phone?: string;
+  /**
+   * Every user-visible string this module renders, already translated.
+   *
+   * Required, not defaulted: these used to be hardcoded Portuguese in here, which
+   * this package has no business authoring — it renders strings, it does not
+   * write them. A default would just hide the same bug behind a fallback.
+   */
+  labels: NotifLabels;
+}
+
+export interface NotifLabels {
+  /** Android channel name, shown in the system notification settings. */
+  channel: string;
+  /** Action that opens the request. */
+  track: string;
+  /** Action that dials the provider; only used when `phone` is set. */
+  call: string;
 }
 
 /**
@@ -106,11 +123,11 @@ export function registerActiveRequestNotificationHandler(): void {
   notifee.onBackgroundEvent(onNotificationEvent);
 }
 
-async function ensureChannel(): Promise<void> {
+async function ensureChannel(name: string): Promise<void> {
   if (Platform.OS !== 'android' || channelReady) return;
   await notifee.createChannel({
     id: CHANNEL,
-    name: 'Chamado em andamento',
+    name,
     importance: AndroidImportance.LOW, // persistent but silent — updates must not buzz.
   });
   channelReady = true;
@@ -149,7 +166,7 @@ function progressFor(status?: string): { max?: number; current?: number; indeter
 export async function upsertActiveRequestNotification(n: ActiveRequestNotif): Promise<void> {
   if (Platform.OS === 'web') return;
   try {
-    await ensureChannel();
+    await ensureChannel(n.labels.channel);
 
     // A genuinely new stage is new information, so it isn't held against the
     // user's earlier swipes — the dismissal budget starts over. (This also
@@ -159,8 +176,8 @@ export async function upsertActiveRequestNotification(n: ActiveRequestNotif): Pr
     // Collapsed is what people actually see, and it only renders title + progress
     // bar — so the status goes in the title, and the body carries the pro + ETA.
     const heading = `${n.title} · ${n.body}`;
-    const actions = [{ title: 'Acompanhar', pressAction: { id: 'default', launchActivity: 'default' } }];
-    if (n.phone) actions.push({ title: 'Ligar', pressAction: { id: 'call', launchActivity: 'default' } });
+    const actions = [{ title: n.labels.track, pressAction: { id: 'default', launchActivity: 'default' } }];
+    if (n.phone) actions.push({ title: n.labels.call, pressAction: { id: 'call', launchActivity: 'default' } });
 
     await notifee.displayNotification({
       id: NOTIF_ID,

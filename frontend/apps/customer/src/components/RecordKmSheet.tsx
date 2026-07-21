@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { Button, Chip, Field, Icon, Row, SectionLabel, Text, useTheme } from '@chamafacil/shared';
+import { Button, Chip, Field, Icon, Row, SectionLabel, Text, focusRing, useTheme } from '@chamafacil/shared';
 import { DatePicker } from './DatePicker';
 
 export interface RecordKmPayload {
@@ -69,7 +69,7 @@ export function RecordKmSheet({
           <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
           <Row style={{ justifyContent: 'space-between' }}>
             <Text variant="h3">{tr('assets.recordKm')}</Text>
-            <Pressable onPress={onClose} accessibilityRole="button" hitSlop={8}>
+            <Pressable onPress={onClose} accessibilityRole="button" hitSlop={8} style={({ focused }: any) => focusRing(t.colors.accent, focused)}>
               <Icon name="close" size={22} color={t.colors.ink3} />
             </Pressable>
           </Row>
