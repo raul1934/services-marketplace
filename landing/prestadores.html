@@ -447,7 +447,9 @@
 
     fetch(API + "/api/v1/waitlist", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      // A página é só em português; o header é explícito para o e-mail não
+      // depender do Accept-Language do navegador de quem preencheu.
+      headers: { "Content-Type": "application/json", Accept: "application/json", "X-Locale": "pt" },
       body: JSON.stringify({
         role: "pro",
         name: nome,

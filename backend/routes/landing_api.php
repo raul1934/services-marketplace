@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\Route;
 Route::controller(LandingController::class)->group(function () {
     Route::post('v1/waitlist', 'waitlist');
     Route::get('v1/waitlist/count', 'waitlistCount');
+    // Assinada e sem auth: o link vive no rodapé de cada e-mail, e exigir login
+    // de quem só quer sair da lista é atrito que a LGPD não admite.
+    Route::get('v1/waitlist/{entry}/unsubscribe', 'unsubscribe')
+        ->name('waitlist.unsubscribe')
+        ->middleware('signed');
     Route::get('v1/service-categories', 'serviceCategories');
     Route::get('v1/cities', 'cities');
 });
