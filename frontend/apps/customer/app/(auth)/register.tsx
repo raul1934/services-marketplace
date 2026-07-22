@@ -65,7 +65,7 @@ export default function Register() {
 
         <Text center style={{ fontSize: 11, color: t.colors.ink3, lineHeight: 16, marginTop: 4 }}>{tr('register.legal')}</Text>
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
-          {tr('register.toLoginPrefix')} <Text color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('register.toLoginLink')}</Text>
+          {tr('register.toLoginPrefix')} <Text accessibilityRole="link" suppressHighlighting color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('register.toLoginLink')}</Text>
         </Text>
       </View>
     </Screen>

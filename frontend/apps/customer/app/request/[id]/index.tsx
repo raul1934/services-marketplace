@@ -478,7 +478,15 @@ export default function RequestDetail() {
                               <Text variant="caption" weight="700" color={t.colors.ok}>{tr('requestDetail.partApproved')}</Text>
                             </Row>
                           ) : (
-                            <Text weight="700" color={t.colors.accent} style={{ fontSize: 12.5 }} onPress={() => approvePart.mutate(p.id)}>
+                            <Text
+                              accessibilityRole="button"
+                              weight="700"
+                              color={t.colors.accent}
+                              // This approves a charge. It was unnamed as a
+                              // control and about 17px tall.
+                              style={{ fontSize: 12.5, paddingVertical: 13 }}
+                              onPress={() => approvePart.mutate(p.id)}
+                            >
                               {tr('requestDetail.approve')}
                             </Text>
                           )}

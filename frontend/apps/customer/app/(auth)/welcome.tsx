@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ViewStyle } from 'react-native';
+import { Pressable, View, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -184,9 +184,26 @@ export default function Welcome() {
         <Text style={{ fontSize: 25, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.5 }}>{slides[i].title}</Text>
         <Text style={{ fontSize: 14.5, lineHeight: 22, color: t.colors.ink2 }}>{slides[i].body}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
-          <Text style={{ flex: 1, fontSize: 13.5, fontWeight: '700', color: t.colors.ink3 }} onPress={() => router.push('/(auth)/register')}>
-            {last ? '' : tr('welcome.skip')}
-          </Text>
+          {/* On the last slide this used to render an empty string while keeping
+              its onPress and `flex: 1` — an invisible, unlabelled strip half the
+              row wide that jumped to register if you touched it. A screen reader
+              found it as an unnamed clickable node; everyone else found it by
+              accident. Gone when there is nothing to skip. */}
+          {last ? (
+            <View style={{ flex: 1 }} />
+          ) : (
+            <Pressable
+              onPress={() => router.push('/(auth)/register')}
+              accessibilityRole="button"
+              // 13.5px text in a row with a 50px Button next to it: the height
+              // comes from padding, so the target reaches 44dp without moving
+              // anything visually.
+              hitSlop={12}
+              style={{ flex: 1, justifyContent: 'center', minHeight: 44 }}
+            >
+              <Text style={{ fontSize: 13.5, fontWeight: '700', color: t.colors.ink3 }}>{tr('welcome.skip')}</Text>
+            </Pressable>
+          )}
           <Button
             title={last ? tr('welcome.getStarted') : tr('welcome.next')}
             onPress={() => (last ? router.push('/(auth)/register') : setI(i + 1))}
@@ -194,7 +211,7 @@ export default function Welcome() {
           />
         </View>
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
-          {tr('register.toLoginPrefix')} <Text color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('register.toLoginLink')}</Text>
+          {tr('register.toLoginPrefix')} <Text accessibilityRole="link" suppressHighlighting color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('register.toLoginLink')}</Text>
         </Text>
       </View>
     </View>

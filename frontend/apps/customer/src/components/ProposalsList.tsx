@@ -388,11 +388,21 @@ function ProposalCard({
             split) — consistent and reachable by keyboard/screen readers. */}
         <Button title={tr('requestDetail.acceptBid')} variant="grad" size="sm" full disabled={pending} loading={pending} onPress={onAccept} />
         <Row style={{ justifyContent: 'center', gap: 16 }}>
-          <Text accessibilityRole="button" center weight="700" color={t.colors.ink2} style={{ fontSize: 12.5, opacity: declining ? 0.5 : 1 }} onPress={declining ? undefined : onDecline}>
+          <Text
+            accessibilityRole="button"
+            accessibilityState={{ disabled: declining }}
+            center
+            weight="700"
+            color={t.colors.ink2}
+            // 12.5px of text is a ~17px target. The padding is what gets it to
+            // 44dp; the Row centres it, so nothing moves visually.
+            style={{ fontSize: 12.5, paddingVertical: 13, opacity: declining ? 0.5 : 1 }}
+            onPress={declining ? undefined : onDecline}
+          >
             {tr('requestDetail.declineBid')}
           </Text>
           {!proposal.pending_counter_offer && (
-            <Text accessibilityRole="button" center weight="700" color={t.colors.accent} style={{ fontSize: 12.5 }} onPress={onCounter}>
+            <Text accessibilityRole="button" center weight="700" color={t.colors.accent} style={{ fontSize: 12.5, paddingVertical: 13 }} onPress={onCounter}>
               {tr('requestDetail.counterCta')}
             </Text>
           )}
