@@ -79,9 +79,9 @@
       "impact": "Alto",
       "status": "partial",
       "commits": [
-        "41ade70"
+        "2fdf10b"
       ],
-      "note": "rotulo persistente entrou; o placeholder segue em ink3 (~2.6:1)",
+      "note": "METADE OBSOLETA: o AuthField tem label persistente ha tempos e o app do cliente passa em todos os campos - o achado descreve um estado que nao existe mais no customer. O que ERA real e foi corrigido: o provider tinha cinco campos usando placeholder como rotulo. FALTA a outra metade: o placeholder em ink3 com ~2.6:1, que e a mesma decisao de paleta do DS-01.",
       "quick_win": 16,
       "change": "harden-auth-forms",
       "issue": 2
@@ -323,9 +323,11 @@
       "solution": "Links reais (`role=\"link\"`) para páginas de Termos/Privacidade.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "f136cd5"
+      ],
+      "note": "Destravou porque a landing ganhou termos.html e privacidade.html. Os dois viraram links reais nos dois apps. O sufixo .html nao e cosmetico: a landing serve /termos.html (200) e nao tem rota /termos (404) - conferi as duas URLs antes de ligar, ia mandar link morto para dentro de um aviso legal.",
       "quick_win": null,
       "change": "account-self-service",
       "issue": 14
@@ -444,9 +446,11 @@
       "solution": "Skeleton/progresso no card durante GPS+geocode.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "f136cd5"
+      ],
+      "note": "GPS + geocodificacao reversa sao dois round trips e podem levar segundos em sinal ruim; o card trocava um rotulo por outro e ficava parado, o que se le como \"nao aconteceu nada\" - a pessoa toca de novo e reinicia tudo. Spinner, live region e o segundo toque recusado enquanto trabalha.",
       "quick_win": null,
       "change": "express-request-flow",
       "issue": 19
@@ -479,9 +483,11 @@
       "solution": "Corrigir copy ou renderizar o mapa antecipado.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "f136cd5"
+      ],
+      "note": "A etapa 2 dizia \"ajuste o pino\" sem mostrar mapa nenhum; nao ha pino ate tocar em \"usar minha localizacao\". Copy agora descreve a tela que existe.",
       "quick_win": null,
       "change": "express-request-flow",
       "issue": 20
@@ -883,9 +889,11 @@
       "solution": "Máscara + validação + autofill de telefone.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "2fdf10b"
+      ],
+      "note": "Campo aceitava qualquer coisa e cada call site montava \"55\"+digits inline. Um erro de digitacao so aparecia como OTP que nunca chega - e a pessoa nao distingue numero errado de SMS lento, entao espera e repete o mesmo erro. Mascara, validacao e autoComplete=tel num modulo compartilhado. O 55 continua cravado (produto so-Brasil) mas num lugar so. Validador propositalmente frouxo: faixa de operadora muda, e errar sobre numero real e pior que deixar passar um errado.",
       "quick_win": null,
       "change": "harden-auth-forms",
       "issue": 35
@@ -992,9 +1000,11 @@
       "solution": "Campo de busca no topo.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "2fdf10b"
+      ],
+      "note": "Busca no topo das categorias, casando pelo nome traduzido e pelo cru (o traduzido e o que a pessoa le), com estado de \"nada encontrado\". Verificado no aparelho: \"chav\" filtra para os dois chaveiros e esconde as secoes vazias; \"chavzzz\" mostra o estado vazio com a busca interpolada.",
       "quick_win": null,
       "change": "discovery-and-primary-action",
       "issue": 40
@@ -1519,9 +1529,11 @@
       "solution": "Regra: skeleton p/ 1º load; spinner p/ ação pontual.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "2fdf10b"
+      ],
+      "note": "Dashboard do prestador usava spinner no primeiro load enquanto as listas ao lado usavam skeleton. Regra aplicada: skeleton para primeiro load, spinner para acao pontual.",
       "quick_win": null,
       "change": "offline-and-error-recovery",
       "issue": 66
@@ -1589,9 +1601,11 @@
       "solution": "Localizar strings/dados do QnA.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "f136cd5"
+      ],
+      "note": "O achado culpava o seed, e o seed esta certo - tem as duas traducoes. question_suggestions guarda UMA LINHA POR IDIOMA (coluna lang, nao mapa) e o picker do prestador filtra pelo locale DELE, entao perguntar congelava $suggestion->text no pedido: prestador com app em ingles mandava pergunta em ingles para cliente em portugues. Resolvido na leitura, nao na escrita - o snapshot continua (e o registro do que foi perguntado, e pergunta digitada a mao nao tem outra fonte), mas pergunta vinda de sugestao resolve pela linha irma no idioma de quem le. 4 testes: os dois sentidos, o caso digitado a mao (nunca reescrito) e o fallback sem irma. Suite: 260 passando.",
       "quick_win": null,
       "change": "negotiation-and-proposal-clarity",
       "issue": 68
@@ -1606,9 +1620,11 @@
       "solution": "Igualar/documentar o default.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "2fdf10b"
+      ],
+      "note": "Login abria em e-mail sob __DEV__ e em telefone em producao: todo desenvolvedor exercitava uma primeira tela diferente da de todo usuario, entao o caminho padrao era o unico que ninguem estava usando.",
       "quick_win": null,
       "change": "harden-auth-forms",
       "issue": 69
@@ -1625,7 +1641,7 @@
       "impact": "Baixo",
       "status": "open",
       "commits": [],
-      "note": null,
+      "note": "NAO e descuido. O card de contexto carrega um comentario explicando por que fica acima das abas (para continuar verdadeiro em qualquer aba) e por que o badge de urgencia tem linha propria (competindo por largura, truncava a categoria). Fundir com o header, como o achado pede, desfaz decisao deliberada e custa o endereco e a urgencia - e conversa de design, nao conserto. Fica aberto esperando essa conversa.",
       "quick_win": null,
       "change": "slim-request-detail",
       "issue": 70
@@ -1676,9 +1692,9 @@
       "solution": "Usar o sistema de ícones.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
+      "status": "invalid",
       "commits": [],
-      "note": null,
+      "note": "Nao reproduz. O no-show ja renderiza <Icon name=\"clock\" size={40} /> - o emoji que a auditoria viu nao existe mais no codigo. Terceiro achado obsoleto encontrado hoje (com REQ-15 e metade do AUTH-04), o que sugere desconfiar de qualquer achado antes de gastar tempo nele.",
       "quick_win": null,
       "change": "consolidate-exception-screens",
       "issue": 71
@@ -1693,9 +1709,11 @@
       "solution": "Fixar o footer.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "2fdf10b"
+      ],
+      "note": "O botao de enviar do reagendamento rolava com o formulario enquanto surcharge e requote fixam o deles; com o teclado aberto podia sair inteiro da tela.",
       "quick_win": null,
       "change": "consolidate-exception-screens",
       "issue": 72
@@ -1750,7 +1768,7 @@
       "impact": "Baixo",
       "status": "open",
       "commits": [],
-      "note": null,
+      "note": "Bloqueado numa decisao de produto: sunset/trust/night sao paletas de MARCA, nao preferencia de usuario. Expor a escolha e decidir que a identidade visual passa a ser configuravel pelo cliente, o que e chamada de produto, nao de engenharia.",
       "quick_win": null,
       "change": "account-self-service",
       "issue": 75
