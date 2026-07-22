@@ -28,7 +28,16 @@ class LandingController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'city' => ['nullable', 'string', 'max:120'],
             'service' => ['nullable', 'string', 'max:120'],
+            'referral_code' => ['nullable', 'string', 'max:12'],
         ]);
+
+        // Quem indicou. Código inválido não é erro: a pessoa pode ter digitado
+        // errado ou colado o link torto, e recusar o cadastro por causa disso
+        // perderia o lead para proteger um crédito.
+        $indicador = ! empty($data['referral_code'])
+            ? WaitlistEntry::where('referral_code', strtoupper(trim($data['referral_code'])))->first()
+            : null;
+        unset($data['referral_code']);
 
         $data['role'] ??= 'customer';
         // O idioma é gravado agora porque a sequência até o lançamento sai
@@ -36,6 +45,12 @@ class LandingController extends Controller
         $data['locale'] = app()->getLocale() === 'en' ? 'en' : 'pt';
 
         $entry = WaitlistEntry::create($data);
+
+        // Autoindicação pelo e-mail não conta: é o jeito mais óbvio de fabricar
+        // crédito, e custa uma linha impedir.
+        if ($indicador && strcasecmp($indicador->email, $entry->email) !== 0) {
+            $entry->forceFill(['referred_by_id' => $indicador->id])->save();
+        }
 
         // Na fila: falha de SMTP não pode derrubar o cadastro. Perder o e-mail
         // é ruim; perder o lead é pior.
@@ -46,7 +61,13 @@ class LandingController extends Controller
         // mesma pessoa. Ver SendWaitlistConfirmation.
         SendWaitlistConfirmation::dispatch($entry->id);
 
-        return response()->json(['message' => __('messages.waitlist_joined')], 201);
+        return response()->json([
+            'message' => __('messages.waitlist_joined'),
+            // Devolvido para a landing montar o link de indicação na tela de
+            // sucesso — é o único momento em que a pessoa está com atenção no
+            // assunto.
+            'data' => ['referral_code' => $entry->referral_code],
+        ], 201);
     }
 
     /**

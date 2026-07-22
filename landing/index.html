@@ -465,6 +465,12 @@
   .lp-submit { width: 100%; margin-top: 20px; justify-content: center; }
   .lp-fineprint { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 14px; }
   .lp-fineprint a { color: var(--ink-2); text-decoration: underline; }
+  .lp-ref { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); text-align: left; }
+  .lp-reftx { font-size: 15px; color: var(--ink-2); margin: 0 0 14px; }
+  .lp-refrow { display: flex; gap: 8px; margin-bottom: 10px; }
+  .lp-reflink { flex: 1; min-width: 0; font-size: 14px; font-family: var(--mono); }
+  .lp-refcopy { flex: none; min-height: 52px; }
+  .lp-refwa { width: 100%; justify-content: center; }
   /* Honeypot. Escondido sem display:none — alguns bots ignoram campos
      display:none justamente porque sabem do truque. */
   .lp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
@@ -809,6 +815,20 @@
           <div class="sc-ic" data-ic="check" data-sz="40" data-white></div>
           <h3>Você está na lista!</h3>
           <p id="joinSuccessMsg">Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.</p>
+
+          <!-- Indicação. Aparece só depois do cadastro, que é o único momento em
+               que a pessoa está com atenção no assunto — e é o único canal
+               gratuito que um pré-lançamento tem. -->
+          <div class="lp-ref" id="joinRef" hidden>
+            <p class="lp-reftx">Indique quem você chamaria num aperto. <b>Vocês dois ganham crédito de fundador</b> no primeiro serviço.</p>
+            <div class="lp-refrow">
+              <input class="lp-input lp-reflink" id="refLink" readonly aria-label="Seu link de indicação" />
+              <button type="button" class="lp-btn ghost lp-refcopy" id="refCopy">Copiar</button>
+            </div>
+            <a class="lp-btn grad lp-refwa" id="refWa" target="_blank" rel="noopener">
+              <span data-ic="phone" data-sz="18"></span> Enviar no WhatsApp
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -1371,6 +1391,50 @@
     if (m) m.classList.toggle("show", on);
     if (inp) inp.classList.toggle("err", on);
   }
+  // Monta o bloco de indicação com o código devolvido pela API.
+  //
+  // Se a API não devolver código, o bloco simplesmente não aparece: melhor a
+  // tela de sucesso sem convite do que um link quebrado — link de indicação que
+  // não funciona queima a indicação E quem indicou.
+  function montarIndicacao(resposta, primeiroNome) {
+    var codigo = resposta && resposta.data && resposta.data.referral_code;
+    var box = document.getElementById("joinRef");
+    if (!codigo || !box) return;
+
+    var link = location.origin + "/?c=" + encodeURIComponent(codigo);
+    var campo = document.getElementById("refLink");
+    campo.value = link;
+
+    var en = isEN();
+    var msg = en
+      ? "I just joined Chama Fácil — tow truck, locksmith and roadside help with verified pros. Join with my link and we both get founder credit: " + link
+      : "Entrei na Chama Fácil — guincho, chaveiro e socorro na estrada com profissional verificado. Entra pelo meu link que nós dois ganhamos crédito de fundador: " + link;
+    var wa = document.getElementById("refWa");
+    wa.href = "https://wa.me/?text=" + encodeURIComponent(msg);
+    wa.addEventListener("click", function () {
+      if (window.gtag) gtag("event", "share", { method: "whatsapp", content_type: "referral" });
+    });
+
+    var botao = document.getElementById("refCopy");
+    botao.addEventListener("click", function () {
+      var pronto = function () {
+        botao.textContent = en ? "Copied!" : "Copiado!";
+        setTimeout(function () { botao.textContent = en ? "Copy" : "Copiar"; }, 2000);
+        if (window.gtag) gtag("event", "share", { method: "copy", content_type: "referral" });
+      };
+      // clipboard.writeText exige contexto seguro e permissão; o select/execCommand
+      // é o que ainda funciona em navegador antigo e em http.
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(link).then(pronto, function () { campo.select(); });
+      } else {
+        campo.select();
+        try { document.execCommand("copy"); pronto(); } catch (e) {}
+      }
+    });
+
+    box.hidden = false;
+  }
+
   // Máscara de telefone. O campo é opcional, então nada aqui pode impedir o
   // envio — no máximo formata o que a pessoa digitou.
   var phoneInput = form.querySelector("[data-phone-mask]");
@@ -1408,10 +1472,18 @@
       // backend cai no padrão e quem se cadastrou em inglês recebe em
       // português.
       headers: { "Content-Type": "application/json", Accept: "application/json", "X-Locale": isEN() ? "en" : "pt" },
-      body: JSON.stringify({ role: role, name: name, email: email, phone: form.phone.value.trim(), city: form.city.value.trim(), service: form.service.value })
+      body: JSON.stringify({
+        role: role, name: name, email: email,
+        phone: form.phone.value.trim(), city: form.city.value.trim(), service: form.service.value,
+        // Quem indicou, se a pessoa chegou por um link com ?c=
+        referral_code: (new URLSearchParams(location.search).get("c") || "").trim()
+      })
     })
       .then(function (r) {
         if (!r.ok && r.status !== 201) throw new Error("fail");
+        return r.json().catch(function () { return {}; });
+      })
+      .then(function (d) {
         form.style.display = "none";
         var msg = document.getElementById("joinSuccessMsg");
         var first = name.split(" ")[0], en = isEN();
@@ -1420,6 +1492,7 @@
           : (en ? "Thanks, " + first + "! We'll email you as soon as Chama Fácil reaches your area." : "Valeu, " + first + "! Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.");
         document.getElementById("joinSuccess").style.display = "block";
         if (window.gtag) gtag("event", "generate_lead", { method: "waitlist", role: role });
+        montarIndicacao(d, first);
       })
       .catch(function () {
         btn.disabled = false;
@@ -1560,6 +1633,11 @@
     "Cidade": "City", "Tenho interesse em": "I'm interested in", "Entrar na lista": "Join the list",
     // O fineprint virou três nós de texto quando Termos e Privacidade viraram
     // links de verdade; a chave da frase inteira parou de casar.
+    // indicação
+    "Indique quem você chamaria num aperto.": "Refer whoever you'd call in a jam.",
+    "Vocês dois ganham crédito de fundador": "You both get founder credit",
+    "no primeiro serviço.": "on the first job.",
+    "Copiar": "Copy", "Enviar no WhatsApp": "Send on WhatsApp",
     "Ao entrar você aceita os": "By joining you accept the",
     "Política de Privacidade": "Privacy Policy",
     "Não preencha este campo": "Do not fill this field",
