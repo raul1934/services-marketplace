@@ -43,7 +43,16 @@ services:
     build: ./backend
     container_name: chamafacil-queue
     working_dir: /app
-    command: php artisan queue:work --tries=3 --timeout=60
+    # --max-time recicla o worker a cada 5 min (sai limpo depois do job em
+    # andamento; `restart: unless-stopped` sobe de novo). Sem isso ele carrega a
+    # aplicação UMA vez, na subida, e como o código é bind mount o `up -d` do
+    # deploy não o recria: ele segue rodando o código e a config de antes do
+    # deploy, em silêncio — o job entra na fila, o worker antigo não conhece a
+    # classe nova, e o trabalho some sem erro em lugar nenhum. Aconteceu: um
+    # worker de 40h continuou mandando e-mail para `log` depois do SMTP
+    # configurado. O scheduler não precisa disso: `schedule:work` dispara
+    # `schedule:run` num processo novo a cada minuto.
+    command: php artisan queue:work --tries=3 --timeout=60 --max-time=300
     environment:
       <<: *php-env
     volumes:
