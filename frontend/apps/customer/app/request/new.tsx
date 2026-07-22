@@ -165,7 +165,23 @@ export default function NewRequest() {
 
   // Vehicle categories let the customer fine-tune the pin by panning the map
   // (center-pin picker); each settle re-geocodes into the address field below.
+  // `onRegionChangeComplete` also fires when the map first lays itself out, not
+  // only when the customer drags — so mounting it re-geocoded the point we had
+  // just geocoded, and whichever answer arrived second won. That is how the
+  // same spot showed as "5, Jardim Marajó" on this step and "Rua Patrícia
+  // Rodrigues Fontes, 805" on the review: one point, two lookups, two answers.
+  //
+  // ~11 m at this latitude. Below that the pin has not really moved: it is the
+  // map settling, and re-asking would only re-roll the same dice.
+  const MOVED = 0.0001;
   const pickCoords = async (c: { latitude: number; longitude: number }) => {
+    if (
+      coords &&
+      Math.abs(coords.latitude - c.latitude) < MOVED &&
+      Math.abs(coords.longitude - c.longitude) < MOVED
+    ) {
+      return;
+    }
     setCoords({ latitude: c.latitude, longitude: c.longitude });
     const addr = await reverseGeocode(c);
     if (addr) setAddress(addr);

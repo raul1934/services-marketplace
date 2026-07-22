@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Image, View } from 'react-native';
 import { SkeletonScreen, Alert } from '@chamafacil/shared';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
   BackBar, Badge, Button, Card, EmptyState, Icon, Row, Screen, SectionLabel, SlideToConfirm, Surcharge, Text, brl, useTheme,
@@ -25,6 +25,19 @@ export default function SurchargeScreen() {
   if (isLoading) return <SkeletonScreen />;
   if (isError || !request) return <LoadErrorScreen onRetry={refetch} />;
 
+  // A requote-tier surcharge is not a surcharge decision: there is nothing here
+  // to approve, only a notice and a button to the screen that actually decides.
+  // The customer arrived from a notification or the request card, read a price
+  // change, then had to tap through to read the same price change again.
+  //
+  // Redirecting here rather than at the entry points because they cannot know:
+  // the deep link carries only `request_id`, and the tier lives on the pending
+  // surcharge. This screen is the first place that knows.
+  const requotePending = (request.surcharges ?? []).find((s) => s.status === 'pending')?.tier === 'requote';
+  if (requotePending) {
+    return <Redirect href={`/request/${requestId}/requote`} />;
+  }
+
   const combinado = request.accepted_proposal?.price ?? 0;
   const all = request.surcharges ?? [];
   const pending = all.find((s) => s.status === 'pending');
@@ -46,9 +59,7 @@ export default function SurchargeScreen() {
 
   // Primary decision pinned to the bottom (consistent with the other screens).
   const footer = pending ? (
-    pending.tier === 'requote' ? (
-      <Button title={tr('actions.surcharge.goRequote')} full onPress={() => router.replace(`/request/${requestId}/requote`)} />
-    ) : (
+    (
       <View style={{ gap: 8 }}>
         <SlideToConfirm
           label={tr('actions.surcharge.slideApprove', { value: brl(newTotal) })}
