@@ -114,9 +114,13 @@
       "solution": "Veículo opcional; placa/modelo inline, sem pré-cadastro.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "62e3898",
+        "0b3510c",
+        "fd25133"
+      ],
+      "note": "Categoria de veiculo exigia ativo salvo, entao a primeira vez que alguem precisava de guincho o app pedia para cadastrar o carro antes - no acostamento, que e onde a pessoa fecha o app. asset_id JA era nullable na API; a parede era uma linha de canContinue no cliente. Agora o veiculo e descrito ali (tipo, marca, modelo opcional) e salvo como ativo no envio, com nome padrao \"Carro/Moto Principal\". Verificado no aparelho ponta a ponta duas vezes (carro e moto): ativo criado, kind persistido, pedido ligado. O aparelho tambem pegou tres coisas: o bloco aparecia para quem ja tem carros salvos, o seletor competia com ele, e a revisao engolia o veiculo. NOTA DE PROCESSO: o #164 mergeou com 2 dos 3 commits; o terceiro (traducao de kind) foi resgatado por cherry-pick no #176.",
       "quick_win": null,
       "change": "express-request-flow",
       "issue": 3
@@ -132,8 +136,10 @@
       "effort": "G",
       "impact": "Alto",
       "status": "open",
-      "commits": [],
-      "note": null,
+      "commits": [
+        "744c674"
+      ],
+      "note": "Base pronta (#172): um pedido aberto agora aceita fotos, respostas e orcamento depois de criado - antes era imutavel, o controller nao tinha update nenhum. O orcamento congela quando existe proposta, porque o prestador da lance CONTRA um numero declarado. Seis testes. FALTA a tela expressa em si, travada em duas decisoes: se o expresso manda o orcamento no default sem perguntar, e como o app decide urgente antes de perguntar.",
       "quick_win": null,
       "change": "express-request-flow",
       "issue": 4
@@ -839,9 +845,11 @@
       "solution": "\"Pular\"→home/guest; remover alvo fantasma.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "partial",
+      "commits": [
+        "248bd30"
+      ],
+      "note": "A metade do alvo fantasma esta feita desde o #155: o \"Pular\" renderizava string vazia no ultimo slide mantendo onPress e flex:1, uma faixa invisivel que pulava para o cadastro. Agora e Button de 44,1dp e nao renderiza quando nao ha o que pular. FALTA a outra metade - \"Pular\" leva ao cadastro em vez de a um modo convidado - e isso depende de existir modo convidado, que e decisao de produto.",
       "quick_win": null,
       "change": "harden-auth-forms",
       "issue": 33
@@ -892,9 +900,11 @@
       "solution": "Toggle mostrar + política ≥8 com feedback.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "partial",
+      "commits": [
+        "fd25133"
+      ],
+      "note": "Toggle de mostrar/ocultar senha nos quatro campos dos dois apps. FALTA a outra metade do achado: minimo de 8 com medidor de forca, que e mudanca de politica para toda conta futura e e decisao de produto. Nota tecnica medida no aparelho: hitSlop NAO cresce os bounds que um servico de acessibilidade le - o botao ficou 19x19dp com hitSlop 12. Padding com margem negativa da 45x45dp reais sem mover o campo.",
       "quick_win": null,
       "change": "harden-auth-forms",
       "issue": 36
@@ -927,9 +937,11 @@
       "solution": "Filtrar chaves faltando (como FirstAssetTutorial).",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "fd25133"
+      ],
+      "note": "Crash real na primeira tela do app. tr(...,{returnObjects:true}) devolve o que estiver no bundle - inclusive a propria chave, como string, quando falta a entrada no locale - e slides[i].title entao le .title de uma string. Agora le o que existe em vez do que o tipo promete.",
       "quick_win": null,
       "change": "harden-auth-forms",
       "issue": 37
@@ -944,11 +956,11 @@
       "solution": "KeyboardAvoidingView + rolagem.",
       "effort": "P",
       "impact": "Médio",
-      "status": "partial",
+      "status": "done",
       "commits": [
-        "c4a4a9c"
+        "fd25133"
       ],
-      "note": "KeyboardAvoidingView no wizard; login.tsx segue sem",
+      "note": "Login e Screen scroll={false} sem KeyboardAvoidingView: o teclado cobria a senha e o botao, sem nada para rolar. Corrigido nos dois apps.",
       "quick_win": 12,
       "change": "harden-auth-forms",
       "issue": 38
@@ -997,9 +1009,11 @@
       "solution": "Empty/error states.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "fd25133"
+      ],
+      "note": "Catalogo falho virava back bar sobre nada (data undefined, todo byType vazio). Usa o EmptyState do #158. Guardado em isError && !data, entao cache ainda vence o cartao de erro - verificado no aparelho derrubando o tunel da API: a lista continuou renderizando, que e o certo.",
       "quick_win": null,
       "change": "discovery-and-primary-action",
       "issue": 41
@@ -1137,9 +1151,9 @@
       "solution": "Colapsar em chip que some após `started_at`.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
+      "status": "invalid",
       "commits": [],
-      "note": null,
+      "note": "Achado obsoleto - nao reproduz e nao precisou de patch. O start_code so e exposto pela API enquanto o status e Accepted (ServiceRequestResource), trava que entrou no commit 789e87f, DEPOIS da auditoria ter sido escrita. O card nao tem como renderizar durante InProgress porque o campo chega nulo. Verificado lendo o resource no main.",
       "quick_win": null,
       "change": "slim-request-detail",
       "issue": 48
