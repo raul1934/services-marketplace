@@ -618,9 +618,12 @@
       "solution": "Extrair `<Sheet>` compartilhado (a11y+insets+animação).",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "b23d70a",
+        "e79440f"
+      ],
+      "note": "As seis copias acabaram. b23d70a extraiu o <Sheet> e migrou cinco (RequestFilterSheet, RecordKmSheet, SinglePicker, LinkedPicker, DatePicker); e79440f migrou a ultima, o DictationModal. O primitivo ganhou duas coisas que nenhuma copia tinha: scrim e painel fora da arvore de acessibilidade, e a regiao marcada como modal.",
       "quick_win": null,
       "change": "design-system-foundations",
       "issue": 26
@@ -635,9 +638,12 @@
       "solution": "`theme.space` 4-pt + `radius.sheet`; migrar Row/Screen/Card.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "partial",
+      "commits": [
+        "e79440f",
+        "0b422b0"
+      ],
+      "note": "theme.space (4-pt) e radius.sheet existem, e o Sheet consome os dois. 0b422b0 fechou o caso mais claro: o gap padrao do Row era 13 e o do Screen 12, diferenca que ninguem escolheu - agora ambos 12 (space.md), mexendo em 101 dos 177 call sites. Fica PARCIAL de proposito: restam ~170 valores cravados em 24 numeros distintos, com 9, 11, 18 e 26 em uso. Encaixa-los move pixels em telas que ninguem pediu para mudar, entao migram quando alguem estiver nesses arquivos.",
       "quick_win": null,
       "change": "design-system-foundations",
       "issue": 27
@@ -652,9 +658,11 @@
       "solution": "Ampliar `Variant`; lint proibindo fontSize literal.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "partial",
+      "commits": [
+        "e79440f"
+      ],
+      "note": "O achado, como escrito, nao sobrevive ao codigo - raciocinio registrado no Text.tsx, ao lado de quem for mexer. Medido: 55 tamanhos inline em 19 valores (11.5, 12.5, 13.5, 14.5 inclusive) e exatamente UM era variante escrita por extenso, esse corrigido. Os outros 54 sao combinacoes distintas de tamanho, peso e cor; absorve-los sao ~30 variantes, que nao e escala - e a mesma dispersao com nomes. BLOQUEADO numa decisao de produto: quais tamanhos existem. A regra de lint tambem nao tem onde morar (nao ha ESLint no repo).",
       "quick_win": null,
       "change": "design-system-foundations",
       "issue": 28
@@ -1307,9 +1315,11 @@
       "solution": "Extrair `<GradientCTACard>`.",
       "effort": "P",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "8ca59b1"
+      ],
+      "note": "GradientCTACard extraido; as duas copias passaram a usa-lo.",
       "quick_win": null,
       "change": "design-system-foundations",
       "issue": 57
@@ -1324,9 +1334,11 @@
       "solution": "Extrair `<SelectField>`.",
       "effort": "M",
       "impact": "Baixo",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "f595228"
+      ],
+      "note": "Um SelectField so. PickerField virou alias fino do mesmo componente, porque os pickers ja importavam esse nome. As copias eram mudas para leitor de tela - pareciam campo, eram anunciadas como texto - e a correcao foi central.",
       "quick_win": null,
       "change": "design-system-foundations",
       "issue": 58
