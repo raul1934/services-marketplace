@@ -76,9 +76,9 @@
       "solution": "Trocar por prova social honesta de pré-lançamento, que converte melhor por ser crível: contador ao vivo da waitlist (backend já tem o endpoint), nº de prestadores cadastrados, nº de cidades. Substituir depoimentos fictícios por entrevistas reais de descoberta rotuladas \"prestador fundador\". Manter \"100% verificados\" (é promessa de política, não métrica). Ganho estimado: +15–25% na submissão do form.",
       "effort": "M",
       "impact": "Alto",
-      "status": "partial",
+      "status": "done",
       "issue": 117,
-      "note": "Removidos: \"12k+ atendimentos\", \"4,9★ / Nota dos profissionais\", \"4.9/5 em 12k+ serviços\", \"6 min até a 1ª proposta\" e os três depoimentos assinados. A seção `#reviews` virou `#confianca` (\"O combinado, por escrito\"), com compromissos verificáveis em vez de depoimento inventado — o que também começa a cobrir MKT-CRO-04.\n\nFalta a parte positiva: o hero tem um slot de contador da fila que só aparece quando `GET /api/v1/waitlist/count` existir. Hoje o endpoint não existe e o bloco fica escondido (nada quebra).",
+      "note": "Numeros inventados removidos na #144; o endpoint GET /api/v1/waitlist/count que alimenta o contador honesto do hero entrou na #146. Issue #117 fechada.",
       "commits": [
         "fix/mkt-p0-landing"
       ]
