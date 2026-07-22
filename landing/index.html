@@ -1399,17 +1399,23 @@
     addEventListener("scroll", talvezAcenar, { passive: true });
   }
 
-  // Prova social honesta: o tamanho real da fila, quando o backend souber
-  // informá-lo. Sem o endpoint (ainda não existe), o bloco simplesmente não
-  // aparece — melhor um número a menos do que um número inventado.
+  // Prova social honesta: o tamanho real da fila, no lugar do "12k+
+  // atendimentos" que a página anunciava antes de atender ninguém.
+  //
+  // Quem decide se o número é grande o bastante para ajudar é o servidor
+  // (config landing.waitlist_count_floor): abaixo do piso ele devolve null e o
+  // bloco continua escondido. O piso não é repetido aqui de propósito — duas
+  // fontes da verdade para a mesma regra divergem no primeiro ajuste. Se o
+  // endpoint falhar ou não existir, o bloco também fica escondido: melhor um
+  // número a menos do que um número inventado.
   var stat = document.querySelector("[data-waitlist-stat]");
   if (stat) {
     var base = (document.querySelector('meta[name="api-base"]') || {}).content || "";
     fetch(base + "/api/v1/waitlist/count", { headers: { Accept: "application/json" } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        var n = d && (typeof d.count === "number" ? d.count : d.data && d.data.count);
-        if (!n || n < 100) return; // abaixo disso o número trabalha contra
+        var n = d && d.data && d.data.count;
+        if (typeof n !== "number") return;
         stat.querySelector("[data-waitlist-count]").textContent =
           n.toLocaleString("pt-BR") + "+";
         stat.hidden = false;
