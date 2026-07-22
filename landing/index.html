@@ -96,9 +96,20 @@
     } catch (e) {}
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<!-- Fontes do próprio domínio (landing/fonts/, geradas por fetch-fonts.py).
+     Antes vinham do Google por <link>: render-blocking e duas conexões novas
+     (googleapis + gstatic) antes do primeiro texto — caro no 4G. Servidas aqui,
+     o browser já tem a conexão aberta e o arquivo entra no cache junto do resto.
+
+     Um preload só, e não um por peso: a Manrope é variável, então o mesmo
+     arquivo cobre 500 a 800. Gerar um arquivo por peso faria o browser baixar
+     quatro vezes o mesmo conteúdo sob URLs diferentes.
+
+     `crossorigin` é obrigatório mesmo sendo same-origin: requisição de fonte é
+     sempre anônima, e preload sem crossorigin não casa com ela — o resultado é
+     baixar duas vezes. -->
+<link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="fonts/fonts.css" />
 
 <!-- Dados estruturados. O FAQPage é o que dá retorno imediato: as mesmas seis
      perguntas da seção #faq, que o Google pode expandir direto na SERP. Ao
@@ -1399,17 +1410,23 @@
     addEventListener("scroll", talvezAcenar, { passive: true });
   }
 
-  // Prova social honesta: o tamanho real da fila, quando o backend souber
-  // informá-lo. Sem o endpoint (ainda não existe), o bloco simplesmente não
-  // aparece — melhor um número a menos do que um número inventado.
+  // Prova social honesta: o tamanho real da fila, no lugar do "12k+
+  // atendimentos" que a página anunciava antes de atender ninguém.
+  //
+  // Quem decide se o número é grande o bastante para ajudar é o servidor
+  // (config landing.waitlist_count_floor): abaixo do piso ele devolve null e o
+  // bloco continua escondido. O piso não é repetido aqui de propósito — duas
+  // fontes da verdade para a mesma regra divergem no primeiro ajuste. Se o
+  // endpoint falhar ou não existir, o bloco também fica escondido: melhor um
+  // número a menos do que um número inventado.
   var stat = document.querySelector("[data-waitlist-stat]");
   if (stat) {
     var base = (document.querySelector('meta[name="api-base"]') || {}).content || "";
     fetch(base + "/api/v1/waitlist/count", { headers: { Accept: "application/json" } })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
-        var n = d && (typeof d.count === "number" ? d.count : d.data && d.data.count);
-        if (!n || n < 100) return; // abaixo disso o número trabalha contra
+        var n = d && d.data && d.data.count;
+        if (typeof n !== "number") return;
         stat.querySelector("[data-waitlist-count]").textContent =
           n.toLocaleString("pt-BR") + "+";
         stat.hidden = false;

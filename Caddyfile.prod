@@ -48,7 +48,7 @@ chamafacil.app {
 	# compartilhamento, ajustar o CSS das páginas de texto). Com `immutable` a
 	# correção levaria um ano para chegar em quem já visitou; uma semana com
 	# revalidação dá quase todo o ganho sem esse risco.
-	@assets path /logo.svg /og.png /doc.css /doc-lang.js
+	@assets path /logo.svg /og.png /doc.css /doc-lang.js /fonts/*
 	header @assets Cache-Control "public, max-age=604800, must-revalidate"
 
 	# O HTML fica de fora de propósito: revalida a cada visita, senão uma
