@@ -29,6 +29,8 @@ export function Wiz({
   title,
   sub,
   onBack,
+  backLabel,
+  stepLabel,
   footer,
   children,
 }: {
@@ -38,6 +40,11 @@ export function Wiz({
   title: string;
   sub?: string;
   onBack: () => void;
+  /** Accessible name for the header control — it closes on step 1, goes back after. */
+  backLabel: string;
+  /** Already-formatted step counter, e.g. "ETAPA 2/4". This package renders
+   *  strings, it does not author them, and this one was hardcoded Portuguese. */
+  stepLabel: string;
   footer: WizFooter;
   children: React.ReactNode;
 }) {
@@ -52,12 +59,12 @@ export function Wiz({
      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       {/* header */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 8 }}>
-        <Pressable onPress={onBack} style={withFocusRing(t.colors.accent, { width: 38, height: 38, borderRadius: 19, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' })}>
+        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel={backLabel} style={withFocusRing(t.colors.accent, { width: 38, height: 38, borderRadius: 19, backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' })}>
           <Icon name={step === 1 ? 'close' : 'back'} size={20} color={t.colors.ink} />
         </Pressable>
         <Text style={{ fontSize: 19, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.2 }} numberOfLines={1}>{cat}</Text>
         <View style={{ flex: 1 }} />
-        <Text style={{ fontSize: 12.5, fontWeight: '800', color: t.colors.ink3, letterSpacing: 0.3 }}>{`ETAPA ${step}/${total}`}</Text>
+        <Text style={{ fontSize: 12.5, fontWeight: '800', color: t.colors.ink3, letterSpacing: 0.3 }}>{stepLabel}</Text>
       </View>
 
       {/* progress */}

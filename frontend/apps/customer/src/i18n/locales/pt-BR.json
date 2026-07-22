@@ -18,7 +18,8 @@
     "ok": "Pronto",
     "menu": "Menu",
     "close": "Fechar",
-    "notifications": "Notificações"
+    "notifications": "Notificações",
+    "wizStep": "ETAPA {{step}}/{{total}}"
   },
   "notFound": {
     "home": "Início",
