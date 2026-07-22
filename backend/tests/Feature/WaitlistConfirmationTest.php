@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\SendWaitlistConfirmation;
 use App\Mail\WaitlistConfirmation;
 use App\Models\WaitlistEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,13 +21,17 @@ class WaitlistConfirmationTest extends TestCase
         'city' => 'São José do Rio Preto',
     ];
 
-    public function test_joining_the_list_queues_a_confirmation(): void
+    public function test_joining_the_list_sends_the_confirmation(): void
     {
+        // Em teste a fila é `sync` (phpunit.xml), então o job despachado pelo
+        // cadastro roda inline e o efeito já aconteceu quando o POST retorna.
+        // Quem marca `confirmed_mail_sent_at` é o job, depois de reivindicar —
+        // marcar no despacho era o bug que a #168 corrigiu.
         Mail::fake();
 
         $this->postJson('/api/v1/waitlist', $this->payload)->assertCreated();
 
-        Mail::assertQueued(WaitlistConfirmation::class, function ($mail) {
+        Mail::assertSent(WaitlistConfirmation::class, function ($mail) {
             return $mail->hasTo('marina@exemplo.com')
                 && $mail->entry->name === 'Marina Alves Souza';
         });

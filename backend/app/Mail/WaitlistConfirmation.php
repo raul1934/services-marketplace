@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\WaitlistEntry;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -20,10 +19,14 @@ use Illuminate\Support\Facades\URL;
  * cadastrou — de modo que a base captada até o lançamento chegava fria no dia
  * em que ela mais importa.
  *
- * Vai para a fila (ShouldQueue) para que uma falha de SMTP não derrube o POST
- * do formulário: perder o e-mail é ruim, perder o lead é pior.
+ * NÃO implementa ShouldQueue. Quem enfileira é o SendWaitlistConfirmation, e
+ * ter os dois seria uma indireção a mais com consequência real: o Mailer do
+ * Laravel troca `send()` por `queue()` quando o Mailable é ShouldQueue
+ * (Mailer::sendMailable), então o job enfileiraria OUTRO job, retornaria na
+ * hora, e o erro de SMTP apareceria fora do try/catch que devolve a
+ * reivindicação — quebrando a idempotência sem quebrar nenhum teste óbvio.
  */
-class WaitlistConfirmation extends Mailable implements ShouldQueue
+class WaitlistConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
