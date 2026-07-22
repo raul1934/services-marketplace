@@ -48,6 +48,7 @@ export default function CustomerNoShowScreen() {
           disabled={report.isPending}
           variant="error"
           onConfirm={onReport}
+          confirmHint={tr('common.slideHint')}
         />
         <Text variant="caption" center>{tr('actions.customerNoShow.hint')}</Text>
       </View>

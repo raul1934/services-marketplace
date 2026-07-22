@@ -33,6 +33,8 @@ export function BudgetMeter({
   pill,
   pillIcon = 'sparkles',
   renderInfo,
+  decreaseLabel,
+  increaseLabel,
 }: {
   value: number;
   onChange: (v: number) => void;
@@ -48,6 +50,13 @@ export function BudgetMeter({
   pill?: string;
   pillIcon?: IconName;
   renderInfo?: (ctx: { word: BudgetZone; value: number; avg: number; color: string }) => React.ReactNode;
+  /**
+   * Names for the two steppers. They are icon-only, so without these they are
+   * unnamed buttons to a screen reader. Text comes from the caller: this package
+   * renders strings, it does not author them.
+   */
+  decreaseLabel?: string;
+  increaseLabel?: string;
 }) {
   const t = useTheme();
   const avg = regionAvg != null ? regionAvg : Math.round((bandLo + bandHi) / 2);
@@ -129,6 +138,22 @@ export function BudgetMeter({
         style={{ marginTop: 6, aspectRatio: 220 / 112 }}
         onLayout={(e) => (layout.current = e.nativeEvent.layout)}
         {...pan.panHandlers}
+        // An SVG driven by a PanResponder: to a screen reader this was a blank
+        // region that happened to swallow touches. `adjustable` is the role that
+        // fits - a value inside a range - and it makes TalkBack's swipe up/down
+        // step the needle, which is the only way to aim it without dragging.
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel={label}
+        // `text` is what gets spoken; min/max/now let the reader say where in the
+        // range this sits. Without it the needle moves and nothing is announced.
+        accessibilityValue={{ min, max, now: shown, text: `${currency} ${shown}` }}
+        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+        onAccessibilityAction={(e) => {
+          const n = e.nativeEvent.actionName;
+          if (n === 'increment') stepBy(step);
+          else if (n === 'decrement') stepBy(-step);
+        }}
       >
         <Svg width="100%" height="100%" viewBox="0 0 220 112">
           {zones.map(([z0, z1, c], i) => (
@@ -146,7 +171,7 @@ export function BudgetMeter({
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 2 }}>
-        <Stepper icon="minus" onPress={() => stepBy(-step)} />
+        <Stepper icon="minus" onPress={() => stepBy(-step)} label={decreaseLabel} />
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 3, backgroundColor: t.colors.surface2, borderWidth: 1.5, borderColor: focus ? t.colors.accent : t.colors.line, borderRadius: 13, paddingHorizontal: 14, paddingVertical: 6 }}>
           <Text style={{ fontSize: 15, fontWeight: '700', color: t.colors.ink2 }}>{currency}</Text>
           <TextInput
@@ -155,10 +180,13 @@ export function BudgetMeter({
             onFocus={() => setFocus(true)}
             onBlur={commit}
             keyboardType="number-pad"
+            // The currency sits in a sibling Text, so the field alone announced a
+            // bare number with nothing saying what it was for.
+            accessibilityLabel={label}
             style={{ width: 78, textAlign: 'center', fontWeight: '800', fontSize: 30, color: zc, padding: 0 }}
           />
         </View>
-        <Stepper icon="plus" onPress={() => stepBy(step)} />
+        <Stepper icon="plus" onPress={() => stepBy(step)} label={increaseLabel} />
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, paddingHorizontal: 4 }}>
@@ -184,10 +212,15 @@ export function BudgetMeter({
   );
 }
 
-function Stepper({ icon, onPress }: { icon: IconName; onPress: () => void }) {
+function Stepper({ icon, onPress, label }: { icon: IconName; onPress: () => void; label?: string }) {
   const t = useTheme();
   return (
-    <Pressable onPress={onPress} style={{ width: 40, height: 40, borderRadius: 13, borderWidth: 1, borderColor: t.colors.line, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center' }}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={{ width: 40, height: 40, borderRadius: 13, borderWidth: 1, borderColor: t.colors.line, backgroundColor: t.colors.surface, alignItems: 'center', justifyContent: 'center' }}
+    >
       <Icon name={icon} size={20} color={t.colors.ink} strokeWidth={2.6} />
     </Pressable>
   );

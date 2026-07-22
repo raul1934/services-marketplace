@@ -184,7 +184,7 @@ export default function BidScreen() {
           primary: { label: tr('common.continue'), onPress: () => setStep(step + 1) },
           ...(step > 1 ? { back: () => setStep(step - 1) } : {}),
         }
-      : { slide: { label: tr('job.slideSendBid'), doneLabel: tr('job.bidSentTitle'), onConfirm: send, disabled: submit.isPending || sent }, back: () => setStep(step - 1) };
+      : { slide: { label: tr('job.slideSendBid'), doneLabel: tr('job.bidSentTitle'), onConfirm: send, disabled: submit.isPending || sent, confirmHint: tr('common.slideHint') }, back: () => setStep(step - 1) };
 
   return (
     <View style={{ flex: 1 }}>
@@ -278,6 +278,8 @@ export default function BidScreen() {
                 {tr('job.bidInfo', { avg, value, chance: tr(`job.chance.${word}`) })}
               </Text>
             )}
+            decreaseLabel={tr('common.decrease')}
+            increaseLabel={tr('common.increase')}
           />
 
           <SectionLabel>{tr('bid.arrivalTime')}</SectionLabel>

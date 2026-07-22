@@ -19,7 +19,10 @@
     "menu": "Menu",
     "close": "Fechar",
     "notifications": "Notificações",
-    "wizStep": "ETAPA {{step}}/{{total}}"
+    "wizStep": "ETAPA {{step}}/{{total}}",
+    "decrease": "Diminuir",
+    "increase": "Aumentar",
+    "slideHint": "Toque duas vezes para confirmar"
   },
   "notFound": {
     "home": "Início",

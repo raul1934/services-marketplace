@@ -122,10 +122,10 @@ export default function JobScreen() {
       isUrgent ? (
         <Button title={tr('job.startUrgentCta')} full onPress={() => setCodeOpen(true)} />
       ) : (
-        <SlideToConfirm label={tr('job.slideStart')} doneLabel={tr('job.slideStarted')} disabled={updateStatus.isPending} onConfirm={() => updateStatus.mutate(RequestStatus.InProgress)} />
+        <SlideToConfirm label={tr('job.slideStart')} doneLabel={tr('job.slideStarted')} disabled={updateStatus.isPending} onConfirm={() => updateStatus.mutate(RequestStatus.InProgress)} confirmHint={tr('common.slideHint')} />
       )
     ) : status === RequestStatus.InProgress ? (
-      <SlideToConfirm label={tr('job.slideComplete')} doneLabel={tr('job.slideCompleted')} onConfirm={() => updateStatus.mutate(RequestStatus.Completed)} />
+      <SlideToConfirm label={tr('job.slideComplete')} doneLabel={tr('job.slideCompleted')} onConfirm={() => updateStatus.mutate(RequestStatus.Completed)} confirmHint={tr('common.slideHint')} />
     ) : canRate ? (
       <Button title={tr('rateClient.promptCta')} full onPress={() => setRateOpen(true)} />
     ) : undefined;

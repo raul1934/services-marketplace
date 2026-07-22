@@ -50,6 +50,7 @@ export default function SurchargeScreen() {
           doneLabel={tr('actions.surcharge.slideApproved')}
           disabled={resolve.isPending}
           onConfirm={() => onResolve(pending.id, true)}
+          confirmHint={tr('common.slideHint')}
         />
         <Button title={tr('actions.surcharge.refuse')} variant="ghost" full onPress={() => onResolve(pending.id, false)} />
       </View>
