@@ -26,7 +26,9 @@
     "loadErrorTitle": "Não foi possível carregar",
     "loadErrorBody": "Verifique sua conexão e tente de novo.",
     "retry": "Tentar de novo",
-    "offline": "Sem conexão. Você está offline."
+    "offline": "Sem conexão. Você está offline.",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha"
   },
   "notFound": {
     "home": "Início",
@@ -755,6 +757,10 @@
       "weight": "Peso",
       "vaccines": "Vacinas",
       "microchip": "Microchip"
+    },
+    "vehicleKind": {
+      "car": "Carro",
+      "motorcycle": "Moto"
     }
   },
   "drawer": {

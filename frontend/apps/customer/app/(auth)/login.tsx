@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Segment, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
@@ -53,6 +53,13 @@ export default function Login() {
         <BrandMark />
         <EnvSwitch />
       </View>
+      {/* `Screen scroll={false}` means the layout cannot get out of the
+          keyboard's way on its own: on a small phone the keyboard covered the
+          password field and the submit button, and nothing scrolled. */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <View style={{ flex: 1, paddingHorizontal: 26, paddingTop: 8, paddingBottom: 26, gap: 13 }}>
         <View>
           <Text style={{ fontSize: 27, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.6, lineHeight: 30 }}>{tr('login.title')}</Text>
@@ -73,7 +80,7 @@ export default function Login() {
         ) : (
           <>
             <AuthField icon="mail" label={tr('login.email')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" textContentType="emailAddress" autoComplete="email" placeholder={tr('login.emailPlaceholder')} error={errors.email} />
-            <AuthField icon="key" label={tr('login.password')} value={password} onChangeText={setPassword} secureTextEntry textContentType="password" autoComplete="current-password" placeholder={tr('login.passwordPlaceholder')} error={errors.password} />
+            <AuthField icon="key" label={tr('login.password')} value={password} onChangeText={setPassword} secureTextEntry revealLabel={tr('common.showPassword')} hideLabel={tr('common.hidePassword')} textContentType="password" autoComplete="current-password" placeholder={tr('login.passwordPlaceholder')} error={errors.password} />
           </>
         )}
 
@@ -103,6 +110,7 @@ export default function Login() {
           {tr('login.toRegisterPrefix')} <Text accessibilityRole="link" suppressHighlighting color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/register')}>{tr('login.toRegisterLink')}</Text>
         </Text>
       </View>
+      </KeyboardAvoidingView>
     </Screen>
   );
 }

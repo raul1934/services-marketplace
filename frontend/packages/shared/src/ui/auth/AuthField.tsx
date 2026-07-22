@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextInput, TextInputProps, View } from 'react-native';
+import { Pressable, TextInput, TextInputProps, View } from 'react-native';
 import { useTheme } from '../../theme';
 import { Text } from '../Text';
 import { Icon, IconName } from '../Icon';
@@ -10,10 +10,29 @@ export function AuthField({
   prefix,
   error,
   label,
+  revealLabel,
+  hideLabel,
   ...rest
-}: TextInputProps & { icon?: IconName; prefix?: string; error?: string; label?: string }) {
+}: TextInputProps & {
+  icon?: IconName;
+  prefix?: string;
+  error?: string;
+  label?: string;
+  /**
+   * Accessible names for the show/hide-password button. Passing either one
+   * turns the button on; a password field without them stays as it was.
+   * Text comes from the caller — this package renders strings, it does not
+   * author them.
+   */
+  revealLabel?: string;
+  hideLabel?: string;
+}) {
   const t = useTheme();
   const [focus, setFocus] = useState(false);
+  // Typing a password blind, on a phone keyboard, in the rain, is how people
+  // get locked out of an app they are trying to call for help with.
+  const [revealed, setRevealed] = useState(false);
+  const canReveal = !!rest.secureTextEntry && !!(revealLabel || hideLabel);
   return (
     <View style={{ gap: 6 }}>
       {/* A persistent label above the field — the placeholder alone disappears
@@ -46,7 +65,26 @@ export function AuthField({
           onBlur={(e) => { setFocus(false); rest.onBlur?.(e); }}
           style={{ flex: 1, fontSize: 15, fontWeight: '600', color: t.colors.ink, padding: 0 }}
           {...rest}
+          // After the spread, so revealing actually overrides the caller's
+          // `secureTextEntry` instead of being overwritten by it.
+          secureTextEntry={rest.secureTextEntry && !revealed}
         />
+        {canReveal ? (
+          <Pressable
+            onPress={() => setRevealed((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel={revealed ? hideLabel : revealLabel}
+            accessibilityState={{ checked: revealed }}
+            // The glyph is 19px. `hitSlop` alone was wrong twice over: it does
+            // not grow the bounds an accessibility service reads (measured on
+            // device: still 19x19dp), and 12 either side would have landed on
+            // 43dp anyway. Padding grows the real box; the negative margin
+            // gives back the space, so the field's height does not move.
+            style={{ padding: 13, margin: -13 }}
+          >
+            <Icon name={revealed ? 'eyeOff' : 'eye'} size={19} color={t.colors.ink3} />
+          </Pressable>
+        ) : null}
       </View>
       {error ? (
         <Text variant="caption" color={t.colors.danger} accessibilityLiveRegion="assertive" accessibilityRole="alert">

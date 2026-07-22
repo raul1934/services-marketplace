@@ -47,7 +47,7 @@ export default function Register() {
         <AuthField icon="user" value={form.name} onChangeText={set('name')} placeholder={tr('register.namePlaceholder')} error={errors.name} />
         <AuthField icon="mail" value={form.email} onChangeText={set('email')} autoCapitalize="none" keyboardType="email-address" placeholder={tr('register.emailPlaceholder')} error={errors.email} />
         <AuthField icon="phone" prefix="+55" value={form.phone} onChangeText={set('phone')} keyboardType="phone-pad" placeholder={tr('register.phonePlaceholder')} error={errors.phone} />
-        <AuthField icon="key" value={form.password} onChangeText={set('password')} secureTextEntry placeholder={tr('register.passwordPlaceholder')} error={errors.password} />
+        <AuthField icon="key" value={form.password} onChangeText={set('password')} secureTextEntry revealLabel={tr('common.showPassword')} hideLabel={tr('common.hidePassword')} placeholder={tr('register.passwordPlaceholder')} error={errors.password} />
 
         {formError ? <Text variant="caption" color={t.colors.danger}>{formError}</Text> : null}
 

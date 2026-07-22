@@ -139,9 +139,19 @@ export default function Welcome() {
   const { t: tr } = useTranslation();
   const insets = useSafeAreaInsets();
   const [i, setI] = useState(0);
-  const slides = tr('welcome.slides', { returnObjects: true }) as { title: string; body: string }[];
-  const eyebrows = tr('welcome.eyebrows', { returnObjects: true }) as string[];
-  const last = i === slides.length - 1;
+  // `returnObjects` hands back whatever is in the bundle — including the key
+  // itself, as a string, when a locale is missing the entry. `slides[i].title`
+  // then reads `.title` off a string and the first screen of the app crashes.
+  // A locale is exactly the kind of thing that ships half-translated, so this
+  // reads what is actually there rather than what the type claims.
+  const rawSlides = tr('welcome.slides', { returnObjects: true });
+  const slides: { title: string; body: string }[] = Array.isArray(rawSlides)
+    ? rawSlides.filter((s): s is { title: string; body: string } => !!s && typeof s === 'object' && 'title' in s)
+    : [];
+  const rawEyebrows = tr('welcome.eyebrows', { returnObjects: true });
+  const eyebrows: string[] = Array.isArray(rawEyebrows) ? rawEyebrows.filter((e) => typeof e === 'string') : [];
+  const last = i >= slides.length - 1;
+  const slide = slides[i];
   const Scene = SCENES[i] ?? SceneHelp;
 
   return (
@@ -188,8 +198,8 @@ export default function Welcome() {
           ))}
         </View>
         <Text style={{ fontSize: 11.5, fontWeight: '800', letterSpacing: 1, color: t.colors.accent }}>{eyebrows[i]?.toUpperCase()}</Text>
-        <Text style={{ fontSize: 25, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.5 }}>{slides[i].title}</Text>
-        <Text style={{ fontSize: 14.5, lineHeight: 22, color: t.colors.ink2 }}>{slides[i].body}</Text>
+        <Text style={{ fontSize: 25, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.5 }}>{slide?.title}</Text>
+        <Text style={{ fontSize: 14.5, lineHeight: 22, color: t.colors.ink2 }}>{slide?.body}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
           {/* On the last slide this used to render an empty string while keeping
               its onPress and `flex: 1` — an invisible, unlabelled strip half the
