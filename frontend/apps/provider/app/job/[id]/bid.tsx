@@ -278,6 +278,8 @@ export default function BidScreen() {
                 {tr('job.bidInfo', { avg, value, chance: tr(`job.chance.${word}`) })}
               </Text>
             )}
+            decreaseLabel={tr('common.decrease')}
+            increaseLabel={tr('common.increase')}
           />
 
           <SectionLabel>{tr('bid.arrivalTime')}</SectionLabel>

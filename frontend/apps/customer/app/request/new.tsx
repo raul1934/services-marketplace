@@ -513,6 +513,8 @@ export default function NewRequest() {
                 {tr('createRequest.budgetInfo', { work: categoryName ?? tr('createRequest.thisJob'), avg, value, chance: tr(`createRequest.chance.${word}`) })}
               </Text>
             )}
+            decreaseLabel={tr('common.decrease')}
+            increaseLabel={tr('common.increase')}
           />
           <SectionLabel>{tr('createRequest.paymentLabel')}</SectionLabel>
           <PaymentSelector

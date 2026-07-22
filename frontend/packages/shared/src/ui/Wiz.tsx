@@ -13,7 +13,7 @@ export interface WizFooter {
    *  badge's breathing ring behind it to draw the eye forward. */
   primary?: { label: string; onPress: () => void; disabled?: boolean; loading?: boolean; pulse?: boolean };
   /** Slide-to-confirm (final step). */
-  slide?: { label: string; doneLabel: string; onConfirm: () => void; disabled?: boolean };
+  slide?: { label: string; doneLabel: string; onConfirm: () => void; disabled?: boolean; confirmHint?: string };
   /** Show a ghost back button next to the primary. */
   back?: () => void;
 }
@@ -87,7 +87,7 @@ export function Wiz({
       <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', paddingHorizontal: 20, paddingTop: 13, paddingBottom: 26, borderTopWidth: 1, borderColor: t.colors.line, backgroundColor: t.colors.surface }}>
         {footer.slide ? (
           <View style={{ flex: 1 }}>
-            <SlideToConfirm label={footer.slide.label} doneLabel={footer.slide.doneLabel} disabled={footer.slide.disabled} onConfirm={footer.slide.onConfirm} />
+            <SlideToConfirm label={footer.slide.label} doneLabel={footer.slide.doneLabel} disabled={footer.slide.disabled} onConfirm={footer.slide.onConfirm} confirmHint={footer.slide.confirmHint} />
           </View>
         ) : footer.primary ? (
           <>

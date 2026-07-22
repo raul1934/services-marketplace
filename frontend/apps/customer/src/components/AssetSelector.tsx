@@ -41,7 +41,16 @@ export function AssetSelector({
         assets.map((a) => {
           const on = selectedId === a.id;
           return (
-            <Card key={a.id} flat onPress={() => onSelect(a.id)} style={{ borderWidth: 1.5, borderColor: on ? t.colors.accent : t.colors.line }}>
+            <Card
+              key={a.id}
+              flat
+              onPress={() => onSelect(a.id)}
+              // Which one is chosen was said only by an accent border and a check
+              // glyph - both invisible to a screen reader, which read every card
+              // identically and gave no way to tell the picked one apart.
+              accessibilityState={{ selected: on }}
+              style={{ borderWidth: 1.5, borderColor: on ? t.colors.accent : t.colors.line }}
+            >
               <Row gap={12}>
                 <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: t.colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
                   {a.detail?.make_logo_url ? (

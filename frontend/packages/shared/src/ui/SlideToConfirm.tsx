@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Animated, PanResponder, View } from 'react-native';
+import { AccessibilityInfo, Animated, PanResponder, View } from 'react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
 import { Icon } from './Icon';
@@ -16,6 +16,19 @@ export type SlideVariant = 'accept' | 'success' | 'error';
  * Drag-to-confirm control (chamafacil .slide). Track is a translucent accent pill;
  * the thumb travels left→right, a fill follows behind the label, and on
  * completion the track goes solid with the thumb resting on the right.
+ *
+ * The drag is deliberate friction: this control accepts proposals and approves
+ * charges, so a stray tap must not spend the customer's money. But friction made
+ * of a gesture is a wall for anyone using a screen reader — TalkBack owns the
+ * touch stream, so the pan gesture never arrives and there was no other way to
+ * confirm. This was the only way to accept a proposal, which meant a screen
+ * reader user could not close a deal at all (WCAG 2.1.1, 2.5.7, 4.1.2).
+ *
+ * So the control announces itself as a button and confirms on the reader's
+ * activation gesture. That keeps the intent rather than dropping it: TalkBack's
+ * double-tap is already a deliberate, two-step act on a focused element — the
+ * same "you meant this" the drag buys for everyone else. Sighted users still get
+ * no tap path; `onAccessibilityTap` only fires when a reader is running.
  */
 export function SlideToConfirm({
   label,
@@ -24,6 +37,7 @@ export function SlideToConfirm({
   disabled,
   variant = 'accept',
   compact,
+  confirmHint,
 }: {
   label: string;
   doneLabel: string;
@@ -31,6 +45,12 @@ export function SlideToConfirm({
   disabled?: boolean;
   variant?: SlideVariant;
   compact?: boolean;
+  /**
+   * Spoken after the label, to say that activating confirms — the visual
+   * "slide me" affordance carries none of that. Text comes from the caller:
+   * this package renders strings, it does not author them.
+   */
+  confirmHint?: string;
 }) {
   const t = useTheme();
   const color = variant === 'success' ? t.colors.ok : variant === 'error' ? t.colors.danger : t.colors.accent;
@@ -47,8 +67,28 @@ export function SlideToConfirm({
   // The PanResponder is created once, so its closure would otherwise capture the
   // first-render values (maxX = 0 before onLayout, plus a stale onConfirm). Keep
   // the live values in a ref the handlers can read on every gesture.
-  const live = useRef({ maxX, done, disabled, onConfirm });
-  live.current = { maxX, done, disabled, onConfirm };
+  const live = useRef({ maxX, done, disabled, onConfirm, doneLabel });
+  live.current = { maxX, done, disabled, onConfirm, doneLabel };
+
+  // The one place that completes, so the gesture and the screen reader cannot
+  // drift apart. Only reads refs and stable setters, so the PanResponder closure
+  // capturing the first instance is harmless.
+  const finish = (animate: boolean) => {
+    const m = live.current.maxX;
+    const settle = () => {
+      setDone(true);
+      // The label swaps silently; a reader would sit on stale text otherwise.
+      AccessibilityInfo.announceForAccessibility(live.current.doneLabel);
+      live.current.onConfirm();
+    };
+    if (animate && m > 0) {
+      Animated.timing(x, { toValue: m, duration: 120, useNativeDriver: false }).start(settle);
+    } else {
+      // Reader path, or a confirm before onLayout: no travel to animate.
+      x.setValue(m);
+      settle();
+    }
+  };
 
   const pan = useRef(
     PanResponder.create({
@@ -67,10 +107,7 @@ export function SlideToConfirm({
         // m > 0 guards against a layout race; a plain click (dx ≈ 0) springs back
         // instead of confirming, so the drag stays the only way to confirm.
         if (m > 0 && g.dx >= m * 0.85) {
-          Animated.timing(x, { toValue: m, duration: 120, useNativeDriver: false }).start(() => {
-            setDone(true);
-            live.current.onConfirm();
-          });
+          finish(true);
         } else {
           Animated.spring(x, { toValue: 0, useNativeDriver: false }).start();
         }
@@ -88,6 +125,27 @@ export function SlideToConfirm({
     <View
       testID="slideToConfirm"
       onLayout={(e) => setTrackW(e.nativeEvent.layout.width)}
+      // One node, named, and activatable. Without `accessible` the track, the
+      // label and the thumb arrive as three unrelated stops, none of which says
+      // it does anything.
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={done ? doneLabel : label}
+      accessibilityHint={done ? undefined : confirmHint}
+      accessibilityState={{ disabled: !!disabled || done }}
+      // Fires on TalkBack/VoiceOver double-tap and nothing else, so the drag
+      // stays the only path for everyone not using a reader.
+      onAccessibilityTap={() => {
+        if (live.current.disabled || live.current.done) return;
+        finish(false);
+      }}
+      // iOS VoiceOver routes some activations here instead of onAccessibilityTap.
+      accessibilityActions={done || disabled ? undefined : [{ name: 'activate' }]}
+      onAccessibilityAction={(e) => {
+        if (e.nativeEvent.actionName !== 'activate') return;
+        if (live.current.disabled || live.current.done) return;
+        finish(false);
+      }}
       style={{
         height: H,
         borderRadius: 999,

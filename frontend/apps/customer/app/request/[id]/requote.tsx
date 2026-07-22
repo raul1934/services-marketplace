@@ -43,6 +43,7 @@ export default function RequoteScreen() {
         doneLabel={tr('actions.requote.slideAccepted')}
         disabled={decide.isPending}
         onConfirm={() => decideMut(false)}
+        confirmHint={tr('common.slideHint')}
       />
       <Button title={tr('actions.requote.reopen')} variant="ghost" full onPress={() => decideMut(true)} left={<Icon name="search" size={16} color={t.colors.ink} />} />
     </View>

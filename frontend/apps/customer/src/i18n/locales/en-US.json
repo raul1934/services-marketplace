@@ -19,7 +19,10 @@
     "menu": "Menu",
     "close": "Close",
     "notifications": "Notifications",
-    "wizStep": "STEP {{step}}/{{total}}"
+    "wizStep": "STEP {{step}}/{{total}}",
+    "decrease": "Decrease",
+    "increase": "Increase",
+    "slideHint": "Double tap to confirm"
   },
   "notFound": {
     "home": "Home",

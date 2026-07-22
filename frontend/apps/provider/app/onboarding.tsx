@@ -76,7 +76,7 @@ export default function Onboarding() {
   const footer = (
     <View style={{ gap: 10 }}>
       {step === TOTAL - 1 && (
-        <SlideToConfirm label={tr('onboardingW.slideSubmit')} doneLabel={tr('onboardingW.submitted')} disabled={setCategories.isPending} onConfirm={submit} />
+        <SlideToConfirm label={tr('onboardingW.slideSubmit')} doneLabel={tr('onboardingW.submitted')} disabled={setCategories.isPending} onConfirm={submit} confirmHint={tr('common.slideHint')} />
       )}
       <Row gap={10}>
         {step > 0 && <Button title={tr('common.back')} variant="ghost" onPress={() => setStep(step - 1)} />}
