@@ -340,7 +340,8 @@
     "vehicleMoto": "Motorcycle",
     "defaultCarName": "Main car",
     "defaultMotoName": "Main motorcycle",
-    "vehicleSavedHint": "We save this as your vehicle for next time. You can rename it later."
+    "vehicleSavedHint": "We save this as your vehicle for next time. You can rename it later.",
+    "addressEditHint": "Tap to correct the address"
   },
   "payment": {
     "pix": "Pix",
