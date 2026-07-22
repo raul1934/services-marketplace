@@ -529,7 +529,7 @@
       "proposeTitle": "Propor nova data",
       "proposeHint": "Escolha uma data e período. A outra parte precisa aceitar.",
       "dateLabel": "Data",
-      "dateError": "Use o formato AAAA-MM-DD.",
+      "dateError": "Escolha a nova data.",
       "periodLabel": "Período",
       "period": {
         "morning": "Manhã",
@@ -547,7 +547,8 @@
       "accept": "Aceitar nova data",
       "decline": "Não consigo",
       "declineHint": "Se recusar, o profissional pode cancelar e reabrimos o chamado.",
-      "lateWarning": "Menos de 24h — conta como falta."
+      "lateWarning": "Menos de 24h — conta como falta.",
+      "datePlaceholder": "Selecione a data"
     },
     "noShow": {
       "title": "Profissional não apareceu",

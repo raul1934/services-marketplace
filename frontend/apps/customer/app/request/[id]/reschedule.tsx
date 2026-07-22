@@ -7,6 +7,7 @@ import {
   BackBar, Button, Card, Field, Icon, RescheduleRequest, Row, Screen, SectionLabel, Segment, Text, useTheme,
 } from '@chamafacil/shared';
 import { useRequest, useRequestReschedule, useResolveReschedule } from '../../../src/queries';
+import { DatePicker } from '../../../src/components/DatePicker';
 
 const PERIODS: Record<string, [number, number]> = {
   morning: [8, 12], afternoon: [13, 17], evening: [18, 22], dawn: [0, 5],
@@ -33,7 +34,10 @@ export default function RescheduleScreen() {
   const incoming = (request.reschedule_requests ?? []).find((r) => r.status === 'pending' && r.requested_by_role === 'provider');
 
   const submit = () => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    // The picker only ever emits YYYY-MM-DD, so this is now "nothing picked
+    // yet" rather than "you typed the date wrong" - which is the whole point of
+    // the change: the shape of the value stopped being the customer's problem.
+    if (!date) {
       Alert.alert(tr('common.error'), tr('actions.reschedule.dateError'));
       return;
     }
@@ -75,7 +79,13 @@ export default function RescheduleScreen() {
               <Row gap={10}><Icon name="calendar" size={20} color={t.colors.accent} /><Text weight="800" style={{ flex: 1, fontSize: 15 }}>{tr('actions.reschedule.proposeTitle')}</Text></Row>
               <Text variant="caption">{tr('actions.reschedule.proposeHint')}</Text>
             </Card>
-            <Field label={tr('actions.reschedule.dateLabel')} value={date} onChangeText={setDate} placeholder="2026-06-25" autoCapitalize="none" />
+            <DatePicker
+              label={tr('actions.reschedule.dateLabel')}
+              value={date}
+              onChange={setDate}
+              placeholder={tr('actions.reschedule.datePlaceholder')}
+              disablePast
+            />
             <SectionLabel>{tr('actions.reschedule.periodLabel')}</SectionLabel>
             <Segment
               items={Object.keys(PERIODS).map((p) => ({ value: p, label: tr(`actions.reschedule.period.${p}`) }))}

@@ -9,7 +9,9 @@ const toStr = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}
 /**
  * Field-shaped date input that opens a month-calendar bottom sheet. Pure RN
  * (no native deps), matching the Scheduler's calendar. Value is an ISO date
- * string "YYYY-MM-DD". `disableFuture` greys out days after today.
+ * string "YYYY-MM-DD". `disableFuture` greys out days after today, and
+ * `disablePast` the days before it — a reading is always in the past, a
+ * reschedule always in the future.
  */
 export function DatePicker({
   label,
@@ -17,12 +19,14 @@ export function DatePicker({
   onChange,
   placeholder,
   disableFuture,
+  disablePast,
 }: {
   label?: string;
   value?: string | null;
   onChange: (v: string) => void;
   placeholder?: string;
   disableFuture?: boolean;
+  disablePast?: boolean;
 }) {
   const t = useTheme();
 
@@ -48,7 +52,13 @@ export function DatePicker({
 
   const todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
   const isFuture = (d: number) => !!disableFuture && new Date(view.y, view.m, d).getTime() > todayMid;
+  const isPast = (d: number) => !!disablePast && new Date(view.y, view.m, d).getTime() < todayMid;
+  const isOff = (d: number) => isFuture(d) || isPast(d);
   const isSel = (d: number) => value === toStr(view.y, view.m, d);
+  // A bare "13" is what a screen reader got from the cell's Text. The month and
+  // year are only in the header, which it has already moved past by then.
+  const dayLabel = (d: number) =>
+    new Date(view.y, view.m, d).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
 
   const dowLabels = Array.from({ length: 7 }, (_, i) => new Date(2024, 8, 1 + i).toLocaleDateString(locale, { weekday: 'narrow' }));
   const monthName = new Date(view.y, view.m, 1).toLocaleDateString(locale, { month: 'long' });
@@ -57,7 +67,7 @@ export function DatePicker({
     : '';
 
   const select = (d: number) => {
-    if (isFuture(d)) return;
+    if (isOff(d)) return;
     onChange(toStr(view.y, view.m, d));
     setOpen(false);
   };
@@ -75,7 +85,6 @@ export function DatePicker({
       <SelectField label={label} value={display} placeholder={placeholder} icon="calendar" onPress={openPicker} />
 
       <Sheet visible={open} onClose={() => setOpen(false)}>
-<View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
             <Row>
               {navBtn('back', () => setView((v) => ({ y: v.m === 0 ? v.y - 1 : v.y, m: v.m === 0 ? 11 : v.m - 1 })))}
               <Text weight="800" center style={{ flex: 1, fontSize: 15, textTransform: 'capitalize' }}>{monthName}</Text>
@@ -97,8 +106,12 @@ export function DatePicker({
                   {d != null && (
                     <Pressable
                       onPress={() => select(d)}
-                      disabled={isFuture(d)}
-                      style={withFocusRing(t.colors.accent, { flex: 1, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: isSel(d) ? t.colors.accent : 'transparent', opacity: isFuture(d) ? 0.3 : 1 })}
+                      disabled={isOff(d)}
+                      accessibilityRole="button"
+                      accessibilityLabel={dayLabel(d)}
+                      // Which day is picked was drawn as an accent fill only.
+                      accessibilityState={{ selected: isSel(d), disabled: isOff(d) }}
+                      style={withFocusRing(t.colors.accent, { flex: 1, borderRadius: 9, alignItems: 'center', justifyContent: 'center', backgroundColor: isSel(d) ? t.colors.accent : 'transparent', opacity: isOff(d) ? 0.3 : 1 })}
                     >
                       <Text weight="700" style={{ fontSize: 13 }} color={isSel(d) ? '#fff' : t.colors.ink}>{d}</Text>
                     </Pressable>
