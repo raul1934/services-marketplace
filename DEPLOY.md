@@ -105,7 +105,40 @@ DB_CONNECTION=pgsql
 REVERB_APP_ID=...
 REVERB_APP_KEY=...
 REVERB_APP_SECRET=...
+
+# E-mail — SMTP da Hostinger, que já hospeda o e-mail do domínio.
+# MX, SPF, DKIM e DMARC de chamafacil.app já apontam para lá: não há DNS a fazer.
+MAIL_MAILER=smtp
+MAIL_SCHEME=smtps
+MAIL_HOST=smtp.hostinger.com
+MAIL_PORT=465
+MAIL_USERNAME=adm@chamafacil.app
+MAIL_PASSWORD=<senha da caixa>
+MAIL_FROM_ADDRESS=adm@chamafacil.app
+MAIL_FROM_NAME="Chama Fácil"
+
+# Alerta de chamado sem cobertura (modo concierge)
+CONCIERGE_ALERT_EMAIL=adm@chamafacil.app
 ```
+
+`MAIL_FROM_ADDRESS` tem que ser a **mesma caixa** do `MAIL_USERNAME`. Enviar como
+um endereço e autenticar como outro passa no envio e cai em spam na entrega —
+que é pior do que falhar, porque parece ter funcionado.
+
+Depois de subir, confirme que sai de verdade:
+
+```bash
+docker compose -f docker-compose.prod.yml exec backend php artisan mail:test voce@email.com
+```
+
+O comando imprime host, porta, remetente e caixa autenticada antes de tentar, e
+avisa quando o remetente não bate. Envio aceito não é entrega: confira a caixa
+de entrada **e o spam**.
+
+> **Limite:** caixa gratuita da Hostinger entrega ~100 mensagens/dia. Sobra para
+> alerta de operação e confirmação de cadastro. Não serve para o disparo de
+> lançamento à lista inteira — para isso, um ESP transacional (Resend, SES,
+> Brevo), com tratamento de bounce e cabeçalho de descadastro.
 
 ### 4. Primeiro boot
 
