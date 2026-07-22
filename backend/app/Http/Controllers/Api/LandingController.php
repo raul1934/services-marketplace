@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendWaitlistConfirmation;
 use App\Models\City;
 use App\Models\ServiceCategory;
 use App\Models\WaitlistEntry;
-use App\Mail\WaitlistConfirmation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Public endpoints consumed by the marketing landing page (no auth). Kept in one
@@ -40,8 +39,12 @@ class LandingController extends Controller
 
         // Na fila: falha de SMTP não pode derrubar o cadastro. Perder o e-mail
         // é ruim; perder o lead é pior.
-        Mail::to($entry->email)->queue(new WaitlistConfirmation($entry));
-        $entry->forceFill(['confirmed_mail_sent_at' => now()])->save();
+        //
+        // A marca de "já enviado" vive DENTRO do job, não aqui. Marcar no
+        // despacho não protegia de nada: a marca era gravada antes de o e-mail
+        // existir, e uma repetição do job mandava um segundo e-mail para a
+        // mesma pessoa. Ver SendWaitlistConfirmation.
+        SendWaitlistConfirmation::dispatch($entry->id);
 
         return response()->json(['message' => __('messages.waitlist_joined')], 201);
     }
