@@ -1,35 +1,8 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import {
-  AppBar,
-  AppDrawer,
-  AvatarGrad,
-  Badge,
-  Card,
-  CatTile,
-  Icon,
-  IconButton,
-  RequestStatus,
-  RequestUrgency,
-  Row,
-  Screen,
-  SectionLabel,
-  ServiceRequest,
-  SkeletonList,
-  SkeletonTiles,
-  Steps,
-  Text,
-  ACTIVE_REQUEST_STEPS,
-  activeRequestStep,
-  flattenPages,
-  isActiveStatus,
-  relativeParts,
-  useAuth,
-  useTheme,
-} from '@chamafacil/shared';
+import { ACTIVE_REQUEST_STEPS, AppBar, AppDrawer, AvatarGrad, Badge, Card, CatTile, GradientCTACard, Icon, IconButton, RequestStatus, RequestUrgency, Row, Screen, SectionLabel, ServiceRequest, SkeletonList, SkeletonTiles, Steps, Text, activeRequestStep, flattenPages, isActiveStatus, relativeParts, useAuth, useTheme } from '@chamafacil/shared';
 import { useCategories, useMyRequests, useUnreadCount } from '../../src/queries';
 import { CategoryIcon } from '../../src/components/CategoryIcon';
 import { HomeAssets } from '../../src/components/HomeAssets';
@@ -133,30 +106,12 @@ export default function Home() {
         {/* Primary "ask for help now" action as the hero: the app's #1 job, and
             it was previously the last card — pushed below the fold and clipped by
             the tab bar at rest. Here it's always visible without scrolling. */}
-        {/* The app's primary action. It reached the accessibility tree as a bare
-            ViewGroup, so a screen reader read the pitch without saying it could
-            be acted on — the one control that most needs to say so (A11Y-15). */}
-        <Pressable
+        <GradientCTACard
+          title={tr('home.needHelpTitle')}
+          body={tr('home.needHelpBody')}
+          icon="plus"
           onPress={() => router.push('/categories')}
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel={`${tr('home.needHelpTitle')}. ${tr('home.needHelpBody')}`}
-        >
-          <LinearGradient
-            colors={t.grad as unknown as readonly [string, string, ...string[]]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ borderRadius: t.radius.card, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text weight="800" color="#fff" style={{ fontSize: 17 }}>{tr('home.needHelpTitle')}</Text>
-              <Text color="rgba(255,255,255,0.9)" style={{ fontSize: 13, marginTop: 2 }}>{tr('home.needHelpBody')}</Text>
-            </View>
-            <View style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="plus" size={26} color="#fff" />
-            </View>
-          </LinearGradient>
-        </Pressable>
+        />
 
         <HomeAssets />
 
