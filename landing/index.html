@@ -7,6 +7,13 @@
 <link rel="icon" type="image/svg+xml" href="logo.svg" />
 <meta name="description" content="Você diz quanto quer pagar, profissionais verificados perto de você mandam propostas e você acompanha no mapa. Guincho, chaveiro, encanador, eletricista e mais. Pix, cartão ou dinheiro, só depois do serviço." />
 <link rel="canonical" href="https://chamafacil.app/" />
+<!-- A home serve os dois idiomas na mesma URL (o botão EN troca os text-nodes),
+     então os dois hreflang apontam para ela — é o que a documentação do Google
+     manda fazer quando o conteúdo alterna sem mudar de endereço. As páginas de
+     texto são o contrário: uma URL por idioma, hreflang cruzado. -->
+<link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/" />
+<link rel="alternate" hreflang="en" href="https://chamafacil.app/" />
+<link rel="alternate" hreflang="x-default" href="https://chamafacil.app/" />
 
 <!-- Sem estas tags o link colado no WhatsApp — o canal nº1 no Brasil — aparece
      cru, sem imagem e sem descrição. Ao mexer no título/descrição acima, mexa
@@ -16,6 +23,7 @@
 <meta property="og:url" content="https://chamafacil.app/" />
 <meta property="og:site_name" content="Chama Fácil" />
 <meta property="og:locale" content="pt_BR" />
+<meta property="og:locale:alternate" content="en_US" />
 <meta property="og:title" content="Um profissional verificado na sua porta, em minutos" />
 <meta property="og:description" content="Guincho, chaveiro, encanador, eletricista. Você define o orçamento, compara propostas e acompanha no mapa. Pix, cartão ou dinheiro — só depois do serviço." />
 <meta property="og:image" content="https://chamafacil.app/og.png" />
@@ -1336,11 +1344,17 @@
     "Nome completo": "Full name", "Informe seu nome.": "Enter your name.", "Email": "Email",
     "Telefone (opcional)": "Phone (optional)", "Informe um e-mail válido.": "Enter a valid email.",
     "Cidade": "City", "Tenho interesse em": "I'm interested in", "Entrar na lista": "Join the list",
-    "Ao entrar você aceita os Termos e a Política de Privacidade.": "By joining you accept the Terms and Privacy Policy.",
+    // O fineprint virou três nós de texto quando Termos e Privacidade viraram
+    // links de verdade; a chave da frase inteira parou de casar.
+    "Ao entrar você aceita os": "By joining you accept the",
+    "Política de Privacidade": "Privacy Policy",
+    "Não preencha este campo": "Do not fill this field",
     "Você está na lista!": "You're on the list!",
     "Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.": "We'll email you as soon as Chama Fácil reaches your area.",
     // services
     "O que cobrimos": "What we cover", "Uma plataforma para toda manutenção": "One platform for all maintenance",
+    // tags do fallback estático de categorias (quando /service-categories não responde)
+    "Elétrica": "Electrical", "Veterinário": "Vet",
     "Do socorro veicular ao reparo predial — chame um profissional verificado em segundos e mantenha o histórico de cada ativo.": "From roadside help to building repairs — call a verified pro in seconds and keep every asset's history.",
     // platform / features
     "A plataforma": "The platform", "Clientes, ativos e prestadores conectados.": "Customers, assets and pros connected.",

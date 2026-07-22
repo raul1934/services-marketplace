@@ -30,6 +30,29 @@ a { color: var(--accent); }
 .doc-spacer { flex: 1; }
 .doc-back { font-weight: 700; font-size: 14.5px; color: var(--ink-2); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
 .doc-back:hover { color: var(--ink); }
+/* Seletor de idioma. Espelha o .lp-icbtn da index para o botão parecer o mesmo
+   botão nas duas partes do site. */
+.doc-lang {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--line); color: var(--ink-2); text-decoration: none;
+  font-weight: 800; font-size: 13px; letter-spacing: .02em;
+}
+.doc-lang:hover { color: var(--ink); border-color: var(--ink-3); }
+/* Faixa que oferece a outra língua a quem chega com o navegador em inglês.
+   Oferece — não redireciona: em página jurídica, trocar o documento debaixo da
+   pessoa sem ela pedir é pior do que um clique a mais. */
+.doc-langbar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--line);
+  font-size: 14px; color: var(--ink-2);
+}
+.doc-langbar a { font-weight: 800; color: var(--accent); }
+.doc-langbar button {
+  margin-left: auto; background: none; border: none; cursor: pointer;
+  color: var(--ink-3); font-size: 20px; line-height: 1;
+  min-width: 44px; min-height: 44px; font-family: inherit;
+}
 main { padding: 56px 0 90px; }
 h1 { font-size: clamp(32px, 5vw, 46px); letter-spacing: -.03em; line-height: 1.1; margin: 0 0 10px; }
 h2 { font-size: 21px; letter-spacing: -.02em; margin: 42px 0 10px; }
