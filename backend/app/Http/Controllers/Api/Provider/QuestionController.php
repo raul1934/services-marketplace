@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Provider;
 
+use App\Enums\AssetType;
 use App\Enums\RequestStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\QuestionSuggestionResource;
@@ -107,8 +108,51 @@ class QuestionController extends Controller
                 $q->whereNull('service_category_id')
                     ->orWhere('service_category_id', $serviceRequest->service_category_id);
             })
+            ->whereNotIn('key', $this->keysTheAssetAlreadyAnswers($serviceRequest))
             ->orderBy('sort_order')
             ->orderBy('id');
+    }
+
+    /**
+     * Suggestions the customer has already answered by registering the asset.
+     *
+     * "Qual a marca e o modelo do veículo?" is in the picker for every roadside
+     * request, including the ones where the customer picked a saved car — so the
+     * provider asks, the customer re-types what the app already knows, and both
+     * of them wait for a round trip that bought nothing. The customer wizard
+     * already hides its own questions this way (see `visibleQuestions` in
+     * `new.tsx`); this is the same rule on the provider's side.
+     *
+     * Keyed on what the asset actually has, not on the asset merely existing: a
+     * vehicle saved with no make is still a vehicle the provider needs to ask
+     * about.
+     *
+     * @return list<string>
+     */
+    private function keysTheAssetAlreadyAnswers(ServiceRequest $serviceRequest): array
+    {
+        $asset = $serviceRequest->asset;
+        if (! $asset) {
+            return [];
+        }
+
+        $detail = $asset->detailable;
+        if (! $detail) {
+            return [];
+        }
+
+        return match ($asset->type) {
+            AssetType::Vehicle => array_filter([
+                $detail->vehicle_make_id || $detail->vehicle_model_id ? 'vehicle' : null,
+            ]),
+            AssetType::Property => array_filter([
+                $detail->floor ? 'floor_elevator' : null,
+            ]),
+            AssetType::Pet => array_filter([
+                $detail->pet_species_id || $detail->pet_breed_id ? 'size_breed' : null,
+            ]),
+            default => [],
+        };
     }
 
     /** A provider may only interact with open requests in a category they serve. */

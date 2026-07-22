@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, View } from 'react-native';
-import { Alert, SkeletonList } from '@chamafacil/shared';
+import { Alert, SkeletonList, SuccessSplash } from '@chamafacil/shared';
 import { useTranslation } from 'react-i18next';
 import {
   AvInit,
@@ -60,6 +60,9 @@ export function ProposalsList({
   const cancel = useCancelRequest(requestId);
   const items = flattenPages(proposals.data?.pages);
   const [counterTarget, setCounterTarget] = useState<Proposal | null>(null);
+  // Set on a successful accept so the splash plays before the screen
+  // switches to tracking. Accepting used to just... become another screen.
+  const [accepted, setAccepted] = useState<Proposal | null>(null);
   const [counterPrice, setCounterPrice] = useState('');
   const [counterMessage, setCounterMessage] = useState('');
 
@@ -88,8 +91,31 @@ export function ProposalsList({
     };
   }, [loadMoreRef, proposals.hasNextPage, proposals.isFetchingNextPage, proposals.fetchNextPage]);
 
+  // Declining already confirmed; accepting did not — the reversible, free
+  // action asked, and the irreversible, financial one did not. Accepting picks
+  // the provider, fixes the price and moves the request to tracking in one
+  // touch, so it says who and how much before it happens, and says it landed
+  // afterwards. (REQ-09 argues the urgent funnel has too much confirmation;
+  // that is about the slide that *sends the request*, a different moment.)
   const onAccept = (p: Proposal) =>
-    accept.mutate(p.id, { onError: (e) => Alert.alert(tr('common.error'), (e as Error).message) });
+    Alert.alert(
+      tr('requestDetail.acceptConfirmTitle'),
+      tr('requestDetail.acceptConfirmBody', {
+        provider: p.provider_name ?? tr('requestDetail.acceptConfirmProviderFallback'),
+        value: brl(p.price),
+      }),
+      [
+        { text: tr('common.back'), style: 'cancel' },
+        {
+          text: tr('requestDetail.acceptBid'),
+          onPress: () =>
+            accept.mutate(p.id, {
+              onSuccess: () => setAccepted(p),
+              onError: (e) => Alert.alert(tr('common.error'), (e as Error).message),
+            }),
+        },
+      ],
+    );
 
   const onDecline = (p: Proposal) =>
     Alert.alert(tr('requestDetail.declineConfirmTitle'), tr('requestDetail.declineConfirmBody'), [
@@ -120,6 +146,8 @@ export function ProposalsList({
   };
 
   return (
+    <>
+      {accepted ? <SuccessSplash onDone={() => setAccepted(null)} /> : null}
     <View style={{ gap: 14 }}>
       <Row>
         <SectionLabel count={items.length}>{tr('requestDetail.proposalsLabel')}</SectionLabel>
@@ -185,6 +213,7 @@ export function ProposalsList({
         loading={counter.isPending}
       />
     </View>
+    </>
   );
 }
 

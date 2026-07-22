@@ -428,7 +428,10 @@
     "workLabel": "Work in progress",
     "workEmpty": "The pro is working. Parts and notes will show up here.",
     "currentTotal": "Current total",
-    "actionsLockedUntil": "The pro is on the way. Rescheduling and no-show unlock at {{time}}."
+    "actionsLockedUntil": "The pro is on the way. Rescheduling and no-show unlock at {{time}}.",
+    "acceptConfirmTitle": "Confirm hire?",
+    "acceptConfirmBody": "You are hiring {{provider}} for {{value}}. The other bids will be declined.",
+    "acceptConfirmProviderFallback": "this provider"
   },
   "receipt": {
     "title": "Receipt",

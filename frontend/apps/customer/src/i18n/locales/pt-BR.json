@@ -428,7 +428,10 @@
     "workLabel": "O que está sendo feito",
     "workEmpty": "O profissional está trabalhando. As peças e observações aparecem aqui.",
     "currentTotal": "Total atual",
-    "actionsLockedUntil": "O profissional está a caminho. As opções de remarcar ou relatar ausência liberam às {{time}}."
+    "actionsLockedUntil": "O profissional está a caminho. As opções de remarcar ou relatar ausência liberam às {{time}}.",
+    "acceptConfirmTitle": "Confirmar contratação?",
+    "acceptConfirmBody": "Você vai contratar {{provider}} por {{value}}. As outras propostas serão recusadas.",
+    "acceptConfirmProviderFallback": "este prestador"
   },
   "receipt": {
     "title": "Recibo",
