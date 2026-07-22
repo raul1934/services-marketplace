@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Chama Fácil — guincho, chaveiro, encanador em minutos</title>
+<title>Chama Fácil — guincho e chaveiro 24h em São José do Rio Preto</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg" />
-<meta name="description" content="Você diz quanto quer pagar, profissionais verificados perto de você mandam propostas e você acompanha no mapa. Guincho, chaveiro, encanador, eletricista e mais. Pix, cartão ou dinheiro, só depois do serviço." />
+<meta name="description" content="Guincho, chaveiro, bateria e pneu em São José do Rio Preto. Você diz quanto quer pagar, recebe propostas de profissionais verificados perto de você e acompanha no mapa. Pix, cartão ou dinheiro, só depois do serviço." />
 <link rel="canonical" href="https://chamafacil.app/" />
 <!-- A home serve os dois idiomas na mesma URL (o botão EN troca os text-nodes),
      então os dois hreflang apontam para ela — é o que a documentação do Google
@@ -24,15 +24,15 @@
 <meta property="og:site_name" content="Chama Fácil" />
 <meta property="og:locale" content="pt_BR" />
 <meta property="og:locale:alternate" content="en_US" />
-<meta property="og:title" content="Um profissional verificado na sua porta, em minutos" />
-<meta property="og:description" content="Guincho, chaveiro, encanador, eletricista. Você define o orçamento, compara propostas e acompanha no mapa. Pix, cartão ou dinheiro — só depois do serviço." />
+<meta property="og:title" content="Pane na estrada? Socorro chega em minutos." />
+<meta property="og:description" content="Guincho, chaveiro, bateria e pneu em São José do Rio Preto. Você define o orçamento, compara propostas e acompanha no mapa. Pix, cartão ou dinheiro — só depois do serviço." />
 <meta property="og:image" content="https://chamafacil.app/og.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Chama Fácil — ajuda, rápido" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Um profissional verificado na sua porta, em minutos" />
-<meta name="twitter:description" content="Guincho, chaveiro, encanador, eletricista. Você define o orçamento, compara propostas e acompanha no mapa." />
+<meta name="twitter:title" content="Pane na estrada? Socorro chega em minutos." />
+<meta name="twitter:description" content="Guincho, chaveiro, bateria e pneu em Rio Preto. Você define o orçamento, compara propostas e acompanha no mapa." />
 <meta name="twitter:image" content="https://chamafacil.app/og.png" />
 <!-- Onde vive POST /api/v1/waitlist e GET /api/v1/service-categories -->
 <meta name="api-base" content="https://api.chamafacil.app" />
@@ -114,8 +114,8 @@
       "name": "Chama Fácil",
       "url": "https://chamafacil.app/",
       "logo": "https://chamafacil.app/logo.svg",
-      "description": "Marketplace de serviços sob demanda: guincho, chaveiro, encanador, eletricista e mais, com profissionais verificados e acompanhamento em tempo real.",
-      "areaServed": { "@type": "Country", "name": "Brasil" }
+      "description": "Marketplace de socorro veicular sob demanda: guincho, chaveiro, bateria e troca de pneu, com profissionais verificados e acompanhamento em tempo real.",
+      "areaServed": { "@type": "City", "name": "São José do Rio Preto", "addressRegion": "SP", "addressCountry": "BR" }
     },
     {
       "@type": "WebSite",
@@ -133,7 +133,7 @@
         {
           "@type": "Question",
           "name": "Onde a Chama Fácil está disponível?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Estamos abrindo o acesso antecipado por cidade. Entre na lista e avisamos assim que ativarmos na sua — quem entra cedo tem prioridade." }
+          "acceptedAnswer": { "@type": "Answer", "text": "A primeira cidade é São José do Rio Preto (SP), começando pelo socorro veicular. Abrimos praça por praça, e só ativamos uma quando há profissionais suficientes para o primeiro chamado ser atendido de verdade. Entre na lista da sua cidade — é ela que define a ordem." }
         },
         {
           "@type": "Question",
@@ -319,6 +319,13 @@
   .lp-trust .ti .tn { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
   .lp-trust .ti .tk { font-size: 13px; font-weight: 700; color: var(--ink-3); max-width: 14ch; line-height: 1.25; }
   .lp-trust .ti .tic { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+
+  /* Faixa "em breve": presente, mas visivelmente de segunda ordem — sem card,
+     sem CTA, sem cor de destaque. */
+  .lp-soon { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .lp-soonlabel { font-family: var(--mono); font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  .lp-soonitems { display: flex; gap: 10px; flex-wrap: wrap; }
+  .lp-soonitem { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink-3); font-size: 13.5px; font-weight: 700; }
 
   .lp-feat { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
   .lp-featlist { display: flex; flex-direction: column; }
@@ -602,9 +609,15 @@
   <div class="lp-glow"></div>
   <div class="lp-wrap">
     <div>
-      <span class="lp-eyebrow">Ajuda, rápido</span>
-      <h1>Um profissional<br/>verificado na sua<br/>porta, em minutos.</h1>
-      <p class="lp-sub">Guincho, chaveiro, encanador, eletricista. Você diz quanto quer pagar, compara propostas de quem está perto e acompanha no mapa.</p>
+      <!-- O hero fala de socorro veicular em Rio Preto, e não de "manutenção de
+           ativos no Brasil inteiro", porque é isso que vai existir de verdade no
+           lançamento. Prometer quatro verticais em 5.570 municípios antes de ter
+           liquidez em nenhum lugar é o caminho conhecido para o primeiro chamado
+           não receber proposta — e a primeira experiência ruim não tem segunda
+           chance. Ver marketing-audit/praca-de-lancamento.md. -->
+      <span class="lp-eyebrow">Começando por Rio Preto</span>
+      <h1>Pane na estrada?<br/>Socorro chega<br/>em minutos.</h1>
+      <p class="lp-sub">Guincho, chaveiro, bateria, pneu. Você diz quanto quer pagar, compara propostas de quem está perto e acompanha o profissional no mapa.</p>
       <div class="lp-cta">
         <a class="lp-btn grad lg" href="#join">Entrar na lista de espera</a>
       </div>
@@ -662,7 +675,7 @@
       <div class="phone ph-mid">
         <span class="nub"></span>
         <div class="scr">
-          <div class="ph-top"><div class="h">Chamado urgente</div><div class="t">Pneu furado · Av. Paulista</div></div>
+          <div class="ph-top"><div class="h">Chamado urgente</div><div class="t">Pneu furado · Av. Bady Bassitt</div></div>
           <div class="ph-body">
             <div class="ph-cardhead"><span style="font-weight:800;font-size:14px">3 propostas</span><span class="ph-badge">AO VIVO</span></div>
             <div class="ph-bid best">
@@ -690,7 +703,7 @@
     <div class="ti"><span class="tic" data-ic="flash"></span><div><div class="tn">Propostas</div><div class="tk">em minutos, não em dias</div></div></div>
     <div class="ti"><span class="tic" data-ic="shieldCheck"></span><div><div class="tn">100%</div><div class="tk">profissionais verificados</div></div></div>
     <div class="ti"><span class="tic" data-ic="star"></span><div><div class="tn">Avaliação mútua</div><div class="tk">cliente e profissional</div></div></div>
-    <div class="ti"><span class="tic" data-ic="pin"></span><div><div class="tn">Cidade por cidade</div><div class="tk">entre na lista da sua</div></div></div>
+    <div class="ti"><span class="tic" data-ic="pin"></span><div><div class="tn">Rio Preto</div><div class="tk">primeira cidade a abrir</div></div></div>
   </div>
 </div>
 
@@ -723,8 +736,8 @@
     <div class="lp-joingrid">
       <div class="lp-joinaside reveal">
         <span class="lp-eyebrow">Acesso antecipado</span>
-        <h2 style="font-size:clamp(30px,4vw,44px);margin-top:12px">Seja o primeiro quando a Chama Fácil chegar perto de você.</h2>
-        <p style="color:var(--ink-2);font-size:17px;margin-top:14px">Entre na lista e avisamos assim que lançarmos na sua cidade — com vantagens para os primeiros.</p>
+        <h2 style="font-size:clamp(30px,4vw,44px);margin-top:12px">Abrimos primeiro em Rio Preto.</h2>
+        <p style="color:var(--ink-2);font-size:17px;margin-top:14px">De outra cidade? Entre na lista mesmo assim — é ela que decide para onde vamos depois, e a fila é por praça.</p>
         <div class="lp-pt"><span class="pc" data-ic="check"></span><span class="tx">Acesso prioritário no lançamento</span></div>
         <div class="lp-pt"><span class="pc" data-ic="check"></span><span class="tx">Créditos de fundador nos primeiros serviços</span></div>
         <div class="lp-pt"><span class="pc" data-ic="check"></span><span class="tx">Sem spam — só um e-mail de lançamento</span></div>
@@ -789,12 +802,27 @@
 
 <section class="lp-sec" id="services">
   <div class="lp-wrap">
-    <div class="lp-sechead"><span class="lp-eyebrow">O que cobrimos</span><h2>Uma plataforma para toda manutenção</h2><p>Do socorro veicular ao reparo predial — chame um profissional verificado em segundos e mantenha o histórico de cada ativo.</p></div>
+    <div class="lp-sechead"><span class="lp-eyebrow">O que abre primeiro</span><h2>Socorro veicular, para começar</h2><p>É a categoria onde o tempo importa mais e onde a Chama Fácil abre primeiro. As outras vêm em seguida, praça por praça.</p></div>
     <div class="lp-svcgrid" id="svcGrid">
-      <!-- populado dinamicamente por /api/v1/service-categories; fallback estático abaixo -->
-      <div class="lp-svc"><div class="lp-ic" data-ic="car"></div><h3>Veicular</h3><p>De volta à estrada, rápido.</p><div class="lp-tags"><span class="lp-tag">Pneu furado</span><span class="lp-tag">Bateria</span><span class="lp-tag">Guincho</span><span class="lp-tag">Chaveiro</span></div></div>
-      <div class="lp-svc"><div class="lp-ic" data-ic="drop"></div><h3>Casa &amp; imóvel</h3><p>Reparos e manutenção sob demanda.</p><div class="lp-tags"><span class="lp-tag">Encanamento</span><span class="lp-tag">Elétrica</span><span class="lp-tag">Limpeza</span><span class="lp-tag">Chaveiro</span></div></div>
-      <div class="lp-svc"><div class="lp-ic" data-ic="paw"></div><h3>Pets</h3><p>Cuidado que vem até você.</p><div class="lp-tags"><span class="lp-tag">Passeio</span><span class="lp-tag">Banho &amp; tosa</span><span class="lp-tag">Veterinário</span></div></div>
+      <!-- Só a vertical de lançamento entra na grade; as demais viram a faixa
+           "em breve" logo abaixo. O JS que popula isto a partir da API respeita
+           a mesma separação (ver LAUNCH_TYPE). -->
+      <div class="lp-svc"><div class="lp-ic" data-ic="truck"></div><h3>Guincho</h3><p>Remoção para onde você precisar.</p><div class="lp-tags"><span class="lp-tag">Pane</span><span class="lp-tag">Colisão</span><span class="lp-tag">24h</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="battery"></div><h3>Bateria e pneu</h3><p>Resolvido no lugar, sem rebocar.</p><div class="lp-tags"><span class="lp-tag">Carga</span><span class="lp-tag">Troca</span><span class="lp-tag">Estepe</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="key"></div><h3>Chaveiro e mecânico</h3><p>Chave trancada, pane elétrica, falta de combustível.</p><div class="lp-tags"><span class="lp-tag">Chaveiro</span><span class="lp-tag">Mecânico móvel</span><span class="lp-tag">Combustível</span></div></div>
+    </div>
+
+    <!-- Casa, beleza e pets continuam na página, mas sem CTA próprio e sem
+         prometer data. Tirar de vez descartaria quem chega procurando
+         encanador; dar o mesmo peso do veicular diluiria o foco que a decisão
+         de praça existe para criar. -->
+    <div class="lp-soon" id="svcSoon">
+      <span class="lp-soonlabel">Em breve na sua região</span>
+      <span class="lp-soonitems">
+        <span class="lp-soonitem"><span data-ic="home" data-sz="15"></span>Casa &amp; imóvel</span>
+        <span class="lp-soonitem"><span data-ic="sparkles" data-sz="15"></span>Beleza</span>
+        <span class="lp-soonitem"><span data-ic="paw" data-sz="15"></span>Pets</span>
+      </span>
     </div>
   </div>
 </section>
@@ -833,7 +861,7 @@
                   <div class="ad-slabel">Chamado ativo</div>
                   <div class="ad-actcard">
                     <span class="ad-actic" data-ic="car"></span>
-                    <div style="flex:1;min-width:0"><div class="ad-acttitle">Guincho · Av. Paulista</div><div class="ad-actsub">Em cotação · 3 propostas</div></div>
+                    <div style="flex:1;min-width:0"><div class="ad-acttitle">Guincho · Av. Bady Bassitt</div><div class="ad-actsub">Em cotação · 3 propostas</div></div>
                     <span class="ad-chev" data-ic="chevron"></span>
                   </div>
                   <div class="ad-slabel">Ajuda rápida</div>
@@ -852,7 +880,7 @@
 
               <!-- 1: Propostas -->
               <div class="ad-screen" data-screen="1">
-                <div class="ph-top"><div class="h">Chamado urgente</div><div class="t">Pneu furado · Av. Paulista</div></div>
+                <div class="ph-top"><div class="h">Chamado urgente</div><div class="t">Pneu furado · Av. Bady Bassitt</div></div>
                 <div class="ph-body">
                   <div class="ph-cardhead"><span style="font-weight:800;font-size:14px">3 propostas</span><span class="ph-badge">AO VIVO</span></div>
                   <div class="ph-bid best">
@@ -1012,7 +1040,7 @@
   <div class="lp-wrap">
     <div class="lp-sechead reveal"><span class="lp-eyebrow">Bom saber</span><h2>Perguntas frequentes</h2></div>
     <div class="lp-faq">
-      <div class="lp-faqitem"><div class="lp-faqq">Onde a Chama Fácil está disponível?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Estamos abrindo o acesso antecipado por cidade. Entre na lista e avisamos assim que ativarmos na sua — quem entra cedo tem prioridade.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Onde a Chama Fácil está disponível?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">A primeira cidade é São José do Rio Preto (SP), começando pelo socorro veicular. Abrimos praça por praça, e só ativamos uma quando há profissionais suficientes para o primeiro chamado ser atendido de verdade. Entre na lista da sua cidade — é ela que define a ordem.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Em quanto tempo o profissional chega?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Em chamados urgentes, a proposta chega em minutos e o profissional logo depois, conforme a distância. Em serviços agendados, você escolhe o dia e o horário.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Como é definido o preço?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Os profissionais são verificados?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade.</div></div>
@@ -1124,6 +1152,12 @@
   var API_BASE = (document.querySelector('meta[name="api-base"]') || {}).content || "";
 
   // dynamic service categories (grouped by backend `type`), with static fallback
+  // Vertical de lançamento. É a única que aparece na grade de serviços da home;
+  // as outras vão para a faixa "em breve". Trocar aqui é o suficiente para
+  // mudar o foco da página quando a próxima vertical abrir.
+  // Contexto da decisão: marketing-audit/praca-de-lancamento.md
+  var LAUNCH_TYPE = "roadside";
+
   var TYPE_META = {
     roadside: { icon: "car", title: "Veicular", sub: "De volta à estrada, rápido." },
     residential: { icon: "home", title: "Casa & imóvel", sub: "Reparos e manutenção sob demanda." },
@@ -1177,18 +1211,40 @@
         if (!groups[t]) { groups[t] = []; order.push(t); }
         groups[t].push(c);
       });
-      var grid = document.getElementById("svcGrid");
-      if (grid) {
-        grid.innerHTML = order.map(function (t) {
-          var m = TYPE_META[t] || { icon: "drop", title: t, sub: "" };
-          var tags = groups[t].slice(0, 6).map(function (c) {
-            var ic = (c.icon && L[c.icon]) ? c.icon : "";
-            return '<span class="lp-tag">' + (ic ? '<span data-ic="' + ic + '" data-sz="14"></span>' : "") + esc(c.name) + "</span>";
+      // A vertical de lançamento manda na grade; as outras só aparecem na faixa
+      // "em breve". Sem isto, o catálogo do backend reintroduziria na home as
+      // quatro verticais que a decisão de praça acabou de tirar de lá.
+      var lancamento = order.filter(function (t) { return t === LAUNCH_TYPE; });
+      var depois = order.filter(function (t) { return t !== LAUNCH_TYPE; });
+
+      var soon = document.getElementById("svcSoon");
+      if (soon) {
+        var itens = soon.querySelector(".lp-soonitems");
+        if (depois.length && itens) {
+          itens.innerHTML = depois.map(function (t) {
+            var m = TYPE_META[t] || { icon: "", title: t };
+            return '<span class="lp-soonitem">' + (m.icon ? '<span data-ic="' + m.icon + '" data-sz="15"></span>' : "") + esc(m.title) + "</span>";
           }).join("");
-          return '<div class="lp-svc"><div class="lp-ic" data-ic="' + m.icon + '"></div><h3>' + esc(m.title) + "</h3><p>" + esc(m.sub) + '</p><div class="lp-tags">' + tags + "</div></div>";
+          renderIcons(soon);
+        }
+        soon.style.display = depois.length ? "" : "none";
+      }
+
+      var grid = document.getElementById("svcGrid");
+      if (grid && lancamento.length) {
+        // Com uma vertical só, agrupar por tipo daria um card solitário numa
+        // grade de três colunas. Cada serviço vira o seu próprio card — que é
+        // também o que o leitor quer ver: "guincho" e "chaveiro", não "veicular".
+        var m = TYPE_META[LAUNCH_TYPE] || { icon: "car" };
+        grid.innerHTML = groups[LAUNCH_TYPE].slice(0, 6).map(function (c) {
+          var ic = (c.icon && L[c.icon]) ? c.icon : m.icon;
+          return '<div class="lp-svc"><div class="lp-ic" data-ic="' + ic + '"></div><h3>' + esc(c.name) + "</h3></div>";
         }).join("");
         renderIcons(grid);
       }
+      // O seletor do formulário continua com tudo: quem procura encanador deve
+      // conseguir dizer isso, e é esse sinal que decide qual vertical abre a
+      // seguir.
       buildServiceSelect(order);
       if (window.cfApplyLang) window.cfApplyLang(); // traduz grid + dropdown se em EN
     })
@@ -1431,26 +1487,25 @@
     "Serviços": "Services", "Planos": "Plans", "Seja prestador": "Become a pro",
     "Parcerias": "Partners", "Acesso antecipado": "Early access", "Como funciona": "How it works",
     // hero
-    "Ajuda, rápido": "Help, fast",
-    "Um profissional": "A verified pro", "verificado na sua": "at your door,",
-    "porta, em minutos.": "in minutes.",
-    "Guincho, chaveiro, encanador, eletricista. Você diz quanto quer pagar, compara propostas de quem está perto e acompanha no mapa.": "Tow truck, locksmith, plumber, electrician. You say what you want to pay, compare quotes from pros nearby and follow them on the map.",
+    "Começando por Rio Preto": "Starting in Rio Preto",
+    "Pane na estrada?": "Broken down?", "Socorro chega": "Help arrives", "em minutos.": "in minutes.",
+    "Guincho, chaveiro, bateria, pneu. Você diz quanto quer pagar, compara propostas de quem está perto e acompanha o profissional no mapa.": "Tow truck, locksmith, battery, tyre. You say what you want to pay, compare quotes from pros nearby and follow them on the map.",
     "Entrar na lista de espera": "Join the waitlist",
     "É profissional?": "Are you a pro?",
     "Você não paga por lead →": "You never pay for a lead →",
     "Profissionais verificados": "Verified pros", "Você": "You",
     "Define o orçamento": "Set the budget", "Já na lista de espera": "Already on the waitlist",
     // phone mockup
-    "Chamado urgente": "Urgent request", "Pneu furado · Av. Paulista": "Flat tire · Av. Paulista",
+    "Chamado urgente": "Urgent request", "Pneu furado · Av. Bady Bassitt": "Flat tire · Av. Bady Bassitt",
     "3 propostas": "3 quotes", "AO VIVO": "LIVE", "Melhor opção": "Best match",
     // trust strip
     "Propostas": "Quotes", "em minutos, não em dias": "in minutes, not days",
     "profissionais verificados": "verified pros",
     "Avaliação mútua": "Two-way ratings", "cliente e profissional": "customer and pro",
-    "Cidade por cidade": "City by city", "entre na lista da sua": "join the list for yours",
+    "Rio Preto": "Rio Preto", "primeira cidade a abrir": "first city to open",
     // join
-    "Seja o primeiro quando a Chama Fácil chegar perto de você.": "Be first when Chama Fácil reaches your area.",
-    "Entre na lista e avisamos assim que lançarmos na sua cidade — com vantagens para os primeiros.": "Join the list and we'll let you know the moment we launch in your city — with perks for the first ones.",
+    "Abrimos primeiro em Rio Preto.": "We open in Rio Preto first.",
+    "De outra cidade? Entre na lista mesmo assim — é ela que decide para onde vamos depois, e a fila é por praça.": "From another city? Join anyway — the list is what decides where we go next, and the queue is per city.",
     "Acesso prioritário no lançamento": "Priority access at launch",
     "Créditos de fundador nos primeiros serviços": "Founder credits on your first jobs",
     "Sem spam — só um e-mail de lançamento": "No spam — just one launch email",
@@ -1468,7 +1523,14 @@
     "Você está na lista!": "You're on the list!",
     "Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.": "We'll email you as soon as Chama Fácil reaches your area.",
     // services
-    "O que cobrimos": "What we cover", "Uma plataforma para toda manutenção": "One platform for all maintenance",
+    "O que abre primeiro": "What opens first", "Socorro veicular, para começar": "Roadside help, to start",
+    "É a categoria onde o tempo importa mais e onde a Chama Fácil abre primeiro. As outras vêm em seguida, praça por praça.": "It is the category where time matters most, and the one Chama Fácil opens first. The others follow, city by city.",
+    "Remoção para onde você precisar.": "Towed wherever you need.",
+    "Bateria e pneu": "Battery and tyre", "Resolvido no lugar, sem rebocar.": "Fixed on the spot, no towing.",
+    "Chaveiro e mecânico": "Locksmith and mechanic",
+    "Chave trancada, pane elétrica, falta de combustível.": "Keys locked in, electrical fault, out of fuel.",
+    "Colisão": "Collision", "Mecânico móvel": "Mobile mechanic", "Combustível": "Fuel",
+    "Em breve na sua região": "Coming soon to your area",
     // tags do fallback estático de categorias (quando /service-categories não responde)
     "Elétrica": "Electrical", "Veterinário": "Vet",
     "Do socorro veicular ao reparo predial — chame um profissional verificado em segundos e mantenha o histórico de cada ativo.": "From roadside help to building repairs — call a verified pro in seconds and keep every asset's history.",
@@ -1534,7 +1596,7 @@
     // faq
     "Bom saber": "Good to know", "Perguntas frequentes": "Frequently asked questions",
     "Onde a Chama Fácil está disponível?": "Where is Chama Fácil available?",
-    "Estamos abrindo o acesso antecipado por cidade. Entre na lista e avisamos assim que ativarmos na sua — quem entra cedo tem prioridade.": "We're opening early access city by city. Join the list and we'll let you know the moment we go live in yours — early joiners get priority.",
+    "A primeira cidade é São José do Rio Preto (SP), começando pelo socorro veicular. Abrimos praça por praça, e só ativamos uma quando há profissionais suficientes para o primeiro chamado ser atendido de verdade. Entre na lista da sua cidade — é ela que define a ordem.": "The first city is São José do Rio Preto (SP), starting with roadside help. We open one city at a time, and only switch one on once there are enough pros for the first request to actually be answered. Join the list for your city — that is what sets the order.",
     "Em chamados urgentes, a proposta chega em minutos e o profissional logo depois, conforme a distância. Em serviços agendados, você escolhe o dia e o horário.": "For urgent requests, quotes arrive in minutes and the pro shortly after, depending on distance. For scheduled jobs, you pick the day and time.",
     "Garanta seu acesso antecipado": "Get your early access", "Cliente · Curitiba": "Customer · Curitiba",
     "Em quanto tempo o profissional chega?": "How fast does the pro arrive?",
@@ -1567,7 +1629,7 @@
     "amanhã, 09:00": "tomorrow, 9:00", "em breve": "soon",
     // device com abas (telas do app)
     "Início": "Home", "Propostas": "Proposals", "Acompanhar": "Track", "Histórico": "History",
-    "Chamado ativo": "Active request", "Guincho · Av. Paulista": "Tow · Av. Paulista",
+    "Chamado ativo": "Active request", "Guincho · Av. Bady Bassitt": "Tow · Av. Bady Bassitt",
     "Em cotação · 3 propostas": "Getting quotes · 3 offers", "Ajuda rápida": "Quick help",
     "Precisa de ajuda?": "Need help?", "Um profissional em segundos.": "A pro in seconds."
   };
@@ -1577,12 +1639,12 @@
   // Mudou uma, mude a outra.
   var META = {
     title: {
-      pt: "Chama Fácil — guincho, chaveiro, encanador em minutos",
-      en: "Chama Fácil — tow truck, locksmith, plumber in minutes"
+      pt: "Chama Fácil — guincho e chaveiro 24h em São José do Rio Preto",
+      en: "Chama Fácil — 24h tow truck and locksmith in São José do Rio Preto"
     },
     desc: {
-      pt: "Você diz quanto quer pagar, profissionais verificados perto de você mandam propostas e você acompanha no mapa. Guincho, chaveiro, encanador, eletricista e mais. Pix, cartão ou dinheiro, só depois do serviço.",
-      en: "You say what you want to pay, verified pros nearby send quotes and you follow them on the map. Tow truck, locksmith, plumber, electrician and more. Pay only after the job is done."
+      pt: "Guincho, chaveiro, bateria e pneu em São José do Rio Preto. Você diz quanto quer pagar, recebe propostas de profissionais verificados perto de você e acompanha no mapa. Pix, cartão ou dinheiro, só depois do serviço.",
+      en: "Tow truck, locksmith, battery and tyre help in São José do Rio Preto. You say what you want to pay, verified pros nearby send quotes and you follow them on the map. Pay only after the job is done."
     }
   };
 
