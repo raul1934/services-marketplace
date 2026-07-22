@@ -8,6 +8,7 @@ use App\Models\ServiceCategory;
 use App\Models\WaitlistEntry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Public endpoints consumed by the marketing landing page (no auth). Kept in one
@@ -31,6 +32,34 @@ class LandingController extends Controller
         WaitlistEntry::create($data);
 
         return response()->json(['message' => __('messages.waitlist_joined')], 201);
+    }
+
+    /**
+     * How many people are on the waitlist, for the landing's social proof.
+     *
+     * The hero used to claim "12k+ jobs done" and a 4.9 rating for a product
+     * that has not served anyone yet. The honest replacement is the one number
+     * we can actually prove — but only once it is large enough to help: a
+     * counter saying "27 people" argues against joining. Below the floor the
+     * endpoint reports null and the landing keeps the block hidden.
+     *
+     * Cached because it sits on the hero of every visit and the exact value
+     * never matters — one minute of staleness is invisible to the reader and
+     * turns a per-visit COUNT into one query a minute.
+     */
+    public function waitlistCount(): JsonResponse
+    {
+        $floor = (int) config('landing.waitlist_count_floor', 100);
+
+        $count = Cache::remember(
+            'landing:waitlist_count',
+            now()->addMinute(),
+            fn () => WaitlistEntry::query()->count()
+        );
+
+        return response()->json([
+            'data' => ['count' => $count >= $floor ? $count : null],
+        ]);
     }
 
     /** Active service categories for the landing's dynamic services grid. */
