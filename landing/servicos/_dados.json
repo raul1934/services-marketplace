@@ -1,0 +1,259 @@
+{
+  "_comment": "Conteúdo das páginas de serviço × cidade. Cada serviço precisa dizer algo que os outros não dizem: doze páginas com o mesmo texto trocando uma palavra são doorway pages, e o Google trata como spam — o efeito é o oposto do pretendido. Se não houver o que escrever de específico sobre um serviço, é melhor não gerar a página dele. Rode `python landing/servicos/gerar.py` depois de editar.",
+
+  "cidade": {
+    "nome": "São José do Rio Preto",
+    "curto": "Rio Preto",
+    "uf": "SP",
+    "slug": "sao-jose-do-rio-preto"
+  },
+
+  "servicos": [
+    {
+      "slug": "guincho",
+      "nome": "Guincho",
+      "titulo": "Guincho 24h em São José do Rio Preto",
+      "h1": "Guincho em Rio Preto,<br/>a qualquer hora",
+      "descricao": "Guincho 24 horas em São José do Rio Preto. Você diz quanto quer pagar, recebe propostas de guincheiros verificados perto de você e acompanha o reboque chegando no mapa.",
+      "icone": "truck",
+      "lead": "O carro parou e não vai sair dali sozinho. Você diz para onde precisa levar, recebe propostas de guincheiros verificados que estão perto e escolhe pelo preço, pelo tempo e pela nota — não pelo primeiro número que alguém disser no telefone.",
+      "quando": [
+        "Pane que impede o carro de andar — motor, câmbio, embreagem",
+        "Colisão, mesmo sem vítima, quando o carro perdeu condição de rodar",
+        "Roda travada, freio agarrado ou suspensão quebrada",
+        "Carro sem habilitado disponível para dirigir até a oficina"
+      ],
+      "preco": [
+        "Distância entre o ponto de coleta e o destino — é o que mais pesa",
+        "Tipo do veículo: carro de passeio, SUV, utilitário ou moto",
+        "Se o carro engata em ponto morto e as rodas giram livres",
+        "Horário e acesso: madrugada, subsolo e estrada custam mais"
+      ],
+      "enquanto": [
+        "Pare em local seguro, ligue o pisca-alerta e use o triângulo a partir de 30 passos atrás do carro",
+        "Em avenida movimentada, saia do veículo pelo lado da calçada e espere longe da pista",
+        "Tenha em mãos o documento do carro e o endereço exato do destino",
+        "Fotografe o estado do veículo antes do embarque — protege os dois lados"
+      ],
+      "faq": [
+        {
+          "p": "O guincho leva para qualquer oficina?",
+          "r": "Leva para onde você indicar: sua oficina de confiança, a concessionária, sua casa. O destino entra no chamado antes das propostas, porque é ele que define o preço."
+        },
+        {
+          "p": "Cabe passageiro no guincho?",
+          "r": "Em geral cabe uma pessoa na cabine, mas depende do veículo do guincheiro. Diga no chamado quantas pessoas precisam ir junto — assim quem não puder levar nem envia proposta."
+        },
+        {
+          "p": "E se o carro estiver em garagem subterrânea?",
+          "r": "Informe no chamado. Subsolo com pé-direito baixo exige equipamento específico, e é melhor isso aparecer antes da proposta do que na hora em que o guincho chega e não desce."
+        }
+      ]
+    },
+    {
+      "slug": "bateria",
+      "nome": "Bateria",
+      "titulo": "Bateria de carro em São José do Rio Preto — socorro e troca",
+      "h1": "Bateria arriada<br/>em Rio Preto",
+      "descricao": "Socorro de bateria em São José do Rio Preto: carga rápida no local ou troca por uma nova, com profissionais verificados e preço combinado antes.",
+      "icone": "battery",
+      "lead": "Girou a chave e só ouviu o clique. Na maioria das vezes o problema resolve no lugar, sem guincho — e sai muito mais barato do que rebocar até uma oficina para descobrir isso lá.",
+      "quando": [
+        "O carro não dá partida e as luzes do painel estão fracas ou piscam",
+        "Só ouve um clique seco ao girar a chave",
+        "O carro pegou com chupeta mas morreu de novo pouco depois",
+        "A bateria tem mais de três anos e começou a falhar em dia frio"
+      ],
+      "preco": [
+        "Carga no local é bem mais barata que substituição",
+        "Amperagem e marca da bateria nova, se for o caso",
+        "Se o problema for o alternador, e não a bateria — aí é serviço de mecânico",
+        "Entrega da bateria nova no local, incluindo o descarte da antiga"
+      ],
+      "enquanto": [
+        "Não insista na partida: tentativas seguidas descarregam o que sobrou e podem danificar o motor de arranque",
+        "Desligue ar, som e faróis antes da próxima tentativa",
+        "Anote há quanto tempo a bateria foi trocada — muda o diagnóstico",
+        "Se o carro pegou com chupeta e morreu ao desligar, o suspeito é o alternador"
+      ],
+      "faq": [
+        {
+          "p": "Dá para resolver sem trocar a bateria?",
+          "r": "Muitas vezes sim. Carga no local resolve quando a bateria ainda tem vida e só descarregou — farol esquecido aceso, carro parado por semanas. O profissional testa antes de recomendar a troca."
+        },
+        {
+          "p": "A bateria nova vem com garantia?",
+          "r": "A garantia é a do fabricante, e o profissional entrega a nota. Confirme o prazo na proposta antes de aceitar."
+        },
+        {
+          "p": "Levam a bateria velha embora?",
+          "r": "Sim, e é o certo: bateria é resíduo perigoso e tem descarte regulamentado. Quem troca é obrigado a dar a destinação correta."
+        }
+      ]
+    },
+    {
+      "slug": "pneu",
+      "nome": "Troca de Pneu",
+      "titulo": "Troca de pneu em São José do Rio Preto — socorro no local",
+      "h1": "Pneu furado<br/>em Rio Preto",
+      "descricao": "Troca de pneu em São José do Rio Preto, no lugar onde você parou. Estepe, reparo ou pneu novo, com profissional verificado e preço acertado antes.",
+      "icone": "car",
+      "lead": "Furou, e trocar na beira da via nem sempre é possível — nem sempre é seguro. Chame alguém que faz isso todo dia, com macaco adequado e sinalização, e continue a viagem sem virar estatística.",
+      "quando": [
+        "Pneu furado ou rasgado sem estepe utilizável",
+        "Estepe existe, mas falta macaco, chave ou o parafuso é antifurto",
+        "Você parou em avenida movimentada, curva ou lugar sem acostamento",
+        "Rodas travadas por parafuso emperrado ou empenado"
+      ],
+      "preco": [
+        "Só montar o estepe é o mais barato",
+        "Reparo do furo, quando o pneu ainda tem condição de ser consertado",
+        "Pneu novo entregue no local, com medida e marca acordadas antes",
+        "Local do atendimento: rodovia e madrugada custam mais que rua de bairro"
+      ],
+      "enquanto": [
+        "Saia da pista. Se possível, empurre o carro para o acostamento antes de parar de vez",
+        "Triângulo a 30 passos atrás em via urbana; mais longe em rodovia",
+        "Espere fora do carro e afastado da pista, nunca sentado dentro dele",
+        "Rodar com o pneu vazio destrói a roda — o prejuízo passa de um pneu para dois itens"
+      ],
+      "faq": [
+        {
+          "p": "Dá para consertar o pneu ou tenho que comprar outro?",
+          "r": "Depende de onde é o furo. Na banda de rodagem, geralmente conserta; na lateral, não tem reparo seguro. O profissional avalia no local e diz antes de fazer."
+        },
+        {
+          "p": "Vocês levam pneu novo até mim?",
+          "r": "Vários profissionais levam. Informe a medida que está no flanco do pneu — algo como 195/55 R15 — para receber proposta com o preço já certo."
+        },
+        {
+          "p": "E se o parafuso for antifurto e eu não tenho a chave?",
+          "r": "Diga isso no chamado. Existe ferramenta para remover, mas nem todo profissional carrega — melhor filtrar antes do que descobrir com ele já no local."
+        }
+      ]
+    },
+    {
+      "slug": "chaveiro",
+      "nome": "Chaveiro (carro)",
+      "titulo": "Chaveiro automotivo em São José do Rio Preto",
+      "h1": "Chave trancada<br/>no carro, em Rio Preto",
+      "descricao": "Chaveiro automotivo em São José do Rio Preto: abertura sem danificar a porta, cópia de chave e reparo de chave codificada, com profissional verificado.",
+      "icone": "key",
+      "lead": "A chave ficou dentro, quebrou na fechadura ou simplesmente sumiu. Abrir carro moderno sem estragar exige ferramenta certa — improviso com arame custa mais caro que o chaveiro.",
+      "quando": [
+        "Chave trancada dentro do carro, às vezes com o motor ligado",
+        "Chave quebrada dentro da fechadura ou da ignição",
+        "Perda da única chave, sem cópia em lugar nenhum",
+        "Chave com controle que parou de destravar"
+      ],
+      "preco": [
+        "Abertura simples é o serviço mais barato",
+        "Cópia de chave com transponder exige codificação e equipamento próprio",
+        "Chave canivete ou presencial custa mais que a chave simples",
+        "Ano e modelo mudam bastante o preço — informe no chamado"
+      ],
+      "enquanto": [
+        "Confira todas as portas e o porta-malas antes: às vezes uma ficou destravada",
+        "Se houver criança ou animal dentro do carro em dia quente, ligue 193 — é emergência, não espere",
+        "Tenha o documento do veículo à mão: o profissional é obrigado a confirmar que o carro é seu",
+        "Não force o vidro nem use arame — o conserto do compensador de vidro sai bem mais caro"
+      ],
+      "faq": [
+        {
+          "p": "Abrir o carro estraga a porta ou a borracha?",
+          "r": "Com ferramenta adequada, não. É justamente o que separa o profissional do improviso — e o motivo de cobrar mais que um arame."
+        },
+        {
+          "p": "Fazem chave nova se eu perdi a única?",
+          "r": "Fazem, mas é mais demorado e mais caro: sem chave original, o profissional precisa gerar o código e programar o transponder. Informe ano e modelo no chamado."
+        },
+        {
+          "p": "Preciso provar que o carro é meu?",
+          "r": "Sim, e desconfie de quem não pedir. Documento do veículo e seu documento com foto — é o que impede que o serviço vire ferramenta de furto."
+        }
+      ]
+    },
+    {
+      "slug": "combustivel",
+      "nome": "Combustível",
+      "titulo": "Acabou a gasolina em São José do Rio Preto — socorro no local",
+      "h1": "Ficou sem combustível<br/>em Rio Preto",
+      "descricao": "Entrega de combustível em São José do Rio Preto para quem ficou na seca. Quantidade suficiente para chegar ao posto, com profissional verificado.",
+      "icone": "drop",
+      "lead": "Acontece com todo mundo uma vez. O socorro traz o suficiente para você chegar ao posto mais próximo por conta própria — não é abastecimento, é resgate.",
+      "quando": [
+        "O carro morreu e o marcador está no fundo da reserva",
+        "Você parou em local sem posto por perto ou sem como empurrar",
+        "Está de madrugada, com posto fechado no caminho",
+        "Errou o combustível e precisa de orientação antes de dar partida"
+      ],
+      "preco": [
+        "O combustível em si, pela quantidade entregue",
+        "A taxa de deslocamento até você, que é a maior parte do valor",
+        "Distância e horário — rodovia e madrugada pesam",
+        "Tipo de combustível: gasolina, etanol ou diesel"
+      ],
+      "enquanto": [
+        "Não insista na partida com o tanque vazio: a bomba de combustível se resfria com o próprio líquido e queima seca",
+        "Se conseguiu parar em declive, deixe o carro em ponto seguro e sinalizado",
+        "Confirme qual combustível o carro usa antes de pedir — abastecer errado é prejuízo bem maior",
+        "Se você abasteceu errado, NÃO dê partida. Peça guincho, não combustível"
+      ],
+      "faq": [
+        {
+          "p": "Quanto combustível eles trazem?",
+          "r": "O suficiente para você chegar ao posto mais próximo por conta própria — normalmente cinco a dez litros. Não é abastecimento completo, e o objetivo é justamente tirar você do lugar."
+        },
+        {
+          "p": "Trazem diesel também?",
+          "r": "Alguns profissionais sim. Informe o combustível no chamado para receber proposta só de quem atende."
+        },
+        {
+          "p": "Coloquei o combustível errado. Vocês resolvem?",
+          "r": "Nesse caso não peça combustível: peça guincho, e não dê partida. Com o motor ligado o combustível errado circula pelo sistema e o conserto multiplica de valor."
+        }
+      ]
+    },
+    {
+      "slug": "mecanico",
+      "nome": "Mecânico Móvel",
+      "titulo": "Mecânico a domicílio em São José do Rio Preto",
+      "h1": "Mecânico que vai<br/>até você, em Rio Preto",
+      "descricao": "Mecânico móvel em São José do Rio Preto: diagnóstico e reparo simples no local, sem levar o carro para a oficina quando não é preciso.",
+      "icone": "wrench",
+      "lead": "Nem todo problema precisa de guincho e oficina. Um mecânico com as ferramentas certas resolve boa parte das paradas no próprio lugar — e quando não resolve, você já sai sabendo o que é antes de pagar reboque.",
+      "quando": [
+        "O carro falha, engasga ou perde força sem motivo claro",
+        "Luz de injeção acesa e você quer saber se dá para rodar",
+        "Correia, mangueira, sensor ou cabo que dá para trocar no local",
+        "Diagnóstico antes de decidir se vale rebocar até uma oficina"
+      ],
+      "preco": [
+        "O diagnóstico costuma ser cobrado à parte do reparo",
+        "Peças, sempre detalhadas e aprovadas por você antes de instalar",
+        "Complexidade: troca de sensor é uma coisa, correia dentada é outra",
+        "Deslocamento até o local, e o horário do atendimento"
+      ],
+      "enquanto": [
+        "Anote o que acontece: barulho, cheiro, luz do painel, em que momento aparece",
+        "Se saiu fumaça ou o ponteiro da temperatura subiu, não ligue o motor de novo",
+        "Fotografe o painel com as luzes acesas — ajuda o mecânico antes de chegar",
+        "Cheiro de combustível ou de queimado: afaste-se do carro e chame ajuda"
+      ],
+      "faq": [
+        {
+          "p": "Mecânico móvel resolve qualquer coisa?",
+          "r": "Não, e quem prometer isso está exagerando. Resolve o que dá para fazer sem elevador e sem bancada. O ganho é sair do escuro: você descobre o que é antes de gastar com reboque."
+        },
+        {
+          "p": "As peças vêm com ele?",
+          "r": "Peça comum sim; específica costuma precisar de compra. Em ambos os casos o valor é detalhado e aprovado por você antes de ser instalado."
+        },
+        {
+          "p": "Se ele não conseguir resolver, eu pago mesmo assim?",
+          "r": "O diagnóstico é trabalho e costuma ser cobrado — confirme na proposta. Mas você sai com a informação, que é o que decide se vale reboque ou não."
+        }
+      ]
+    }
+  ]
+}

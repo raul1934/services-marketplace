@@ -818,9 +818,9 @@
       <!-- Só a vertical de lançamento entra na grade; as demais viram a faixa
            "em breve" logo abaixo. O JS que popula isto a partir da API respeita
            a mesma separação (ver LAUNCH_TYPE). -->
-      <div class="lp-svc"><div class="lp-ic" data-ic="truck"></div><h3>Guincho</h3><p>Remoção para onde você precisar.</p><div class="lp-tags"><span class="lp-tag">Pane</span><span class="lp-tag">Colisão</span><span class="lp-tag">24h</span></div></div>
-      <div class="lp-svc"><div class="lp-ic" data-ic="battery"></div><h3>Bateria e pneu</h3><p>Resolvido no lugar, sem rebocar.</p><div class="lp-tags"><span class="lp-tag">Carga</span><span class="lp-tag">Troca</span><span class="lp-tag">Estepe</span></div></div>
-      <div class="lp-svc"><div class="lp-ic" data-ic="key"></div><h3>Chaveiro e mecânico</h3><p>Chave trancada, pane elétrica, falta de combustível.</p><div class="lp-tags"><span class="lp-tag">Chaveiro</span><span class="lp-tag">Mecânico móvel</span><span class="lp-tag">Combustível</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="truck"></div><h3><a href="servicos/guincho/sao-jose-do-rio-preto/">Guincho</a></h3><p>Remoção para onde você precisar.</p><div class="lp-tags"><span class="lp-tag">Pane</span><span class="lp-tag">Colisão</span><span class="lp-tag">24h</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="battery"></div><h3><a href="servicos/bateria/sao-jose-do-rio-preto/">Bateria e pneu</a></h3><p>Resolvido no lugar, sem rebocar.</p><div class="lp-tags"><span class="lp-tag">Carga</span><span class="lp-tag">Troca</span><span class="lp-tag">Estepe</span></div></div>
+      <div class="lp-svc"><div class="lp-ic" data-ic="key"></div><h3><a href="servicos/chaveiro/sao-jose-do-rio-preto/">Chaveiro e mecânico</a></h3><p>Chave trancada, pane elétrica, falta de combustível.</p><div class="lp-tags"><span class="lp-tag">Chaveiro</span><span class="lp-tag">Mecânico móvel</span><span class="lp-tag">Combustível</span></div></div>
     </div>
 
     <!-- Casa, beleza e pets continuam na página, mas sem CTA próprio e sem
@@ -1169,6 +1169,12 @@
   // Contexto da decisão: marketing-audit/praca-de-lancamento.md
   var LAUNCH_TYPE = "roadside";
 
+  // Serviços que já têm página própria de serviço × cidade
+  // (landing/servicos/ — geradas por servicos/gerar.py). Ao gerar página nova,
+  // acrescente o slug aqui, senão o card não vira link.
+  var CIDADE_SLUG = "sao-jose-do-rio-preto";
+  var PAGINAS_SERVICO = ["guincho", "bateria", "pneu", "chaveiro", "combustivel", "mecanico"];
+
   var TYPE_META = {
     roadside: { icon: "car", title: "Veicular", sub: "De volta à estrada, rápido." },
     residential: { icon: "home", title: "Casa & imóvel", sub: "Reparos e manutenção sob demanda." },
@@ -1249,7 +1255,15 @@
         var m = TYPE_META[LAUNCH_TYPE] || { icon: "car" };
         grid.innerHTML = groups[LAUNCH_TYPE].slice(0, 6).map(function (c) {
           var ic = (c.icon && L[c.icon]) ? c.icon : m.icon;
-          return '<div class="lp-svc"><div class="lp-ic" data-ic="' + ic + '"></div><h3>' + esc(c.name) + "</h3></div>";
+          // Link para a página de serviço × cidade, quando ela existe. Precisa
+          // estar AQUI e não só no fallback estático: assim que a API responde,
+          // este HTML substitui aquele — links postos só lá sumiriam na
+          // primeira carga bem-sucedida, que é o caso normal.
+          var titulo = esc(c.name);
+          if (PAGINAS_SERVICO.indexOf(c.slug) !== -1) {
+            titulo = '<a href="servicos/' + encodeURIComponent(c.slug) + "/" + CIDADE_SLUG + '/">' + titulo + "</a>";
+          }
+          return '<div class="lp-svc"><div class="lp-ic" data-ic="' + ic + '"></div><h3>' + titulo + "</h3></div>";
         }).join("");
         renderIcons(grid);
       }
