@@ -16,6 +16,7 @@ class AssetVehicleResource extends JsonResource
             'make' => $this->make?->name,
             'model' => $this->model?->name,
             'make_logo_url' => $this->make?->logo_url,
+            'kind' => $this->kind,
             'plate' => $this->plate,
             'color' => $this->color,
             'year' => $this->year,

@@ -26,7 +26,8 @@ import {
   flattenPages,
   useTheme,
 } from '@chamafacil/shared';
-import { useAssets, useCategories, useCreateRequest } from '../../src/queries';
+import { useAssets, useCategories, useCreateAsset, useCreateRequest, useVehicleMakes } from '../../src/queries';
+import { MakeModelPicker } from '../../src/components/MakeModelPicker';
 import { AssetSelector } from '../../src/components/AssetSelector';
 import { ICON, assetCaption } from '../../src/assetDisplay';
 import { takeCreatedAsset } from '../../src/assetPick';
@@ -79,6 +80,27 @@ export default function NewRequest() {
   const selectedAsset = assetList.find((a) => a.id === assetId);
   // Whether to share the asset's provider note with the pro. Private by default.
   const [shareNote, setShareNote] = useState(false);
+
+  // Vehicle described inline, for someone with nothing saved yet. Registering
+  // the car used to stand between the customer and asking for a tow — on the
+  // hard shoulder, on their first ever request, which is where they give up.
+  // The asset is created on submit, not here: an abandoned wizard must not
+  // leave a car behind in the garage.
+  const [vehKind, setVehKind] = useState<'car' | 'motorcycle' | null>(null);
+  const [vehMakeId, setVehMakeId] = useState<number | null>(null);
+  const [vehModelId, setVehModelId] = useState<number | null>(null);
+  const createAsset = useCreateAsset();
+  // Only when there is nothing saved to pick. With a garage already on file,
+  // the selector plus "add new" is the path — showing both would be two
+  // competing ways to say the same thing on the same screen.
+  const describingVehicle = assetType === 'vehicle' && assetId == null && !assets.isLoading && assetList.length === 0;
+  const vehicleDescribed = vehKind != null && vehMakeId != null;
+  // Same catalog the picker above already loaded — shared query cache, so
+  // reading it here to name the choice on the review screen costs no request.
+  const { data: vehicleMakes = [] } = useVehicleMakes(describingVehicle);
+  const pickedMake = vehicleMakes.find((m) => m.id === vehMakeId);
+  const makeName = pickedMake?.name;
+  const modelName = pickedMake?.models.find((m) => m.id === vehModelId)?.name;
 
   // With exactly one asset of the needed type, picking it isn't a guess — it's
   // the only answer. Choose it, and say so below (`autoPicked`), so the choice
@@ -162,6 +184,28 @@ export default function NewRequest() {
     const loc = assetLocation ?? coords;
     if (!loc) return;
     try {
+      // Save the vehicle they described, and hand the request its id. Created
+      // here rather than while typing so an abandoned wizard leaves nothing
+      // behind. The name is a default on purpose: make and model already show
+      // underneath it, and asking someone to christen their car before they
+      // can call a tow truck is not a price worth paying.
+      let vehicleAssetId = assetId;
+      if (vehicleAssetId == null && describingVehicle && vehicleDescribed) {
+        try {
+          const created = await createAsset.mutateAsync({
+            type: 'vehicle',
+            nickname: tr(vehKind === 'motorcycle' ? 'createRequest.defaultMotoName' : 'createRequest.defaultCarName'),
+            detail: { kind: vehKind, vehicle_make_id: vehMakeId, vehicle_model_id: vehModelId ?? undefined },
+          });
+          vehicleAssetId = created.id;
+        } catch {
+          // Saving the car is a convenience; the call for help is not, so this
+          // does not block the request on a second endpoint. The cost is real
+          // though — the request goes out with no vehicle attached and the pro
+          // has to ask through the QnA. Acceptable because the common cause of
+          // this failing is no connection, and then the request below fails too.
+        }
+      }
       // Upload-first: upload the photos, then attach them via media_ids on create.
       let mediaIds: number[] | undefined;
       if (photos.length) {
@@ -174,7 +218,7 @@ export default function NewRequest() {
 
       const req = await create.mutateAsync({
         service_category_id: Number(categoryId),
-        asset_id: assetId ?? undefined,
+        asset_id: vehicleAssetId ?? undefined,
         description: description.trim(),
         latitude: loc.latitude,
         longitude: loc.longitude,
@@ -219,7 +263,11 @@ export default function NewRequest() {
     review: { title: tr('createRequest.wizReviewTitle'), sub: tr('createRequest.wizReviewSub') },
   };
   const canContinue =
-    (stepKey === 'details' && description.trim().length >= 5 && (assetType == null || assetId != null)) ||
+    // A vehicle category does need to know *what* vehicle — but a saved asset
+    // is only one way of answering that. Describing it counts too.
+    (stepKey === 'details' &&
+      description.trim().length >= 5 &&
+      (assetType == null || assetId != null || (assetType === 'vehicle' && vehicleDescribed))) ||
     (stepKey === 'location' && (!!coords || !!assetCoords)) ||
     stepKey === 'questions' || // optional
     (stepKey === 'when' && (urgency === RequestUrgency.Urgent || availabilities.length > 0)) ||
@@ -309,7 +357,11 @@ export default function NewRequest() {
               <Text variant="caption">{tr('createRequest.tellUs')}</Text>
             </View>
           </Row>
-          {assetType && (
+          {/* Hidden while describing: with nothing saved, the selector is just a
+              section header and an "add new" button, and that button opens the
+              full asset form — the long way round, offered directly above the
+              short one. The full form stays reachable from Meus Ativos. */}
+          {assetType && !describingVehicle && (
             <AssetSelector
               assetType={assetType}
               assets={assetList}
@@ -319,6 +371,36 @@ export default function NewRequest() {
               loading={assets.isLoading}
               note={autoPicked ? tr('createRequest.assetAutoPicked') : undefined}
             />
+          )}
+
+          {/* Nothing saved and nothing picked: describe it here instead of being
+              sent off to register an asset first. Car-or-motorcycle is asked
+              because the system had no way to know — makes build both, and it
+              is the fact that decides whether the tow truck brings a bike ramp.
+              Model is optional; make plus kind is already enough to load the
+              right truck, and every extra required pick is paid on the
+              hard shoulder. */}
+          {describingVehicle && (
+            <View style={{ gap: 10 }}>
+              <SectionLabel>{tr('createRequest.vehicleTitle')}</SectionLabel>
+              <Segment
+                items={[
+                  { value: 'car', label: tr('createRequest.vehicleCar') },
+                  { value: 'motorcycle', label: tr('createRequest.vehicleMoto') },
+                ]}
+                value={vehKind ?? ''}
+                onChange={(v) => setVehKind(v as 'car' | 'motorcycle')}
+              />
+              <MakeModelPicker
+                makeId={vehMakeId}
+                modelId={vehModelId}
+                onChange={({ vehicle_make_id, vehicle_model_id }) => {
+                  setVehMakeId(vehicle_make_id);
+                  setVehModelId(vehicle_model_id);
+                }}
+              />
+              <Text variant="caption" color={t.colors.ink3}>{tr('createRequest.vehicleSavedHint')}</Text>
+            </View>
           )}
 
           {/* The asset carries a note for pros; sharing it is per-request and
@@ -538,6 +620,23 @@ export default function NewRequest() {
               icon={ICON[selectedAsset.type] ?? 'car'}
               k={tr(`assets.type.${selectedAsset.type}`)}
               v={[selectedAsset.nickname, assetCaption(selectedAsset, tr)].filter(Boolean).join(' · ')}
+              onPress={() => goTo('details')}
+            />
+          )}
+          {/* The described vehicle does not exist as an asset yet — it is created
+              on submit — so without this the review quietly drops it, on a
+              screen whose whole job is "check everything before sending". */}
+          {!selectedAsset && describingVehicle && vehicleDescribed && (
+            <SumRow
+              icon="car"
+              k={tr('assets.type.vehicle')}
+              v={[
+                tr(vehKind === 'motorcycle' ? 'createRequest.vehicleMoto' : 'createRequest.vehicleCar'),
+                makeName,
+                modelName,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
               onPress={() => goTo('details')}
             />
           )}

@@ -322,7 +322,13 @@
     "addAsset": "Add new",
     "assetAutoPicked": "We picked this one — it's your only saved asset. Tap another to change it.",
     "shareNote": "Share my note with the professional",
-    "removePhoto": "Remove photo"
+    "removePhoto": "Remove photo",
+    "vehicleTitle": "Which vehicle?",
+    "vehicleCar": "Car",
+    "vehicleMoto": "Motorcycle",
+    "defaultCarName": "Main car",
+    "defaultMotoName": "Main motorcycle",
+    "vehicleSavedHint": "We save this as your vehicle for next time. You can rename it later."
   },
   "payment": {
     "pix": "Pix",
