@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Card, Icon, IconName, Row, Screen, Text, useTheme } from '@chamafacil/shared';
 import { useRequest, useReportNoShow, useCancelRequest } from '../../../src/queries';
+import { LoadErrorScreen } from '../../../src/components/LoadError';
 
 /** V3NoShow (C35): provider didn't show — wait, reopen at no cost, or cancel. */
 export default function NoShowScreen() {
@@ -13,11 +14,15 @@ export default function NoShowScreen() {
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const requestId = Number(id);
-  const { data: request, isLoading } = useRequest(requestId);
+  const { data: request, isLoading, isError, refetch } = useRequest(requestId);
   const reopen = useReportNoShow(requestId);
   const cancel = useCancelRequest(requestId);
 
-  if (isLoading || !request) return <SkeletonScreen />;
+  // `isLoading || !request` collapsed two different states into one:
+  // on a failed query isLoading is false and request is undefined, so this
+  // screen sat on the skeleton forever, promising it was almost there.
+  if (isLoading) return <SkeletonScreen />;
+  if (isError || !request) return <LoadErrorScreen onRetry={refetch} />;
 
   const onReopen = () =>
     reopen.mutate(undefined, {

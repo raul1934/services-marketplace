@@ -6,6 +6,7 @@ import { EmptyState, Icon, PaginatedList, RequestStatus, Row, ServiceRequest, Te
 import { useMyRequests } from '../../src/queries';
 import { RequestCard } from '../../src/components/RequestCard';
 import { RequestFilter, RequestFilterSheet } from '../../src/components/RequestFilterSheet';
+import { LoadError } from '../../src/components/LoadError';
 
 // In progress first, then open to bid, then everything else (completed/cancelled/expired) —
 // keeps whatever's actionable for the customer at the top instead of strict recency.
@@ -107,6 +108,7 @@ export default function Requests() {
         header={header}
         listHeader={listHeader}
         empty={empty}
+        errorState={<LoadError onRetry={query.refetch} />}
         edges={['top']}
       />
 

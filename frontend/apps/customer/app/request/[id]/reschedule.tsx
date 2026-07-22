@@ -7,6 +7,7 @@ import {
   BackBar, Button, Card, Field, Icon, RescheduleRequest, Row, Screen, SectionLabel, Segment, Text, useTheme,
 } from '@chamafacil/shared';
 import { useRequest, useRequestReschedule, useResolveReschedule } from '../../../src/queries';
+import { LoadErrorScreen } from '../../../src/components/LoadError';
 import { DatePicker } from '../../../src/components/DatePicker';
 
 const PERIODS: Record<string, [number, number]> = {
@@ -20,7 +21,7 @@ export default function RescheduleScreen() {
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const requestId = Number(id);
-  const { data: request, isLoading } = useRequest(requestId);
+  const { data: request, isLoading, isError, refetch } = useRequest(requestId);
   const propose = useRequestReschedule(requestId);
   const resolve = useResolveReschedule(requestId);
 
@@ -28,7 +29,11 @@ export default function RescheduleScreen() {
   const [period, setPeriod] = useState('morning');
   const [reason, setReason] = useState('');
 
-  if (isLoading || !request) return <SkeletonScreen />;
+  // `isLoading || !request` collapsed two different states into one:
+  // on a failed query isLoading is false and request is undefined, so this
+  // screen sat on the skeleton forever, promising it was almost there.
+  if (isLoading) return <SkeletonScreen />;
+  if (isError || !request) return <LoadErrorScreen onRetry={refetch} />;
 
   // A reschedule from the provider awaiting this client's decision.
   const incoming = (request.reschedule_requests ?? []).find((r) => r.status === 'pending' && r.requested_by_role === 'provider');

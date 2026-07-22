@@ -29,7 +29,10 @@
     "wizStep": "STEP {{step}}/{{total}}",
     "decrease": "Decrease",
     "increase": "Increase",
-    "slideHint": "Double tap to confirm"
+    "slideHint": "Double tap to confirm",
+    "loadErrorTitle": "Couldn't load this",
+    "loadErrorBody": "Check your connection and try again.",
+    "retry": "Try again"
   },
   "notFound": {
     "home": "Dashboard",

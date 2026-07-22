@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { EmptyState, PaginatedList, Segment, ServiceRequest, Text } from '@chamafacil/shared';
 import { useMyBids, useMyJobs } from '../../src/queries';
 import { JobCard } from '../../src/components/JobCard';
+import { LoadError } from '../../src/components/LoadError';
 
 export default function Jobs() {
   const router = useRouter();
@@ -42,6 +43,7 @@ export default function Jobs() {
           title={tab === 'jobs' ? tr('jobs.emptyJobs') : tr('jobs.emptyBids')}
         />
       }
+      errorState={<LoadError onRetry={active.refetch} />}
       renderItem={(r) => <JobCard request={r} onPress={() => router.push(`/job/${r.id}`)} />}
     />
   );

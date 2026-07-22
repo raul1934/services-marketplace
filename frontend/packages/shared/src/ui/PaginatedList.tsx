@@ -33,6 +33,12 @@ function dedupeByKey<T>(items: T[], keyExtractor: (item: T, index: number) => st
 export interface InfiniteListQuery<T> {
   data?: { pages: Paginated<T>[] };
   isLoading: boolean;
+  /**
+   * The query failed. This was missing, so a failed list fell through to the
+   * empty state and told the user they had nothing — when in fact the app had
+   * no idea whether they had anything.
+   */
+  isError?: boolean;
   isRefetching?: boolean;
   refetch?: () => void;
   fetchNextPage: () => void;
@@ -56,6 +62,7 @@ export function PaginatedList<T>({
   listHeader,
   footer,
   empty,
+  errorState,
   gap = 12,
   padded = true,
   // See Screen: the bottom edge keeps the last row clear of the nav buttons.
@@ -75,6 +82,12 @@ export function PaginatedList<T>({
   footer?: React.ReactNode;
   /** Rendered when the query resolves with zero items. */
   empty?: React.ReactElement | null;
+  /**
+   * Rendered instead of `empty` when the query failed and there is nothing
+   * cached to show. Falls back to `empty` if the caller has not passed one,
+   * which is the old behaviour — wrong, but not a regression.
+   */
+  errorState?: React.ReactElement | null;
   gap?: number;
   padded?: boolean;
   edges?: ('top' | 'bottom' | 'left' | 'right')[];
@@ -91,6 +104,11 @@ export function PaginatedList<T>({
   const column: ViewStyle = { width: '100%', maxWidth: 480, alignSelf: 'center' };
   const pad: ViewStyle = padded ? { paddingHorizontal: 20 } : {};
 
+  // Only take over the whole list when there is nothing to show. Stale rows
+  // beat an error card, and a failed *next page* must not wipe the pages that
+  // did load — pull-to-refresh is the retry in that case.
+  const failed = !!query.isError && items.length === 0;
+
   const onEndReached = () => {
     if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
   };
@@ -102,6 +120,8 @@ export function PaginatedList<T>({
 
       {query.isLoading ? (
         <SkeletonList padded={padded} />
+      ) : failed ? (
+        errorState ?? empty ?? null
       ) : (
         <FlatList
           data={items}

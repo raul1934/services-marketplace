@@ -29,7 +29,10 @@
     "wizStep": "ETAPA {{step}}/{{total}}",
     "decrease": "Diminuir",
     "increase": "Aumentar",
-    "slideHint": "Toque duas vezes para confirmar"
+    "slideHint": "Toque duas vezes para confirmar",
+    "loadErrorTitle": "Não foi possível carregar",
+    "loadErrorBody": "Verifique sua conexão e tente de novo.",
+    "retry": "Tentar de novo"
   },
   "notFound": {
     "home": "Painel",
