@@ -27,7 +27,12 @@ class WaitlistConfirmation extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public WaitlistEntry $entry) {}
+    public function __construct(public WaitlistEntry $entry)
+    {
+        // O rodapé do template do Laravel usa __(); sem fixar o locale aqui ele
+        // sairia no idioma do app, não no de quem vai ler.
+        $this->locale($entry->locale === 'en' ? 'en' : 'pt');
+    }
 
     public function envelope(): Envelope
     {
@@ -68,10 +73,11 @@ class WaitlistConfirmation extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
+            // O Laravel deriva a alternativa em texto puro do MESMO markdown
+            // (Mailable::buildMarkdownText), então ela sai de graça e nunca
+            // diverge do HTML. Um template de texto próprio daria prosa mais
+            // bonita e duas cópias do mesmo conteúdo para manter em sincronia.
             markdown: 'mail.waitlist-confirmation',
-            // Sem esta linha a mensagem sai só em HTML, o que conta contra em
-            // filtro de spam e deixa de fora quem lê em cliente sem HTML.
-            text: 'mail.waitlist-confirmation-text',
             with: [
                 'entry' => $this->entry,
                 'en' => $this->entry->locale === 'en',
