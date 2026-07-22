@@ -11,6 +11,10 @@ use App\Models\AssetVehicle;
 use App\Models\Proposal;
 use App\Models\RequestQuestion;
 use App\Models\ServiceRequest;
+use App\Support\Ops\MailOpsAlerter;
+use App\Support\Ops\OpsAlerter;
+use App\Support\Ops\StackOpsAlerter;
+use App\Support\Ops\WhatsAppOpsAlerter;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,7 +25,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Canal do alerta da operação, escolhido por config. Quem dispara o
+        // alerta pede a interface e não sabe se aquilo virou e-mail, WhatsApp
+        // ou os dois — trocar de canal é editar CONCIERGE_CHANNELS.
+        $this->app->bind(OpsAlerter::class, function () {
+            $canais = array_map(fn (string $nome) => match ($nome) {
+                'whatsapp' => new WhatsAppOpsAlerter,
+                default => new MailOpsAlerter,
+            }, (array) config('concierge.channels', ['mail']));
+
+            // Um canal só não precisa do overhead do stack.
+            return count($canais) === 1 ? $canais[0] : new StackOpsAlerter($canais);
+        });
     }
 
     /**
