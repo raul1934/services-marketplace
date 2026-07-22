@@ -189,6 +189,8 @@ export default function BidScreen() {
   return (
     <View style={{ flex: 1 }}>
     <Wiz
+      backLabel={tr('common.back')}
+      stepLabel={tr('common.wizStep', { step: step, total: TOTAL_STEPS })}
       cat={categoryName ?? tr('job.fallbackTitle')}
       step={step}
       total={TOTAL_STEPS}

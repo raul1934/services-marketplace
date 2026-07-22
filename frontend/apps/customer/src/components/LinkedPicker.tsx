@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Image, Modal, Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Field, Icon, Row, Sheet, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
+import { Field, Icon, Row, SelectField, Sheet, Text, focusRing, useTheme, withFocusRing } from '@chamafacil/shared';
 
 export interface LinkedItem {
   id: number;
@@ -118,21 +118,8 @@ export function LinkedPicker({
   );
 }
 
-export function PickerField({ label, value, placeholder, disabled, left, onPress }: { label: string; value?: string; placeholder?: string; disabled?: boolean; left?: React.ReactNode; onPress?: () => void }) {
-  const t = useTheme();
-  const isPh = !value;
-  return (
-    <View style={{ gap: 6 }}>
-      <Text variant="label">{label}</Text>
-      <Pressable
-        onPress={onPress}
-        disabled={disabled}
-        style={withFocusRing(t.colors.accent, { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: t.colors.surface2, borderRadius: t.radius.field, borderWidth: 1.5, borderColor: t.colors.line, paddingHorizontal: 14, minHeight: 50, opacity: disabled ? 0.55 : 1 })}
-      >
-        {left}
-        <Text style={{ flex: 1, fontSize: 15, fontWeight: '500', color: isPh ? t.colors.ink3 : t.colors.ink }}>{value || placeholder}</Text>
-        <Icon name="arrowR" size={18} color={t.colors.ink3} />
-      </Pressable>
-    </View>
-  );
+export function PickerField(props: React.ComponentProps<typeof SelectField>) {
+  // Kept as a name the pickers already import; the implementation moved to the
+  // shared SelectField, which the date picker had copied by hand.
+  return <SelectField {...props} />;
 }

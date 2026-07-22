@@ -217,6 +217,8 @@ export default function AddAsset() {
 
   return (
     <Wiz
+      backLabel={tr('common.back')}
+      stepLabel={tr('common.wizStep', { step: step, total: total })}
       cat={tr('assets.addTitle')}
       step={clamped}
       total={total}

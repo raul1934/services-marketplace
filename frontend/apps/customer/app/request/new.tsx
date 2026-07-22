@@ -274,6 +274,8 @@ export default function NewRequest() {
     <>
     {submittedId != null && <SuccessSplash onDone={() => router.replace(`/request/${submittedId}`)} />}
     <Wiz
+      backLabel={tr('common.back')}
+      stepLabel={tr('common.wizStep', { step: step, total: TOTAL })}
       cat={categoryName ?? tr('createRequest.title')}
       step={step}
       total={TOTAL}

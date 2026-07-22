@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Icon, IconName, Row, Text, useTheme, withFocusRing } from '@chamafacil/shared';
+import { Icon, IconName, Row, SelectField, Sheet, Text, useTheme, withFocusRing } from '@chamafacil/shared';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const toStr = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
@@ -27,11 +26,6 @@ export function DatePicker({
 }) {
   const t = useTheme();
 
-  // Modals render outside the screen's SafeAreaView, so the sheet has to
-
-  // clear Android's navigation bar itself.
-
-  const insets = useSafeAreaInsets();
   const { i18n } = useTranslation();
   const locale = i18n.language;
   const today = new Date();
@@ -78,22 +72,10 @@ export function DatePicker({
 
   return (
     <View style={{ gap: 6 }}>
-      {label ? <Text variant="label">{label}</Text> : null}
-      <Pressable
-        onPress={openPicker}
-        style={withFocusRing(t.colors.accent, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: t.colors.surface2, borderRadius: t.radius.field, borderWidth: 1.5, borderColor: t.colors.line, paddingHorizontal: 14, minHeight: 50 })}
-      >
-        <Text style={{ fontSize: 15, fontWeight: '500', color: display ? t.colors.ink : t.colors.ink3 }}>{display || placeholder}</Text>
-        <Icon name="calendar" size={18} color={t.colors.ink3} />
-      </Pressable>
+      <SelectField label={label} value={display} placeholder={placeholder} icon="calendar" onPress={openPicker} />
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }} onPress={() => setOpen(false)}>
-          <Pressable
-            onPress={(e) => e.stopPropagation?.()}
-            style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28 + insets.bottom, gap: 12 }}
-          >
-            <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
+      <Sheet visible={open} onClose={() => setOpen(false)}>
+<View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
             <Row>
               {navBtn('back', () => setView((v) => ({ y: v.m === 0 ? v.y - 1 : v.y, m: v.m === 0 ? 11 : v.m - 1 })))}
               <Text weight="800" center style={{ flex: 1, fontSize: 15, textTransform: 'capitalize' }}>{monthName}</Text>
@@ -124,9 +106,7 @@ export function DatePicker({
                 </View>
               ))}
             </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          </Sheet>
     </View>
   );
 }

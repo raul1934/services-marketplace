@@ -25,7 +25,8 @@
     "until": "até",
     "ok": "Pronto",
     "menu": "Menu",
-    "notifications": "Notificações"
+    "notifications": "Notificações",
+    "wizStep": "ETAPA {{step}}/{{total}}"
   },
   "notFound": {
     "home": "Painel",

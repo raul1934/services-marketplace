@@ -25,7 +25,8 @@
     "until": "until",
     "ok": "Done",
     "menu": "Menu",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "wizStep": "STEP {{step}}/{{total}}"
   },
   "notFound": {
     "home": "Dashboard",

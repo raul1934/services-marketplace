@@ -18,7 +18,8 @@
     "ok": "Done",
     "menu": "Menu",
     "close": "Close",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "wizStep": "STEP {{step}}/{{total}}"
   },
   "notFound": {
     "home": "Home",
