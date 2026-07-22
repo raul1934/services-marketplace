@@ -7,6 +7,7 @@ import {
   BackBar, Badge, Button, Card, EmptyState, Icon, Row, Screen, SectionLabel, SlideToConfirm, Surcharge, Text, brl, useTheme,
 } from '@chamafacil/shared';
 import { useRequest, useResolveSurcharge } from '../../../src/queries';
+import { LoadErrorScreen } from '../../../src/components/LoadError';
 
 /** V3Acrescimo (C16): client approves/refuses the provider's surcharge. */
 export default function SurchargeScreen() {
@@ -15,10 +16,14 @@ export default function SurchargeScreen() {
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const requestId = Number(id);
-  const { data: request, isLoading } = useRequest(requestId);
+  const { data: request, isLoading, isError, refetch } = useRequest(requestId);
   const resolve = useResolveSurcharge(requestId);
 
-  if (isLoading || !request) return <SkeletonScreen />;
+  // `isLoading || !request` collapsed two different states into one:
+  // on a failed query isLoading is false and request is undefined, so this
+  // screen sat on the skeleton forever, promising it was almost there.
+  if (isLoading) return <SkeletonScreen />;
+  if (isError || !request) return <LoadErrorScreen onRetry={refetch} />;
 
   const combinado = request.accepted_proposal?.price ?? 0;
   const all = request.surcharges ?? [];

@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SkeletonScreen, BackBar, Screen, useTheme } from '@chamafacil/shared';
 import { useRequest } from '../../../src/queries';
+import { LoadErrorScreen } from '../../../src/components/LoadError';
 import { ReceiptView } from '../../../src/components/ReceiptView';
 
 /**
@@ -20,9 +21,13 @@ export default function ReceiptScreen() {
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const requestId = Number(id);
-  const { data: request, isLoading } = useRequest(requestId);
+  const { data: request, isLoading, isError, refetch } = useRequest(requestId);
 
-  if (isLoading || !request) return <SkeletonScreen />;
+  // `isLoading || !request` collapsed two different states into one:
+  // on a failed query isLoading is false and request is undefined, so this
+  // screen sat on the skeleton forever, promising it was almost there.
+  if (isLoading) return <SkeletonScreen />;
+  if (isError || !request) return <LoadErrorScreen onRetry={refetch} />;
 
   return (
     <Screen stickyHeader padded={false}>

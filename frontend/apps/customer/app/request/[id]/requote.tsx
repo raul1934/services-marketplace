@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Card, Icon, Row, Screen, SlideToConfirm, Text, brl, useTheme } from '@chamafacil/shared';
 import { useRequest, useRequoteDecision } from '../../../src/queries';
+import { LoadErrorScreen } from '../../../src/components/LoadError';
 
 /** RecotacaoScreen (C40): accept the present provider's new quote, or reopen to others. */
 export default function RequoteScreen() {
@@ -13,10 +14,14 @@ export default function RequoteScreen() {
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const requestId = Number(id);
-  const { data: request, isLoading } = useRequest(requestId);
+  const { data: request, isLoading, isError, refetch } = useRequest(requestId);
   const decide = useRequoteDecision(requestId);
 
-  if (isLoading || !request) return <SkeletonScreen />;
+  // `isLoading || !request` collapsed two different states into one:
+  // on a failed query isLoading is false and request is undefined, so this
+  // screen sat on the skeleton forever, promising it was almost there.
+  if (isLoading) return <SkeletonScreen />;
+  if (isError || !request) return <LoadErrorScreen onRetry={refetch} />;
 
   const combinado = request.accepted_proposal?.price ?? 0;
   const pendingExtra = (request.surcharges ?? []).filter((s) => s.status === 'pending').reduce((s, x) => s + x.amount, 0);

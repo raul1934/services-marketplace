@@ -7,6 +7,7 @@ import { Asset } from '../../src/api';
 import { useAssets } from '../../src/queries';
 import { ASSET_TYPES, AssetTypeKey } from '../../src/assetFields';
 import { ICON, assetCaption } from '../../src/assetDisplay';
+import { LoadError } from '../../src/components/LoadError';
 
 type Filter = 'all' | AssetTypeKey;
 
@@ -45,6 +46,7 @@ export default function AssetsScreen() {
       }
       contentContainerStyle={{ paddingHorizontal: 20 }}
       empty={<EmptyState fill icon="car" title={tr('assets.emptyTitle')} body={tr('assets.emptyBody')} />}
+      errorState={<LoadError onRetry={query.refetch} />}
       footer={
         <Button
           title={tr('assets.add')}

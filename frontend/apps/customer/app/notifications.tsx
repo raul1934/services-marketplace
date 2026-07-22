@@ -6,6 +6,7 @@ import { BackBar, Card, EmptyState, Icon, PaginatedList, Row, Text, focusRing, r
 import { AppNotification } from '../src/api';
 import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications, useUnreadCount } from '../src/queries';
 import { notificationIcon, notificationRoute } from '../src/notificationLinks';
+import { LoadError } from '../src/components/LoadError';
 
 /** Avisos: the bell's list — everything the server told this user. */
 export default function NotificationsScreen() {
@@ -56,6 +57,7 @@ export default function NotificationsScreen() {
       }
       contentContainerStyle={{ paddingHorizontal: 20 }}
       empty={<EmptyState fill icon="bell" title={tr('notifications.emptyTitle')} body={tr('notifications.emptyBody')} />}
+      errorState={<LoadError onRetry={query.refetch} />}
       renderItem={(n) => <NotificationRow notification={n} onPress={() => open(n)} />}
     />
   );
