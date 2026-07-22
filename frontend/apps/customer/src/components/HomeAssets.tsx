@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import * as SecureStore from 'expo-secure-store';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Card, Icon, Row, SectionLabel, SkeletonTiles, Text, flattenPages, useTheme } from '@chamafacil/shared';
+import { Card, GradientCTACard, Icon, Row, SectionLabel, SkeletonTiles, Text, flattenPages, useTheme } from '@chamafacil/shared';
 import { Asset } from '../api';
 import { useAssets } from '../queries';
 import { ICON, assetCaption } from '../assetDisplay';
@@ -151,33 +150,11 @@ function FirstAssetCard() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   return (
-    // Same gradient card, same missing role as the one on the home (A11Y-15).
-    // DS-05 wants these two extracted into one component — when that happens,
-    // this belongs there rather than duplicated a third time.
-    <Pressable
+    <GradientCTACard
+      title={tr('home.firstAssetTitle')}
+      body={tr('home.firstAssetBody')}
+      icon="home"
       onPress={() => router.push('/assets/new')}
-      accessible
-      accessibilityRole="button"
-      accessibilityLabel={tr('home.firstAssetTitle')}
-    >
-      <LinearGradient
-        colors={t.grad as unknown as readonly [string, string, ...string[]]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={{ borderRadius: t.radius.card, padding: 18, flexDirection: 'row', alignItems: 'center', gap: 14 }}
-      >
-        <View style={{ flex: 1 }}>
-          <Text weight="800" color="#fff" style={{ fontSize: 17 }}>
-            {tr('home.firstAssetTitle')}
-          </Text>
-          <Text color="rgba(255,255,255,0.9)" style={{ fontSize: 13, marginTop: 2 }}>
-            {tr('home.firstAssetBody')}
-          </Text>
-        </View>
-        <View style={{ width: 46, height: 46, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="home" size={24} color="#fff" />
-        </View>
-      </LinearGradient>
-    </Pressable>
+    />
   );
 }
