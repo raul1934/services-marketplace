@@ -3,37 +3,75 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Chama Fácil — ajuda, rápido</title>
+<title>Chama Fácil — guincho, chaveiro, encanador em minutos</title>
 <link rel="icon" type="image/svg+xml" href="logo.svg" />
-<meta name="description" content="Toda a manutenção dos seus ativos em um só lugar. Do socorro veicular ao reparo predial — chame um profissional verificado em segundos." />
+<meta name="description" content="Você diz quanto quer pagar, profissionais verificados perto de você mandam propostas e você acompanha no mapa. Guincho, chaveiro, encanador, eletricista e mais. Pix, cartão ou dinheiro, só depois do serviço." />
+<link rel="canonical" href="https://chamafacil.app/" />
+
+<!-- Sem estas tags o link colado no WhatsApp — o canal nº1 no Brasil — aparece
+     cru, sem imagem e sem descrição. Ao mexer no título/descrição acima, mexa
+     aqui também: o que o Google mostra e o que o WhatsApp mostra são coisas
+     diferentes e desalinham em silêncio. -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://chamafacil.app/" />
+<meta property="og:site_name" content="Chama Fácil" />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:title" content="Um profissional verificado na sua porta, em minutos" />
+<meta property="og:description" content="Guincho, chaveiro, encanador, eletricista. Você define o orçamento, compara propostas e acompanha no mapa. Pix, cartão ou dinheiro — só depois do serviço." />
+<meta property="og:image" content="https://chamafacil.app/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Chama Fácil — ajuda, rápido" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Um profissional verificado na sua porta, em minutos" />
+<meta name="twitter:description" content="Guincho, chaveiro, encanador, eletricista. Você define o orçamento, compara propostas e acompanha no mapa." />
+<meta name="twitter:image" content="https://chamafacil.app/og.png" />
 <!-- Onde vive POST /api/v1/waitlist e GET /api/v1/service-categories -->
 <meta name="api-base" content="https://api.chamafacil.app" />
-<!-- Google Analytics 4 — cole seu ID de medição em content="G-XXXXXXXXXX" (vazio = desativado) -->
+<!-- Analytics. IDs vazios = desativado.
+     Google Analytics 4 — ID de medição G-XXXXXXXXXX.
+     Microsoft Clarity — Project ID. -->
 <meta name="ga-id" content="G-WWDLQGCY74" />
-<script>
-  (function () {
-    var id = ((document.querySelector('meta[name="ga-id"]') || {}).content || "").trim();
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () { dataLayer.push(arguments); };
-    if (!id) return; // sem ID, o GA fica desativado
-    var s = document.createElement("script"); s.async = true;
-    s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
-    document.head.appendChild(s);
-    gtag("js", new Date());
-    gtag("config", id);
-  })();
-</script>
-<!-- Microsoft Clarity (grátis) — cole seu Project ID em content="xxxxxxxxxx" (vazio = desativado) -->
 <meta name="clarity-id" content="xmdkrrnzx6" />
 <script>
   (function () {
-    var id = ((document.querySelector('meta[name="clarity-id"]') || {}).content || "").trim();
-    if (!id) return;
-    (function (c, l, a, r, i, t, y) {
-      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments); };
-      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
-      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
-    })(window, document, "clarity", "script", id);
+    // As duas tags ficavam aqui em cima carregando de imediato. O Clarity sozinho
+    // segurava o evento `load` por 6,2s (medido em produção) — a ferramenta de
+    // medir experiência era a que mais estragava a experiência. Nada aqui é
+    // necessário para pintar a página, então tudo espera a ociosidade depois do
+    // load. As filas (`dataLayer`, `clarity.q`) são criadas já, para que um
+    // gtag()/clarity() disparado antes disso seja bufferizado e não se perca.
+    function meta(n) { return ((document.querySelector('meta[name="' + n + '"]') || {}).content || "").trim(); }
+
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+    window.clarity = window.clarity || function () { (clarity.q = clarity.q || []).push(arguments); };
+
+    function loadGA() {
+      var id = meta("ga-id");
+      if (!id) return;
+      var s = document.createElement("script"); s.async = true;
+      s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(id);
+      document.head.appendChild(s);
+      gtag("js", new Date());
+      gtag("config", id);
+    }
+
+    function loadClarity() {
+      var id = meta("clarity-id");
+      if (!id) return;
+      var s = document.createElement("script"); s.async = true;
+      s.src = "https://www.clarity.ms/tag/" + encodeURIComponent(id);
+      document.head.appendChild(s);
+    }
+
+    function boot() {
+      var idle = window.requestIdleCallback || function (fn) { setTimeout(fn, 1); };
+      idle(function () { loadGA(); loadClarity(); }, { timeout: 3000 });
+    }
+
+    if (document.readyState === "complete") boot();
+    else window.addEventListener("load", boot, { once: true });
   })();
 </script>
 <script>
@@ -53,6 +91,72 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<!-- Dados estruturados. O FAQPage é o que dá retorno imediato: as mesmas seis
+     perguntas da seção #faq, que o Google pode expandir direto na SERP. Ao
+     editar o FAQ da página, edite aqui — nada avisa quando os dois divergem, e
+     resposta estruturada diferente da visível é motivo de perder o rich result. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://chamafacil.app/#organization",
+      "name": "Chama Fácil",
+      "url": "https://chamafacil.app/",
+      "logo": "https://chamafacil.app/logo.svg",
+      "description": "Marketplace de serviços sob demanda: guincho, chaveiro, encanador, eletricista e mais, com profissionais verificados e acompanhamento em tempo real.",
+      "areaServed": { "@type": "Country", "name": "Brasil" }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://chamafacil.app/#website",
+      "url": "https://chamafacil.app/",
+      "name": "Chama Fácil",
+      "inLanguage": "pt-BR",
+      "publisher": { "@id": "https://chamafacil.app/#organization" }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://chamafacil.app/#faq",
+      "inLanguage": "pt-BR",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Onde a Chama Fácil está disponível?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Estamos abrindo o acesso antecipado por cidade. Entre na lista e avisamos assim que ativarmos na sua — quem entra cedo tem prioridade." }
+        },
+        {
+          "@type": "Question",
+          "name": "Em quanto tempo o profissional chega?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Em chamados urgentes, a proposta chega em minutos e o profissional logo depois, conforme a distância. Em serviços agendados, você escolhe o dia e o horário." }
+        },
+        {
+          "@type": "Question",
+          "name": "Como é definido o preço?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha." }
+        },
+        {
+          "@type": "Question",
+          "name": "Os profissionais são verificados?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade." }
+        },
+        {
+          "@type": "Question",
+          "name": "Como eu pago?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Pix, cartão ou dinheiro — sua escolha, só após o serviço. Peças extras são detalhadas e aprovadas por você." }
+        },
+        {
+          "@type": "Question",
+          "name": "Quanto custa trabalhar como prestador?",
+          "acceptedAnswer": { "@type": "Answer", "text": "No acesso antecipado é totalmente grátis — sem mensalidade nem comissão. Planos pagos entram só quando lançarmos, com aviso antes." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
   :root {
     --bg: #eef2f7; --surface: #fff; --surface-2: #f6f8fc;
@@ -105,6 +209,11 @@
   .lp-hero h1 { font-size: clamp(44px, 6vw, 76px); line-height: .98; }
   .lp-sub { font-size: 19px; color: var(--ink-2); max-width: 30ch; margin: 22px 0 30px; font-weight: 500; }
   .lp-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  /* O prestador tem funil próprio; no hero ele é um link, não um botão de mesmo
+     peso — dois CTAs concorrentes dividiam a atenção do visitante-cliente. */
+  .lp-heropro { margin: 16px 0 0; font-size: 14.5px; font-weight: 600; color: var(--ink-3); }
+  .lp-heropro a { color: var(--accent); font-weight: 800; }
+  .lp-heropro a:hover { text-decoration: underline; }
   .lp-meta { display: flex; gap: 28px; margin-top: 34px; }
   .lp-meta .v { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
   .lp-meta .k { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
@@ -271,6 +380,8 @@
   .lp-quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
   .lp-quote { background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 26px; box-shadow: 0 12px 34px -22px rgba(20,35,59,.26); display: flex; flex-direction: column; gap: 14px; }
   .lp-quote .stars { color: var(--accent-2); display: flex; gap: 3px; }
+  .lp-quote .lp-tic { width: 46px; height: 46px; border-radius: 14px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; flex: none; }
+  .lp-quote p b { display: block; margin-bottom: 4px; }
   .lp-quote p { font-size: 15.5px; color: var(--ink); margin: 0; line-height: 1.55; }
   .lp-quote .who { display: flex; align-items: center; gap: 11px; margin-top: auto; }
   .lp-quote .who .av { width: 40px; height: 40px; border-radius: 12px; color: #fff; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none; }
@@ -327,6 +438,10 @@
   .lp-errmsg.show { display: block; }
   .lp-submit { width: 100%; margin-top: 20px; justify-content: center; }
   .lp-fineprint { text-align: center; font-size: 12px; color: var(--ink-3); margin-top: 14px; }
+  .lp-fineprint a { color: var(--ink-2); text-decoration: underline; }
+  /* Honeypot. Escondido sem display:none — alguns bots ignoram campos
+     display:none justamente porque sabem do truque. */
+  .lp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
   .lp-success { text-align: center; padding: 26px 10px; }
   .lp-success .sc-ic { width: 76px; height: 76px; border-radius: 24px; background: var(--grad); display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; }
   .lp-success h3 { font-size: 26px; }
@@ -366,6 +481,33 @@
     .lp-trust .lp-wrap { gap: 20px; }
     .lp-proband { padding: 40px 26px; }
   }
+
+  /* Área de toque de 44px (WCAG 2.5.5). Feito com padding + margem negativa para
+     não mexer no espaçamento visual já ajustado das listas e do rodapé. */
+  @media (max-width: 880px) {
+    .lp-footer .lp-col a, .lp-heropro a {
+      display: inline-flex; align-items: center; min-height: 44px;
+      padding-block: 4px; margin-block: -4px;
+    }
+    .lp-icbtn { min-width: 44px; height: 44px; }
+  }
+
+  /* Barra fixa de conversão no mobile. O CTA do nav some abaixo de 880px e a
+     página tem ~14.000px de altura: sem isto, agir a qualquer momento custa
+     rolar de volta até o formulário. Só aparece depois de uma tela de rolagem
+     (para não competir com o CTA do próprio hero) e some quando o formulário
+     está visível, que é quando ela viraria só obstrução. */
+  .lp-sticky {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: none;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(14px); border-top: 1px solid var(--line);
+    transform: translateY(110%); transition: transform .22s ease;
+  }
+  .lp-sticky.on { transform: translateY(0); }
+  .lp-sticky .lp-btn { width: 100%; justify-content: center; min-height: 52px; }
+  @media (max-width: 880px) { .lp-sticky { display: block; } }
+  @media (prefers-reduced-motion: reduce) { .lp-sticky { transition: none; } }
 </style>
 </head>
 <body>
@@ -373,7 +515,7 @@
 
 <nav class="lp-nav"><div class="lp-wrap">
   <a class="lp-logo" href="#"><img class="lp-mk" src="logo.svg" alt="Chama Fácil" />Chama Fácil</a>
-  <div class="lp-links"><a href="#services">Serviços</a><a href="#planos">Planos</a><a href="#pro">Seja prestador</a><a href="#download">Baixar app</a><a href="parcerias.html">Parcerias</a></div>
+  <div class="lp-links"><a href="#services">Serviços</a><a href="#how">Como funciona</a><a href="#planos">Planos</a><a href="#pro">Seja prestador</a><a href="parcerias.html">Parcerias</a></div>
   <span class="lp-spacer"></span>
   <button class="lp-icbtn" id="langBtn" type="button" aria-label="Language / Idioma">EN</button>
   <button class="lp-icbtn" id="themeBtn" type="button" aria-label="Tema claro/escuro"></button>
@@ -384,17 +526,22 @@
   <div class="lp-glow"></div>
   <div class="lp-wrap">
     <div>
-      <span class="lp-eyebrow">Gestão de manutenção de ativos</span>
-      <h1>Toda a manutenção<br/>dos seus ativos<br/>em um só lugar.</h1>
-      <p class="lp-sub">Do primeiro chamado ao histórico completo de manutenção, conectamos clientes, ativos e prestadores de serviço em um único ecossistema.</p>
+      <span class="lp-eyebrow">Ajuda, rápido</span>
+      <h1>Um profissional<br/>verificado na sua<br/>porta, em minutos.</h1>
+      <p class="lp-sub">Guincho, chaveiro, encanador, eletricista. Você diz quanto quer pagar, compara propostas de quem está perto e acompanha no mapa.</p>
       <div class="lp-cta">
-        <a class="lp-btn grad lg" href="#join">Acesso antecipado</a>
-        <a class="lp-btn ghost lg" href="#pro">Seja prestador</a>
+        <a class="lp-btn grad lg" href="#join">Entrar na lista de espera</a>
       </div>
+      <p class="lp-heropro">É profissional? <a href="#pro">Cadastre-se para receber chamados →</a></p>
+      <!-- Estes três números descreviam um produto que já rodava ("12k+
+           atendimentos", "4,9★") na mesma página que diz "avisamos quando
+           lançarmos na sua cidade". Enquanto não houver histórico real, o que
+           entra aqui é o que dá para provar: a política de verificação, o
+           mecanismo de preço e o tamanho da fila (preenchido pelo backend). -->
       <div class="lp-meta">
-        <div><div class="v">6&nbsp;min</div><div class="k">1ª proposta</div></div>
-        <div><div class="v">4,9&nbsp;★</div><div class="k">Nota dos profissionais</div></div>
-        <div><div class="v">12k+</div><div class="k">Atendimentos</div></div>
+        <div><div class="v">100%</div><div class="k">Profissionais verificados</div></div>
+        <div><div class="v">Você</div><div class="k">Define o orçamento</div></div>
+        <div data-waitlist-stat hidden><div class="v" data-waitlist-count>—</div><div class="k">Já na lista de espera</div></div>
       </div>
     </div>
     <div class="lp-phonewrap lp-phones">
@@ -461,55 +608,37 @@
 
 <div class="lp-trust">
   <div class="lp-wrap">
-    <div class="ti"><span class="tic" data-ic="flash"></span><div><div class="tn">6 min</div><div class="tk">até a 1ª proposta</div></div></div>
+    <!-- Cada item aqui é uma promessa de política ou um fato do mecanismo, não
+         uma estatística de operação: enquanto o produto não rodou, "4,9 em 12k+
+         serviços" só custava credibilidade. -->
+    <div class="ti"><span class="tic" data-ic="flash"></span><div><div class="tn">Propostas</div><div class="tk">em minutos, não em dias</div></div></div>
     <div class="ti"><span class="tic" data-ic="shieldCheck"></span><div><div class="tn">100%</div><div class="tk">profissionais verificados</div></div></div>
-    <div class="ti"><span class="tic" data-ic="star"></span><div><div class="tn">4.9 / 5</div><div class="tk">em 12k+ serviços</div></div></div>
-    <div class="ti"><span class="tic" data-ic="pin"></span><div><div class="tn">Todo o Brasil</div><div class="tk">atendemos em todo o país</div></div></div>
+    <div class="ti"><span class="tic" data-ic="star"></span><div><div class="tn">Avaliação mútua</div><div class="tk">cliente e profissional</div></div></div>
+    <div class="ti"><span class="tic" data-ic="pin"></span><div><div class="tn">Cidade por cidade</div><div class="tk">entre na lista da sua</div></div></div>
   </div>
 </div>
 
-<!-- Download dos apps (APK direto) -->
+<!-- Aqui existia uma seção "Baixe o APK" com dois botões apontando para
+     /downloads/*.apk — arquivos que nunca foram publicados: os dois davam 404 em
+     produção. Era o CTA de maior intenção da página levando a uma página de
+     erro. Mesmo com os arquivos no lugar, instalar fora da Play Store ("permitir
+     fontes desconhecidas") derruba a conversão de forma brutal, então o destino
+     certo enquanto não há loja é a lista de espera. Ao publicar na Play Store,
+     esta seção volta — com link de loja, não com APK. -->
 <style>
-  #download .lp-dlgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; max-width:840px; margin:0 auto; }
-  #download .lp-dlcard { background:var(--bg); border:1px solid var(--line); border-radius:24px; padding:32px 28px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px; }
-  #download .lp-dlic { width:76px; height:76px; border-radius:20px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; margin-bottom:4px; }
-  #download .lp-dlcard h3 { font-size:22px; margin:0; }
-  #download .lp-dlcard p { color:var(--ink-2); margin:0; font-size:15px; line-height:1.5; }
-  #download .lp-dlbtn { width:100%; justify-content:center; margin-top:8px; }
-  #download .lp-dlmeta { font-family:var(--mono); font-size:12px; color:var(--ink-3); letter-spacing:.06em; }
-  #download .lp-dlnote { text-align:center; color:var(--ink-3); font-size:13px; margin-top:22px; }
-  @media (max-width:720px){ #download .lp-dlgrid { grid-template-columns:1fr; } }
+  #download .lp-soon { max-width:720px; margin:0 auto; text-align:center; }
+  #download .lp-soon .lp-btn { margin-top:22px; }
+  #download .lp-soonnote { color:var(--ink-3); font-size:13px; margin-top:18px; }
 </style>
 <section class="lp-sec" id="download" style="background:var(--surface)">
   <div class="lp-wrap">
-    <div class="lp-sechead reveal">
-      <span class="lp-eyebrow">Baixe o app</span>
-      <h2>Instale a Chama Fácil no Android</h2>
-      <p>Dois apps, um para cada lado. Baixe o APK, abra o arquivo e permita a instalação de fontes desconhecidas.</p>
+    <div class="lp-soon reveal">
+      <span class="lp-eyebrow">Aplicativo</span>
+      <h2 style="font-size:clamp(28px,4vw,40px);margin-top:12px">Os apps chegam junto com a sua cidade.</h2>
+      <p style="color:var(--ink-2);font-size:17px;margin-top:14px">São dois: um para quem pede e um para quem atende. Publicamos na Play Store quando abrirmos cada praça — quem está na lista recebe o link antes de todo mundo.</p>
+      <a class="lp-btn grad lg" href="#join">Quero ser avisado <span data-ic="arrowR" data-sz="18"></span></a>
+      <p class="lp-soonnote">Android primeiro, iOS na sequência.</p>
     </div>
-    <div class="lp-dlgrid reveal">
-      <div class="lp-dlcard">
-        <div class="lp-dlic"><span data-ic="home" data-sz="34"></span></div>
-        <h3>App do Cliente</h3>
-        <p>Peça serviços, acompanhe chamados em tempo real e meça seus ativos com realidade aumentada.</p>
-        <a class="lp-btn grad lg lp-dlbtn" href="/downloads/chamafacil-cliente.apk" download>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
-          Baixar APK · Cliente
-        </a>
-        <span class="lp-dlmeta">Android · v1.0.0</span>
-      </div>
-      <div class="lp-dlcard">
-        <div class="lp-dlic"><span data-ic="wrench" data-sz="34"></span></div>
-        <h3>App do Prestador</h3>
-        <p>Receba chamados perto de você, envie propostas e gerencie seus atendimentos e ganhos.</p>
-        <a class="lp-btn grad lg lp-dlbtn" href="/downloads/chamafacil-prestador.apk" download>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
-          Baixar APK · Prestador
-        </a>
-        <span class="lp-dlmeta">Android · v1.0.0</span>
-      </div>
-    </div>
-    <p class="lp-dlnote">iOS em breve. Instalação direta (fora da Play Store) — o Android pode pedir para permitir “fontes desconhecidas”.</p>
   </div>
 </section>
 
@@ -536,18 +665,20 @@
             <button type="button" class="lp-rolebtn" data-role="pro"><span data-ic="briefcase" data-sz="16"></span> Quero trabalhar</button>
           </div>
 
-          <label class="lp-fl">Nome completo</label>
-          <input class="lp-input" name="name" placeholder="Mateus Almeida" autocomplete="name" />
-          <div class="lp-errmsg" data-err="name">Informe seu nome.</div>
+          <label class="lp-fl" for="joinName">Nome completo</label>
+          <input class="lp-input" id="joinName" name="name" placeholder="Mateus Almeida" autocomplete="name" aria-describedby="errName" />
+          <div class="lp-errmsg" id="errName" data-err="name">Informe seu nome.</div>
 
           <div class="lp-row2">
-            <div><label class="lp-fl">Email</label><input class="lp-input" name="email" type="email" placeholder="voce@email.com" autocomplete="email" /></div>
-            <div><label class="lp-fl">Telefone (opcional)</label><input class="lp-input" name="phone" placeholder="+55 11 ..." autocomplete="tel" /></div>
+            <div><label class="lp-fl" for="joinEmail">Email</label><input class="lp-input" id="joinEmail" name="email" type="email" inputmode="email" placeholder="voce@email.com" autocomplete="email" aria-describedby="errEmail" /></div>
+            <!-- inputmode="tel" abre o teclado numérico; sem ele o campo abria o
+                 teclado alfabético e o abandono no telefone era previsível. -->
+            <div><label class="lp-fl" for="joinPhone">Telefone (opcional)</label><input class="lp-input" id="joinPhone" name="phone" type="tel" inputmode="tel" placeholder="(11) 99999-9999" autocomplete="tel" maxlength="16" data-phone-mask /></div>
           </div>
-          <div class="lp-errmsg" data-err="email">Informe um e-mail válido.</div>
+          <div class="lp-errmsg" id="errEmail" data-err="email">Informe um e-mail válido.</div>
 
           <div class="lp-row2">
-            <div class="lp-ac" data-city-ac><label class="lp-fl">Cidade</label><input class="lp-input" name="city" placeholder="Digite sua cidade..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="lp-ac-list" role="listbox" hidden></div></div>
+            <div class="lp-ac" data-city-ac><label class="lp-fl" for="joinCity">Cidade</label><input class="lp-input" id="joinCity" name="city" placeholder="Digite sua cidade..." autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" /><div class="lp-ac-list" role="listbox" hidden></div></div>
             <div class="lp-ac" data-svc-ac><label class="lp-fl" data-svc-label>Tenho interesse em</label>
               <input type="hidden" name="service" id="serviceInput" />
               <button type="button" class="lp-input lp-svcbtn" id="svcBtn" aria-haspopup="listbox" aria-expanded="false">
@@ -559,10 +690,18 @@
             </div>
           </div>
 
+          <!-- Honeypot: invisível e fora da ordem de tabulação, então só um bot
+               preenche. A base de waitlist é o que decide qual praça abrir
+               primeiro — envenená-la é envenenar a decisão. -->
+          <div class="lp-hp" aria-hidden="true">
+            <label for="joinNick">Não preencha este campo</label>
+            <input id="joinNick" name="nickname" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+
           <button type="submit" class="lp-btn grad lg lp-submit">Entrar na lista <span data-ic="arrowR" data-sz="18"></span></button>
-          <div class="lp-fineprint">Ao entrar você aceita os Termos e a Política de Privacidade.</div>
+          <div class="lp-fineprint">Ao entrar você aceita os <a href="termos.html">Termos</a> e a <a href="privacidade.html">Política de Privacidade</a>.</div>
         </form>
-        <div class="lp-success" id="joinSuccess" style="display:none">
+        <div class="lp-success" id="joinSuccess" style="display:none" role="status" aria-live="polite">
           <div class="sc-ic" data-ic="check" data-sz="40" data-white></div>
           <h3>Você está na lista!</h3>
           <p id="joinSuccessMsg">Avisaremos por e-mail assim que a Chama Fácil chegar perto de você.</p>
@@ -707,15 +846,32 @@
   </div>
 </section>
 
-<section class="lp-sec" id="reviews">
+<!-- Esta seção era "Quem usa, recomenda", com três depoimentos assinados
+     ("Rafael C. · 213 trabalhos") de um produto que ainda não atendeu ninguém.
+     Depoimento inventado não é só risco de CDC art. 37: ao lado de "avisamos
+     quando lançarmos na sua cidade" ele se contradiz sozinho e derruba a
+     credibilidade do resto da página. No lugar entram os compromissos que
+     realmente valem hoje — que são, por acaso, as objeções que a página não
+     respondia. Quando houver clientes de verdade, os depoimentos voltam: reais,
+     com nome completo e autorização. -->
+<section class="lp-sec" id="confianca">
   <div class="lp-wrap">
-    <div class="lp-sechead reveal"><span class="lp-eyebrow">Quem usa, recomenda</span><h2>Histórias reais com a Chama Fácil</h2></div>
+    <div class="lp-sechead reveal"><span class="lp-eyebrow">Por que confiar</span><h2>O combinado, por escrito.</h2><p>Você está contratando alguém que vai até a sua casa ou até o seu carro. Estes são os compromissos que assumimos desde o primeiro chamado.</p></div>
     <div class="lp-quotes">
-      <div class="lp-quote reveal"><div class="stars" data-stars></div><p>"Pneu furado de noite na Marginal. Em dois minutos veio proposta e em vinte eu estava rodando. Salvou."</p><div class="who"><span class="av" style="background:#ff6a3d">CA</span><div><div class="nm">Camila A.</div><div class="rl">Cliente · São Paulo</div></div></div></div>
-      <div class="lp-quote reveal"><div class="stars" data-stars></div><p>"Defini meu preço e vi a média da área — sem pechincha. O encanador veio na mesma tarde."</p><div class="who"><span class="av" style="background:#3b82f6">DR</span><div><div class="nm">Diego R.</div><div class="rl">Cliente · Curitiba</div></div></div></div>
-      <div class="lp-quote reveal"><div class="stars" data-stars></div><p>"Como profissional, pego trabalhos perto e fico com 97%. As fotos de antes/depois geram confiança."</p><div class="who"><span class="av" style="background:#12b981">RC</span><div><div class="nm">Rafael C.</div><div class="rl">profissional Chama Fácil · 213 trabalhos</div></div></div></div>
+      <div class="lp-quote reveal">
+        <span class="lp-tic" data-ic="shieldCheck" data-sz="22"></span>
+        <p><b>Ninguém atende sem ser aprovado.</b> Documento, comprovante e selfie conferidos pela equipe antes do primeiro chamado. Sem cadastro automático.</p>
+      </div>
+      <div class="lp-quote reveal">
+        <span class="lp-tic" data-ic="dollar" data-sz="22"></span>
+        <p><b>Você paga depois, e só o combinado.</b> Pix, cartão ou dinheiro, sempre após a conclusão. Peça extra só entra no valor se você aprovar antes.</p>
+      </div>
+      <div class="lp-quote reveal">
+        <span class="lp-tic" data-ic="star" data-sz="22"></span>
+        <p><b>A avaliação é dos dois lados.</b> Você avalia o profissional e ele avalia você. Quem cai de nota deixa de receber chamados.</p>
+      </div>
     </div>
-    <div class="lp-ctarow reveal"><a class="lp-btn grad lg" href="#join">Acesso antecipado <span data-ic="arrowR" data-sz="18"></span></a></div>
+    <div class="lp-ctarow reveal"><a class="lp-btn grad lg" href="#join">Entrar na lista de espera <span data-ic="arrowR" data-sz="18"></span></a></div>
   </div>
 </section>
 
@@ -780,8 +936,8 @@
   <div class="lp-wrap">
     <div class="lp-sechead reveal"><span class="lp-eyebrow">Bom saber</span><h2>Perguntas frequentes</h2></div>
     <div class="lp-faq">
-      <div class="lp-faqitem"><div class="lp-faqq">Onde a Chama Fácil está disponível?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Estamos abrindo o acesso antecipado em todo o Brasil. Entre na lista e avisamos assim que ativarmos na sua cidade — quem entra cedo tem prioridade.</div></div>
-      <div class="lp-faqitem"><div class="lp-faqq">Em quanto tempo o profissional chega?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Em chamados urgentes, a primeira proposta costuma chegar em poucos minutos e o profissional em ~6. Em serviços agendados, você escolhe o dia e o horário.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Onde a Chama Fácil está disponível?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Estamos abrindo o acesso antecipado por cidade. Entre na lista e avisamos assim que ativarmos na sua — quem entra cedo tem prioridade.</div></div>
+      <div class="lp-faqitem"><div class="lp-faqq">Em quanto tempo o profissional chega?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Em chamados urgentes, a proposta chega em minutos e o profissional logo depois, conforme a distância. Em serviços agendados, você escolhe o dia e o horário.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Como é definido o preço?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Você define um orçamento e recebe propostas. Um medidor mostra a média da região — sem tabela fixa, sem pechincha.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Os profissionais são verificados?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Cada prestador envia documento, comprovante e selfie, e é aprovado pela equipe antes de atender. A avaliação mútua mantém a qualidade.</div></div>
       <div class="lp-faqitem"><div class="lp-faqq">Como eu pago?<span class="chev" data-ic="fwd" data-sz="22"></span></div><div class="lp-faqa">Pix, cartão ou dinheiro — sua escolha, só após o serviço. Peças extras são detalhadas e aprovadas por você.</div></div>
@@ -794,14 +950,23 @@
 <footer class="lp-footer"><div class="lp-wrap">
   <div class="lp-col" style="max-width:240px">
     <a class="lp-logo" href="#" style="margin-bottom:12px"><img class="lp-mk" src="logo.svg" alt="Chama Fácil" />Chama Fácil</a>
-    <p style="color:var(--ink-3);font-size:13.5px;margin:0">Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.</p>
+    <p style="color:var(--ink-3);font-size:13.5px;margin:0">Um profissional verificado na sua porta, em minutos. Do socorro veicular ao reparo em casa.</p>
   </div>
   <span class="lp-spacer"></span>
-  <div class="lp-col"><h4>Empresa</h4><a href="#why">Sobre</a><a href="#join">Contato</a></div>
-  <div class="lp-col"><h4>Serviços</h4><a href="#services">Categorias</a><a href="#how">Como funciona</a><a href="#reviews">Avaliações</a></div>
+  <!-- Sobre, Contato, Termos e Privacidade apontavam para âncoras da própria
+       página (#why, #join): nenhum documento existia. Com o formulário coletando
+       nome, e-mail, telefone e cidade sob a frase "você aceita os Termos e a
+       Política de Privacidade", o link tinha que virar documento — é o que a
+       LGPD pede e o que a Play Store exige para publicar o app. -->
+  <div class="lp-col"><h4>Empresa</h4><a href="sobre.html">Sobre</a><a href="contato.html">Contato</a></div>
+  <div class="lp-col"><h4>Serviços</h4><a href="#services">Categorias</a><a href="#how">Como funciona</a><a href="#confianca">Por que confiar</a></div>
   <div class="lp-col"><h4>Prestadores</h4><a href="#pro">Seja prestador</a><a href="#planos">Planos</a><a href="parcerias.html">Parcerias</a></div>
-  <div class="lp-col"><h4>Jurídico</h4><a href="#join">Termos</a><a href="#join">Privacidade</a></div>
+  <div class="lp-col"><h4>Jurídico</h4><a href="termos.html">Termos</a><a href="privacidade.html">Privacidade</a></div>
 </div></footer>
+
+<div class="lp-sticky" id="stickyCta">
+  <a class="lp-btn grad" href="#join">Entrar na lista de espera <span data-ic="arrowR" data-sz="18"></span></a>
+</div>
 
 </div>
 
@@ -1032,8 +1197,29 @@
     if (m) m.classList.toggle("show", on);
     if (inp) inp.classList.toggle("err", on);
   }
+  // Máscara de telefone. O campo é opcional, então nada aqui pode impedir o
+  // envio — no máximo formata o que a pessoa digitou.
+  var phoneInput = form.querySelector("[data-phone-mask]");
+  if (phoneInput) {
+    phoneInput.addEventListener("input", function () {
+      var d = phoneInput.value.replace(/\D/g, "").slice(0, 11);
+      if (!d) { phoneInput.value = ""; return; }
+      var out = "(" + d.slice(0, 2);
+      if (d.length > 2) out += ") " + d.slice(2, d.length > 10 ? 7 : 6);
+      if (d.length > 6) out += "-" + d.slice(d.length > 10 ? 7 : 6);
+      phoneInput.value = out;
+    });
+  }
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
+    // Honeypot preenchido = bot. Finge que deu certo em vez de mostrar erro:
+    // erro é sinal de volta para quem está tentando adivinhar a validação.
+    if (form.nickname && form.nickname.value) {
+      form.style.display = "none";
+      document.getElementById("joinSuccess").style.display = "block";
+      return;
+    }
     var name = form.name.value.trim();
     var email = form.email.value.trim();
     var okEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
@@ -1067,6 +1253,48 @@
 })();
 </script>
 <script>
+(function () {
+  "use strict";
+
+  // Barra fixa de CTA no mobile. Aparece depois de uma tela de rolagem e some
+  // enquanto o formulário está à vista — ali ela só cobriria o próprio destino.
+  var bar = document.getElementById("stickyCta");
+  var join = document.getElementById("join");
+  if (bar && join) {
+    var joinVisible = false;
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (entries) {
+        joinVisible = entries[0].isIntersecting;
+        update();
+      }, { rootMargin: "-10% 0px -10% 0px" }).observe(join);
+    }
+    var update = function () {
+      bar.classList.toggle("on", window.scrollY > window.innerHeight * 0.9 && !joinVisible);
+    };
+    addEventListener("scroll", update, { passive: true });
+    update();
+  }
+
+  // Prova social honesta: o tamanho real da fila, quando o backend souber
+  // informá-lo. Sem o endpoint (ainda não existe), o bloco simplesmente não
+  // aparece — melhor um número a menos do que um número inventado.
+  var stat = document.querySelector("[data-waitlist-stat]");
+  if (stat) {
+    var base = (document.querySelector('meta[name="api-base"]') || {}).content || "";
+    fetch(base + "/api/v1/waitlist/count", { headers: { Accept: "application/json" } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var n = d && (typeof d.count === "number" ? d.count : d.data && d.data.count);
+        if (!n || n < 100) return; // abaixo disso o número trabalha contra
+        stat.querySelector("[data-waitlist-count]").textContent =
+          n.toLocaleString("pt-BR") + "+";
+        stat.hidden = false;
+      })
+      .catch(function () {});
+  }
+})();
+</script>
+<script>
 /* ============================================================================
  * i18n (PT padrão no HTML; EN via dicionário de text-nodes) + tema day/night.
  * Portável: o dicionário abaixo migra 1:1 para next-intl/i18n quando virar React.
@@ -1077,20 +1305,25 @@
   var EN = {
     // nav
     "Serviços": "Services", "Planos": "Plans", "Seja prestador": "Become a pro",
-    "Parcerias": "Partners", "Acesso antecipado": "Early access",
+    "Parcerias": "Partners", "Acesso antecipado": "Early access", "Como funciona": "How it works",
     // hero
-    "Gestão de manutenção de ativos": "Asset maintenance management",
-    "Toda a manutenção": "All the maintenance", "dos seus ativos": "of your assets",
-    "em um só lugar.": "in one place.",
-    "Do primeiro chamado ao histórico completo de manutenção, conectamos clientes, ativos e prestadores de serviço em um único ecossistema.": "From the first request to the full maintenance history, we connect customers, assets and service providers in a single ecosystem.",
-    "1ª proposta": "1st quote", "Nota dos profissionais": "Pro rating", "Atendimentos": "Jobs done",
+    "Ajuda, rápido": "Help, fast",
+    "Um profissional": "A verified pro", "verificado na sua": "at your door,",
+    "porta, em minutos.": "in minutes.",
+    "Guincho, chaveiro, encanador, eletricista. Você diz quanto quer pagar, compara propostas de quem está perto e acompanha no mapa.": "Tow truck, locksmith, plumber, electrician. You say what you want to pay, compare quotes from pros nearby and follow them on the map.",
+    "Entrar na lista de espera": "Join the waitlist",
+    "É profissional?": "Are you a pro?",
+    "Cadastre-se para receber chamados →": "Sign up to get jobs →",
+    "Profissionais verificados": "Verified pros", "Você": "You",
+    "Define o orçamento": "Set the budget", "Já na lista de espera": "Already on the waitlist",
     // phone mockup
     "Chamado urgente": "Urgent request", "Pneu furado · Av. Paulista": "Flat tire · Av. Paulista",
     "3 propostas": "3 quotes", "AO VIVO": "LIVE", "Melhor opção": "Best match",
     // trust strip
-    "até a 1ª proposta": "to the 1st quote", "profissionais verificados": "verified pros",
-    "em 12k+ serviços": "across 12k+ jobs",
-    "Todo o Brasil": "All of Brazil", "atendemos em todo o país": "available across the country",
+    "Propostas": "Quotes", "em minutos, não em dias": "in minutes, not days",
+    "profissionais verificados": "verified pros",
+    "Avaliação mútua": "Two-way ratings", "cliente e profissional": "customer and pro",
+    "Cidade por cidade": "City by city", "entre na lista da sua": "join the list for yours",
     // join
     "Seja o primeiro quando a Chama Fácil chegar perto de você.": "Be first when Chama Fácil reaches your area.",
     "Entre na lista e avisamos assim que lançarmos na sua cidade — com vantagens para os primeiros.": "Join the list and we'll let you know the moment we launch in your city — with perks for the first ones.",
@@ -1130,15 +1363,19 @@
     "Profissionais próximos enviam ofertas com preço, prazo e nota. Escolha a ideal.": "Nearby pros send offers with price, time and rating. Pick the best one.",
     "Acompanhe & pague": "Track & pay",
     "Acompanhe no mapa e pague por Pix, cartão ou dinheiro ao concluir.": "Track on the map and pay by Pix, card or cash when it's done.",
-    // reviews
-    "Quem usa, recomenda": "People who use it, recommend it",
-    "Histórias reais com a Chama Fácil": "Real stories with Chama Fácil",
-    "\"Pneu furado de noite na Marginal. Em dois minutos veio proposta e em vinte eu estava rodando. Salvou.\"": "\"Flat tire at night on the Marginal. A quote came in two minutes and in twenty I was back on the road. Lifesaver.\"",
-    "Cliente · São Paulo": "Customer · São Paulo",
-    "\"Defini meu preço e vi a média da área — sem pechincha. O encanador veio na mesma tarde.\"": "\"I set my price and saw the area average — no haggling. The plumber came that same afternoon.\"",
-    "Cliente · Pinheiros": "Customer · Pinheiros",
-    "\"Como profissional, pego trabalhos perto e fico com 97%. As fotos de antes/depois geram confiança.\"": "\"As a pro, I take nearby jobs and keep 97%. Before/after photos build trust.\"",
-    "profissional Chama Fácil · 213 trabalhos": "Chama Fácil pro · 213 jobs",
+    // app (substituiu a seção de download de APK)
+    "Aplicativo": "The app", "Os apps chegam junto com a sua cidade.": "The apps arrive with your city.",
+    "São dois: um para quem pede e um para quem atende. Publicamos na Play Store quando abrirmos cada praça — quem está na lista recebe o link antes de todo mundo.": "There are two: one for people asking, one for people working. We publish on the Play Store as each city opens — people on the list get the link first.",
+    "Quero ser avisado": "Notify me", "Android primeiro, iOS na sequência.": "Android first, iOS next.",
+    // confiança (substituiu os depoimentos)
+    "Por que confiar": "Why trust us", "O combinado, por escrito.": "The deal, in writing.",
+    "Você está contratando alguém que vai até a sua casa ou até o seu carro. Estes são os compromissos que assumimos desde o primeiro chamado.": "You're hiring someone who will come to your home or your car. These are the commitments we make from the very first request.",
+    "Ninguém atende sem ser aprovado.": "Nobody works without being approved.",
+    "Documento, comprovante e selfie conferidos pela equipe antes do primeiro chamado. Sem cadastro automático.": "ID, proof of address and a selfie checked by our team before the first job. No automatic sign-ups.",
+    "Você paga depois, e só o combinado.": "You pay afterwards, and only what was agreed.",
+    "Pix, cartão ou dinheiro, sempre após a conclusão. Peça extra só entra no valor se você aprovar antes.": "Pix, card or cash, always after the job is done. Extra parts are only charged if you approve them first.",
+    "A avaliação é dos dois lados.": "Ratings go both ways.",
+    "Você avalia o profissional e ele avalia você. Quem cai de nota deixa de receber chamados.": "You rate the pro and the pro rates you. Whoever drops below the bar stops getting jobs.",
     // plans
     "Planos para prestadores": "Plans for pros", "Comece grátis, cresça quando quiser.": "Start free, grow when you want.",
     "Quanto mais avançado o plano, menor a comissão por serviço. Sem fidelidade — mude de plano a qualquer momento.": "The higher the plan, the lower the per-job commission. No lock-in — switch plans anytime.",
@@ -1167,8 +1404,8 @@
     // faq
     "Bom saber": "Good to know", "Perguntas frequentes": "Frequently asked questions",
     "Onde a Chama Fácil está disponível?": "Where is Chama Fácil available?",
-    "Estamos abrindo o acesso antecipado em todo o Brasil. Entre na lista e avisamos assim que ativarmos na sua cidade — quem entra cedo tem prioridade.": "We're opening early access all across Brazil. Join the list and we'll let you know the moment we go live in your city — early joiners get priority.",
-    "Em chamados urgentes, a primeira proposta costuma chegar em poucos minutos e o profissional em ~6. Em serviços agendados, você escolhe o dia e o horário.": "For urgent requests, the first quote usually arrives in minutes and the pro in ~6. For scheduled jobs, you pick the day and time.",
+    "Estamos abrindo o acesso antecipado por cidade. Entre na lista e avisamos assim que ativarmos na sua — quem entra cedo tem prioridade.": "We're opening early access city by city. Join the list and we'll let you know the moment we go live in yours — early joiners get priority.",
+    "Em chamados urgentes, a proposta chega em minutos e o profissional logo depois, conforme a distância. Em serviços agendados, você escolhe o dia e o horário.": "For urgent requests, quotes arrive in minutes and the pro shortly after, depending on distance. For scheduled jobs, you pick the day and time.",
     "Garanta seu acesso antecipado": "Get your early access", "Cliente · Curitiba": "Customer · Curitiba",
     "Em quanto tempo o profissional chega?": "How fast does the pro arrive?",
     "Como é definido o preço?": "How is the price set?",
@@ -1180,9 +1417,9 @@
     "Quanto custa trabalhar como prestador?": "How much does it cost to work as a pro?",
     "O cadastro é grátis. Há planos de 5% a 1% de comissão — peças repassadas a custo — e pagamento seguro a cada serviço.": "Signing up is free. Plans range from 5% to 1% commission — parts passed on at cost — with secure payment on every job.",
     // footer
-    "Gestão de manutenção de ativos. Clientes, ativos e prestadores conectados.": "Asset maintenance management. Customers, assets and pros connected.",
+    "Um profissional verificado na sua porta, em minutos. Do socorro veicular ao reparo em casa.": "A verified pro at your door, in minutes. From roadside help to repairs at home.",
     "Empresa": "Company", "Sobre": "About", "Contato": "Contact", "Categorias": "Categories",
-    "Avaliações": "Reviews", "Prestadores": "Pros", "Jurídico": "Legal", "Termos": "Terms", "Privacidade": "Privacy",
+    "Prestadores": "Pros", "Jurídico": "Legal", "Termos": "Terms", "Privacidade": "Privacy",
     // tipos de serviço (grid dinâmico + dropdown "Tenho interesse em")
     "Veicular": "Vehicle", "De volta à estrada, rápido.": "Back on the road, fast.",
     "Casa & imóvel": "Home & property", "Reparos e manutenção sob demanda.": "Repairs and upkeep on demand.",
@@ -1205,11 +1442,17 @@
     "Precisa de ajuda?": "Need help?", "Um profissional em segundos.": "A pro in seconds."
   };
   var EN_PH = { "voce@email.com": "you@email.com", "Digite sua cidade...": "Type your city...", "Mateus Almeida": "Jordan Smith" };
+  // Estes valores sobrescrevem <title> e <meta name=description> no load, em
+  // qualquer idioma — editar só as tags do <head> não adianta, o JS reverte.
+  // Mudou uma, mude a outra.
   var META = {
-    title: { pt: "Chama Fácil — ajuda, rápido", en: "Chama Fácil — help, fast" },
+    title: {
+      pt: "Chama Fácil — guincho, chaveiro, encanador em minutos",
+      en: "Chama Fácil — tow truck, locksmith, plumber in minutes"
+    },
     desc: {
-      pt: "Toda a manutenção dos seus ativos em um só lugar. Do socorro veicular ao reparo predial — chame um profissional verificado em segundos.",
-      en: "All your asset maintenance in one place. From roadside help to building repairs — call a verified pro in seconds."
+      pt: "Você diz quanto quer pagar, profissionais verificados perto de você mandam propostas e você acompanha no mapa. Guincho, chaveiro, encanador, eletricista e mais. Pix, cartão ou dinheiro, só depois do serviço.",
+      en: "You say what you want to pay, verified pros nearby send quotes and you follow them on the map. Tow truck, locksmith, plumber, electrician and more. Pay only after the job is done."
     }
   };
 

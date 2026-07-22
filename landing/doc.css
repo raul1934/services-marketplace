@@ -1,0 +1,52 @@
+/* Folha compartilhada das páginas de texto (sobre, contato, termos, privacidade).
+   A index.html e a parcerias.html carregam CSS inline porque são páginas de
+   marketing com layout próprio; estas quatro são o mesmo documento com conteúdo
+   diferente, então vale um arquivo só. Os tokens são os mesmos da landing —
+   mudou lá, muda aqui. */
+:root {
+  --bg: #eef2f7; --surface: #fff; --ink: #15233b; --ink-2: #5b6b82; --ink-3: #95a2b6;
+  --line: #e7ecf3; --accent: #ff6a3d;
+  --grad: linear-gradient(135deg, #ff8a4c 0%, #ff5a6e 55%, #ffb23e 110%);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0d131c; --surface: #161f2b; --ink: #eef2f7; --ink-2: #a7b6c9; --ink-3: #6e7f95;
+  --line: #263242; --accent: #ff7a4d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg); color: var(--ink); line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); }
+.doc-nav { border-bottom: 1px solid var(--line); background: var(--surface); }
+.doc-wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
+.doc-nav .doc-wrap { display: flex; align-items: center; gap: 12px; height: 72px; }
+.doc-logo { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 21px; letter-spacing: -.03em; color: var(--ink); text-decoration: none; }
+.doc-logo img { height: 40px; width: auto; display: block; }
+.doc-spacer { flex: 1; }
+.doc-back { font-weight: 700; font-size: 14.5px; color: var(--ink-2); text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
+.doc-back:hover { color: var(--ink); }
+main { padding: 56px 0 90px; }
+h1 { font-size: clamp(32px, 5vw, 46px); letter-spacing: -.03em; line-height: 1.1; margin: 0 0 10px; }
+h2 { font-size: 21px; letter-spacing: -.02em; margin: 42px 0 10px; }
+h3 { font-size: 17px; margin: 26px 0 8px; }
+p, li { color: var(--ink-2); font-size: 16.5px; }
+li { margin-bottom: 6px; }
+.doc-updated { font-size: 13.5px; color: var(--ink-3); margin: 0 0 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.doc-lead { font-size: 18.5px; color: var(--ink-2); }
+/* Espaço reservado para dado que só a empresa tem (CNPJ, endereço, e-mail do
+   encarregado). Fica gritante de propósito: página jurídica publicada com
+   lacuna é pior do que página jurídica nenhuma. */
+.doc-fill { background: #fff3cd; color: #7a5c00; border: 1px dashed #d1a000; border-radius: 5px; padding: 0 6px; font-weight: 700; font-size: .92em; }
+:root[data-theme="dark"] .doc-fill { background: rgba(255,200,0,.14); color: #ffd76a; }
+.doc-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px 26px; margin: 26px 0; }
+.doc-card p:last-child { margin-bottom: 0; }
+.doc-footer { border-top: 1px solid var(--line); padding: 30px 0 50px; }
+.doc-footer .doc-wrap { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+.doc-footer a { color: var(--ink-2); text-decoration: none; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; min-height: 44px; }
+.doc-footer a:hover { color: var(--ink); }
+.doc-footer .c { color: var(--ink-3); font-size: 13.5px; }

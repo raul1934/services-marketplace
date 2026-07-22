@@ -17,10 +17,33 @@
 	email admin@chamafacil.app
 }
 
+# www → apex. Servir a mesma landing nos dois hosts (como era antes) fazia o
+# Google ver duas URLs com o mesmo conteúdo e dividir os sinais entre elas.
+www.chamafacil.app {
+	redir https://chamafacil.app{uri} permanent
+}
+
 # Landing page estática (marketing + formulário de waitlist).
-chamafacil.app, www.chamafacil.app {
+chamafacil.app {
 	root * /srv/landing
 	encode zstd gzip
+
+	header {
+		# O `.app` já é HSTS-preload, mas o header explícito é o que auditoria de
+		# parceiro e adquirente procura — e vale para qualquer domínio futuro.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# A landing não tem motivo para ser embutida em iframe de terceiro.
+		X-Frame-Options "DENY"
+		-Server
+	}
+
+	# Assets versionados/imutáveis. O HTML fica de fora de propósito: ele precisa
+	# revalidar a cada deploy, senão uma correção de copy leva um ano para chegar.
+	@static path /vendor/* /logo.svg /og.png
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
 	file_server
 }
 
