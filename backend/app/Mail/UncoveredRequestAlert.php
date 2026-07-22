@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\RescueContact;
 use App\Models\ServiceRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -43,6 +44,18 @@ class UncoveredRequestAlert extends Mailable
             with: [
                 'request' => $this->request,
                 'minutes' => $this->minutes,
+                // A fila de resgate vai DENTRO do alerta, não num painel: quem
+                // precisa agir está no celular às 2h da manhã, e cada tela a
+                // mais entre o alerta e a ligação é tempo que o cliente passa
+                // esperando. Cinco é o que cabe numa tela sem virar lista.
+                'contatos' => RescueContact::query()
+                    // Sem filtro de cidade: `service_requests` não guarda
+                    // cidade — só endereço e coordenadas — e a operação é de uma
+                    // praça só. Quando abrir a segunda, o filtro sai do Market
+                    // do chamado, que é onde a territorialidade já vive.
+                    ->paraChamado(null, $this->request->category?->slug)
+                    ->limit(5)
+                    ->get(),
                 'adminUrl' => rtrim((string) config('concierge.admin_url'), '/')
                     ."/admin/service-requests/{$this->request->id}",
             ],
