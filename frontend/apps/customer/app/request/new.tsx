@@ -229,7 +229,7 @@ export default function NewRequest() {
   const footer =
     step < TOTAL
       ? { primary: { label: tr('common.continue'), onPress: () => setStep(step + 1), disabled: !canContinue }, back: step > 1 ? () => setStep(step - 1) : undefined }
-      : { slide: { label: tr('createRequest.slideRequest'), doneLabel: tr('createRequest.slideRequested'), onConfirm: submit, disabled: create.isPending }, back: () => setStep(step - 1) };
+      : { slide: { label: tr('createRequest.slideRequest'), doneLabel: tr('createRequest.slideRequested'), onConfirm: submit, disabled: create.isPending, confirmHint: tr('common.slideHint') }, back: () => setStep(step - 1) };
 
   // When the step's requirement isn't met yet, say what's missing instead of
   // leaving a silently-dead "Continue" button (the user can't tell why it's off).
