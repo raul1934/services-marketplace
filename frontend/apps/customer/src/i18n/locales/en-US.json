@@ -115,7 +115,8 @@
     "passwordPlaceholder": "••••••••",
     "submit": "Continue",
     "toRegisterPrefix": "New to Chama Fácil?",
-    "toRegisterLink": "Create account"
+    "toRegisterLink": "Create account",
+    "phoneInvalid": "Enter a valid phone number with area code."
   },
   "otp": {
     "title": "Verify your phone",
@@ -262,7 +263,11 @@
     "passeador-caes": "Dog walker",
     "adestrador": "Dog trainer",
     "veterinario": "Home vet visit",
-    "pet-sitter": "Pet sitter"
+    "pet-sitter": "Pet sitter",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Tow, locksmith, plumber…",
+    "noResultsTitle": "Nothing found",
+    "noResultsBody": "No service matches “{{query}}”. Try another word."
   },
   "createRequest": {
     "title": "New request",

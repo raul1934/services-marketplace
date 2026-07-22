@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
+import { Alert, SkeletonList } from '@chamafacil/shared';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -144,7 +144,10 @@ export default function Dashboard() {
         {!online ? (
           <EmptyState tone="muted" icon="power" title={tr('dashboard.youreOffline')} body={tr('dashboard.offlineHint')} />
         ) : nearby.isLoading ? (
-          <ActivityIndicator color={t.colors.accent} />
+          // First load gets a skeleton, like every list in the app; a spinner
+          // here said "wait" where the neighbouring screens said "here is the
+          // shape of what is coming". Spinners stay for discrete actions.
+          <SkeletonList count={2} padded={false} />
         ) : topNearby.length ? (
           topNearby.map((r) => (
             <Card key={r.id} style={{ borderWidth: 1.5, borderColor: t.colors.accent }} onPress={() => router.push(`/job/${r.id}`)}>
