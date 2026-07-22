@@ -34,8 +34,10 @@ class WaitlistMailDeliverabilityTest extends TestCase
 
     public function test_carries_a_plain_text_alternative(): void
     {
-        // Mensagem só-HTML conta contra no filtro, e deixa de fora quem lê em
-        // cliente que não renderiza HTML.
+        // Mensagem só-HTML conta contra no filtro e deixa de fora quem lê em
+        // cliente sem HTML. O Laravel deriva o texto do próprio markdown, então
+        // isto vale enquanto o Mailable continuar usando `markdown:` — se um dia
+        // alguém trocar por `html:`, a alternativa some e este teste avisa.
         $msg = $this->mensagem();
 
         $this->assertNotEmpty($msg->getHtmlBody());
@@ -79,5 +81,32 @@ class WaitlistMailDeliverabilityTest extends TestCase
             ]);
             $this->assertNotEmpty($msg->getTextBody(), "{$role}/{$locale}");
         }
+    }
+
+    public function test_footer_carries_the_brand_and_the_right_language(): void
+    {
+        // O template de e-mail do Laravel monta cabeçalho e rodapé com
+        // config('app.name') e __('All rights reserved.'). Com APP_NAME padrão,
+        // o e-mail sai assinado "Laravel" — e em produção era exatamente esse o
+        // valor. Marca errada no corpo, com "Chama Fácil" no remetente, é
+        // incoerência que o leitor nota e o filtro pontua.
+        config(['app.name' => 'Chama Fácil']);
+
+        $msg = $this->mensagem();
+        $html = $msg->getHtmlBody();
+
+        $this->assertStringContainsString('Chama Fácil', $html);
+        $this->assertStringNotContainsString('Laravel', $html);
+        $this->assertStringContainsString('Todos os direitos reservados', $html);
+        $this->assertStringNotContainsString('All rights reserved', $html);
+    }
+
+    public function test_english_recipient_gets_the_english_footer(): void
+    {
+        config(['app.name' => 'Chama Fácil']);
+
+        $msg = $this->mensagem(['locale' => 'en', 'email' => 'en@exemplo.com']);
+
+        $this->assertStringContainsString('All rights reserved', $msg->getHtmlBody());
     }
 }
