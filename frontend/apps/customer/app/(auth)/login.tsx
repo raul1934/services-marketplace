@@ -100,7 +100,7 @@ export default function Login() {
         <View style={{ flex: 1 }} />
 
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
-          {tr('login.toRegisterPrefix')} <Text color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/register')}>{tr('login.toRegisterLink')}</Text>
+          {tr('login.toRegisterPrefix')} <Text accessibilityRole="link" suppressHighlighting color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/register')}>{tr('login.toRegisterLink')}</Text>
         </Text>
       </View>
     </Screen>

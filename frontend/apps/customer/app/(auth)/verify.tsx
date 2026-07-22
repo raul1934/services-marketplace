@@ -77,14 +77,14 @@ export default function Verify() {
           {seconds > 0 ? (
             tr('otp.resendIn', { seconds })
           ) : (
-            <Text color={t.colors.accent} weight="800" onPress={resend}>{tr('otp.resend')}</Text>
+            <Text accessibilityRole="button" suppressHighlighting color={t.colors.accent} weight="800" onPress={resend}>{tr('otp.resend')}</Text>
           )}
         </Text>
         {resent && seconds > 0 ? <Text variant="caption" color={t.colors.ok} center>{tr('otp.resent')}</Text> : null}
         <View style={{ flex: 1 }} />
 
         <Text center style={{ fontSize: 11, color: t.colors.ink3, lineHeight: 16 }}>
-          {tr('otp.wrongNumber')} <Text color={t.colors.ink2} weight="700" onPress={() => router.back()}>{tr('otp.edit')}</Text>
+          {tr('otp.wrongNumber')} <Text accessibilityRole="link" suppressHighlighting color={t.colors.ink2} weight="700" onPress={() => router.back()}>{tr('otp.edit')}</Text>
         </Text>
       </View>
     </Screen>

@@ -89,13 +89,18 @@ export function ReviewForm({
             <Text
               key={amount}
               onPress={() => setTip(amount)}
+              accessibilityRole="button"
+              // A single-choice row that said which one was picked with a fill
+              // colour and nothing else.
+              accessibilityState={{ selected: on }}
               weight="700"
               center
               color={on ? t.colors.accentInk : t.colors.ink2}
               style={{
                 flex: 1,
                 fontSize: 13,
-                paddingVertical: 10,
+                // 10 left the pill about 37px tall, just under the 44dp floor.
+                paddingVertical: 13,
                 borderRadius: 999,
                 overflow: 'hidden',
                 borderWidth: 1,
