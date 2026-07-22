@@ -69,7 +69,7 @@ class JobController extends Controller
         return new ServiceRequestResource(
             $serviceRequest->load([
                 'category', 'asset', 'asset.detailable', 'client', 'photos', 'beforePhotos', 'afterPhotos',
-                'acceptedProposal', 'availabilities', 'questions.provider', 'answers',
+                'acceptedProposal', 'availabilities', 'questions.provider', 'questions.suggestion', 'answers',
                 'surcharges.provider', 'surcharges.media', 'rescheduleRequests', 'providerReview',
                 // The provider's own bid, so `my_proposal` reflects the "já enviei" state.
                 'proposals' => fn ($q) => $q->where('provider_id', $provider->id),

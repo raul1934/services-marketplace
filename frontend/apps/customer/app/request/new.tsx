@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Image, Pressable, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, View } from 'react-native';
 import { Alert } from '@chamafacil/shared';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
@@ -473,9 +473,26 @@ export default function NewRequest() {
                     </MapView>
                   )
                 ) : (
-                  <Pressable onPress={locate} style={{ height: 200, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                    <Icon name="location" size={28} color={t.colors.accent} />
-                    <Text weight="700" color={t.colors.accent}>{locating ? tr('createRequest.locating') : tr('createRequest.useLocation')}</Text>
+                  <Pressable
+                    onPress={locate}
+                    disabled={locating}
+                    accessibilityRole="button"
+                    accessibilityState={{ busy: locating, disabled: locating }}
+                    style={{ height: 200, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                  >
+                    {/* GPS then reverse-geocode is two round trips and can take
+                        several seconds on a bad signal. The card used to swap
+                        one label for another and otherwise sit perfectly still,
+                        which reads as "nothing happened" — so people tap again,
+                        and the second tap starts the whole thing over. */}
+                    {locating ? (
+                      <ActivityIndicator color={t.colors.accent} size="large" />
+                    ) : (
+                      <Icon name="location" size={28} color={t.colors.accent} />
+                    )}
+                    <Text weight="700" color={t.colors.accent} accessibilityLiveRegion="polite">
+                      {locating ? tr('createRequest.locating') : tr('createRequest.useLocation')}
+                    </Text>
                   </Pressable>
                 )}
                 <Row style={{ padding: 14 }}>

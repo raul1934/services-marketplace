@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useTheme } from '@chamafacil/shared';
+import { config } from '../../src/config';
 
 export default function Register() {
   const t = useTheme();
@@ -55,7 +56,32 @@ export default function Register() {
         <DividerOr label={tr('common.or')} />
         <GoogleButton label={tr('common.googleSignup')} />
 
-        <Text center style={{ fontSize: 11, color: t.colors.ink3, lineHeight: 16, marginTop: 4 }}>{tr('register.legal')}</Text>
+        {/* Was a flat sentence: it told people they were agreeing to two
+            documents and gave them no way to read either one. Legal problem
+            before it is an accessibility one. */}
+        <Text center style={{ fontSize: 11, color: t.colors.ink3, lineHeight: 16, marginTop: 4 }}>
+          {tr('register.legalPrefix')}{' '}
+          <Text
+            accessibilityRole="link"
+            suppressHighlighting
+            color={t.colors.accent}
+            weight="700"
+            onPress={() => Linking.openURL(config.legal.terms)}
+          >
+            {tr('register.legalTerms')}
+          </Text>{' '}
+          {tr('register.legalMiddle')}{' '}
+          <Text
+            accessibilityRole="link"
+            suppressHighlighting
+            color={t.colors.accent}
+            weight="700"
+            onPress={() => Linking.openURL(config.legal.privacy)}
+          >
+            {tr('register.legalPrivacy')}
+          </Text>{' '}
+          {tr('register.legalSuffix')}
+        </Text>
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
           <Text color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('common.haveAccount')}</Text>
         </Text>

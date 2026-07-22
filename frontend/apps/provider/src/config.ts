@@ -17,5 +17,15 @@ export const config = {
   googleClientId:
     process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID ??
     '750648294839-6fta9gctg4mh9e1eovvudri7a2c344r0.apps.googleusercontent.com',
+  /**
+   * Public site, used for the Terms and Privacy links on the sign-up screen.
+   * The `.html` suffix is not cosmetic: the landing serves `/termos.html`
+   * (200) and has no `/termos` route (404), so dropping it would ship a dead
+   * link inside a legal notice.
+   */
+  legal: {
+    terms: (process.env.EXPO_PUBLIC_SITE_URL ?? 'https://chamafacil.app') + '/termos.html',
+    privacy: (process.env.EXPO_PUBLIC_SITE_URL ?? 'https://chamafacil.app') + '/privacidade.html',
+  },
   tokenKey: 'chamafacil.provider.token',
 };
