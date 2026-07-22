@@ -1,0 +1,6 @@
+# chamafacil.app
+# Nada aqui é privado — a landing existe para ser encontrada.
+User-agent: *
+Allow: /
+
+Sitemap: https://chamafacil.app/sitemap.xml

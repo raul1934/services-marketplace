@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Ao criar uma página nova em landing/, acrescente-a aqui: o sitemap é escrito
+     à mão porque o site é estático e tem poucas URLs. Se um dia as páginas de
+     serviço×cidade entrarem, isto vira arquivo gerado.
+
+     As páginas de texto existem em pt-BR e en, uma URL por idioma; cada entrada
+     declara o par com xhtml:link, que é a forma de dizer isso em sitemap. O
+     hreflang precisa bater com o que está no <head> de cada página — se um lado
+     mudar sozinho, o Google descarta o grupo inteiro. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <url>
+    <loc>https://chamafacil.app/</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/" />
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <url>
+    <loc>https://chamafacil.app/parcerias.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://chamafacil.app/sobre.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/sobre.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/about.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/sobre.html" />
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://chamafacil.app/en/about.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/sobre.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/about.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/sobre.html" />
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://chamafacil.app/contato.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/contato.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/contact.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/contato.html" />
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://chamafacil.app/en/contact.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/contato.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/contact.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/contato.html" />
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://chamafacil.app/termos.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/termos.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/terms.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/termos.html" />
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://chamafacil.app/en/terms.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/termos.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/terms.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/termos.html" />
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+
+  <url>
+    <loc>https://chamafacil.app/privacidade.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/privacidade.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/privacidade.html" />
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://chamafacil.app/en/privacy.html</loc>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://chamafacil.app/privacidade.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://chamafacil.app/en/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://chamafacil.app/privacidade.html" />
+    <changefreq>yearly</changefreq>
+    <priority>0.2</priority>
+  </url>
+</urlset>

@@ -1,0 +1,446 @@
+{
+  "$comment": "Fonte da verdade do status da auditoria de marketing/growth da landing (chamafacil.app). Edite o campo `status` AQUI. Mesma mecanica do ux-audit: `python marketing-audit/create-issues.py` cria uma issue por achado aberto e grava o numero de volta em `issue`.",
+  "scope": "landing chamafacil.app (landing/index.html) + aquisicao, SEO, CRO e funil",
+  "audited": "2026-07-21",
+  "statuses": {
+    "open": "nao iniciado",
+    "partial": "parcialmente feito - ver `note`",
+    "done": "entregue - ver `commits`",
+    "invalid": "falso positivo - ver `note`"
+  },
+  "effort": {
+    "P": "pequeno (ate meio dia)",
+    "M": "medio (ate uma semana)",
+    "G": "grande (semanas)"
+  },
+  "total": 27,
+  "findings": [
+    {
+      "id": "MKT-DL-01",
+      "module": "download",
+      "severity": "Crítico",
+      "title": "CTA principal \"Baixar app\" aponta para APKs que não existem (404)",
+      "description": "Os dois botões de download da seção `#download` — e o item \"Baixar app\" do menu — apontam para arquivos que nunca foram publicados. Todo usuário com a maior intenção de conversão da página bate num 404 do Caddy.",
+      "evidence": "`GET https://chamafacil.app/downloads/chamafacil-cliente.apk` → HTTP 404\n`GET https://chamafacil.app/downloads/chamafacil-prestador.apk` → HTTP 404\n`landing/downloads/README.txt` diz \"Coloque aqui os APKs\" — nunca foram colocados.",
+      "solution": "Enquanto o app não estiver na Play Store, remover a seção `#download` e o item de menu, e redirecionar todo o tráfego para a waitlist (`#join`). Distribuir APK por link privado para beta testers. Alternativa: publicar os APKs de fato — mas instalação fora da loja corta 80–95% dos downloads de qualquer jeito.",
+      "effort": "P",
+      "impact": "Alto",
+      "status": "done",
+      "issue": 114,
+      "note": "Seção de download removida; nav e CTAs apontam para a waitlist. `landing/downloads/` apagado.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-LEGAL-01",
+      "module": "legal",
+      "severity": "Crítico",
+      "title": "Termos, Privacidade, Sobre e Contato são links mortos (href=\"#\") — risco LGPD e bloqueio de loja",
+      "description": "O formulário coleta nome, e-mail, telefone e cidade e exibe \"Ao entrar você aceita os Termos e a Política de Privacidade\" com ambos os links apontando para `href=\"#\"`. Consentimento a documento inexistente é consentimento inválido (LGPD Art. 8º/9º). Google Play e App Store exigem URL de política de privacidade publicada para aprovar o app — isso bloqueia o lançamento. E rodapé com link quebrado é sinal forte de \"site abandonado\" para o usuário.",
+      "evidence": "`grep -o 'href=\"[^\"]*\"' landing/index.html` retorna `href=\"#\"` para Sobre, Contato, Termos e Privacidade. Só `parcerias.html` existe de fato.",
+      "solution": "Publicar `/termos`, `/privacidade`, `/sobre` e `/contato` como páginas estáticas ao lado de `parcerias.html` e religar os links do rodapé. Incluir na política: controlador, finalidade, base legal, retenção e canal do titular. Texto precisa de revisão jurídica antes de ir ao ar.",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "partial",
+      "issue": 115,
+      "note": "`termos.html`, `privacidade.html`, `sobre.html` e `contato.html` criados (+ `doc.css` compartilhado), rodapé e fineprint do formulário religados.\n\n**Não faça deploy ainda:** os documentos são rascunho e trazem marcadores `[[PREENCHER: ...]]` visíveis onde falta dado que só a empresa tem — razão social, CNPJ, endereço, e-mail do encarregado, prazos. Precisa de revisão jurídica antes de ir ao ar.\n\nCorreção da evidência original: os links do rodapé não eram `href=\"#\"`, eram âncoras da própria página (`#why` para Sobre, `#join` para Contato/Termos/Privacidade). O problema é o mesmo — nenhum documento existia —, mas o registro estava impreciso.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-SEO-01",
+      "module": "seo",
+      "severity": "Crítico",
+      "title": "Zero Open Graph / Twitter Card / canonical — compartilhamento no WhatsApp desligado",
+      "description": "A página não tem nenhuma tag `og:*`, nenhuma `twitter:*` e nenhum canonical. Quando alguém cola chamafacil.app no WhatsApp — o canal de distribuição nº1 no Brasil — aparece um link cru, sem imagem, sem título e sem descrição. O compartilhamento orgânico está morto antes de começar.",
+      "evidence": "`grep -c 'og:' landing/index.html` → 0; `twitter:` → 0; `canonical` → 0; `application/ld+json` → 0.",
+      "solution": "Adicionar og:type/url/title/description/image (1200×630)/locale, twitter:card=summary_large_image e `<link rel=canonical>`. Criar `landing/og.png`. ~20 minutos de trabalho; CTR de link compartilhado tipicamente sobe 2–3×.",
+      "effort": "P",
+      "impact": "Alto",
+      "status": "done",
+      "issue": 116,
+      "note": "og:*, twitter:*, canonical e `landing/og.png` (1200x630) adicionados. A imagem é funcional, não final — vale um passe de design.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-TRUST-01",
+      "module": "confiança",
+      "severity": "Crítico",
+      "title": "Métricas e depoimentos de um produto não lançado (\"12k+ atendimentos\") — risco CDC e perda de conversão",
+      "description": "O hero exibe \"12k+ ATENDIMENTOS\", \"4,9★ em 12k+ serviços\" e três depoimentos nominais, enquanto a mesma página diz \"avisamos assim que lançarmos na sua cidade\" e os apps nem estão nas lojas. Não dá para ter 12 mil atendimentos e uma waitlist de lançamento ao mesmo tempo. Além do risco de publicidade enganosa (CDC Art. 37 §1º / CONAR), a dissonância derruba conversão: usuário brasileiro é hipercético com marketplace novo, e número redondo não-verificável somado a \"vamos lançar\" produz desconfiança.",
+      "evidence": "Hero: \"12k+ / ATENDIMENTOS\", \"4,9 ★ / NOTA DOS PROFISSIONAIS\", \"4.9 / 5 em 12k+ serviços\", \"6 min até a 1ª proposta\". Depoimentos \"Camila A. · São Paulo\", \"Rafael C. · 213 trabalhos\". Seção `#join`: \"Seja o primeiro quando a Chama Fácil chegar perto de você\".",
+      "solution": "Trocar por prova social honesta de pré-lançamento, que converte melhor por ser crível: contador ao vivo da waitlist (backend já tem o endpoint), nº de prestadores cadastrados, nº de cidades. Substituir depoimentos fictícios por entrevistas reais de descoberta rotuladas \"prestador fundador\". Manter \"100% verificados\" (é promessa de política, não métrica). Ganho estimado: +15–25% na submissão do form.",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "partial",
+      "issue": 117,
+      "note": "Removidos: \"12k+ atendimentos\", \"4,9★ / Nota dos profissionais\", \"4.9/5 em 12k+ serviços\", \"6 min até a 1ª proposta\" e os três depoimentos assinados. A seção `#reviews` virou `#confianca` (\"O combinado, por escrito\"), com compromissos verificáveis em vez de depoimento inventado — o que também começa a cobrir MKT-CRO-04.\n\nFalta a parte positiva: o hero tem um slot de contador da fila que só aparece quando `GET /api/v1/waitlist/count` existir. Hoje o endpoint não existe e o bloco fica escondido (nada quebra).",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-PERF-01",
+      "module": "performance",
+      "severity": "Crítico",
+      "title": "Microsoft Clarity no <head> segura o load em 6,3s sozinho",
+      "description": "TTFB é 2ms e DOMContentLoaded 55ms — a base é excelente. Mas o evento `load` só fecha em 6.346ms, e 6.245ms disso é a tag do Clarity carregada de forma síncrona no `<head>`. A ferramenta instalada para medir experiência é a que está destruindo a experiência.",
+      "evidence": "PerformanceResourceTiming no navegador: `clarity.ms/tag/xmdkrrnzx6` duration 6245ms; navigation loadEventEnd 6346ms, domContentLoadedEventEnd 55ms, responseStart 2ms. `api/v1/service-categories` também custa 1977ms e não é above-the-fold.",
+      "solution": "Carregar Clarity (e idealmente o GA4) em `requestIdleCallback` ou após o evento `load`, nunca no `<head>`. Tornar `service-categories` lazy. Esperado: load < 1s.",
+      "effort": "P",
+      "impact": "Alto",
+      "status": "done",
+      "issue": 118,
+      "note": "GA4 e Clarity saíram do `<head>`: carregam em `requestIdleCallback` após o evento `load`, com `dataLayer`/`clarity.q` criados antes para não perder eventos.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-LP-01",
+      "module": "landing",
+      "severity": "Crítico",
+      "title": "H1 fala B2B (\"gestão de manutenção de ativos\") para um público B2C on-demand",
+      "description": "A página tem três identidades conflitantes: title \"ajuda, rápido\", H1 \"Toda a manutenção dos seus ativos em um só lugar\", eyebrow \"GESTÃO DE MANUTENÇÃO DE ATIVOS\", meta description \"socorro veicular ao reparo predial\". \"Gestão de manutenção de ativos\" é vocabulário de SaaS B2B de facilities. Quem está com pneu furado na Paulista não digita, não pensa e não se identifica com isso. No teste dos 5 segundos o usuário sai com \"plataforma corporativa de manutenção\", não com \"app que traz guincho rápido\".",
+      "evidence": "`landing/index.html`: `<title>Chama Fácil — ajuda, rápido</title>`, `<h1>Toda a manutenção dos seus ativos em um só lugar.</h1>`, eyebrow \"GESTÃO DE MANUTENÇÃO DE ATIVOS\".",
+      "solution": "Assumir B2C on-demand na aquisição. H1 concreto de benefício: \"Guincho, chaveiro, encanador — um profissional verificado na sua porta em minutos\". Manter gestão de ativos como feature de retenção mais abaixo na página, não como headline. Testar em A/B (esperado +25–40% na taxa de lead).",
+      "effort": "P",
+      "impact": "Alto",
+      "status": "done",
+      "issue": 119,
+      "note": "Novo H1/eyebrow/sub em linguagem B2C. Atenção: `<title>` e `<meta description>` são sobrescritos em runtime pelo objeto `META` do bloco de i18n — os dois lugares foram atualizados.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-CRO-01",
+      "module": "cro",
+      "severity": "Alto",
+      "title": "Sem CTA sticky no mobile numa página de 14.465px (18 telas de rolagem)",
+      "description": "A 375px de largura o documento tem 14.465px de altura e o formulário fica a ~40% da página. Não há CTA fixo, então o custo de agir a qualquer momento é rolar de volta. Em landing de waitlist isso é perda direta.",
+      "evidence": "`document.body.scrollHeight` = 14465 a `innerWidth` 375. Seção `#join` no meio da página.",
+      "solution": "Barra sticky no mobile com CTA único \"Entrar na lista\" que faz scroll suave até `#join`, aparecendo depois de ~1 viewport de rolagem. Ganho estimado +15–25% de leads mobile.",
+      "effort": "P",
+      "impact": "Alto",
+      "status": "done",
+      "issue": 120,
+      "note": "Barra `.lp-sticky` no mobile: entra após ~1 viewport e recolhe quando `#join` está visível (IntersectionObserver).",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-CRO-02",
+      "module": "cro",
+      "severity": "Alto",
+      "title": "Lead entra na waitlist e não recebe nada — sem confirmação nem nutrição",
+      "description": "O POST `/api/v1/waitlist` funciona (validado: retorna 422 estruturado sem payload) e o form mostra mensagem de sucesso personalizada, mas o lead não recebe e-mail nenhum. Sem confirmação imediata nem sequência até o lançamento, cada lead esfria em 48h e estará morto no dia do lançamento. O funil hoje termina no lead e não há ponte até a ativação.",
+      "evidence": "`landing/index.html:1045` — o fetch só troca a UI por `joinSuccess`. Nenhum e-mail transacional no fluxo.",
+      "solution": "E-mail de confirmação imediato com posição na fila e o que acontece a seguir + sequência de 5 toques até o lançamento (bastidores, prestadores da região, data da praça, convite antecipado). Métrica: abertura > 45%.",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "open",
+      "issue": 121
+    },
+    {
+      "id": "MKT-UX-01",
+      "module": "formulário",
+      "severity": "Alto",
+      "title": "Campo de telefone abre teclado alfabético e nenhum input tem <label for>",
+      "description": "O campo telefone é `type=\"text\"` sem `inputmode=\"tel\"` e sem máscara — no celular abre teclado alfabético, o que é uma das maiores causas de abandono de campo. Nenhum dos quatro campos tem `<label for>` vinculado, o que degrada leitor de tela e autofill.",
+      "evidence": "DOM: inputs `name`(text), `email`(email), `phone`(text, inputMode vazio), `city`(text, autocomplete=off) — nenhum com `label[for]` correspondente.",
+      "solution": "`inputmode=\"tel\"` + máscara `(11) 99999-9999` no telefone; `<label for>` real (visualmente oculto se necessário) em todos os campos; `aria-live=\"polite\"` na mensagem de sucesso.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "done",
+      "issue": 122,
+      "note": "`<label for>` em todos os campos, `type=tel` + `inputmode=tel` + máscara `(11) 99999-9999`, `aria-describedby` nos erros e `aria-live` no sucesso.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-UX-02",
+      "module": "acessibilidade",
+      "severity": "Alto",
+      "title": "17 de 40 alvos de toque abaixo de 44×44px no mobile",
+      "description": "Quase metade dos links e botões renderizados a 375px tem altura ou largura inferior a 44px, abaixo do mínimo de WCAG 2.5.5 e das HIG. Em landing mobile-first isso vira toque errado e desistência.",
+      "evidence": "Medido no DOM a 375px: 17 de 40 elementos `a`/`button` com bounding box < 44px em alguma dimensão.",
+      "solution": "Padding mínimo garantindo 44×44px de área clicável em nav, links de categoria, itens de FAQ e rodapé — sem alterar o visual, via padding + margem negativa quando preciso.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "partial",
+      "issue": 123,
+      "note": "Área de 44px garantida nos links do rodapé, no link de prestador do hero e nos botões de idioma/tema. Não foi uma varredura exaustiva — vale remedir os 375px depois deste lote.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-SEO-02",
+      "module": "seo",
+      "severity": "Alto",
+      "title": "robots.txt e sitemap.xml retornam 404",
+      "description": "Nenhum dos dois existe. Sem sitemap, a descoberta depende só de links externos, que também não existem ainda.",
+      "evidence": "`GET /robots.txt` → 404; `GET /sitemap.xml` → 404.",
+      "solution": "Publicar `robots.txt` liberando tudo e apontando o sitemap, e um `sitemap.xml` com a home, `/parcerias` e as páginas legais assim que existirem.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "done",
+      "issue": 124,
+      "note": "`landing/robots.txt` e `landing/sitemap.xml` publicados; o sitemap já lista as páginas novas.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-SEO-03",
+      "module": "seo",
+      "severity": "Alto",
+      "title": "FAQ existente sem schema FAQPage — rich snippet desperdiçado",
+      "description": "As 6 perguntas do FAQ já estão escritas e são boas, mas sem JSON-LD `FAQPage` o Google não pode expandi-las na SERP. É CTR grátis sendo deixado na mesa.",
+      "evidence": "`grep -c 'application/ld+json' landing/index.html` → 0. Seção FAQ com 6 pares pergunta/resposta.",
+      "solution": "Adicionar JSON-LD `FAQPage` com as 6 perguntas existentes, mais `Organization` e `WebSite`. ~30 minutos; +20–30% de CTR na SERP quando o rich result é concedido.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "done",
+      "issue": 125,
+      "note": "JSON-LD com `Organization` + `WebSite` + `FAQPage` (as 6 perguntas). O texto do FAQ visível foi ajustado para bater exatamente com o schema.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-SEO-04",
+      "module": "seo",
+      "severity": "Alto",
+      "title": "www e apex servem o mesmo conteúdo com 200 e sem canonical — conteúdo duplicado",
+      "description": "Tanto `chamafacil.app` quanto `www.chamafacil.app` respondem 200 com a mesma página e não há canonical. O Google vê duas URLs para o mesmo conteúdo e divide sinais.",
+      "evidence": "`curl -I https://www.chamafacil.app/` → HTTP 200 (mesmo conteúdo do apex). Nenhum `rel=canonical` no HTML.",
+      "solution": "Redirecionar 301 de www para o apex no Caddyfile (ou o inverso, escolhendo um) e adicionar canonical no HTML.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "done",
+      "issue": 126,
+      "note": "`www` agora responde 301 para o apex no `Caddyfile.prod`, e o canonical está no HTML.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-LP-02",
+      "module": "landing",
+      "severity": "Alto",
+      "title": "Cinco CTAs concorrentes e dois públicos disputando a mesma página",
+      "description": "A home tenta converter cliente e prestador ao mesmo tempo: \"Acesso antecipado\", \"Seja prestador\", \"Baixar app\", \"Começar grátis\" e \"Começar a ganhar\" competem, sendo dois deles no hero com peso visual equivalente. Pela Lei de Hick, cada opção adicional reduz a ação. Cliente e prestador são dois negócios, dois funis e duas propostas de valor — Uber, iFood e GetNinjas separam.",
+      "evidence": "Hero com dois botões de mesmo peso; nav com \"Seja prestador\" e \"Baixar app\"; três botões \"Começar grátis\" na tabela de planos.",
+      "solution": "Home 100% do cliente, com um CTA primário único e um link discreto \"É profissional? Cadastre-se aqui →\" para uma landing `/prestadores` com hero, copy e funil próprios.",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "partial",
+      "issue": 127,
+      "note": "O hero agora tem um CTA só (\"Entrar na lista de espera\") e o prestador virou link discreto; \"Baixar app\" saiu do menu. Falta o principal: a landing `/prestadores` separada, com headline \"você não paga por lead\".",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-CRO-03",
+      "module": "cro",
+      "severity": "Alto",
+      "title": "Três números diferentes de comissão na mesma página",
+      "description": "A tabela de planos anuncia \"0% de comissão\" no acesso antecipado, o depoimento do Rafael diz \"fico com 97%\" (ou seja, 3%) e o FAQ diz \"sem mensalidade nem comissão\". Prestador é o público mais desconfiado do funil e vai notar.",
+      "evidence": "Planos: \"5% → 0%\", \"2,5% → 0%\", \"1% → 0%\". Depoimento: \"pego trabalhos perto e fico com 97%\". FAQ: \"totalmente grátis — sem mensalidade nem comissão\".",
+      "solution": "Definir uma única mensagem de comissão para o acesso antecipado e propagar em planos, depoimentos e FAQ.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "done",
+      "issue": 128,
+      "note": "O \"fico com 97%\" saiu junto com os depoimentos fabricados. Planos e FAQ agora dizem a mesma coisa: 0% no acesso antecipado.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-CRO-04",
+      "module": "cro",
+      "severity": "Alto",
+      "title": "Objeções centrais não tratadas: seguro, garantia, no-show e faixa de preço",
+      "description": "Nenhuma menção a seguro ou garantia (\"e se o profissional quebrar algo?\"), a política de cancelamento/no-show (\"e se ele não aparecer?\") nem a faixa de preço por serviço (\"quanto vou pagar?\"). Do lado do prestador, o maior trunfo — não pagar por lead, ao contrário do GetNinjas — está enterrado numa tabela de planos em vez de ser headline.",
+      "evidence": "Varredura completa do texto da página: FAQ cobre disponibilidade, tempo, preço-mecanismo, verificação, pagamento e custo do prestador — nenhuma cobre garantia, no-show ou faixa de valores.",
+      "solution": "Adicionar ao FAQ e a uma faixa de confiança: política de garantia, o que acontece se o profissional não aparecer, e faixa de preço típica por serviço. Na landing de prestador, subir para o topo: \"Você não paga para receber o contato. Só ganha quando trabalha.\"",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "partial",
+      "issue": 129,
+      "note": "A seção `#confianca` responde verificação, pagamento após conclusão e avaliação mútua; `termos.html` cobre no-show, cancelamento e prazo de disputa. Continuam sem resposta: seguro/garantia e faixa de preço por serviço — as duas dependem de decisão de produto.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-CRO-05",
+      "module": "cro",
+      "severity": "Médio",
+      "title": "Sem canal de WhatsApp — padrão de suporte esperado no Brasil",
+      "description": "Não há botão de WhatsApp em lugar nenhum. É o canal de contato padrão do consumidor brasileiro e a ausência custa tanto em conversão quanto em confiança, ainda mais numa marca desconhecida em pré-lançamento.",
+      "evidence": "Nenhum link `wa.me` ou `api.whatsapp.com` no HTML.",
+      "solution": "Botão flutuante de WhatsApp com mensagem pré-preenchida por contexto (cliente vs. prestador) e evento no GA4.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "done",
+      "issue": 130,
+      "commits": [
+        "fix/mkt-p0-landing"
+      ],
+      "note": "Botão flutuante em todas as visitas da index (+55 17 99647-5590), com mensagem pré-preenchida no idioma da página e evento `contact` no GA4. Nas páginas de contato PT/EN o WhatsApp virou o canal principal, com o e-mail como alternativa. Posicionado acima da barra sticky no mobile — as duas moram no canto de baixo."
+    },
+    {
+      "id": "MKT-UX-03",
+      "module": "formulário",
+      "severity": "Médio",
+      "title": "Cidade é texto livre com autocomplete=off — impossível segmentar a waitlist por praça",
+      "description": "O campo cidade é texto livre e explicitamente desliga o autocomplete. O resultado é base suja (\"sp\", \"São paulo\", \"sao paulo - sp\") justamente no dado que decide qual praça lançar primeiro — a métrica mais importante do estágio atual.",
+      "evidence": "DOM: input `city` com `autocomplete=\"off\"`, sem datalist e sem normalização no submit.",
+      "solution": "Datalist ou combobox com as 200 maiores cidades + normalização no backend, com geolocalização opcional como atalho. Sem isso, densidade por praça não é mensurável.",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "invalid",
+      "issue": 131,
+      "note": "Falso positivo — desculpe o ruído. O campo de cidade **já é** um combobox: `[data-city-ac]` com `role=\"combobox\"`, listbox e busca em `GET /api/v1/cities` (que responde 200). O `autocomplete=\"off\"` que eu li como \"sem autocomplete\" está ali justamente para o autocomplete nativo do navegador não brigar com a lista da aplicação — é o uso correto.\n\nO que sobra de real é bem menor e não justifica issue própria: o valor enviado não é normalizado quando a pessoa digita e não seleciona da lista.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-SEC-01",
+      "module": "infra",
+      "severity": "Médio",
+      "title": "Endpoint de waitlist sem honeypot e com CORS liberado — base vulnerável a lixo",
+      "description": "O preflight responde `Access-Control-Allow-Origin: *` e o formulário não tem honeypot nem qualquer sinal anti-bot. Uma base de waitlist envenenada corrompe a métrica de densidade por praça, que é a que decide a estratégia de lançamento.",
+      "evidence": "`OPTIONS /api/v1/waitlist` → 204 com `Access-Control-Allow-Origin: *`. Formulário sem campo honeypot nem timestamp.",
+      "solution": "Honeypot escondido + verificação de tempo mínimo de preenchimento no front, rate limit por IP no backend e restrição do CORS à origem da landing.",
+      "effort": "P",
+      "impact": "Médio",
+      "status": "partial",
+      "issue": 132,
+      "note": "Honeypot (`nickname`) no formulário, invisível e fora da tabulação; se preenchido, finge sucesso e não envia. Falta o lado do backend: rate limit por IP e CORS restrito à origem da landing (hoje `Access-Control-Allow-Origin: *`).",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-SEC-02",
+      "module": "infra",
+      "severity": "Médio",
+      "title": "Sem headers de segurança e sem Cache-Control nos estáticos",
+      "description": "A resposta não traz HSTS, CSP, X-Frame-Options nem X-Content-Type-Options, e `/vendor/` e `logo.svg` são servidos sem header de cache. Além do risco, headers de segurança ausentes aparecem em auditorias de parceiros e adquirentes quando o pagamento entrar em cena.",
+      "evidence": "`curl -I https://chamafacil.app/` não retorna nenhum header de segurança nem `Cache-Control`.",
+      "solution": "No Caddyfile: HSTS, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy e uma CSP inicial em Report-Only; `Cache-Control: public, max-age=31536000, immutable` para `/vendor/` e assets versionados.",
+      "effort": "P",
+      "impact": "Baixo",
+      "status": "done",
+      "issue": 133,
+      "note": "HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy e `Cache-Control` imutável para `/vendor/`, `logo.svg` e `og.png` no `Caddyfile.prod`. Falta o deploy para valer em produção.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
+    },
+    {
+      "id": "MKT-PERF-02",
+      "module": "performance",
+      "severity": "Médio",
+      "title": "Fontes do Google são render-blocking — LCP penalizado em 4G",
+      "description": "Manrope e Space Mono entram por `<link rel=\"stylesheet\">` do Google Fonts sem preload e sem self-host, bloqueando a renderização. Em 4G brasileiro isso custa centenas de ms de LCP, ainda que os preconnect já ajudem.",
+      "evidence": "`landing/index.html` head: `<link href=\"https://fonts.googleapis.com/css2?family=Manrope...\" rel=\"stylesheet\">` sem preload.",
+      "solution": "Self-hostar os dois em `.woff2` subsetado (latin + latin-ext) com `font-display: swap` e `<link rel=preload>`. Esperado: LCP 300–800ms melhor. Bônus: elimina uma dependência de terceiro sob LGPD.",
+      "effort": "M",
+      "impact": "Médio",
+      "status": "open",
+      "issue": 134
+    },
+    {
+      "id": "MKT-SEO-05",
+      "module": "seo",
+      "severity": "Alto",
+      "title": "Zero superfície de busca num negócio 100% de intenção local — SEO programático serviço×cidade",
+      "description": "O negócio é movido por buscas de intenção local com urgência máxima (\"guincho 24h zona sul sp\", \"chaveiro automotivo perto de mim\", \"encanador urgente bh\"), que têm a maior intenção comercial do funil e CPC de R$4–15. O site tem exatamente uma página e não pode ranquear para nada disso. Foi assim que o GetNinjas construiu o fosso dele em 14 anos. Sem resposta programática, o CAC será 100% pago para sempre.",
+      "evidence": "Site tem 1 página indexável (`index.html`) + `parcerias.html`. Nenhuma URL por serviço ou cidade.",
+      "solution": "Gerar `/servicos/{servico}/{cidade}` a partir de template + dados — 24 serviços × 100 cidades = 2.400 páginas. Cada uma com preço médio local, FAQ específica, schema `LocalBusiness`/`Service`/`FAQPage` e CTA para a waitlist daquela cidade. `GET /api/v1/service-categories` já entrega metade dos dados. Potencial: 10–40k visitas orgânicas/mês em 6–9 meses a custo marginal zero.",
+      "effort": "G",
+      "impact": "Alto",
+      "status": "open",
+      "issue": 135
+    },
+    {
+      "id": "MKT-DL-02",
+      "module": "download",
+      "severity": "Alto",
+      "title": "Publicar os apps na Play Store — APK avulso corta 80–95% dos downloads",
+      "description": "Pedir para o usuário baixar um APK, abrir o gerenciador de arquivos e habilitar \"fontes desconhecidas\" é um funil de quatro passos com aviso de segurança do sistema no meio. A queda típica frente à loja é de 80–95%. Está bloqueado por MKT-LEGAL-01, já que a loja exige URL de política de privacidade publicada.",
+      "evidence": "Seção `#download`: \"Baixe o APK, abra o arquivo e permita a instalação de fontes desconhecidas\". \"iOS em breve\".",
+      "solution": "Publicar cliente e prestador na Play Store (ficha, ASO em português, screenshots, política de privacidade). Depende de MKT-LEGAL-01.",
+      "effort": "G",
+      "impact": "Alto",
+      "status": "open",
+      "issue": 136
+    },
+    {
+      "id": "MKT-GROWTH-01",
+      "module": "growth",
+      "severity": "Alto",
+      "title": "Nenhum mecanismo de indicação — cada lead termina em si mesmo",
+      "description": "A tela de sucesso do formulário só agradece. Não há posição na fila, não há convite, não há motivo para o lead falar com alguém. Num pré-lançamento, o único canal de crescimento gratuito disponível é o próprio lead, e ele está desligado — assim como o compartilhamento em si (ver MKT-SEO-01).",
+      "evidence": "`landing/index.html:1052-1058` — sucesso troca o form por uma mensagem estática de agradecimento.",
+      "solution": "Mecânica de fila estilo Robinhood: mostrar a posição, dar link único e subir posições por indicação confirmada. Do lado da oferta, R$50 ao prestador que indicar outro que complete o primeiro serviço. Meta: K-factor > 0,3.",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "open",
+      "issue": 137
+    },
+    {
+      "id": "MKT-STRAT-01",
+      "module": "estratégia",
+      "severity": "Crítico",
+      "title": "Quatro verticais e cobertura nacional com liquidez zero — foco em 1 vertical + 1 praça",
+      "description": "A home ataca Veicular, Casa, Beleza e Pets (24 serviços) em \"todo o Brasil\" antes do lançamento. Marketplace pré-lançamento morre exatamente disso: com a demanda espalhada por 24 serviços e milhares de municípios, a chance de existir prestador disponível no primeiro pedido é próxima de zero — e a primeira experiência ruim é irrecuperável. Uber lançou uma cidade, um serviço.",
+      "evidence": "Seção `#services` com 4 categorias e 24 subcategorias; FAQ: \"Estamos abrindo o acesso antecipado em todo o Brasil\"; hero: \"Todo o Brasil — atendemos em todo o país\".",
+      "solution": "Estreitar para socorro veicular em uma capital (recomendo São Paulo). É a única vertical onde nenhum incumbente compete, a urgência sustenta preço, o rastreamento em tempo real importa de verdade e o veículo é o \"ativo\" mais natural para o histórico de manutenção. Beleza e pets ficam no roadmap, saem da home. Meta antes de abrir: ~200 prestadores e taxa de match > 70%.",
+      "effort": "G",
+      "impact": "Alto",
+      "status": "open",
+      "issue": 138
+    },
+    {
+      "id": "MKT-GROWTH-02",
+      "module": "growth",
+      "severity": "Médio",
+      "title": "Histórico de ativo não gera recorrência — falta push de lembrete de manutenção",
+      "description": "O histórico de manutenção por ativo é o diferencial mais forte do produto e nenhum concorrente brasileiro tem. Mas hoje é passivo: só registra. Sem lembrete proativo, o app continua sendo de emergência (frequência 1–2×/ano, retenção ruim) em vez de relacionamento recorrente.",
+      "evidence": "Seção da plataforma mostra \"Revisão agendada — amanhã, 09:00\" como estado, sem nenhuma menção a notificação proativa.",
+      "solution": "Push e e-mail proativos a partir do histórico: \"Sua revisão vence em 15 dias\", \"Última troca de óleo há 6 meses\", com recontratação do mesmo profissional em um toque. É a maior alavanca de LTV do produto.",
+      "effort": "G",
+      "impact": "Alto",
+      "status": "open",
+      "issue": 139
+    },
+    {
+      "id": "MKT-CONTENT-01",
+      "module": "conteúdo",
+      "severity": "Baixo",
+      "title": "Sem blog e sem páginas institucionais — nenhum topo de funil e nenhum sinal de E-E-A-T",
+      "description": "Não existe blog nem conteúdo de topo de funil, e as institucionais (Sobre, Contato) são links mortos. Sem isso não há como capturar busca informacional (\"quanto custa um guincho\", \"como saber se o encanador é confiável\") nem construir os sinais de autoridade que o Google usa para confiar numa marca nova.",
+      "evidence": "Rodapé com Sobre e Contato em `href=\"#\"`. Nenhuma rota de blog.",
+      "solution": "Depois das páginas legais e do SEO programático: blog com pauta de custo e confiança por serviço, alimentando as páginas de cidade com links internos.",
+      "effort": "G",
+      "impact": "Médio",
+      "status": "open",
+      "issue": 140
+    }
+  ]
+}
