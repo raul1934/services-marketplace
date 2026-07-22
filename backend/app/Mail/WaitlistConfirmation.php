@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\URL;
 
@@ -40,10 +41,37 @@ class WaitlistConfirmation extends Mailable implements ShouldQueue
         );
     }
 
+    /**
+     * Cabeçalhos de descadastro em um clique (RFC 8058).
+     *
+     * Desde 2024 o Gmail e o Yahoo exigem isto de quem envia em volume, e a
+     * ausência conta como sinal negativo mesmo em volume baixo — que é
+     * exatamente a situação de um domínio novo, sem histórico, mandando o
+     * primeiro e-mail da vida. É o mesmo link assinado do rodapé; a diferença é
+     * que aqui o provedor consegue lê-lo e oferecer o botão nativo de
+     * "cancelar inscrição", em vez de deixar a pessoa marcar como spam — que é
+     * o que de fato destrói reputação.
+     *
+     * List-Unsubscribe-Post é o que torna o clique único: sem ele o provedor
+     * abre a URL num navegador em vez de resolver sozinho.
+     */
+    public function headers(): Headers
+    {
+        $url = URL::signedRoute('waitlist.unsubscribe', ['entry' => $this->entry->id]);
+
+        return new Headers(text: [
+            'List-Unsubscribe' => "<{$url}>",
+            'List-Unsubscribe-Post' => 'List-Unsubscribe=One-Click',
+        ]);
+    }
+
     public function content(): Content
     {
         return new Content(
             markdown: 'mail.waitlist-confirmation',
+            // Sem esta linha a mensagem sai só em HTML, o que conta contra em
+            // filtro de spam e deixa de fora quem lê em cliente sem HTML.
+            text: 'mail.waitlist-confirmation-text',
             with: [
                 'entry' => $this->entry,
                 'en' => $this->entry->locale === 'en',
