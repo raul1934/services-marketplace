@@ -57,6 +57,16 @@ return [
     'admin_url' => env('CONCIERGE_ADMIN_URL', 'https://admin.chamafacil.app'),
 
     /*
+    | WhatsApp público da operação — o mesmo que a landing publica.
+    |
+    | Entra na confirmação da lista de espera com uma oferta que só existe por
+    | causa do modo concierge: enquanto a cidade não abriu, quem precisar de
+    | socorro pode falar com a gente e o atendimento é feito na mão. É o
+    | caminho mais curto entre um lead frio e o primeiro serviço real.
+    */
+    'public_whatsapp' => env('CONCIERGE_PUBLIC_WHATSAPP', '5517996475590'),
+
+    /*
     |--------------------------------------------------------------------------
     | Canais do alerta
     |--------------------------------------------------------------------------

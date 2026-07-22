@@ -6,9 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\ServiceCategory;
 use App\Models\WaitlistEntry;
+use App\Mail\WaitlistConfirmation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * Public endpoints consumed by the marketing landing page (no auth). Kept in one
@@ -29,9 +32,40 @@ class LandingController extends Controller
         ]);
 
         $data['role'] ??= 'customer';
-        WaitlistEntry::create($data);
+        // O idioma é gravado agora porque a sequência até o lançamento sai
+        // muito depois, quando não há mais requisição de onde inferir isso.
+        $data['locale'] = app()->getLocale() === 'en' ? 'en' : 'pt';
+
+        $entry = WaitlistEntry::create($data);
+
+        // Na fila: falha de SMTP não pode derrubar o cadastro. Perder o e-mail
+        // é ruim; perder o lead é pior.
+        Mail::to($entry->email)->queue(new WaitlistConfirmation($entry));
+        $entry->forceFill(['confirmed_mail_sent_at' => now()])->save();
 
         return response()->json(['message' => __('messages.waitlist_joined')], 201);
+    }
+
+    /**
+     * Descadastro da lista, por link assinado enviado no rodapé de cada e-mail.
+     *
+     * Assinado para que ninguém descadastre outra pessoa mexendo no id da URL,
+     * e sem login porque exigir conta de quem só quer sair é o tipo de atrito
+     * que a LGPD não admite. Responde HTML: quem clica está no e-mail, não numa
+     * integração, e merece uma página e não um JSON.
+     */
+    public function unsubscribe(WaitlistEntry $entry): Response
+    {
+        if ($entry->canBeEmailed()) {
+            $entry->forceFill(['unsubscribed_at' => now()])->save();
+        }
+
+        $en = $entry->locale === 'en';
+
+        return response()->view('waitlist.unsubscribed', [
+            'entry' => $entry,
+            'en' => $en,
+        ]);
     }
 
     /**

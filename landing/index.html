@@ -1381,7 +1381,10 @@
     btn.disabled = true;
     fetch(API_BASE + "/api/v1/waitlist", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      // X-Locale decide o idioma do e-mail de confirmação; sem ele o
+      // backend cai no padrão e quem se cadastrou em inglês recebe em
+      // português.
+      headers: { "Content-Type": "application/json", Accept: "application/json", "X-Locale": isEN() ? "en" : "pt" },
       body: JSON.stringify({ role: role, name: name, email: email, phone: form.phone.value.trim(), city: form.city.value.trim(), service: form.service.value })
     })
       .then(function (r) {
