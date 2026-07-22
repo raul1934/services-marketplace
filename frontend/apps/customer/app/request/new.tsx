@@ -55,6 +55,7 @@ export default function NewRequest() {
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState<Coords | null>(null);
   const [locating, setLocating] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(false);
   const [budget, setBudget] = useState(120);
   const [urgency, setUrgency] = useState<RequestUrgency>(RequestUrgency.Urgent);
   const [reception, setReception] = useState<ReceptionType>(ReceptionType.AdultKey);
@@ -343,6 +344,7 @@ export default function NewRequest() {
     <>
     {submittedId != null && <SuccessSplash onDone={() => router.replace(`/request/${submittedId}`)} />}
     <Wiz
+      fillBody={stepKey === 'location'}
       backLabel={tr('common.back')}
       stepLabel={tr('common.wizStep', { step: step, total: TOTAL })}
       cat={categoryName ?? tr('createRequest.title')}
@@ -475,10 +477,13 @@ export default function NewRequest() {
             </>
           ) : (
             <>
-              <Card padded={false} style={{ overflow: 'hidden' }}>
+              {/* The map is the subject of this step, not an illustration of it:
+                  it takes the room, and the address sits under it as a line you
+                  can correct rather than a form field you must fill. */}
+              <Card padded={false} style={{ flex: 1, overflow: 'hidden' }}>
                 {coords ? (
                   assetType === 'vehicle' ? (
-                    <View style={{ height: 200 }}>
+                    <View style={{ flex: 1, minHeight: 220 }}>
                       <MapView
                         style={{ flex: 1 }}
                         initialRegion={{ latitude: coords.latitude, longitude: coords.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
@@ -489,7 +494,7 @@ export default function NewRequest() {
                       </View>
                     </View>
                   ) : (
-                    <MapView style={{ height: 200 }} region={{ latitude: coords.latitude, longitude: coords.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}>
+                    <MapView style={{ flex: 1, minHeight: 220 }} region={{ latitude: coords.latitude, longitude: coords.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}>
                       <Marker coordinate={{ latitude: coords.latitude, longitude: coords.longitude }} pinColor={t.colors.accent} />
                     </MapView>
                   )
@@ -499,7 +504,7 @@ export default function NewRequest() {
                     disabled={locating}
                     accessibilityRole="button"
                     accessibilityState={{ busy: locating, disabled: locating }}
-                    style={{ height: 200, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                    style={{ flex: 1, minHeight: 220, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center', gap: 8 }}
                   >
                     {/* GPS then reverse-geocode is two round trips and can take
                         several seconds on a bad signal. The card used to swap
@@ -524,9 +529,31 @@ export default function NewRequest() {
                   {coords && <Icon name="check" size={18} color={t.colors.ok} />}
                 </Row>
               </Card>
-              {/* Reuse the asset's saved address when it has one; otherwise ask for the street. */}
-              {assetAddress ? null : (
-                <Field label={tr('createRequest.addressLabel')} value={address} onChangeText={setAddress} placeholder={tr('createRequest.addressPlaceholder')} />
+              {/* Reuse the asset's saved address when it has one; otherwise show
+                  what we found, with a pencil. It was a text input the customer
+                  had to read as a task; almost always it is already right, and
+                  the few times it is not, they know exactly what to change. */}
+              {assetAddress ? null : editingAddress || !address ? (
+                <Field
+                  label={tr('createRequest.addressLabel')}
+                  value={address}
+                  onChangeText={setAddress}
+                  placeholder={tr('createRequest.addressPlaceholder')}
+                  autoFocus={editingAddress}
+                  onBlur={() => setEditingAddress(false)}
+                />
+              ) : (
+                <Pressable
+                  onPress={() => setEditingAddress(true)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${tr('createRequest.addressLabel')}, ${address}`}
+                  accessibilityHint={tr('createRequest.addressEditHint')}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 }}
+                >
+                  <Icon name="location" size={18} color={t.colors.accent} />
+                  <Text style={{ flex: 1, fontSize: 14, fontWeight: '600' }} numberOfLines={2}>{address}</Text>
+                  <Icon name="edit" size={18} color={t.colors.ink3} />
+                </Pressable>
               )}
             </>
           )}

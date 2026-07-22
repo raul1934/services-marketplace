@@ -32,9 +32,12 @@ export function Wiz({
   backLabel,
   stepLabel,
   footer,
+  fillBody,
   children,
 }: {
   cat: string;
+  /** Let the body fill the screen — for a step whose subject is a surface, like a map. */
+  fillBody?: boolean;
   step: number; // 1-based
   total: number;
   title: string;
@@ -75,7 +78,18 @@ export function Wiz({
       </View>
 
       {/* body */}
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24, gap: 13 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24, gap: 13 },
+          // Without `flexGrow`, a child asking for `flex: 1` inside a ScrollView
+          // gets nothing — the content box is only as tall as its content. Steps
+          // whose subject *is* a surface (a map) need the opposite: take the
+          // room that is there.
+          fillBody ? { flexGrow: 1 } : null,
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={{ marginTop: 4 }}>
           <Text style={{ fontSize: 23, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.4 }}>{title}</Text>
           {sub ? <Text style={{ color: t.colors.ink2, fontSize: 13.5, marginTop: 3, lineHeight: 19 }}>{sub}</Text> : null}

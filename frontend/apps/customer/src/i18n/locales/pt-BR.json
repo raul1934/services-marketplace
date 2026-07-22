@@ -340,7 +340,8 @@
     "vehicleMoto": "Moto",
     "defaultCarName": "Carro Principal",
     "defaultMotoName": "Moto Principal",
-    "vehicleSavedHint": "Salvamos como seu veículo para os próximos chamados. Dá para renomear depois."
+    "vehicleSavedHint": "Salvamos como seu veículo para os próximos chamados. Dá para renomear depois.",
+    "addressEditHint": "Toque para corrigir o endereço"
   },
   "payment": {
     "pix": "Pix",
