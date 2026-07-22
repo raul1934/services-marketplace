@@ -96,9 +96,20 @@
     } catch (e) {}
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<!-- Fontes do próprio domínio (landing/fonts/, geradas por fetch-fonts.py).
+     Antes vinham do Google por <link>: render-blocking e duas conexões novas
+     (googleapis + gstatic) antes do primeiro texto — caro no 4G. Servidas aqui,
+     o browser já tem a conexão aberta e o arquivo entra no cache junto do resto.
+
+     Um preload só, e não um por peso: a Manrope é variável, então o mesmo
+     arquivo cobre 500 a 800. Gerar um arquivo por peso faria o browser baixar
+     quatro vezes o mesmo conteúdo sob URLs diferentes.
+
+     `crossorigin` é obrigatório mesmo sendo same-origin: requisição de fonte é
+     sempre anônima, e preload sem crossorigin não casa com ela — o resultado é
+     baixar duas vezes. -->
+<link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="fonts/fonts.css" />
 
 <!-- Dados estruturados. O FAQPage é o que dá retorno imediato: as mesmas seis
      perguntas da seção #faq, que o Google pode expandir direto na SERP. Ao
