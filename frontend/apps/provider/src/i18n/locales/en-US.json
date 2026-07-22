@@ -136,7 +136,9 @@
     "password": "Password",
     "passwordPlaceholder": "••••••••",
     "submit": "Sign in",
-    "toRegister": "Create a provider account"
+    "toRegister": "Create a provider account",
+    "phone": "Phone",
+    "phoneInvalid": "Enter a valid phone number with area code."
   },
   "otp": {
     "title": "Verify your phone",

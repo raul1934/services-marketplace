@@ -115,7 +115,8 @@
     "passwordPlaceholder": "••••••••",
     "submit": "Continuar",
     "toRegisterPrefix": "Novo na Chama Fácil?",
-    "toRegisterLink": "Criar conta"
+    "toRegisterLink": "Criar conta",
+    "phoneInvalid": "Digite um telefone válido com DDD."
   },
   "otp": {
     "title": "Verifique seu telefone",
@@ -262,7 +263,11 @@
     "passeador-caes": "Passeador de Cães",
     "adestrador": "Adestrador",
     "veterinario": "Veterinário a Domicílio",
-    "pet-sitter": "Pet Sitter"
+    "pet-sitter": "Pet Sitter",
+    "searchLabel": "Buscar",
+    "searchPlaceholder": "Guincho, chaveiro, encanador…",
+    "noResultsTitle": "Nada encontrado",
+    "noResultsBody": "Nenhum serviço para “{{query}}”. Tente outra palavra."
   },
   "createRequest": {
     "title": "Novo chamado",

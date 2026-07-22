@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Segment, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
+import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Segment, Text, isValidPhoneBR, maskPhoneBR, toE164BR, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
 import { EnvSwitch } from '../../src/components/EnvSwitch';
 import { currentHost } from '../../src/env';
 
@@ -14,7 +14,11 @@ export default function Login() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   const google = useGoogleSignIn();
-  const [mode, setMode] = useState<Mode>(__DEV__ ? 'email' : 'phone');
+  // Same tab in dev and in production. It used to open on e-mail under
+  // __DEV__, which meant every developer exercised a different first screen
+  // from every user — the one path nobody was dogfooding was the default one.
+  // The dev credential prefill below stays; reaching it is one tap.
+  const [mode, setMode] = useState<Mode>('phone');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState(__DEV__ ? 'cliente@chamafacil.test' : '');
   const [password, setPassword] = useState(__DEV__ ? 'senha123' : '');
@@ -28,7 +32,15 @@ export default function Login() {
     setLoading(true);
     try {
       if (mode === 'phone') {
-        const digits = '55' + phone.replace(/\D/g, '');
+        // Caught here rather than by the OTP never arriving. A typo used to
+        // look exactly like a slow SMS, and the user has no way to tell those
+        // apart — they just wait, then try again with the same wrong number.
+        if (!isValidPhoneBR(phone)) {
+          setErrors({ phone: tr('login.phoneInvalid') });
+          setLoading(false);
+          return;
+        }
+        const digits = toE164BR(phone);
         const res = await requestOtp(digits);
         router.push({ pathname: '/(auth)/verify', params: { phone: digits, debug: res.debug_code ?? '' } });
       } else {
@@ -76,7 +88,7 @@ export default function Login() {
         />
 
         {mode === 'phone' ? (
-          <AuthField icon="phone" label={tr('login.tabPhone')} prefix="+55" value={phone} onChangeText={setPhone} keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" placeholder={tr('login.phonePlaceholder')} error={errors.phone} />
+          <AuthField icon="phone" label={tr('login.tabPhone')} prefix="+55" value={phone} onChangeText={(v) => setPhone(maskPhoneBR(v))} keyboardType="phone-pad" textContentType="telephoneNumber" autoComplete="tel" placeholder={tr('login.phonePlaceholder')} error={errors.phone} />
         ) : (
           <>
             <AuthField icon="mail" label={tr('login.email')} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" textContentType="emailAddress" autoComplete="email" placeholder={tr('login.emailPlaceholder')} error={errors.email} />

@@ -136,7 +136,9 @@
     "password": "Senha",
     "passwordPlaceholder": "••••••••",
     "submit": "Entrar",
-    "toRegister": "Criar conta de prestador"
+    "toRegister": "Criar conta de prestador",
+    "phone": "Telefone",
+    "phoneInvalid": "Digite um telefone válido com DDD."
   },
   "otp": {
     "title": "Verifique seu telefone",

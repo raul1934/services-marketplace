@@ -73,7 +73,18 @@ export default function RescheduleScreen() {
     );
 
   return (
-    <Screen stickyHeader padded={false}>
+    // The send button used to scroll away with the form, unlike every other
+    // exception screen — surcharge and requote both pin theirs. On a small
+    // phone with the keyboard up it could be entirely off-screen.
+    <Screen
+      stickyHeader
+      padded={false}
+      footer={
+        incoming ? undefined : (
+          <Button title={tr('actions.reschedule.send')} full loading={propose.isPending} onPress={submit} />
+        )
+      }
+    >
       <BackBar backLabel={tr('common.back')} title={tr('actions.reschedule.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace(`/request/${id}`))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 28, gap: 14 }}>
         {incoming ? (
@@ -98,7 +109,6 @@ export default function RescheduleScreen() {
               onChange={setPeriod}
             />
             <Field label={tr('actions.reschedule.reasonLabel')} value={reason} onChangeText={setReason} placeholder={tr('actions.reschedule.reasonPlaceholder')} multiline voiceInput style={{ height: 64, textAlignVertical: 'top' }} />
-            <Button title={tr('actions.reschedule.send')} full loading={propose.isPending} onPress={submit} />
           </>
         )}
       </View>
