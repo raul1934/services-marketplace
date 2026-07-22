@@ -242,9 +242,9 @@
       "solution": "Home 100% do cliente, com um CTA primário único e um link discreto \"É profissional? Cadastre-se aqui →\" para uma landing `/prestadores` com hero, copy e funil próprios.",
       "effort": "M",
       "impact": "Alto",
-      "status": "partial",
+      "status": "done",
       "issue": 127,
-      "note": "O hero agora tem um CTA só (\"Entrar na lista de espera\") e o prestador virou link discreto; \"Baixar app\" saiu do menu. Falta o principal: a landing `/prestadores` separada, com headline \"você não paga por lead\".",
+      "note": "Landing prestadores.html criada na #148, com a headline \"Você não paga para receber o contato\" e comparação lado a lado do modelo de venda de lead. Sete CTAs do lado da oferta na home apontam para ela.",
       "commits": [
         "fix/mkt-p0-landing"
       ]
@@ -361,8 +361,12 @@
       "solution": "Self-hostar os dois em `.woff2` subsetado (latin + latin-ext) com `font-display: swap` e `<link rel=preload>`. Esperado: LCP 300–800ms melhor. Bônus: elimina uma dependência de terceiro sob LGPD.",
       "effort": "M",
       "impact": "Médio",
-      "status": "open",
-      "issue": 134
+      "status": "done",
+      "issue": 134,
+      "note": "Fontes hospedadas no próprio domínio na #145, deduplicadas por hash (a Manrope é variável): 12 arquivos/219 KB para 6/102 KB, uma requisição cobrindo a faixa 500-800.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
     },
     {
       "id": "MKT-SEO-05",
@@ -413,8 +417,12 @@
       "solution": "Estreitar para socorro veicular em uma capital (recomendo São Paulo). É a única vertical onde nenhum incumbente compete, a urgência sustenta preço, o rastreamento em tempo real importa de verdade e o veículo é o \"ativo\" mais natural para o histórico de manutenção. Beleza e pets ficam no roadmap, saem da home. Meta antes de abrir: ~200 prestadores e taxa de match > 70%.",
       "effort": "G",
       "impact": "Alto",
-      "status": "open",
-      "issue": 138
+      "status": "done",
+      "issue": 138,
+      "note": "Decidido: socorro veicular em São José do Rio Preto. Home estreitada na #151; raciocínio, metas de liquidez e critério de reabertura em marketing-audit/praca-de-lancamento.md.",
+      "commits": [
+        "fix/mkt-p0-landing"
+      ]
     },
     {
       "id": "MKT-GROWTH-02",
