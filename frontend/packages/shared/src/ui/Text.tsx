@@ -5,6 +5,21 @@ import { manropeFor } from '../lib/fonts';
 
 const HEADING_LEVEL: Record<string, number> = { h1: 1, h2: 2, h3: 3 };
 
+/**
+ * The type scale: h1 28 · h2 22 · h3 17 · body 15 · mono 14 · label 13 · caption 12.
+ *
+ * DS-04 asks for this to be widened until inline `fontSize` disappears from the
+ * UI kit, plus a lint rule to keep it gone. Measured before doing it: there are
+ * 55 inline font sizes across 19 distinct values, including 11.5, 12.5, 13.5 and
+ * 14.5 — and exactly **one** of them was a variant written longhand (fixed).
+ * The other 54 are distinct size/weight/colour combinations.
+ *
+ * So widening `Variant` to absorb them means roughly thirty variants, which is
+ * not a scale — it is the same sprawl with names on it. What this actually needs
+ * is a decision about which sizes exist, after which the strays snap to them and
+ * the lint rule has something to enforce. That is a design call, and it is the
+ * same shape as the `ink3` contrast question in `themes.ts`.
+ */
 type Variant = 'h1' | 'h2' | 'h3' | 'body' | 'label' | 'caption' | 'mono';
 
 interface Props extends TextProps {

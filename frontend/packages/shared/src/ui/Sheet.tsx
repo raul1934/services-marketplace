@@ -70,12 +70,12 @@ export function Sheet({
           style={[
             {
               backgroundColor: t.colors.bg,
-              borderTopLeftRadius: 26,
-              borderTopRightRadius: 26,
-              paddingHorizontal: 20,
+              borderTopLeftRadius: t.radius.sheet,
+              borderTopRightRadius: t.radius.sheet,
+              paddingHorizontal: t.space.xl,
               paddingTop: 14,
               paddingBottom: 28 + insets.bottom,
-              gap: 16,
+              gap: t.space.lg,
               maxHeight,
             },
             contentStyle,
