@@ -53,6 +53,12 @@ services:
     # configurado. O scheduler não precisa disso: `schedule:work` dispara
     # `schedule:run` num processo novo a cada minuto.
     command: php artisan queue:work --tries=3 --timeout=60 --max-time=300
+    # Precisa ser MAIOR que o --timeout acima. No `up -d` e no `restart` o Docker
+    # manda SIGTERM e mata em seguida; o Laravel entende o sinal e termina o job
+    # em andamento, mas com o padrão de 10s um job mais longo morre no meio.
+    # Ele não se perde — volta depois do retry_after (90s) — porém roda de novo
+    # desde o começo, e aí um e-mail que já saiu vira dois.
+    stop_grace_period: 90s
     environment:
       <<: *php-env
     volumes:

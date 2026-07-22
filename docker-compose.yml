@@ -60,6 +60,8 @@ services:
     # configurado. O scheduler não precisa disso: `schedule:work` dispara
     # `schedule:run` num processo novo a cada minuto.
     command: php artisan queue:work --tries=3 --timeout=60 --max-time=300
+    # Precisa ser MAIOR que o --timeout acima. Ver docker-compose.prod.yml.
+    stop_grace_period: 90s
     environment:
       DB_HOST: db
       DB_PORT: 5432
