@@ -293,8 +293,12 @@
       "solution": "Botão flutuante de WhatsApp com mensagem pré-preenchida por contexto (cliente vs. prestador) e evento no GA4.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "issue": 130
+      "status": "done",
+      "issue": 130,
+      "commits": [
+        "fix/mkt-p0-landing"
+      ],
+      "note": "Botão flutuante em todas as visitas da index (+55 17 99647-5590), com mensagem pré-preenchida no idioma da página e evento `contact` no GA4. Nas páginas de contato PT/EN o WhatsApp virou o canal principal, com o e-mail como alternativa. Posicionado acima da barra sticky no mobile — as duas moram no canto de baixo."
     },
     {
       "id": "MKT-UX-03",
