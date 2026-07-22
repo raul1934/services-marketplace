@@ -183,8 +183,16 @@ export function SectionLabel({ children, count, style }: { children: React.React
   );
 }
 
-/** Horizontal row (chamafacil .row). */
-export function Row({ children, style, gap = 13 }: { children: React.ReactNode; style?: ViewStyle; gap?: number }) {
+/**
+ * Horizontal row (chamafacil .row).
+ *
+ * The default gap was 13 and `Screen`'s was 12 — a one-pixel difference nobody
+ * chose, which meant a row nested in a screen was subtly off from its siblings.
+ * Now both are 12, which is `space.md`. Written as a literal because `Row` takes
+ * no theme: it is one of the hottest primitives in the app, all three palettes
+ * define `md: 12`, and a hook here buys nothing.
+ */
+export function Row({ children, style, gap = 12 }: { children: React.ReactNode; style?: ViewStyle; gap?: number }) {
   return <View style={[{ flexDirection: 'row', alignItems: 'center', gap }, style]}>{children}</View>;
 }
 
