@@ -2,6 +2,7 @@
 
 return [
     'request_not_open' => 'This request is no longer open.',
+    'budget_locked' => 'Providers have already bid on this budget, so it can no longer be changed.',
     'max_questions' => 'You can ask at most :max questions per request.',
     'request_not_active' => 'The request is not in progress.',
     'review_only_completed' => 'You can only review a completed service.',

@@ -79,6 +79,7 @@ Route::prefix('customer/v1')->group(function () {
         Route::post('requests', [RequestController::class, 'store']);
         Route::get('requests/{serviceRequest}', [RequestController::class, 'show']);
         Route::get('requests/{serviceRequest}/events', [RequestController::class, 'events']);
+        Route::post('requests/{serviceRequest}/details', [RequestController::class, 'addDetails']);
         Route::post('requests/{serviceRequest}/cancel', [RequestController::class, 'cancel']);
         Route::post('requests/{serviceRequest}/no-show', [RequestController::class, 'reportNoShow']);
         Route::post('requests/{serviceRequest}/approve-parts', [RequestController::class, 'approveParts']);

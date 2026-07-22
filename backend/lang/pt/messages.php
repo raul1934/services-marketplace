@@ -2,6 +2,7 @@
 
 return [
     'request_not_open' => 'Este chamado não está mais aberto.',
+    'budget_locked' => 'Prestadores já deram lance neste orçamento, então ele não pode mais ser alterado.',
     'max_questions' => 'Você pode fazer no máximo :max perguntas por chamado.',
     'request_not_active' => 'O chamado não está em atendimento.',
     'review_only_completed' => 'Só é possível avaliar um serviço concluído.',

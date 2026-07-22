@@ -124,6 +124,35 @@ class RequestService
         }
     }
 
+    /**
+     * Fill in, after the fact, what the express flow deliberately did not ask
+     * for up front. A request used to be immutable once created — the only way
+     * to add a photo was to have thought of it before asking for help.
+     *
+     * Answers are replaced, not appended: `saveAnswers` creates rows, so
+     * calling it twice for the same question would leave the provider reading
+     * two contradictory answers with no way to tell which one is current.
+     *
+     * @param  array{budget_max?:?float,media_ids?:array<int>,answers?:array<array{question_id:int,answer:string}>}  $data
+     */
+    public function addDetails(ServiceRequest $request, array $data, User $client): void
+    {
+        if (array_key_exists('budget_max', $data) && $data['budget_max'] !== null) {
+            $request->update(['budget_max' => $data['budget_max']]);
+        }
+
+        if (! empty($data['answers'])) {
+            $request->answers()
+                ->whereIn('question_id', array_column($data['answers'], 'question_id'))
+                ->delete();
+            $this->saveAnswers($request, $data['answers']);
+        }
+
+        if (! empty($data['media_ids'])) {
+            (new MediaService)->attach($data['media_ids'], $request, 'request', $client->id);
+        }
+    }
+
     public function cancel(ServiceRequest $request, ?string $reason = null): void
     {
         $request->update([
