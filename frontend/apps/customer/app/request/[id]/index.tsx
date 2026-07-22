@@ -5,37 +5,8 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { SkeletonScreen,
-  AnswerList,
-  Asset,
-  AvInit,
-  BackBar,
-  Badge,
-  Button,
-  Card,
-  Icon,
-  IconName,
-  NotFoundView,
-  RequestStatus,
-  RequestUrgency,
-  Row,
-  Screen,
-  SectionLabel,
-  Segment,
-  ServiceRequest,
-  Stars,
-  Text,
-  brl,
-  distanceLabel,
-  etaLabel,
-  etaMinutes,
-  haversineKm,
-  isActiveStatus,
-  subscribeToRequest,
-  TestBanner, // TEMP — test bots. Remove with backend app/Bots.
-  useRoute,
-  useTheme,
-} from '@chamafacil/shared';
+// TEMP — test bots (TestBanner). Remove with backend app/Bots.
+import { AnswerList, Asset, AvInit, BackBar, Badge, Button, Card, Icon, IconName, NotFoundView, RequestStatus, RequestUrgency, Row, Screen, SectionLabel, Segment, ServiceRequest, SkeletonScreen, Stars, TestBanner, Text, brl, distanceLabel, etaLabel, etaMinutes, haversineKm, isActiveStatus, isSameRegion, subscribeToRequest, useRoute, useTheme } from '@chamafacil/shared';
 import { keys, useApprovePart, useApproveParts, useRequest, useRequestEvents, useTracking } from '../../../src/queries';
 import { CategoryIcon } from '../../../src/components/CategoryIcon';
 import { EventFeed } from '../../../src/components/EventFeed';
@@ -52,26 +23,6 @@ type RequestTab = 'tracking' | 'request' | 'history';
 /** How long the map stays where the user left it before snapping back. */
 const RECENTER_DELAY_MS = 10_000;
 
-/**
- * Whether two regions are close enough to be "the same view".
- *
- * The map reports every region change through onRegionChangeComplete —
- * including the ones we cause by re-centering. Without this check, our own
- * recenter would look like a user gesture, re-arm the timer, and loop forever.
- * Tolerances are relative to the delta so they hold at any zoom level.
- */
-function isSameRegion(a: Region, b: Region): boolean {
-  const tolLat = Math.max(Math.abs(b.latitudeDelta) * 0.05, 1e-5);
-  const tolLng = Math.max(Math.abs(b.longitudeDelta) * 0.05, 1e-5);
-  const sameZoom =
-    b.latitudeDelta > 0 ? (() => { const r = a.latitudeDelta / b.latitudeDelta; return r > 0.75 && r < 1.33; })() : true;
-
-  return (
-    Math.abs(a.latitude - b.latitude) < tolLat &&
-    Math.abs(a.longitude - b.longitude) < tolLng &&
-    sameZoom
-  );
-}
 
 /**
  * The live tracking map, which follows the job and the provider — but yields to
