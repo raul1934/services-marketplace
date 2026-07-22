@@ -13,7 +13,7 @@
     "M": "medio (ate uma semana)",
     "G": "grande (semanas)"
   },
-  "total": 27,
+  "total": 28,
   "findings": [
     {
       "id": "MKT-DL-01",
@@ -449,6 +449,19 @@
       "impact": "Médio",
       "status": "open",
       "issue": 140
+    },
+    {
+      "id": "MKT-OPS-01",
+      "module": "operação",
+      "severity": "Alto",
+      "title": "Chamado sem proposta não tem plano B — falta o modo concierge do cold start",
+      "description": "Até haver ~40 prestadores ativos em Rio Preto, vai existir chamado que ninguém pega: madrugada, feriado, categoria sem cobertura. Hoje esse chamado simplesmente morre em silêncio — o cliente não recebe proposta, não recebe aviso, e não volta. Como a taxa de match é a métrica que decide se o negócio existe (praca-de-lancamento.md), um buraco de cobertura no primeiro mês custa mais do que qualquer verba de aquisição recupera: quem pede socorro e é ignorado conta para os outros.\n\nA ideia original era, ao detectar poucos prestadores, disparar WhatsApp automático para guincheiros achados no Google pedindo que baixassem o app. Descartada por três motivos: (1) mensagem comercial em massa não solicitada queima o número — e o número em risco é o mesmo +55 17 99647-5590 que a landing publica como suporte; (2) telefone de MEI/autônomo é dado pessoal, e coleta automatizada somada a disparo não passa no teste de legítimo interesse da LGPD; (3) raspar o Maps viola os termos do Google, e a Places API proíbe armazenar os dados para base própria e uso em marketing.\n\nO problema maior era de conversão: \"temos um chamado, baixe o app\" pede que a pessoa instale software ANTES de confiar, por um serviço que ela não consegue ver.",
+      "evidence": "Nenhum caminho no produto trata chamado sem proposta. O plano de lançamento fixa taxa de match > 70% como meta pré-abertura, mas não existe mecanismo para sustentar isso antes de a oferta orgânica existir. `marketing-audit/praca-de-lancamento.md`.",
+      "solution": "Modo concierge, com a ordem invertida: entregar o serviço primeiro, pedir o download depois.\n\n1. **Detector** — chamado sem nenhuma proposta após N minutos dispara alerta interno (push + WhatsApp para o número da operação, não para terceiros). O gatilho é a falha real, não a contagem de cadastros: dez guincheiros cadastrados e todos dormindo às 2h é zero cobertura.\n2. **Fila de resgate** — prestadores locais pré-qualificados manualmente, com consentimento registrado, cadastrados antes e não raspados na hora.\n3. **Painel do operador** — dados do chamado, telefones da fila e atribuição manual.\n4. **Contato por voz.** Ligar para o telefone comercial publicado de uma empresa de guincho oferecendo serviço pago é prática comercial normal: não é spam, não queima número, não tem problema de LGPD. É o que não escala — e é exatamente o que precisa ser feito com 40 pessoas numa cidade.\n5. **Honestidade com o cliente** — \"estamos acionando um profissional para você\" em vez de silêncio. O silêncio é o que perde o cliente, não a demora.\n6. **Convite pós-serviço** — o convite para o app só depois do serviço concluído e pago. A conversa deixa de ser \"me dê seu tempo\" e vira \"te dei dinheiro\", e o prestador entra com um trabalho real no histórico.\n\nSe um dia houver prospecção outbound em escala, ela precisa ser humana ou pela API oficial do WhatsApp com opt-in e opt-out — nunca automação não-oficial.",
+      "effort": "M",
+      "impact": "Alto",
+      "status": "open",
+      "issue": 156
     }
   ]
 }
