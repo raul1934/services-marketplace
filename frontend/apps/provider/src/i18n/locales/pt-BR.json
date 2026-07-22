@@ -163,7 +163,12 @@
     "phonePlaceholder": "(11) 99999-9999",
     "password": "Senha",
     "passwordPlaceholder": "mínimo 6 caracteres",
-    "submit": "Continuar"
+    "submit": "Continuar",
+    "legalPrefix": "Ao continuar você concorda com os",
+    "legalTerms": "Termos de Uso",
+    "legalMiddle": "e a",
+    "legalPrivacy": "Política de Privacidade",
+    "legalSuffix": "da Chama Fácil."
   },
   "onboarding": {
     "title": "O que você faz?",

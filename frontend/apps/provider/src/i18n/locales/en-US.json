@@ -163,7 +163,12 @@
     "phonePlaceholder": "(11) 99999-9999",
     "password": "Password",
     "passwordPlaceholder": "at least 6 characters",
-    "submit": "Continue"
+    "submit": "Continue",
+    "legalPrefix": "By continuing you agree to the",
+    "legalTerms": "Terms of Use",
+    "legalMiddle": "and the",
+    "legalPrivacy": "Privacy Policy",
+    "legalSuffix": "of Chama Fácil."
   },
   "onboarding": {
     "title": "What do you do?",

@@ -146,7 +146,12 @@
     "submit": "Criar conta",
     "legal": "Ao continuar você concorda com os Termos e a Política de Privacidade da Chama Fácil.",
     "toLoginPrefix": "Já tem conta?",
-    "toLoginLink": "Entrar"
+    "toLoginLink": "Entrar",
+    "legalPrefix": "Ao continuar você concorda com os",
+    "legalTerms": "Termos de Uso",
+    "legalMiddle": "e a",
+    "legalPrivacy": "Política de Privacidade",
+    "legalSuffix": "da Chama Fácil."
   },
   "home": {
     "greeting": "Olá,",
@@ -264,7 +269,7 @@
     "wizProblemTitle": "O que aconteceu?",
     "wizProblemSub": "Uma descrição rápida ajuda os prestadores a virem preparados.",
     "wizLocationTitle": "Onde você está?",
-    "wizLocationSub": "Ajuste o pino se precisar.",
+    "wizLocationSub": "Toque para usar sua localização — dá para ajustar o pino depois.",
     "wizQuestionsTitle": "Mais alguns detalhes",
     "wizQuestionsSub": "Responda o que fizer sentido para o prestador se preparar.",
     "noExtraQuestions": "Nada mais a adicionar para este serviço.",

@@ -146,7 +146,12 @@
     "submit": "Create account",
     "legal": "By continuing you agree to Chama Fácil's Terms and Privacy Policy.",
     "toLoginPrefix": "Already have an account?",
-    "toLoginLink": "Log in"
+    "toLoginLink": "Log in",
+    "legalPrefix": "By continuing you agree to the",
+    "legalTerms": "Terms of Use",
+    "legalMiddle": "and the",
+    "legalPrivacy": "Privacy Policy",
+    "legalSuffix": "of Chama Fácil."
   },
   "home": {
     "greeting": "Hi,",
@@ -264,7 +269,7 @@
     "wizProblemTitle": "What happened?",
     "wizProblemSub": "A quick description helps pros come prepared.",
     "wizLocationTitle": "Where are you?",
-    "wizLocationSub": "Drag the pin to fine-tune your spot.",
+    "wizLocationSub": "Tap to use your location — you can fine-tune the pin afterwards.",
     "wizQuestionsTitle": "A few more details",
     "wizQuestionsSub": "Answer what applies so pros can prepare.",
     "noExtraQuestions": "Nothing else to add for this service.",

@@ -18,7 +18,8 @@ class RequestQuestionResource extends JsonResource
             // eager-loads `provider`, so there's no extra query. Remove with app/Bots.
             'is_test' => $this->whenLoaded('provider', fn () => (bool) $this->provider->is_bot),
             'suggestion_id' => $this->suggestion_id,
-            'question' => $this->question,
+            // Resolved in the reader's language; see RequestQuestion.
+            'question' => $this->localizedQuestion(),
             'answer' => $this->answer,
             'image_required' => $this->image_required,
             'answer_photos' => $this->whenLoaded('answerPhotos', fn () => $this->answerPhotos->pluck('url')),

@@ -116,7 +116,7 @@ class RequestController extends Controller
                 // Resolve the vehicle make/model (+ logo) for the asset card on the request screen.
                 'asset.detailable' => fn (MorphTo $m) => $m->morphWith([AssetVehicle::class => ['make', 'model']]),
                 'photos', 'beforePhotos', 'afterPhotos', 'acceptedProposal',
-                'provider.providerProfile', 'availabilities', 'review', 'questions.provider', 'questions.answerPhotos', 'answers',
+                'provider.providerProfile', 'availabilities', 'review', 'questions.provider', 'questions.suggestion', 'questions.answerPhotos', 'answers',
                 'surcharges.provider', 'surcharges.media', 'rescheduleRequests', 'jobParts',
                 // Feeds the "what's being done" panel that replaces the map once
                 // the provider is on site.
