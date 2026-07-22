@@ -1,4 +1,5 @@
 import 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -14,7 +15,7 @@ import {
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope';
 import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
-import { addNotificationResponseListener, AuthProvider, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
+import { addNotificationResponseListener, AuthProvider, OfflineBanner, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
 import { initServices } from '../src/init';
 import '../src/i18n';
@@ -26,6 +27,7 @@ const queryClient = new QueryClient({
 });
 
 function Gate() {
+  const { t: tr } = useTranslation();
   const { status, user } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -99,6 +101,7 @@ function Gate() {
   return (
     <>
       <Stack screenOptions={{ headerShown: false }} />
+      <OfflineBanner label={tr('common.offline')} />
       <UpdateBanner app="provider" />
     </>
   );

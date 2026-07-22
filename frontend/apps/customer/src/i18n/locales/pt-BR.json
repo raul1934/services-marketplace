@@ -25,7 +25,8 @@
     "slideHint": "Toque duas vezes para confirmar",
     "loadErrorTitle": "Não foi possível carregar",
     "loadErrorBody": "Verifique sua conexão e tente de novo.",
-    "retry": "Tentar de novo"
+    "retry": "Tentar de novo",
+    "offline": "Sem conexão. Você está offline."
   },
   "notFound": {
     "home": "Início",

@@ -25,7 +25,8 @@
     "slideHint": "Double tap to confirm",
     "loadErrorTitle": "Couldn't load this",
     "loadErrorBody": "Check your connection and try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "offline": "No connection. You're offline."
   },
   "notFound": {
     "home": "Home",
