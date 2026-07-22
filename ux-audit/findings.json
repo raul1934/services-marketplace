@@ -182,9 +182,12 @@
       "solution": "Role adjustable/button + `accessibilityActions` + botão-alternativa quando leitor ativo.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "a74b466",
+        "25d0fed"
+      ],
+      "note": "Era o pior achado do lote: o SlideToConfirm e o unico jeito de aceitar proposta e aprovar cobranca, e o TalkBack toma conta do fluxo de toque - o gesto nunca chegava, entao quem usa leitor nao conseguia fechar negocio. A fricção do arrasto foi mantida, nao removida: o controle se anuncia como botao e completa no gesto de ativacao do leitor, que ja e um ato deliberado de dois passos. onAccessibilityTap so dispara com leitor ativo, entao quem enxerga continua sem caminho por toque - verificado no aparelho, um input tap no centro do slide nao envia. A conclusao passou a ser anunciada.",
       "quick_win": null,
       "change": "accessible-confirmation-controls",
       "issue": 7
@@ -199,9 +202,11 @@
       "solution": "`accessibilityRole=\"adjustable\"` + `accessibilityValue` + incremento por leitor.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "a74b466"
+      ],
+      "note": "O medidor virou role adjustable com min/max/now e valor falado; no aparelho chega como android.widget.SeekBar, desc \"Orcamento maximo, R$ 120\". Os dois steppers eram so icone e sem nome (agora Button \"Diminuir\"/\"Aumentar\"), e o campo de valor anunciava um numero solto porque a moeda mora num Text irmao.",
       "quick_win": null,
       "change": "accessible-confirmation-controls",
       "issue": 8
@@ -216,9 +221,11 @@
       "solution": "Trocar por date picker nativo.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "2b3d9c7"
+      ],
+      "note": "Trocado pelo DatePicker do proprio app. Ligar o componente revelou tres coisas: ele so conhecia disableFuture (ganhou disablePast, porque reagendamento e sempre futuro); a mensagem de erro descrevia um formato que nao existe mais; e o calendario desenhava DUAS alcas - a extracao do Sheet no #111 deixou a antiga para tras. As celulas de dia tambem anunciavam um \"13\" seco e nao diziam qual estava escolhido. Verificado no aparelho pela tela de ativos, que usa o mesmo componente: uma alca, 31 celulas com data completa, dias bloqueados como enabled=false. A tela de reagendamento em si nao foi verificada - so abre apos o prazo de chegada.",
       "quick_win": null,
       "change": "consolidate-exception-screens",
       "issue": 9
@@ -287,9 +294,11 @@
       "solution": "`importantForAccessibility=\"no-hide-descendants\"` + 1 label na ilustração.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "2b3d9c7"
+      ],
+      "note": "As cenas sao ilustracoes feitas de Text de verdade; o leitor lia \"R$ 120\", \"Melhor opcao\" e \"Protegido pela Chama Facil\" como conteudo, antes do login. Escondidas como unidade decorativa. Nao verificado no aparelho: e tela pre-login e conferir exigiria deslogar a sessao de teste.",
       "quick_win": null,
       "change": "accessible-semantics-sweep",
       "issue": 13
@@ -734,9 +743,11 @@
       "solution": "Role + label + estado selected.",
       "effort": "P",
       "impact": "Médio",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "a74b466"
+      ],
+      "note": "O card escolhido agora carrega selected; medido no aparelho como selected=\"true\" no ativo selecionado. Antes a escolha era dita so por borda de destaque e um check.",
       "quick_win": null,
       "change": "accessible-semantics-sweep",
       "issue": 31
@@ -753,7 +764,7 @@
       "impact": "Alto",
       "status": "open",
       "commits": [],
-      "note": null,
+      "note": "Evidencia nova (2026-07-22): um deep link para /request/<id>/reschedule com id inexistente deixa a tela no SkeletonScreen para sempre. A query falha e nada nunca sai do estado de carregando - nem erro, nem retry, nem volta.",
       "quick_win": null,
       "change": "offline-and-error-recovery",
       "issue": 32
