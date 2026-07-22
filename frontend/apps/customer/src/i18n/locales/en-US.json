@@ -529,7 +529,7 @@
       "proposeTitle": "Propose a new date",
       "proposeHint": "Pick a date and period. The other party must accept.",
       "dateLabel": "Date",
-      "dateError": "Use the format YYYY-MM-DD.",
+      "dateError": "Pick the new date.",
       "periodLabel": "Period",
       "period": {
         "morning": "Morning",
@@ -547,7 +547,8 @@
       "accept": "Accept new date",
       "decline": "I can't",
       "declineHint": "If you decline, the pro may cancel and we reopen the request.",
-      "lateWarning": "Under 24h — counts as a no-show."
+      "lateWarning": "Under 24h — counts as a no-show.",
+      "datePlaceholder": "Select date"
     },
     "noShow": {
       "title": "Pro didn't show",

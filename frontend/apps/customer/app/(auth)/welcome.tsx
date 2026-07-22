@@ -159,7 +159,15 @@ export default function Welcome() {
             <EnvSwitch onAccent />
           </View>
         </SafeAreaView>
-        <Scene />
+        {/* The scenes are illustrations built out of real Text nodes — mock
+            cards showing "R$ 120", "Melhor opção", "Protegido pela Chama Fácil".
+            A screen reader read all of it as if it were content on the screen:
+            prices for services nobody requested, before the user has even
+            signed in. Hidden as one decorative unit (1.1.1, 1.3.1); the slide's
+            own title and body, right below, are what actually carry the meaning. */}
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Scene />
+        </View>
       </LinearGradient>
 
       {/* card */}
