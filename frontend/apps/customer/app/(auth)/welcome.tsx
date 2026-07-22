@@ -165,6 +165,13 @@ export default function Welcome() {
             prices for services nobody requested, before the user has even
             signed in. Hidden as one decorative unit (1.1.1, 1.3.1); the slide's
             own title and body, right below, are what actually carry the meaning. */}
+        {/* Note for whoever tries to verify this with `uiautomator dump`: you
+            cannot. UiAutomator registers itself with
+            FLAG_INCLUDE_NOT_IMPORTANT_VIEWS, so it deliberately lists nodes
+            marked not-important — these labels still appear in its output with
+            the flag working exactly as intended. TalkBack, which does not set
+            that flag, skips them. Checked on device: the dump is identical
+            before and after, which says nothing either way. */}
         <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
           <Scene />
         </View>
