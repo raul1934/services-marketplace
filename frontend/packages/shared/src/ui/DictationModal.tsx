@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Animated, Pressable, ScrollView, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../theme';
 import { useDictation } from '../lib/dictation';
 import { withFocusRing } from '../lib/a11y';
 import { Button } from './Button';
 import { Icon } from './Icon';
+import { Sheet } from './Sheet';
 import { Text } from './Text';
 
 /**
@@ -39,11 +39,6 @@ export function DictationModal({
 }) {
   const t = useTheme();
 
-  // Modals render outside the screen's SafeAreaView, so the sheet has to
-
-  // clear Android's navigation bar itself.
-
-  const insets = useSafeAreaInsets();
   const [finalText, setFinalText] = useState('');
   const [partial, setPartial] = useState('');
   const pulse = useRef(new Animated.Value(0)).current;
@@ -102,13 +97,7 @@ export function DictationModal({
   const ringOpacity = pulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0] });
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={cancel}>
-      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }} onPress={cancel}>
-        <Pressable
-          onPress={(e) => e.stopPropagation?.()}
-          style={{ backgroundColor: t.colors.bg, borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingHorizontal: 20, paddingTop: 14, paddingBottom: 28 + insets.bottom, gap: 18 }}
-        >
-          <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: t.colors.line }} />
+    <Sheet visible={visible} onClose={cancel}>
           <Text variant="h3" center>{title}</Text>
 
           {/* mic with pulsing ring */}
@@ -159,8 +148,6 @@ export function DictationModal({
               <Button title={confirmLabel} variant="grad" full disabled={!shown} onPress={confirm} />
             </View>
           </View>
-        </Pressable>
-      </Pressable>
-    </Modal>
+        </Sheet>
   );
 }

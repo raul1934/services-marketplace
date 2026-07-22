@@ -41,7 +41,19 @@ export interface Theme {
   /** Diagonal gradient color stops (top-left -> bottom-right). */
   grad: readonly string[];
   gradSoft: readonly string[];
-  radius: { card: number; btn: number; field: number };
+  radius: { card: number; btn: number; field: number; sheet: number };
+  /**
+   * 4-pt spacing scale. Introduced because the UI kit had 170 hardcoded spacing
+   * values across 24 distinct numbers, with no rule saying which to reach for.
+   *
+   * Deliberately does NOT cover every number in use: 9, 11, 13, 18 and 26 are all
+   * in the code today, and snapping them to the scale moves pixels on screens
+   * nobody asked to change. `Row`'s default gap of 13 against `Screen`'s 12 is the
+   * clearest case — a one-pixel difference nobody chose, but correcting it is a
+   * design call, not a refactor. New code uses the scale; the strays get migrated
+   * when someone is looking at those screens anyway.
+   */
+  space: { xs: number; sm: number; md: number; lg: number; xl: number; xxl: number };
   shadow: ThemeShadow;
   shadowSm: ThemeShadow;
   font: { body: string; head: string; mono: string };
@@ -87,7 +99,8 @@ export const sunset: Theme = {
   },
   grad: ['#ff8a4c', '#ff5a6e', '#ffb23e'],
   gradSoft: ['#fff4ec', '#ffeef0'],
-  radius: { card: 22, btn: 999, field: 16 },
+  radius: { card: 22, btn: 999, field: 16, sheet: 26 },
+  space: { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24 },
   shadow: { shadowColor: '#14233b', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.2, shadowRadius: 18, elevation: 9 },
   shadowSm: { shadowColor: '#14233b', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.14, shadowRadius: 8, elevation: 3 },
   font: { body: 'Manrope', head: 'Manrope', mono: 'Space Mono' },
@@ -120,7 +133,8 @@ export const trust: Theme = {
   },
   grad: ['#6258f5', '#4f46e5'],
   gradSoft: ['#f0effe', '#eafafa'],
-  radius: { card: 16, btn: 12, field: 12 },
+  radius: { card: 16, btn: 12, field: 12, sheet: 20 },
+  space: { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24 },
   shadow: { shadowColor: '#0b1220', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 14, elevation: 6 },
   shadowSm: { shadowColor: '#0b1220', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 6, elevation: 2 },
   font: { body: 'Manrope', head: 'Manrope', mono: 'Space Mono' },
@@ -152,7 +166,8 @@ export const night: Theme = {
   },
   grad: ['#ff7a45', '#ff4d6d', '#ffb000'],
   gradSoft: ['#221a18', '#1d1614'],
-  radius: { card: 22, btn: 999, field: 16 },
+  radius: { card: 22, btn: 999, field: 16, sheet: 26 },
+  space: { xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24 },
   shadow: { shadowColor: '#000000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.6, shadowRadius: 24, elevation: 12 },
   shadowSm: { shadowColor: '#000000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 12, elevation: 5 },
   font: { body: 'Manrope', head: 'Manrope', mono: 'Space Mono' },

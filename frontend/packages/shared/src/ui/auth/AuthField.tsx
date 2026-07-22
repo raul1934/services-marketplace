@@ -18,7 +18,7 @@ export function AuthField({
     <View style={{ gap: 6 }}>
       {/* A persistent label above the field — the placeholder alone disappears
           the moment the user types, leaving no cue for what the field is. */}
-      {label ? <Text style={{ fontSize: 13, fontWeight: '700', color: t.colors.ink2 }}>{label}</Text> : null}
+      {label ? <Text variant="label">{label}</Text> : null}
       <View
         style={{
           flexDirection: 'row',
