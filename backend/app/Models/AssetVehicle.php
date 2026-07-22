@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class AssetVehicle extends Model
 {
     protected $fillable = [
-        'vehicle_make_id', 'vehicle_model_id', 'plate', 'color', 'year', 'current_mileage', 'fuel', 'chassis',
+        'kind', 'vehicle_make_id', 'vehicle_model_id', 'plate', 'color', 'year', 'current_mileage', 'fuel', 'chassis',
     ];
 
     protected $casts = [

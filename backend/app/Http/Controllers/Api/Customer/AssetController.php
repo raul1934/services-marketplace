@@ -346,6 +346,8 @@ class AssetController extends Controller
 
         return match ($type) {
             AssetType::Vehicle => [
+                // Carro/moto: decide se o guincho sai com prancha de moto.
+                'detail.kind' => ['nullable', 'string', 'max:24'],
                 'detail.vehicle_make_id' => ['nullable', 'integer', 'exists:vehicle_makes,id'],
                 'detail.vehicle_model_id' => ['nullable', 'integer', 'exists:vehicle_models,id'],
                 'detail.plate' => ['nullable', 'string', 'max:16'],
@@ -382,7 +384,7 @@ class AssetController extends Controller
     private function detailColumns(AssetType $type, array $detail): array
     {
         $keys = match ($type) {
-            AssetType::Vehicle => ['vehicle_make_id', 'vehicle_model_id', 'plate', 'color', 'year', 'fuel', 'chassis'],
+            AssetType::Vehicle => ['kind', 'vehicle_make_id', 'vehicle_model_id', 'plate', 'color', 'year', 'fuel', 'chassis'],
             AssetType::Property => ['property_type_id', 'unit', 'size', 'address', 'floor', 'condo', 'latitude', 'longitude', 'geofence', 'cep', 'street', 'number', 'neighborhood', 'city', 'state'],
             AssetType::Pet => ['pet_species_id', 'pet_breed_id', 'size', 'birthdate', 'weight', 'vaccines', 'microchip'],
         };

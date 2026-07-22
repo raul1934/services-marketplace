@@ -322,7 +322,13 @@
     "addAsset": "Adicionar novo",
     "assetAutoPicked": "Selecionamos este por ser o seu único cadastrado. Toque em outro para trocar.",
     "shareNote": "Compartilhar minha anotação com o profissional",
-    "removePhoto": "Remover foto"
+    "removePhoto": "Remover foto",
+    "vehicleTitle": "Qual veículo?",
+    "vehicleCar": "Carro",
+    "vehicleMoto": "Moto",
+    "defaultCarName": "Carro Principal",
+    "defaultMotoName": "Moto Principal",
+    "vehicleSavedHint": "Salvamos como seu veículo para os próximos chamados. Dá para renomear depois."
   },
   "payment": {
     "pix": "Pix",
