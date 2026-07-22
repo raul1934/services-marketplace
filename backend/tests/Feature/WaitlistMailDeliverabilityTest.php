@@ -109,4 +109,20 @@ class WaitlistMailDeliverabilityTest extends TestCase
 
         $this->assertStringContainsString('All rights reserved', $msg->getHtmlBody());
     }
+
+    public function test_header_uses_our_logo_and_never_laravels(): void
+    {
+        // O componente de cabeçalho do framework troca o nome pelo LOGO DO
+        // LARAVEL quando app.name é exatamente "Laravel" — e em produção era.
+        // Este teste falha se alguém remover a sobrescrita, ou se o APP_NAME
+        // voltar ao padrão.
+        config(['app.name' => 'Laravel']);
+
+        $html = $this->mensagem()->getHtmlBody();
+
+        $this->assertStringNotContainsString('laravel.com/img', $html);
+        $this->assertStringContainsString(config('brand.logo'), $html);
+        // Imagem bloqueada é o caso comum: o alt precisa ler como a marca.
+        $this->assertStringContainsString('alt="'.config('brand.name').'"', $html);
+    }
 }
