@@ -11,6 +11,11 @@ Artisan::command('inspire', function () {
 // Sweep uploads that were never attached to a record.
 Schedule::command('media:prune-orphans')->hourly();
 
+// Alert ops about open requests nobody has bid on yet — while there is still
+// time to rescue them by hand. Runs before expire-stale on purpose: once that
+// one fires, the client has already given up.
+Schedule::command('requests:detect-uncovered')->everyMinute()->withoutOverlapping();
+
 // Expire urgent requests nobody bid on within the client's stated max wait.
 Schedule::command('requests:expire-stale')->everyMinute();
 
