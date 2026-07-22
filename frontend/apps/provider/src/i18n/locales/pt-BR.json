@@ -733,5 +733,11 @@
     "adestrador": "Adestrador",
     "veterinario": "Veterinário a Domicílio",
     "pet-sitter": "Pet Sitter"
+  },
+  "assets": {
+    "vehicleKind": {
+      "car": "Carro",
+      "motorcycle": "Moto"
+    }
   }
 }

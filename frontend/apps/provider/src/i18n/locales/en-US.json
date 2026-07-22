@@ -733,5 +733,11 @@
     "adestrador": "Dog trainer",
     "veterinario": "Home vet visit",
     "pet-sitter": "Pet sitter"
+  },
+  "assets": {
+    "vehicleKind": {
+      "car": "Car",
+      "motorcycle": "Motorcycle"
+    }
   }
 }

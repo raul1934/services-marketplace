@@ -406,7 +406,10 @@ function AssetCard({ asset }: { asset: Asset }) {
   const t = useTheme();
   const { t: tr } = useTranslation();
   const a = asset.detail ?? {};
-  const sub = [a.make, a.model, a.plate, a.color, a.kind, a.unit, a.species].filter(Boolean).join(' · ');
+  // `kind` is the raw API token ('car' / 'motorcycle'); translated here so a
+  // Portuguese screen does not read "Aprilia · motorcycle".
+  const kind = a.kind ? tr(`assets.vehicleKind.${a.kind}`) : null;
+  const sub = [a.make, a.model, a.plate, a.color, kind, a.unit, a.species].filter(Boolean).join(' · ');
   const icon = asset.type === 'property' ? 'home' : asset.type === 'pet' ? 'paw' : 'car';
   return (
     <Card>

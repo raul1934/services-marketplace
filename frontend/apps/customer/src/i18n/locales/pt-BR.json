@@ -755,6 +755,10 @@
       "weight": "Peso",
       "vaccines": "Vacinas",
       "microchip": "Microchip"
+    },
+    "vehicleKind": {
+      "car": "Carro",
+      "motorcycle": "Moto"
     }
   },
   "drawer": {
