@@ -5,38 +5,9 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { SkeletonScreen,
-  AnswerList,
-  Asset,
-  AvInit,
-  BackBar,
-  Badge,
-  Button,
-  Card,
-  Icon,
-  IconName,
-  NotFoundView,
-  RequestStatus,
-  RequestUrgency,
-  Row,
-  Screen,
-  SectionLabel,
-  Segment,
-  ServiceRequest,
-  Stars,
-  Text,
-  brl,
-  distanceLabel,
-  etaLabel,
-  etaMinutes,
-  haversineKm,
-  isActiveStatus,
-  subscribeToRequest,
-  TestBanner, // TEMP — test bots. Remove with backend app/Bots.
-  useRoute,
-  useTheme,
-} from '@chamafacil/shared';
-import { keys, useApprovePart, useApproveParts, useJobReport, useRequest, useRequestEvents, useTracking } from '../../../src/queries';
+// TEMP — test bots (TestBanner). Remove with backend app/Bots.
+import { AnswerList, Asset, AvInit, BackBar, Badge, Button, Card, Icon, IconName, NotFoundView, RequestStatus, RequestUrgency, Row, Screen, SectionLabel, Segment, ServiceRequest, SkeletonScreen, Stars, TestBanner, Text, brl, distanceLabel, etaLabel, etaMinutes, haversineKm, isActiveStatus, isSameRegion, subscribeToRequest, useRoute, useTheme } from '@chamafacil/shared';
+import { keys, useApprovePart, useApproveParts, useRequest, useRequestEvents, useTracking } from '../../../src/queries';
 import { CategoryIcon } from '../../../src/components/CategoryIcon';
 import { EventFeed } from '../../../src/components/EventFeed';
 import { JobSubject } from '../../../src/components/JobSubject';
@@ -52,26 +23,6 @@ type RequestTab = 'tracking' | 'request' | 'history';
 /** How long the map stays where the user left it before snapping back. */
 const RECENTER_DELAY_MS = 10_000;
 
-/**
- * Whether two regions are close enough to be "the same view".
- *
- * The map reports every region change through onRegionChangeComplete —
- * including the ones we cause by re-centering. Without this check, our own
- * recenter would look like a user gesture, re-arm the timer, and loop forever.
- * Tolerances are relative to the delta so they hold at any zoom level.
- */
-function isSameRegion(a: Region, b: Region): boolean {
-  const tolLat = Math.max(Math.abs(b.latitudeDelta) * 0.05, 1e-5);
-  const tolLng = Math.max(Math.abs(b.longitudeDelta) * 0.05, 1e-5);
-  const sameZoom =
-    b.latitudeDelta > 0 ? (() => { const r = a.latitudeDelta / b.latitudeDelta; return r > 0.75 && r < 1.33; })() : true;
-
-  return (
-    Math.abs(a.latitude - b.latitude) < tolLat &&
-    Math.abs(a.longitude - b.longitude) < tolLng &&
-    sameZoom
-  );
-}
 
 /**
  * The live tracking map, which follows the job and the provider — but yields to
@@ -159,7 +110,6 @@ export default function RequestDetail() {
   const isOpen = request?.status === RequestStatus.Open;
   const approve = useApproveParts(requestId);
   const approvePart = useApprovePart(requestId);
-  const { parts: jobParts } = useJobReport(requestId);
   // Live tracking + event feed (lifted from the former /track screen).
   const trackable = request ? isActiveStatus(request.status) : false;
   const tracking = useTracking(requestId, trackable);
@@ -414,7 +364,11 @@ export default function RequestDetail() {
                 answers "where is he", which stops being a question once he's
                 here. The stepper in the header still carries the status. */}
               {onSite ? (
-                <JobProgressPanel request={request} />
+                <JobProgressPanel
+                  request={request}
+                  onApprovePart={request.parts_approval_requested && !request.parts_approved ? (id) => approvePart.mutate(id) : undefined}
+                  approvingPart={approvePart.isPending}
+                />
               ) : (
                 <Card padded={false} style={{ overflow: 'hidden' }}>
                   <TrackingMap target={region} style={{ height: 220 }}>
@@ -464,36 +418,12 @@ export default function RequestDetail() {
                     <Text weight="800" style={{ flex: 1, fontSize: 14.5 }}>{tr('requestDetail.approvalTitle')}</Text>
                   </Row>
                   <Text variant="caption">{tr('requestDetail.approvalBody')}</Text>
-                  {(jobParts.data ?? []).length > 0 && (
-                    <View style={{ gap: 6 }}>
-                      {(jobParts.data ?? []).map((p) => (
-                        <Row key={p.id} style={{ paddingVertical: 6, borderTopWidth: 1, borderColor: t.colors.line }}>
-                          <View style={{ flex: 1 }}>
-                            <Text weight="700" style={{ fontSize: 13.5 }}>{p.quantity}× {p.name}</Text>
-                            {p.unit_price != null && <Text variant="caption">{brl(p.unit_price * p.quantity)}</Text>}
-                          </View>
-                          {p.approved_at ? (
-                            <Row gap={4}>
-                              <Icon name="check" size={14} color={t.colors.ok} />
-                              <Text variant="caption" weight="700" color={t.colors.ok}>{tr('requestDetail.partApproved')}</Text>
-                            </Row>
-                          ) : (
-                            <Text
-                              accessibilityRole="button"
-                              weight="700"
-                              color={t.colors.accent}
-                              // This approves a charge. It was unnamed as a
-                              // control and about 17px tall.
-                              style={{ fontSize: 12.5, paddingVertical: 13 }}
-                              onPress={() => approvePart.mutate(p.id)}
-                            >
-                              {tr('requestDetail.approve')}
-                            </Text>
-                          )}
-                        </Row>
-                      ))}
-                    </View>
-                  )}
+                  {/* The list used to be repeated here, from a second query, while
+                      JobProgressPanel below rendered the same parts from
+                      `request.job_parts` — same rows twice on the same tab, from
+                      two sources that could disagree. The list stays where it
+                      already lived; this card keeps the explanation and the
+                      decision, and the per-part approve moved down to the rows. */}
                   <Button title={tr('requestDetail.approveAll')} full loading={approve.isPending} onPress={() => approve.mutate()} />
                 </Card>
               )}
@@ -679,7 +609,16 @@ function TrackSteps({ steps, current }: { steps: string[]; current: number }) {
  * "what is he doing to my thing" — parts going on the bill, notes and photos
  * from the job. Updates arrive over the request channel (progress.updated).
  */
-function JobProgressPanel({ request }: { request: ServiceRequest }) {
+function JobProgressPanel({
+  request,
+  onApprovePart,
+  approvingPart,
+}: {
+  request: ServiceRequest;
+  /** Present only while the provider's parts are awaiting approval. */
+  onApprovePart?: (partId: number) => void;
+  approvingPart?: boolean;
+}) {
   const t = useTheme();
   const { t: tr } = useTranslation();
   const parts = request.job_parts ?? [];
@@ -721,6 +660,20 @@ function JobProgressPanel({ request }: { request: ServiceRequest }) {
               <Text weight="700" style={{ fontSize: 13.5 }}>
                 {p.unit_price != null ? brl(p.unit_price * p.quantity) : '—'}
               </Text>
+              {onApprovePart && !p.approved_at ? (
+                <Text
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: !!approvingPart }}
+                  weight="700"
+                  color={t.colors.accent}
+                  // Approves a charge; 12.5px of text is a ~17px target, so the
+                  // padding is what makes it reachable.
+                  style={{ fontSize: 12.5, paddingVertical: 13, opacity: approvingPart ? 0.5 : 1 }}
+                  onPress={() => !approvingPart && onApprovePart(p.id)}
+                >
+                  {tr('requestDetail.approve')}
+                </Text>
+              ) : null}
             </Row>
           ))}
         </Card>

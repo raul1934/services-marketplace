@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, View } from 'react-native';
-import { Alert } from '@chamafacil/shared';
-import MapView, { Marker, Polygon } from 'react-native-maps';
+import { Alert, isSameRegion } from '@chamafacil/shared';
+import MapView, { Marker, Polygon, Region } from 'react-native-maps';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -165,7 +165,28 @@ export default function NewRequest() {
 
   // Vehicle categories let the customer fine-tune the pin by panning the map
   // (center-pin picker); each settle re-geocodes into the address field below.
-  const pickCoords = async (c: { latitude: number; longitude: number }) => {
+  // The map reports every region change, including the ones it causes itself
+  // while settling — Leaflet emits `moveend` for its own `setView`, and more
+  // than once. Each echo re-geocoded the point we had just geocoded, and the
+  // answer that landed second won: the same spot read "5, Jardim Marajó" on
+  // this step and "Rua Patrícia Rodrigues Fontes, 805" on the review.
+  //
+  // `isSameRegion` is the tracking map's answer to the same question, moved to
+  // shared. Its tolerance scales with the zoom; an absolute one does not —
+  // measured on device, a fixed ~11 m caught the settle on one run and missed
+  // it on the next.
+  const appliedRegion = React.useRef<Region | null>(null);
+  const pickCoords = async (r: Region) => {
+    // The first event is the settle itself, and it arrives with no baseline to
+    // compare against — so it has to be recorded and dropped, not passed
+    // through. Getting this backwards is why the address still changed between
+    // this step and the review across three attempts at this fix.
+    if (!appliedRegion.current || isSameRegion(r, appliedRegion.current)) {
+      appliedRegion.current = r;
+      return;
+    }
+    appliedRegion.current = r;
+    const c = { latitude: r.latitude, longitude: r.longitude };
     setCoords({ latitude: c.latitude, longitude: c.longitude });
     const addr = await reverseGeocode(c);
     if (addr) setAddress(addr);
@@ -461,7 +482,7 @@ export default function NewRequest() {
                       <MapView
                         style={{ flex: 1 }}
                         initialRegion={{ latitude: coords.latitude, longitude: coords.longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 }}
-                        onRegionChangeComplete={(r) => pickCoords({ latitude: r.latitude, longitude: r.longitude })}
+                        onRegionChangeComplete={pickCoords}
                       />
                       <View pointerEvents="none" style={{ position: 'absolute', top: '50%', left: '50%', marginLeft: -14, marginTop: -28, zIndex: 1000 }}>
                         <Icon name="location" size={28} color={t.colors.accent} />

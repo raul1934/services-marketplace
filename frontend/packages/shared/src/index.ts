@@ -22,5 +22,6 @@ export * from './lib/usePushSync';
 export * from './lib/activeRequestNotification';
 export * from './lib/payout';
 export * from './lib/phone';
+export * from './maps/region';
 export * from './lib/webSetup';
 export * from './lib/fonts';
