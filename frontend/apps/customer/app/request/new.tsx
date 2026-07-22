@@ -26,7 +26,7 @@ import {
   flattenPages,
   useTheme,
 } from '@chamafacil/shared';
-import { useAssets, useCategories, useCreateAsset, useCreateRequest } from '../../src/queries';
+import { useAssets, useCategories, useCreateAsset, useCreateRequest, useVehicleMakes } from '../../src/queries';
 import { MakeModelPicker } from '../../src/components/MakeModelPicker';
 import { AssetSelector } from '../../src/components/AssetSelector';
 import { ICON, assetCaption } from '../../src/assetDisplay';
@@ -90,8 +90,17 @@ export default function NewRequest() {
   const [vehMakeId, setVehMakeId] = useState<number | null>(null);
   const [vehModelId, setVehModelId] = useState<number | null>(null);
   const createAsset = useCreateAsset();
-  const describingVehicle = assetType === 'vehicle' && assetId == null;
+  // Only when there is nothing saved to pick. With a garage already on file,
+  // the selector plus "add new" is the path — showing both would be two
+  // competing ways to say the same thing on the same screen.
+  const describingVehicle = assetType === 'vehicle' && assetId == null && !assets.isLoading && assetList.length === 0;
   const vehicleDescribed = vehKind != null && vehMakeId != null;
+  // Same catalog the picker above already loaded — shared query cache, so
+  // reading it here to name the choice on the review screen costs no request.
+  const { data: vehicleMakes = [] } = useVehicleMakes(describingVehicle);
+  const pickedMake = vehicleMakes.find((m) => m.id === vehMakeId);
+  const makeName = pickedMake?.name;
+  const modelName = pickedMake?.models.find((m) => m.id === vehModelId)?.name;
 
   // With exactly one asset of the needed type, picking it isn't a guess — it's
   // the only answer. Choose it, and say so below (`autoPicked`), so the choice
@@ -348,7 +357,11 @@ export default function NewRequest() {
               <Text variant="caption">{tr('createRequest.tellUs')}</Text>
             </View>
           </Row>
-          {assetType && (
+          {/* Hidden while describing: with nothing saved, the selector is just a
+              section header and an "add new" button, and that button opens the
+              full asset form — the long way round, offered directly above the
+              short one. The full form stays reachable from Meus Ativos. */}
+          {assetType && !describingVehicle && (
             <AssetSelector
               assetType={assetType}
               assets={assetList}
@@ -607,6 +620,23 @@ export default function NewRequest() {
               icon={ICON[selectedAsset.type] ?? 'car'}
               k={tr(`assets.type.${selectedAsset.type}`)}
               v={[selectedAsset.nickname, assetCaption(selectedAsset, tr)].filter(Boolean).join(' · ')}
+              onPress={() => goTo('details')}
+            />
+          )}
+          {/* The described vehicle does not exist as an asset yet — it is created
+              on submit — so without this the review quietly drops it, on a
+              screen whose whole job is "check everything before sending". */}
+          {!selectedAsset && describingVehicle && vehicleDescribed && (
+            <SumRow
+              icon="car"
+              k={tr('assets.type.vehicle')}
+              v={[
+                tr(vehKind === 'motorcycle' ? 'createRequest.vehicleMoto' : 'createRequest.vehicleCar'),
+                makeName,
+                modelName,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
               onPress={() => goTo('details')}
             />
           )}
