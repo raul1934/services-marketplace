@@ -149,6 +149,41 @@ class RequestController extends Controller
         return new ServiceRequestResource($serviceRequest->fresh()->load('category'));
     }
 
+    /**
+     * Add what the express flow did not ask for up front: photos, the
+     * category's intake answers, and the budget.
+     *
+     * The three are not equivalent, which is why the budget is guarded on its
+     * own. Photos and answers are additive — the provider simply learns more.
+     * A budget is what providers bid *against*, so changing it after a bid
+     * exists rewrites the terms of an offer already on the table. Editable
+     * while nobody has bid; frozen the moment someone has.
+     */
+    public function addDetails(Request $request, ServiceRequest $serviceRequest): ServiceRequestResource
+    {
+        $this->authorizeOwner($request, $serviceRequest);
+        abort_unless($serviceRequest->status === RequestStatus::Open, 422, __('messages.request_not_open'));
+
+        $data = $request->validate([
+            'budget_max' => ['nullable', 'numeric', 'min:0'],
+            'media_ids' => ['nullable', 'array', 'max:10'],
+            'media_ids.*' => ['integer'],
+            'answers' => ['nullable', 'array'],
+            'answers.*.question_id' => ['required', 'integer', 'exists:questions,id'],
+            'answers.*.answer' => ['required', 'string', 'max:500'],
+        ]);
+
+        abort_if(
+            array_key_exists('budget_max', $data) && $data['budget_max'] !== null && $serviceRequest->proposals()->exists(),
+            422,
+            __('messages.budget_locked'),
+        );
+
+        $this->service->addDetails($serviceRequest, $data, $request->user());
+
+        return new ServiceRequestResource($serviceRequest->fresh()->load(['category', 'photos', 'answers']));
+    }
+
     /** Client approves the provider's requested total (labor + parts). */
     public function approveParts(Request $request, ServiceRequest $serviceRequest): ServiceRequestResource
     {
