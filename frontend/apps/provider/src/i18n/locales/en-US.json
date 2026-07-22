@@ -33,7 +33,9 @@
     "loadErrorTitle": "Couldn't load this",
     "loadErrorBody": "Check your connection and try again.",
     "retry": "Try again",
-    "offline": "No connection. You're offline."
+    "offline": "No connection. You're offline.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "notFound": {
     "home": "Dashboard",
@@ -733,5 +735,11 @@
     "adestrador": "Dog trainer",
     "veterinario": "Home vet visit",
     "pet-sitter": "Pet sitter"
+  },
+  "assets": {
+    "vehicleKind": {
+      "car": "Car",
+      "motorcycle": "Motorcycle"
+    }
   }
 }

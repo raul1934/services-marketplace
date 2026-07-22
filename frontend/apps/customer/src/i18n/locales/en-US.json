@@ -26,7 +26,9 @@
     "loadErrorTitle": "Couldn't load this",
     "loadErrorBody": "Check your connection and try again.",
     "retry": "Try again",
-    "offline": "No connection. You're offline."
+    "offline": "No connection. You're offline.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "notFound": {
     "home": "Home",
@@ -755,6 +757,10 @@
       "weight": "Weight",
       "vaccines": "Vaccines",
       "microchip": "Microchip"
+    },
+    "vehicleKind": {
+      "car": "Car",
+      "motorcycle": "Motorcycle"
     }
   },
   "drawer": {

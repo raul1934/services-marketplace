@@ -12,8 +12,13 @@ export const ICON: Record<string, IconName> = { vehicle: 'car', property: 'home'
  */
 export function assetCaption(a: Asset, tr: (key: string) => string): string {
   const d = a.detail ?? {};
+  // `kind` is stored as the raw token the API speaks ('car' / 'motorcycle').
+  // It sat in this list for a long time without ever being set, so nothing
+  // showed; the moment the request flow started filling it, cards began
+  // reading "Aprilia · motorcycle" — an English word in a Portuguese UI.
+  const kind = d.kind ? tr(`assets.vehicleKind.${d.kind}`) : null;
   return (
-    [d.make, d.model, d.plate, d.kind, d.unit, d.species, d.breed].filter(Boolean).join(' · ') ||
+    [d.make, d.model, d.plate, kind, d.unit, d.species, d.breed].filter(Boolean).join(' · ') ||
     tr(`assets.type.${a.type}`)
   );
 }

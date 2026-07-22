@@ -33,7 +33,9 @@
     "loadErrorTitle": "Não foi possível carregar",
     "loadErrorBody": "Verifique sua conexão e tente de novo.",
     "retry": "Tentar de novo",
-    "offline": "Sem conexão. Você está offline."
+    "offline": "Sem conexão. Você está offline.",
+    "showPassword": "Mostrar senha",
+    "hidePassword": "Ocultar senha"
   },
   "notFound": {
     "home": "Painel",
@@ -733,5 +735,11 @@
     "adestrador": "Adestrador",
     "veterinario": "Veterinário a Domicílio",
     "pet-sitter": "Pet Sitter"
+  },
+  "assets": {
+    "vehicleKind": {
+      "car": "Carro",
+      "motorcycle": "Moto"
+    }
   }
 }

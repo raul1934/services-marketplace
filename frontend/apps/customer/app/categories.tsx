@@ -5,12 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { BackBar, CATEGORY_TYPE_ORDER, Card, Screen, SectionLabel, ServiceCategory, Skeleton, Text, useTheme } from '@chamafacil/shared';
 import { useCategories } from '../src/queries';
 import { CategoryIcon } from '../src/components/CategoryIcon';
+import { LoadError } from '../src/components/LoadError';
 
 export default function Categories() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
-  const { data, isLoading } = useCategories();
+  const { data, isLoading, isError, refetch } = useCategories();
 
   const byType = (type: string): ServiceCategory[] => data?.filter((c) => c.type === type) ?? [];
 
@@ -18,7 +19,13 @@ export default function Categories() {
     <Screen stickyHeader padded={false}>
       <BackBar backLabel={tr('common.back')} title={tr('categories.title')} onBack={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))} />
       <View style={{ paddingHorizontal: 20, paddingBottom: 24, gap: 22 }}>
-        {isLoading ? (
+        {/* A failed catalog used to render nothing at all: `data` stayed
+            undefined, every `byType` came back empty, and the screen was a
+            back bar over blank space with no hint that anything had gone
+            wrong or anything to press. */}
+        {isError && !data ? (
+          <LoadError onRetry={refetch} fill={false} />
+        ) : isLoading ? (
           <View style={{ gap: 22 }}>
             {[0, 1].map((s) => (
               <View key={s} style={{ gap: 14 }}>
