@@ -526,14 +526,64 @@
     background: #25d366; color: #fff; display: flex; align-items: center; justify-content: center;
     box-shadow: 0 10px 26px -8px rgba(37,211,102,.6);
     transition: transform .15s ease;
+    /* Entra depois da página assentar, não junto com ela: aparecer no primeiro
+       frame faz o botão competir com o hero, que é o que a pessoa veio ler.
+       Em CSS e não em JS de propósito — a entrada não pode depender de script,
+       senão sem JS o botão fica invisível, que é justamente o caso em que o
+       href cru ao lado deveria salvar.
+
+       `backwards` e não `both`: o fill-mode segura o estado inicial durante o
+       atraso, que é o que se quer, mas com `both` o estado final continuaria
+       valendo depois — e valor vindo de animação ganha do :hover na cascata,
+       matando o scale do hover. Com `backwards` o fill some no fim e as
+       declarações normais voltam a mandar. */
+    animation: waIn .42s cubic-bezier(.2,1.6,.4,1) 1.2s backwards;
+  }
+  @keyframes waIn {
+    from { opacity: 0; transform: scale(.6); }
+    to   { opacity: 1; transform: scale(1); }
   }
   .lp-wa:hover { transform: scale(1.06); }
-  .lp-wa svg { width: 30px; height: 30px; }
+  .lp-wa svg { width: 30px; height: 30px; position: relative; z-index: 1; }
+
+  /* Anel que pulsa. Roda três vezes e para — animação infinita em elemento fixo
+     rouba atenção da leitura o tempo todo e ainda mantém a GPU acordada no
+     celular. O ::after é só o anel; o botão em si não escala, senão o alvo de
+     toque muda de tamanho embaixo do dedo. */
+  .lp-wa::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid #25d366; opacity: 0;
+    animation: waRing 2.2s ease-out 1.7s 3;
+  }
+  @keyframes waRing {
+    0%   { transform: scale(1);    opacity: .7; }
+    70%  { transform: scale(1.75); opacity: 0; }
+    100% { transform: scale(1.75); opacity: 0; }
+  }
+
+  /* Aceno único, bem depois: quem rolou meia página e não converteu é quem pode
+     precisar de ajuda. Uma vez por sessão — repetir vira barulho. */
+  .lp-wa.nudge svg { animation: waNudge 1.1s ease-in-out; transform-origin: 50% 70%; }
+  @keyframes waNudge {
+    0%, 55%, 100% { transform: rotate(0); }
+    12% { transform: rotate(-13deg); }
+    24% { transform: rotate(11deg); }
+    36% { transform: rotate(-8deg); }
+    46% { transform: rotate(5deg); }
+  }
+
   @media (max-width: 880px) {
     .lp-wa { bottom: calc(88px + env(safe-area-inset-bottom)); width: 52px; height: 52px; }
     .lp-wa svg { width: 27px; height: 27px; }
   }
-  @media (prefers-reduced-motion: reduce) { .lp-wa { transition: none; } }
+  /* Quem pediu menos movimento recebe o botão parado — visível, sem anel e sem
+     aceno. A entrada vira um fade curto para o elemento não brotar do nada. */
+  @media (prefers-reduced-motion: reduce) {
+    .lp-wa { animation: waFade .2s linear 1.2s backwards; }
+    .lp-wa:hover { transform: none; }
+    .lp-wa::after, .lp-wa.nudge svg { animation: none; }
+  }
+  @keyframes waFade { from { opacity: 0; } to { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -1331,6 +1381,22 @@
     wa.addEventListener("click", function () {
       if (window.gtag) gtag("event", "contact", { method: "whatsapp" });
     });
+
+    // A entrada e o anel são CSS puro (ver .lp-wa) para funcionarem sem JS.
+    // Aqui fica só o aceno, que depende de rolagem.
+    //
+    // Um aceno só, e só para quem rolou meia página sem converter — é o sinal
+    // mais barato de "está procurando alguma coisa". Depois disso o botão fica
+    // quieto: o segundo aceno já é barulho.
+    var acenou = false;
+    var talvezAcenar = function () {
+      if (acenou || scrollY < innerHeight * 2) return;
+      acenou = true;
+      removeEventListener("scroll", talvezAcenar);
+      wa.classList.add("nudge");
+      wa.addEventListener("animationend", function () { wa.classList.remove("nudge"); }, { once: true });
+    };
+    addEventListener("scroll", talvezAcenar, { passive: true });
   }
 
   // Prova social honesta: o tamanho real da fila, quando o backend souber
