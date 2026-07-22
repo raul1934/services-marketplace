@@ -3,11 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Enums\RequestStatus;
-use App\Mail\UncoveredRequestAlert;
 use App\Models\ServiceRequest;
+use App\Support\Ops\OpsAlerter;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Avisa a operação de chamados que ficaram sem nenhuma proposta (MKT-OPS-01).
@@ -27,7 +26,7 @@ class DetectUncoveredRequests extends Command
 
     protected $description = 'Alerta a operação sobre chamados abertos sem nenhuma proposta';
 
-    public function handle(): int
+    public function handle(OpsAlerter $alerta): int
     {
         if (! config('concierge.enabled')) {
             $this->info('Concierge desligado (CONCIERGE_ENABLED).');
@@ -37,7 +36,6 @@ class DetectUncoveredRequests extends Command
 
         $minutos = (int) config('concierge.minutes_without_proposal', 4);
         $horas = (int) config('concierge.max_age_hours', 6);
-        $destino = config('concierge.alert_email');
         $alertados = 0;
 
         ServiceRequest::query()
@@ -53,34 +51,31 @@ class DetectUncoveredRequests extends Command
             ->where(fn ($q) => $q->where('is_test', false)->orWhereNull('is_test'))
             ->whereDoesntHave('proposals')
             ->with(['client', 'category'])
-            ->chunkById(100, function ($chamados) use (&$alertados, $minutos, $destino) {
+            ->chunkById(100, function ($chamados) use (&$alertados, $minutos, $alerta) {
                 foreach ($chamados as $chamado) {
-                    // Marca ANTES de enviar. Se o e-mail falhar, o pior caso é
+                    // Marca ANTES de avisar. Se o canal falhar, o pior caso é
                     // um alerta perdido; marcar depois arriscaria reenviar o
                     // mesmo alerta a cada minuto se o envio ficasse instável.
                     $chamado->forceFill(['concierge_alerted_at' => now()])->save();
                     $alertados++;
 
-                    if ($destino) {
-                        Mail::to($destino)->send(new UncoveredRequestAlert($chamado, $minutos));
-                    }
+                    // Qual canal isto vira — e-mail, WhatsApp, os dois — é
+                    // decisão de configuração; o detector não sabe e não deve
+                    // saber. Nenhuma implementação deixa exceção escapar.
+                    $alerta->uncoveredRequest($chamado, $minutos);
 
-                    // Log sempre, com ou sem e-mail configurado: é o que permite
-                    // medir depois quantos chamados precisaram de resgate — o
-                    // inverso direto da taxa de match.
+                    // Log sempre, independente do canal: é o que permite medir
+                    // depois quantos chamados precisaram de resgate — o inverso
+                    // direto da taxa de match.
                     Log::warning('concierge.uncovered_request', [
                         'request_id' => $chamado->id,
                         'category' => $chamado->category?->name,
                         'address' => $chamado->address,
                         'minutes_open' => $minutos,
-                        'alerted' => (bool) $destino,
                     ]);
                 }
             });
 
-        if ($alertados && ! $destino) {
-            $this->warn('CONCIERGE_ALERT_EMAIL não configurado — nada foi enviado.');
-        }
         $this->info("Chamados sem cobertura detectados: {$alertados}.");
 
         return self::SUCCESS;

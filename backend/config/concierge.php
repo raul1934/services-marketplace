@@ -56,4 +56,52 @@ return [
     */
     'admin_url' => env('CONCIERGE_ADMIN_URL', 'https://admin.chamafacil.app'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Canais do alerta
+    |--------------------------------------------------------------------------
+    |
+    | Lista separada por vírgula: 'mail', 'whatsapp', ou os dois. Com mais de um
+    | canal, todos recebem — útil enquanto o WhatsApp está sendo validado, para
+    | conferir que chega sem apostar a operação nele.
+    |
+    | Padrão só e-mail: não depende de integração nenhuma e já resolve.
+    |
+    */
+    'channels' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('CONCIERGE_CHANNELS', 'mail'))
+    ))),
+
+    /*
+    |--------------------------------------------------------------------------
+    | WhatsApp Cloud API (oficial da Meta)
+    |--------------------------------------------------------------------------
+    |
+    | Só é usado quando 'whatsapp' está em CONCIERGE_CHANNELS. Sem as
+    | credenciais o canal se cala e registra em log — nunca derruba o detector.
+    |
+    | Dois avisos que custam caro descobrir tarde:
+    |
+    | 1. Um número registrado na Cloud API DEIXA de funcionar no aplicativo do
+    |    WhatsApp. Não registre o número que a landing publica como suporte:
+    |    use um número separado.
+    | 2. Fora da janela de 24h a Meta só entrega TEMPLATE APROVADO. O alerta é
+    |    sempre iniciado por nós, então é sempre template — e o nome abaixo
+    |    precisa existir e estar aprovado no WhatsApp Manager antes de ligar
+    |    o canal.
+    |
+    | O template esperado tem três parâmetros no corpo, nesta ordem:
+    |   {{1}} minutos sem proposta · {{2}} categoria · {{3}} endereço
+    |
+    */
+    'whatsapp' => [
+        'token' => env('CONCIERGE_WA_TOKEN'),
+        'phone_number_id' => env('CONCIERGE_WA_PHONE_ID'),
+        'to' => env('CONCIERGE_WA_TO'),
+        'template' => env('CONCIERGE_WA_TEMPLATE', 'chamado_sem_proposta'),
+        'template_language' => env('CONCIERGE_WA_TEMPLATE_LANG', 'pt_BR'),
+        'version' => env('CONCIERGE_WA_VERSION', 'v21.0'),
+    ],
+
 ];
