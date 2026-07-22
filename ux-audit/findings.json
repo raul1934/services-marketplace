@@ -260,9 +260,11 @@
       "solution": "`useConnectivity()` + `<OfflineBanner>` + `onlineManager` do React Query.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "ee34fa1"
+      ],
+      "note": "Nao havia nocao de conectividade: estar num tunel e o backend estar fora davam a mesma mensagem. useIsOnline (NetInfo, ja dependencia e ja carregado no aparelho pelo build RN do Pusher - sem rebuild nativo) mais um OfflineBanner nao-dispensavel e live region. Prefere isInternetReachable a isConnected porque o Android chama wifi com portal cativo de conectado; desconhecido conta como online para o banner nao piscar no cold start. NAO verificado no aparelho: exigiria desligar o radio, que e configuracao de sistema.",
       "quick_win": null,
       "change": "offline-and-error-recovery",
       "issue": 11
@@ -277,9 +279,11 @@
       "solution": "Refresh token / soft-retry + aviso ao usuário.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": null,
+      "status": "done",
+      "commits": [
+        "ee34fa1"
+      ],
+      "note": "O bootstrap envolvia api.me() num catch INCONDICIONAL que deletava o token, entao \"servidor inalcancavel\" e \"token recusado\" eram o mesmo evento - e o mais barato dos dois destruia a sessao. Provado no aparelho: derrubei o tunel da API por ~1 min e a sessao viva foi embora de vez; restaurar o tunel nao trouxe de volta. Agora so um 401 descarta o token; o resto ganha 3 tentativas curtas (~3,5s) e, se ainda assim nao der, mostra a UI deslogada MANTENDO o token, e volta sozinho quando a conexao retorna. NAO verificado no aparelho: precisa de sessao logada, que eu mesmo derrubei, e voltar exige digitar senha.",
       "quick_win": null,
       "change": "offline-and-error-recovery",
       "issue": 12
@@ -298,7 +302,7 @@
       "commits": [
         "2b3d9c7"
       ],
-      "note": "As cenas sao ilustracoes feitas de Text de verdade; o leitor lia \"R$ 120\", \"Melhor opcao\" e \"Protegido pela Chama Facil\" como conteudo, antes do login. Escondidas como unidade decorativa. Nao verificado no aparelho: e tela pre-login e conferir exigiria deslogar a sessao de teste.",
+      "note": "CORRECAO da nota anterior. Voltei na welcome (ela apareceu quando a sessao caiu durante outro teste) e o dump do uiautomator listava a ilustracao inteira, entao conclui que o fix estava quebrado. NAO estava: o UiAutomator se registra com FLAG_INCLUDE_NOT_IMPORTANT_VIEWS e lista de proposito nos marcados como nao-importantes - mesmo motivo pelo qual esta auditoria ja sabia que ele super-reporta. O TalkBack nao usa essa flag. O dump e identico com e sem o fix: nao diz nada nem a favor nem contra. Provei que o codigo estava vivo (opacity no wrapper escureceu a ilustracao) antes de concluir. Verificar de verdade exige TalkBack ligado. LICAO GERAL: uiautomator nao serve de oraculo para importantForAccessibility - vale reler qualquer achado que dependa disso.",
       "quick_win": null,
       "change": "accessible-semantics-sweep",
       "issue": 13
@@ -723,12 +727,11 @@
       "solution": "Trocar por Button/Pressable com role + alvo ≥44dp.",
       "effort": "M",
       "impact": "Alto",
-      "status": "partial",
+      "status": "done",
       "commits": [
-        "41ade70",
-        "36b817e"
+        "248bd30"
       ],
-      "note": "roles em propostas, cancelar, CatTile, cards gradiente e BackBar; resta varrer welcome/login/register/verify",
+      "note": "Duas formas, duas respostas. Links dentro de frase (Text aninhado num Text pai) ganharam so o papel - link, ou button no \"reenviar codigo\", que age em vez de navegar; viram Pressable so quebrando a frase, entao continuam abaixo de 44dp e isso fica declarado, nao disfarcado. Controles isolados (recusar, contrapor, aprovar peca, gorjeta) ganharam padding ate 44dp; aprovar peca nao tinha papel nenhum e aprova uma cobranca. Medido no aparelho na linha de gorjetas: Button, selected no escolhido, 131px a 450dpi = 46,6dp (antes ~40,5). O bug de verdade do lote estava na welcome: o \"pular\" renderizava string vazia no ultimo slide mas mantinha onPress e flex:1 - faixa invisivel, sem rotulo, meia linha de largura, que pulava para o cadastro. Agora e Button de 44,1dp e nao e renderizado quando nao ha o que pular.",
       "quick_win": 23,
       "change": "accessible-semantics-sweep",
       "issue": 30
@@ -762,9 +765,12 @@
       "solution": "`isError`/`refetch` + `<ErrorState>` + `<Toast>` + ErrorBoundary.",
       "effort": "M",
       "impact": "Alto",
-      "status": "open",
-      "commits": [],
-      "note": "Evidencia nova (2026-07-22): um deep link para /request/<id>/reschedule com id inexistente deixa a tela no SkeletonScreen para sempre. A query falha e nada nunca sai do estado de carregando - nem erro, nem retry, nem volta.",
+      "status": "done",
+      "commits": [
+        "eed8f13",
+        "ebcf4fe"
+      ],
+      "note": "Duas mentiras com a mesma raiz: ninguem nunca ligou nada no caminho de erro. O guard `isLoading || !request` junta dois estados - numa query que falha isLoading e false e request e undefined, entao cinco telas (no-show, receipt, requote, reschedule, surcharge - as que o cliente alcanca quando algo JA deu errado) ficavam no skeleton para sempre. O PaginatedList nem aceitava isError, entao lista falhada virava \"voce nao tem nada\". Agora aceita isError e errorState, e so toma a tela quando nao ha linha nenhuma: linha velha vence cartao de erro, e proxima pagina que falha nao apaga as que carregaram. Nenhum componente novo - o EmptyState ja tinha icone, titulo, corpo, acao e tom muted; a peca existia. Verificado no aparelho com o mesmo deep link da issue #32.",
       "quick_win": null,
       "change": "offline-and-error-recovery",
       "issue": 32
