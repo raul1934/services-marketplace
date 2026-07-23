@@ -228,10 +228,17 @@ function MapImpl({
           {...(region
             ? { center: [view!.longitude, view!.latitude] as [number, number], zoom: zoomFor(view!.longitudeDelta) }
             : {
-                defaultSettings: {
-                  center: [view?.longitude ?? 0, view?.latitude ?? 0] as [number, number],
-                  zoom: zoomFor(view?.longitudeDelta),
-                },
+                // `initialViewState`, not `defaultSettings` — the wrong name
+                // silently did nothing and left the camera at world zoom over
+                // the null island. Only set when we have a starting point.
+                ...(view
+                  ? {
+                      initialViewState: {
+                        center: [view.longitude, view.latitude] as [number, number],
+                        zoom: zoomFor(view.longitudeDelta),
+                      },
+                    }
+                  : {}),
               })}
         />
 
