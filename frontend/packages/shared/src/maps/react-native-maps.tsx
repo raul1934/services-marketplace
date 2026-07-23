@@ -1,29 +1,40 @@
 /**
- * NATIVE (iOS/Android) implementation of the `react-native-maps` API subset the
- * app uses, backed by **Leaflet inside a react-native-webview** + OpenStreetMap
- * (CARTO) tiles — no Google Maps, no API key, no billing.
+ * `react-native-maps`, backed by MapLibre.
  *
- * Aliased for native platforms in each app's metro.config.js (web keeps its own
- * DOM Leaflet stub in src/web-stubs). `MapView` is a class (like the real
- * react-native-maps) so screens can `useRef<MapView>()` and call the imperative
- * methods `animateToRegion` / `animateCamera`; the class delegates to an inner
- * function component that owns the WebView + Leaflet bridge.
+ * The apps alias the `react-native-maps` module name to this file (see each
+ * app's metro.config.js), so the 16 call sites across both apps keep the API
+ * they already speak — `<MapView><Marker/><Polygon/><Polyline/></MapView>`
+ * plus `animateToRegion` / `animateCamera` on a ref. Only the engine changed.
  *
- * API covered:
- *   <MapView initialRegion|region onPress onRegionChangeComplete ref>
- *     <Marker coordinate pinColor title description draggable onDrag onDragEnd
- *             onPress onCalloutPress> {label child | RequestMarker child} </Marker>
- *     <Polygon coordinates strokeColor fillColor strokeWidth fillOpacity/>
- *     <Polyline coordinates strokeColor strokeWidth/>
- *   </MapView>
+ * What it replaced: a WebView running Leaflet, with the Leaflet library itself
+ * fetched from unpkg.com on every mount. No network meant no map — in an app
+ * whose central case is somebody stopped on a hard shoulder with bad signal,
+ * the map was the first thing to go dark, and it took a third-party CDN with
+ * it into the critical path of asking for help.
  *
- * Layers are serialised from JSX children and reconciled by a stable id (React
- * `key`, else child index). A marker being dragged is not repositioned from React
- * state mid-drag (Leaflet owns it), so the geofence editor's live drag works.
+ * Three things fall out of the move beyond speed:
+ *
+ * - It renders natively, so there is no WebView per map, and there are 16.
+ * - `OfflineManager` exists, so cached tiles become possible rather than
+ *   impossible.
+ * - Region changes report `userInteraction`. The new-request wizard needed
+ *   exactly that signal and did not have it: it had to guess whether a region
+ *   change was the customer moving the pin or the map settling into place, and
+ *   guessing wrong rewrote the address it had just shown them. It took four
+ *   attempts to approximate that flag with heuristics. Now it is a boolean.
  */
 import React from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
-import { WebView, WebViewMessageEvent } from 'react-native-webview';
+import { StyleSheet, View, ViewStyle } from 'react-native';
+import {
+  Camera,
+  type CameraRef,
+  GeoJSONSource,
+  Layer,
+  Map,
+  Marker as MLMarker,
+  type StyleSpecification,
+  type ViewStateChangeEvent,
+} from '@maplibre/maplibre-react-native';
 import { useTheme } from '../theme';
 
 export interface Region {
@@ -55,6 +66,7 @@ interface MarkerLike {
   fillColor?: string;
   strokeWidth?: number;
   fillOpacity?: number;
+  lineDashPattern?: number[];
   onDrag?: (e: MapPress) => void;
   onDragEnd?: (e: MapPress) => void;
   onPress?: () => void;
@@ -68,274 +80,229 @@ interface MapViewProps {
   style?: ViewStyle;
   children?: React.ReactNode;
   onPress?: (e: MapPress) => void;
+  /**
+   * Fired only for changes the user made. MapLibre separates those from the
+   * ones the app causes itself; the previous engine did not, so every consumer
+   * had to invent its own way of telling them apart.
+   */
   onRegionChangeComplete?: (region: Region) => void;
   /** When false, the map won't pan on drag — so it doesn't swallow the parent
    *  ScrollView's vertical scroll. Tap-to-place and marker drag still work. */
   scrollEnabled?: boolean;
 }
 
-const LIGHT_TILES = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-const DARK_TILES = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+// The same CARTO basemaps the WebView used, so nothing about the look changes.
+const LIGHT_TILES = 'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+const DARK_TILES = 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
 
+/** Web-Mercator zoom for a longitude span, matching the old Leaflet mapping. */
 function zoomFor(delta?: number): number {
   if (!delta || delta <= 0) return 13;
-  return Math.max(3, Math.min(18, Math.round(Math.log2(360 / delta))));
+  return Math.max(3, Math.min(18, Math.log2(360 / delta)));
 }
 
-const labelOf = (p: MarkerLike): { text: string; tone?: string } | null => {
-  const c = p.children;
-  if (!React.isValidElement(c)) return null;
-  const lp = c.props as { text?: string; tone?: string };
-  return lp.text != null ? { text: lp.text, tone: lp.tone } : null;
-};
-const richOf = (p: MarkerLike): { color: string; label: string; iconName: string } | null => {
-  const c = p.children;
-  if (!React.isValidElement(c)) return null;
-  const lp = c.props as { color?: string; label?: string; iconName?: string };
-  return lp.color && lp.iconName ? { color: lp.color, label: lp.label ?? '', iconName: lp.iconName } : null;
-};
-
-interface Layer {
-  id: string;
-  kind: 'pin' | 'circle' | 'label' | 'rich' | 'polygon' | 'polyline';
-  coord?: [number, number];
-  coords?: [number, number][];
-  color?: string;
-  fillColor?: string;
-  strokeWidth?: number;
-  fillOpacity?: number;
-  draggable?: boolean;
-  title?: string;
-  description?: string;
-  label?: { text: string; tone?: string };
-  rich?: { color: string; label: string };
-  press?: boolean;
-  callout?: boolean;
+/** Longitude span for a zoom — the inverse of `zoomFor`, to report a Region back. */
+function deltaFor(zoom: number): number {
+  return 360 / Math.pow(2, zoom);
 }
 
-function serialize(children: React.ReactNode): Layer[] {
-  const out: Layer[] = [];
-  React.Children.forEach(children, (child, i) => {
-    if (!React.isValidElement(child)) return;
-    const p = child.props as MarkerLike;
-    const id = child.key != null ? String(child.key) : 'i' + i;
-    const isLine = child.type === Polyline;
-    if (Array.isArray(p.coordinates)) {
-      if (p.coordinates.length < 2) return;
-      out.push({
-        id,
-        kind: isLine ? 'polyline' : 'polygon',
-        coords: p.coordinates.map((c) => [c.latitude, c.longitude] as [number, number]),
-        color: p.strokeColor,
-        fillColor: p.fillColor,
-        strokeWidth: p.strokeWidth,
-        fillOpacity: p.fillOpacity,
-      });
-      return;
-    }
-    if (!p.coordinate) return;
-    const coord: [number, number] = [p.coordinate.latitude, p.coordinate.longitude];
-    const lbl = labelOf(p);
-    if (lbl) {
-      out.push({ id, kind: 'label', coord, label: lbl });
-      return;
-    }
-    const rich = richOf(p);
-    if (rich) {
-      out.push({ id, kind: 'rich', coord, color: rich.color, rich, press: !!p.onPress });
-      return;
-    }
-    out.push({
-      id,
-      kind: p.draggable ? 'pin' : 'circle',
-      coord,
-      color: p.pinColor,
-      draggable: p.draggable,
-      title: p.title,
-      description: p.description,
-      press: !!p.onPress,
-      callout: !!p.onCalloutPress,
-    });
-  });
-  return out;
+/**
+ * A raster style built in code rather than fetched.
+ *
+ * MapLibre normally takes a style URL, which would put a network round trip
+ * back in front of the map — the exact problem being fixed here. Tiles still
+ * come from the network, but a map missing tiles is a grey grid you can still
+ * pan, not a blank screen, and tiles are what `OfflineManager` can cache.
+ */
+function rasterStyle(dark: boolean, background: string): StyleSpecification {
+  return {
+    version: 8,
+    sources: {
+      basemap: {
+        type: 'raster',
+        tiles: [dark ? DARK_TILES : LIGHT_TILES],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© OpenStreetMap, © CARTO',
+      },
+    },
+    layers: [
+      { id: 'bg', type: 'background', paint: { 'background-color': background } },
+      { id: 'basemap', type: 'raster', source: 'basemap' },
+    ],
+  } as StyleSpecification;
 }
 
-/** The HTML document rendered inside the WebView: Leaflet from CDN + a bridge. */
-function htmlDoc(center: [number, number], zoom: number, dark: boolean, accent: string, dragEnabled = true): string {
-  const tiles = dark ? DARK_TILES : LIGHT_TILES;
-  return `<!doctype html><html><head><meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<style>html,body,#map{height:100%;margin:0;padding:0;background:${dark ? '#0e141d' : '#eef1f4'}}</style>
-</head><body><div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-var ACCENT=${JSON.stringify(accent)};
-var post=function(o){try{window.ReactNativeWebView.postMessage(JSON.stringify(o));}catch(e){}};
-var map=L.map('map',{attributionControl:false,zoomControl:true,maxZoom:18,dragging:${dragEnabled ? 'true' : 'false'}}).setView([${center[0]},${center[1]}],${zoom});
-var tile=L.tileLayer(${JSON.stringify(tiles)},{subdomains:'abcd',maxZoom:19}).addTo(map);
-map.on('click',function(e){post({t:'press',lat:e.latlng.lat,lng:e.latlng.lng});});
-map.on('moveend',function(){var c=map.getCenter(),b=map.getBounds();post({t:'region',lat:c.lat,lng:c.lng,latD:b.getNorth()-b.getSouth(),lngD:b.getEast()-b.getWest()});});
-var layers={}; var dragging={};
-function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
-function pinIcon(color){var d=18;return L.divIcon({className:'',html:'<div style="box-sizing:border-box;width:'+d+'px;height:'+d+'px;border-radius:9px;background:'+color+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>',iconSize:[d,d],iconAnchor:[9,9]});}
-function labelIcon(text,tone){var area=tone==='area';var skin=area?('background:'+ACCENT+';color:#fff;'):'background:rgba(255,255,255,0.92);color:#222;border:1px solid rgba(0,0,0,0.08);';return L.divIcon({className:'',html:'<div style="transform:translate(-50%,-50%);white-space:nowrap;'+skin+'font:700 '+(area?12:11)+'px system-ui,sans-serif;padding:2px 6px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.25);">'+esc(text)+'</div>',iconSize:[0,0]});}
-function richIcon(color,label){var lab=label?('<div style="background:#fff;border:1px solid '+color+';border-radius:8px;padding:1px 6px;margin-top:2px;"><span style="color:'+color+';font-weight:800;font-size:11px;font-family:system-ui,sans-serif;">'+esc(label)+'</span></div>'):'';return L.divIcon({className:'',html:'<div style="transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;white-space:nowrap;"><div style="width:32px;height:32px;border-radius:16px;background:#fff;border:2px solid '+color+';display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.3);"><div style="width:12px;height:12px;border-radius:6px;background:'+color+';"></div></div>'+lab+'</div>',iconSize:[0,0]});}
-function setTiles(d){map.removeLayer(tile);tile=L.tileLayer(d?${JSON.stringify(DARK_TILES)}:${JSON.stringify(LIGHT_TILES)},{subdomains:'abcd',maxZoom:19}).addTo(map);}
-function styleOf(d){if(d.kind==='polygon')return {color:d.color||ACCENT,weight:d.strokeWidth||2,fillColor:d.fillColor||d.color||ACCENT,fillOpacity:d.fillOpacity==null?1:d.fillOpacity};if(d.kind==='polyline')return {color:d.color||ACCENT,weight:d.strokeWidth||5,opacity:0.9};return null;}
-function makeLayer(d){
-  var color=d.color||ACCENT;
-  if(d.kind==='polygon')return L.polygon(d.coords,styleOf(d));
-  if(d.kind==='polyline')return L.polyline(d.coords,styleOf(d));
-  if(d.kind==='label')return L.marker(d.coord,{icon:labelIcon(d.label.text,d.label.tone),interactive:false});
-  if(d.kind==='rich'){var rm=L.marker(d.coord,{icon:richIcon(color,d.rich?d.rich.label:'')});if(d.press)rm.on('click',function(){post({t:'markerPress',id:d.id});});return rm;}
-  if(d.kind==='pin'){
-    var mk=L.marker(d.coord,{draggable:!!d.draggable,icon:pinIcon(color)});
-    if(d.draggable){
-      mk.on('dragstart',function(){dragging[d.id]=true;});
-      mk.on('drag',function(){var p=mk.getLatLng();post({t:'drag',id:d.id,lat:p.lat,lng:p.lng});});
-      mk.on('dragend',function(){dragging[d.id]=false;var p=mk.getLatLng();post({t:'dragEnd',id:d.id,lat:p.lat,lng:p.lng});});
-    }
-    if(d.press)mk.on('click',function(){post({t:'markerPress',id:d.id});});
-    return mk;
-  }
-  var cm=L.circleMarker(d.coord,{color:'#fff',weight:2,fillColor:color,fillOpacity:1,radius:9});
-  if(d.press)cm.on('click',function(){post({t:'markerPress',id:d.id});});
-  if(d.title)cm.bindPopup('<b>'+esc(d.title)+'</b>'+(d.description?('<br/>'+esc(d.description)):''));
-  if(d.callout)cm.on('popupopen',function(){var n=cm.getPopup().getElement();if(n)n.addEventListener('click',function(){post({t:'callout',id:d.id});},{once:true});});
-  return cm;
-}
-function setLayers(list){
-  var seen={};
-  for(var i=0;i<list.length;i++){(function(d){
-    seen[d.id]=true;
-    var ex=layers[d.id];
-    if(ex&&ex.kind!==d.kind){map.removeLayer(ex.layer);delete layers[d.id];ex=null;}
-    if(!ex){layers[d.id]={kind:d.kind,layer:makeLayer(d).addTo(map)};return;}
-    var lyr=ex.layer;
-    if(d.kind==='polygon'||d.kind==='polyline'){lyr.setLatLngs(d.coords);var s=styleOf(d);if(s)lyr.setStyle(s);return;}
-    if(d.kind==='label'){lyr.setLatLng(d.coord);lyr.setIcon(labelIcon(d.label.text,d.label.tone));return;}
-    if(d.kind==='rich'){if(!dragging[d.id])lyr.setLatLng(d.coord);lyr.setIcon(richIcon(d.color||ACCENT,d.rich?d.rich.label:''));return;}
-    if(!dragging[d.id])lyr.setLatLng(d.coord);
-  })(list[i]);}
-  for(var id in layers){if(!seen[id]){map.removeLayer(layers[id].layer);delete layers[id];}}
-}
-function onCmd(raw){try{var m=JSON.parse(raw);
-  if(m.cmd==='layers')setLayers(m.list);
-  else if(m.cmd==='view')map.setView([m.lat,m.lng],m.zoom);
-  else if(m.cmd==='fly')map.flyTo([m.lat,m.lng],m.zoom,{duration:(m.duration||300)/1000});
-  else if(m.cmd==='pan')map.panTo([m.lat,m.lng],{animate:true,duration:(m.duration||300)/1000});
-  else if(m.cmd==='tiles')setTiles(m.dark);
-}catch(e){}}
-document.addEventListener('message',function(e){onCmd(e.data);});
-window.addEventListener('message',function(e){onCmd(e.data);});
-post({t:'ready'});
-setTimeout(function(){map.invalidateSize();},50);
-</script></body></html>`;
-}
+interface MarkerSpec { id: string; lngLat: [number, number]; pinColor?: string; child?: React.ReactNode; onPress?: () => void }
+interface ShapeSpec { id: string; coords: [number, number][]; stroke?: string; fill?: string; width?: number; opacity?: number }
 
-/** Inner function component: owns the WebView, syncs children/region, bridges events. */
-function MapViewInner(props: MapViewProps & { handleRef: React.Ref<MapViewHandle> }) {
-  const t = useTheme();
-  const ref = React.useRef<WebView>(null);
-  const ready = React.useRef(false);
-  const start = props.region ?? props.initialRegion ?? { latitude: -23.56, longitude: -46.64, latitudeDelta: 0.05, longitudeDelta: 0.05 };
+/** JSX children → the shapes MapLibre draws. Reconciled by React key, else index. */
+function useLayers(children: React.ReactNode) {
+  return React.useMemo(() => {
+    const markers: MarkerSpec[] = [];
+    const polygons: ShapeSpec[] = [];
+    const lines: ShapeSpec[] = [];
 
-  const byId = React.useMemo(() => {
-    const map = new Map<string, MarkerLike>();
-    React.Children.forEach(props.children, (child, i) => {
+    React.Children.forEach(children, (child, i) => {
       if (!React.isValidElement(child)) return;
-      map.set(child.key != null ? String(child.key) : 'i' + i, child.props as MarkerLike);
+      const p = child.props as MarkerLike;
+      const id = String(child.key ?? i);
+      const kind = (child.type as { displayName?: string })?.displayName;
+
+      if (p.coordinate) {
+        markers.push({ id, lngLat: [p.coordinate.longitude, p.coordinate.latitude], pinColor: p.pinColor, child: p.children, onPress: p.onPress });
+        return;
+      }
+      if (!p.coordinates?.length) return;
+      const coords = p.coordinates.map((c) => [c.longitude, c.latitude] as [number, number]);
+      // Fall back on the props when the name is missing (production builds can
+      // drop it): only a polygon carries a fill.
+      const isLine = kind === 'Polyline' || (kind !== 'Polygon' && p.fillColor == null);
+      (isLine ? lines : polygons).push({ id, coords, stroke: p.strokeColor, fill: p.fillColor, width: p.strokeWidth, opacity: p.fillOpacity });
     });
-    return map;
-  }, [props.children]);
 
-  const html = React.useMemo(
-    () => htmlDoc([start.latitude, start.longitude], zoomFor(start.latitudeDelta), t.dark, t.colors.accent, props.scrollEnabled !== false),
-    // Rebuild only when theme flips or panning is toggled; region/children sync
-    // via injection below.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [t.dark, props.scrollEnabled],
-  );
+    return { markers, polygons, lines };
+  }, [children]);
+}
 
-  const send = React.useCallback((obj: unknown) => {
-    ref.current?.injectJavaScript(`window.onCmd(${JSON.stringify(JSON.stringify(obj))});true;`);
-  }, []);
-
-  React.useImperativeHandle(props.handleRef, () => ({
-    animateToRegion: (r: Region, durationMs = 300) =>
-      send({ cmd: 'fly', lat: r.latitude, lng: r.longitude, zoom: zoomFor(r.latitudeDelta), duration: durationMs }),
-    animateCamera: (camera, opts) => {
-      if (camera.center) send({ cmd: 'pan', lat: camera.center.latitude, lng: camera.center.longitude, duration: opts?.duration });
-    },
-  }), [send]);
-
-  const layers = React.useMemo(() => serialize(props.children), [props.children]);
-  React.useEffect(() => {
-    if (ready.current) send({ cmd: 'layers', list: layers });
-  }, [layers, send]);
-
-  React.useEffect(() => {
-    if (ready.current && props.region)
-      send({ cmd: 'view', lat: props.region.latitude, lng: props.region.longitude, zoom: zoomFor(props.region.latitudeDelta) });
-  }, [props.region?.latitude, props.region?.longitude, props.region?.latitudeDelta, send]);
-
-  const onMessage = React.useCallback(
-    (e: WebViewMessageEvent) => {
-      let m: { t: string; id?: string; lat?: number; lng?: number; latD?: number; lngD?: number };
-      try {
-        m = JSON.parse(e.nativeEvent.data);
-      } catch {
-        return;
-      }
-      if (m.t === 'ready') {
-        ready.current = true;
-        send({ cmd: 'layers', list: serialize(props.children) });
-        return;
-      }
-      if (m.t === 'press') return props.onPress?.({ nativeEvent: { coordinate: { latitude: m.lat!, longitude: m.lng! } } });
-      if (m.t === 'region')
-        return props.onRegionChangeComplete?.({ latitude: m.lat!, longitude: m.lng!, latitudeDelta: m.latD!, longitudeDelta: m.lngD! });
-      const p = m.id != null ? byId.get(String(m.id)) : undefined;
-      if (!p) return;
-      const ev = { nativeEvent: { coordinate: { latitude: m.lat!, longitude: m.lng! } } };
-      if (m.t === 'drag') p.onDrag?.(ev);
-      else if (m.t === 'dragEnd') p.onDragEnd?.(ev);
-      else if (m.t === 'markerPress') p.onPress?.();
-      else if (m.t === 'callout') p.onCalloutPress?.();
-    },
-    [byId, props, send],
-  );
-
-  const flat = (StyleSheet.flatten(props.style) as ViewStyle) ?? {};
+/** The default marker, for call sites that pass only a `pinColor`. */
+function Pin({ color }: { color: string }) {
   return (
-    <WebView
-      ref={ref}
-      originWhitelist={['*']}
-      source={{ html }}
-      onMessage={onMessage}
-      javaScriptEnabled
-      domStorageEnabled
-      nestedScrollEnabled
-      style={[{ backgroundColor: 'transparent', minHeight: 220 }, flat]}
-    />
+    <View style={{ alignItems: 'center' }}>
+      <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: color, borderWidth: 3, borderColor: '#fff' }} />
+      <View style={{ width: 2, height: 8, backgroundColor: color }} />
+    </View>
+  );
+}
+
+function MapImpl({
+  initialRegion,
+  region,
+  style,
+  children,
+  onPress,
+  onRegionChangeComplete,
+  scrollEnabled = true,
+  cameraRef,
+}: MapViewProps & { cameraRef: React.RefObject<CameraRef | null> }) {
+  const t = useTheme();
+  const dark = t.dark;
+  const view = region ?? initialRegion;
+  const { markers, polygons, lines } = useLayers(children);
+  const mapStyle = React.useMemo(() => rasterStyle(dark, t.colors.surface2), [dark, t.colors.surface2]);
+
+  return (
+    <View style={[{ minHeight: 220 }, style]}>
+      <Map
+        style={StyleSheet.absoluteFill}
+        mapStyle={mapStyle}
+        logo={false}
+        attribution={false}
+        compass={false}
+        dragPan={scrollEnabled}
+        onPress={(e) =>
+          onPress?.({
+            nativeEvent: {
+              coordinate: { latitude: e.nativeEvent.lngLat[1], longitude: e.nativeEvent.lngLat[0] },
+            },
+          })
+        }
+        onRegionDidChange={(ev: { nativeEvent: ViewStateChangeEvent }) => {
+          const e = ev.nativeEvent;
+          // The reason this migration matters for this callback: only the
+          // user's own moves are reported, so consumers stop guessing.
+          if (!e.userInteraction) return;
+          onRegionChangeComplete?.({
+            latitude: e.center[1],
+            longitude: e.center[0],
+            latitudeDelta: deltaFor(e.zoom),
+            longitudeDelta: deltaFor(e.zoom),
+          });
+        }}
+      >
+        <Camera
+          ref={cameraRef}
+          // `center`/`zoom` track the `region` prop when a screen drives the
+          // map; with only `initialRegion` they are a starting point and the
+          // user owns the camera from then on.
+          {...(region
+            ? { center: [view!.longitude, view!.latitude] as [number, number], zoom: zoomFor(view!.longitudeDelta) }
+            : {
+                // `initialViewState`, not `defaultSettings` — the wrong name
+                // silently did nothing and left the camera at world zoom over
+                // the null island. Only set when we have a starting point.
+                ...(view
+                  ? {
+                      initialViewState: {
+                        center: [view.longitude, view.latitude] as [number, number],
+                        zoom: zoomFor(view.longitudeDelta),
+                      },
+                    }
+                  : {}),
+              })}
+        />
+
+        {polygons.map((g) => (
+          <GeoJSONSource
+            key={`poly-${g.id}`}
+            id={`poly-${g.id}`}
+            data={{ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [g.coords] } }}
+          >
+            <Layer id={`poly-fill-${g.id}`} type="fill" style={{ fillColor: g.fill ?? 'transparent', fillOpacity: g.opacity ?? 1 }} />
+            <Layer id={`poly-line-${g.id}`} type="line" style={{ lineColor: g.stroke ?? 'transparent', lineWidth: g.width ?? 2 }} />
+          </GeoJSONSource>
+        ))}
+
+        {lines.map((l) => (
+          <GeoJSONSource
+            key={`line-${l.id}`}
+            id={`line-${l.id}`}
+            data={{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: l.coords } }}
+          >
+            <Layer
+              id={`line-layer-${l.id}`}
+              type="line"
+              style={{ lineColor: l.stroke ?? t.colors.accent, lineWidth: l.width ?? 3, lineCap: 'round', lineJoin: 'round' }}
+            />
+          </GeoJSONSource>
+        ))}
+
+        {markers.map((m) => (
+          <MLMarker key={`m-${m.id}`} id={`m-${m.id}`} lngLat={m.lngLat}>
+            <View onTouchEnd={m.onPress}>{m.child ?? <Pin color={m.pinColor ?? t.colors.accent} />}</View>
+          </MLMarker>
+        ))}
+      </Map>
+    </View>
   );
 }
 
 /**
- * Class wrapper so `MapView` is usable as a type (`useRef<MapView>()`) and exposes
- * the imperative methods, matching react-native-maps. Delegates to MapViewInner.
+ * Class component purely so the imperative ref API keeps working: several
+ * screens hold a `MapViewHandle` and call `animateToRegion` / `animateCamera`.
  */
-export default class MapView extends React.Component<MapViewProps> {
-  private inner = React.createRef<MapViewHandle>();
-  animateToRegion(region: Region, durationMs?: number) {
-    this.inner.current?.animateToRegion(region, durationMs);
+export default class MapView extends React.Component<MapViewProps> implements MapViewHandle {
+  private camera = React.createRef<CameraRef>();
+
+  animateToRegion(region: Region, durationMs = 400) {
+    // `easeTo` takes one options bag, not (options, animation).
+    this.camera.current?.easeTo({
+      center: [region.longitude, region.latitude],
+      zoom: zoomFor(region.longitudeDelta),
+      duration: durationMs,
+    });
   }
+
   animateCamera(camera: { center?: { latitude: number; longitude: number } }, opts?: { duration?: number }) {
-    this.inner.current?.animateCamera(camera, opts);
+    if (!camera.center) return;
+    this.camera.current?.easeTo({
+      center: [camera.center.longitude, camera.center.latitude],
+      duration: opts?.duration ?? 400,
+    });
   }
+
   render() {
-    return <MapViewInner {...this.props} handleRef={this.inner} />;
+    return <MapImpl {...this.props} cameraRef={this.camera} />;
   }
 }
 
@@ -344,6 +311,8 @@ export default class MapView extends React.Component<MapViewProps> {
 export function Marker(_props: MarkerLike & { anchor?: { x: number; y: number } }) {
   return null;
 }
+Marker.displayName = 'Marker';
+
 export function Polygon(_props: {
   coordinates: LatLng[];
   strokeColor?: string;
@@ -353,6 +322,8 @@ export function Polygon(_props: {
 }) {
   return null;
 }
+Polygon.displayName = 'Polygon';
+
 export function Polyline(_props: {
   coordinates: LatLng[];
   strokeColor?: string;
@@ -361,3 +332,4 @@ export function Polyline(_props: {
 }) {
   return null;
 }
+Polyline.displayName = 'Polyline';
