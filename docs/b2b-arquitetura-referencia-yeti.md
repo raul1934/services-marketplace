@@ -80,6 +80,35 @@ Company (dona dos catálogos)
               └── Medição   (rollup mensal por contrato)
 ```
 
+### Eixo de execução do operador (correção)
+
+`estrategia-b2b.md` e a primeira versão deste doc puseram **turno→rota→crew** em
+"não trazer do Yeti". **Errado nas três.** A operação é field-service de verdade —
+o modelo do Yeti quase inteiro, menos o que é mesmo dispensável (whitelabel,
+ChargeOver, geofencing pesado). O operador **inicia um turno (shift), depois uma
+rota**, e o trabalho é de uma **equipe (crew)**. Ortogonal ao catálogo:
+
+```
+Shift (turno)  →  Route (rota)  →  parada = Site / ServiceOrder
+   ▲ da crew        ▲ da crew         ▲ vários membros editam a mesma OS
+```
+
+- **Turno e rota são da equipe.** Um membro é **líder**, os outros são membros.
+  Despacho e configuração podem ser **setados por rota**.
+- **Cada membro é usuário do app, no próprio celular.** Entra, e **adiciona
+  serviços à `ServiceOrder` em andamento** — vários celulares editando a mesma
+  visita ao mesmo tempo. O líder também pode **adicionar e atribuir** um serviço a
+  um membro.
+- **Cada serviço registra o autor** (quem executou). Isso não é enfeite: no
+  `por hora`, a hora é **de quem fez** — atribuição é o que torna a medição por
+  tempo defensável quando a equipe é mista.
+
+**Consequência de arquitetura (crew + offline-first):** o sync **não pode** ser
+"último a salvar vence" na OS inteira. Cada serviço/foto é um item com **autor +
+UUID gerado no cliente**; o merge é **por item** (append/aditivo), no espírito dos
+jobs idempotentes já documentados. Dois membros offline fecham partes da mesma
+visita e as duas sobem sem se sobrescrever.
+
 ## Dois lados, movimento de dinheiro faseado
 
 Decidido: cobrança de **dois lados** — cobra do contratante a um `customer_rate`,
@@ -105,26 +134,28 @@ começo.
 
 Assim projeta-se dois lados e opera-se um, sem ficar bloqueado.
 
-## Origem da prestadora: híbrida (o flywheel)
+## Escopo atual: self-contained, SEM marketplace (decisão)
 
-Decidido: **híbrido** — o contrato usa vendors próprios da administradora e cai
-para o marketplace quando falta cobertura para um serviço obrigatório. Esse
-fallback é o mesmo padrão da fila de resgate (MKT-OPS-01 / #156), só que
-proativo.
+**Decidido (2026-07-24): por enquanto, só o app de campo, standalone.** O produto
+roda sozinho — Company, Contract, Site, Service + catálogos, Route/Shift, Crew,
+ServiceOrder, Medição — usando **apenas a própria equipe/vendors da empresa de
+manutenção**. Nada de `ServiceRequest`, nada de pool de marketplace, nada de
+`ProviderProfile` compartilhado.
 
-O que isso desbloqueia, e é o argumento mais forte de todos para fazer o B2B:
+Isso **simplifica** a arquitetura em vez de complicar: sem acoplamento ao B2C, o
+módulo de campo é um contexto fechado que pode até virar app/serviço próprio. A
+origem da prestadora é só interna (crew montada no turno + vendors da empresa).
 
-- O **mesmo `ProviderProfile` serve os dois lados** — não há pool separado. O
-  provider ganha um estado: *"de dentro do contrato"* (vendor preferido) ou *"de
-  fora"* (marketplace).
-- Os **contratos B2B criam demanda recorrente garantida** que semeia a oferta do
-  marketplace.
-- A **oferta do marketplace faz backstop dos contratos** quando o vendor próprio
-  falha.
+### Flywheel híbrido — adiado, não morto
 
-**Não é um segundo produto. É o que torna o primeiro viável** — o B2B traz
-oferta e receita previsível, o B2C usa essa oferta, cada lado cobre o buraco do
-outro.
+O plano anterior era **híbrido**: cair para o marketplace quando faltasse cobertura
+de um serviço obrigatório, com o **mesmo `ProviderProfile` servindo os dois lados**
+(vendor "de dentro do contrato" vs. "de fora"). Isso continua sendo o argumento
+mais forte de longo prazo — contratos criam demanda recorrente que semeia a oferta;
+a oferta faz backstop dos contratos. **Mas fica para depois.** O MVP não integra o
+marketplace; a decisão de reconectar os dois é uma escolha futura, com o mesmo gate
+de validação. Guardar os `rates` dos dois lados desde o dia 1 mantém essa porta
+aberta sem custo.
 
 ## Três opções de arquitetura
 
@@ -137,13 +168,15 @@ empresa, nem cobrança por visita/hora. O modelo de cobrança não cabe aqui.
 
 ### B — módulo B2B isolado · **recomendada**
 
-Contexto separado no mesmo backend, espelhando o Yeti enxugado: `Organization`,
+Contexto **self-contained**, espelhando o Yeti enxugado: `Organization`,
 `Contract`, `Site`, `Service` + catálogos (`Equipment`, `Consumable`, `Form`),
-`ServiceOrder`, `Medição`. Não toca no `ServiceRequest`, mas **compartilha o
-`ProviderProfile`** para sustentar o híbrido.
+`Shift`, `Route`, `Crew`, `ServiceOrder`, `Medição`. **Não toca no marketplace** —
+nem `ServiceRequest`, nem `ProviderProfile`. Com o escopo standalone (ver "Escopo
+atual"), o isolamento fica ainda mais limpo: pode viver no mesmo backend por
+conveniência, ou ser serviço próprio, sem acoplamento.
 
-É a única que respeita o modelo de cobrança. É "dois produtos, uma plataforma"
-feito com disciplina — a complexidade B2B nunca polui o B2C on-demand.
+É a única que respeita o modelo de cobrança. A porta do híbrido fica aberta pelos
+`rates` guardados desde o dia 1, mas nada é compartilhado agora.
 
 ### C — portar a prova (form) primeiro · **descartada**
 
@@ -152,20 +185,74 @@ service, não a espinha. Liderar por ele é telhado antes da parede.
 
 ## O que NÃO trazer do Yeti
 
-Crew, rotas, a hierarquia turno→rota→site→serviço, geofencing pesado, whitelabel,
-ChargeOver. É maquinário do modelo de neve (operadores empregados, turnos, crews
-de campo) — não do condomínio. Importar isso repete a armadilha das quatro
-verticais: complexidade que serve o modelo do Yeti, não o nosso.
+Sobrou quase nada. **Turno, rota, crew e geofencing ficam** (eu errei ao excluir
+os quatro, um a um). O que fica de fora é só: **whitelabel** e **ChargeOver**
+(billing terceirizado) — plugáveis depois, nenhum é espinha. E, por decisão de
+escopo, a **integração com o marketplace** (ver "Escopo atual"). Não é mais
+"trazer o mínimo do Yeti" — é "trazer o Yeti de campo quase inteiro, standalone".
 
 ## Superfície de app
 
-Três atores, que **não são** os apps de marketplace:
+Com o pivot (este vira o produto principal), são **três atores**:
 
-- **Síndico e gestor da administradora → painel web** (Filament, que já existe).
-  Estão numa mesa, uma vez por mês.
-- **Prestadora → app do provider atual**, com um modo "ordem de contrato", ou web.
+- **Gestor da empresa de manutenção e síndico → painel web** (Filament, que já
+  existe). Estão numa mesa; despacham rotas, aprovam medição, exportam PDF.
+- **Operador de campo → o app do provider, em modo de campo.** **Não é um app
+  novo** (decisão 2026-07-24): a experiência de campo é construída **sobre o app do
+  provider existente** (`frontend/apps/provider`), **atrás de uma feature flag**.
+  Inicia turno e rota, executa a `ServiceOrder` no site (foto+geo, lista de
+  serviços, equipamento e material aninhados por serviço, form). **Cada membro da
+  equipe tem o app no próprio celular.** Ver protótipo de campo.
 
-Sem app novo para o beachhead de 2-3 administradoras.
+### Feature flags (decisão)
+
+Cada capacidade fica **atrás da sua própria feature flag**. **Por enquanto só a de
+campo (`field_service`) está ativa** — as features de marketplace do provider ficam
+desligadas. Isso operacionaliza o "self-contained, sem marketplace": não é um fork
+nem um app separado, é o mesmo app do provider com um conjunto de flags que decide o
+que aparece. Reconectar o marketplace um dia é ligar flags, não reescrever.
+
+### Decisões do app do operador
+
+- **Turno → rota → parada, da equipe.** Um membro é líder; o operador inicia o
+  turno, escolhe a rota; cada parada é uma visita. Config e despacho **por rota**.
+- **Iniciar o turno é montar o turno.** No começo o líder **seleciona a equipe**
+  (quem entra hoje) e **os equipamentos cobráveis que vai levar** — um "manifesto"
+  do turno. O conjunto de equipamento carregado **escopa o que pode ser cobrado**
+  nas OSs do dia: só se cobra equipamento que a equipe efetivamente levou. Liga o
+  catálogo `Equipment` (por visita/hora) ao turno.
+- **Multi-dispositivo e colaborativo.** Vários membros editam a **mesma OS** ao
+  mesmo tempo, cada um no seu celular; o líder pode **atribuir** serviços. Cada
+  serviço guarda **o autor** (a hora do `por hora` é de quem fez). Exige sync
+  **por item (autor + UUID)**, não last-write-wins na OS.
+- **Offline-first, não-negociável.** Subsolo, garagem e casa de máquinas não têm
+  sinal. A OS grava no aparelho e sincroniza sozinha quando o sinal volta — exige
+  **IDs gerados no cliente (UUID)** e resolução de conflito no sync, no mesmo
+  espírito dos jobs idempotentes já documentados.
+- **Visibilidade do valor é config, não decisão do operador.** **Dois tipos:**
+  mostra o total ao operador, ou não. O default esconde o dinheiro no aparelho de
+  campo — `customer_rate`/`contractor_rate` e a medição vivem no painel. É um flag
+  de empresa/contrato, "setado em outro lugar".
+- **Navegação da rota.** Opção de **mapa** da rota; botão para **abrir no Waze /
+  Google Maps** com a rota já montada (deep-link com os pontos). O app não
+  reimplementa navegação — delega ao que o motorista já usa.
+- **Geofencing (mecanismo central, não acessório).** Cada `Site` tem uma
+  **geocerca** (centro + raio) que **confirma presença** e valida as fotos contra a
+  cerca. É *outdoor* (GPS) — complementa o site map *indoor*. Muda o "geo
+  confirmado" para "dentro da geocerca". **Start/end do site é manual** — a cerca
+  **não** inicia nem encerra o cronômetro sozinha. O que ela faz é **lembrar**: se
+  o operador está dentro da geocerca e **não iniciou** o site, o app avisa (nudge
+  "você está no Cond. X e ainda não iniciou").
+- **Foto do site e site map.** Cada `Site` tem uma **foto de referência**. Além
+  disso, **site maps**: imagens do site (planta/área) com **fotos fixadas em
+  pontos** por **coordenada relativa na planta (x,y%)**, não geo — dentro do prédio
+  o GPS não pega. Distinto da foto antes/depois da visita, que é do trabalho.
+- **Durações.** Mostrar a **duração do turno aberto** (timer correndo) e a
+  **duração de cada site** (tempo por visita). Alimentam medição por tempo e
+  produtividade.
+- **Tarja de modo offline.** Sem internet, uma **faixa vermelha** persistente diz
+  "Modo offline · sincroniza ao voltar a internet". O operador nunca fica em
+  dúvida se o trabalho está salvo — está no aparelho, sobe sozinho depois.
 
 ## Gate
 
