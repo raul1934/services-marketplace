@@ -5,6 +5,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon, useTheme } from '@chamafacil/shared';
 import { tabHref } from '../../src/flags';
 
+// The field-service surface is not a tab — it's the (field) group with its own
+// drawer (see app/(field)/). These tabs are the on-demand marketplace, gated by
+// the marketplace flag.
+
 /** Bar height above the system inset — room for a 24px icon plus its label. */
 const TAB_BAR_H = 60;
 
@@ -31,12 +35,6 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
       }}
     >
-      {/* Field-service surface (field_service flag). First tab when active. */}
-      <Tabs.Screen
-        name="field"
-        options={{ href: tabHref('field_service'), title: tr('tabs.field'), tabBarIcon: ({ color, size }) => <Icon name="wrench" size={size} color={color} /> }}
-      />
-      {/* On-demand marketplace surface (marketplace flag). */}
       <Tabs.Screen
         name="dashboard"
         options={{ href: tabHref('marketplace'), title: tr('tabs.dashboard'), tabBarIcon: ({ color, size }) => <Icon name="home" size={size} color={color} /> }}

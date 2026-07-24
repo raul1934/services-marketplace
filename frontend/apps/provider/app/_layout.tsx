@@ -81,10 +81,11 @@ function Gate() {
 
     // Field-service standalone (marketplace flag off): the marketplace gates —
     // onboarding (service categories) and pending (admin approval) — don't apply.
-    // The operator is provisioned by their maintenance company, so an authed
-    // user goes straight to the field home.
+    // The operator is provisioned by their maintenance company. Anything outside
+    // the (field) group (auth, the marketplace tabs, onboarding, pending) is sent
+    // to the field home (today's routes).
     if (!flags.marketplace) {
-      if (inAuth || inOnboarding || inPending) router.replace('/(tabs)/field');
+      if (segments[0] !== '(field)') router.replace('/(field)/routes');
       return;
     }
 
