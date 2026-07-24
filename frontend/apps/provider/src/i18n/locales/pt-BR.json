@@ -10,9 +10,19 @@
     "profile": "Perfil"
   },
   "field": {
-    "title": "Campo",
-    "subtitle": "Turno, rota e ordens de serviço",
-    "soon": "O fluxo de campo — iniciar turno, escolher rota e executar a ordem de serviço no local — chega aqui conforme for construído."
+    "startTitle": "Iniciar turno",
+    "greeting": "Bom dia",
+    "notStarted": "turno não iniciado",
+    "geoOk": "Local confirmado",
+    "crewLabel": "Minha equipe hoje",
+    "gearLabel": "Equipamentos que vou levar",
+    "you": "Líder · você",
+    "chargeVisit": "cobra por visita",
+    "chargeHour": "cobra por hora",
+    "slide": "Deslize para iniciar o turno",
+    "slideDone": "Turno iniciado",
+    "slideHint": "Ativar confirma o início do turno",
+    "startedNext": "Turno iniciado. Próximo: escolher a rota (em construção)."
   },
   "common": {
     "continue": "Continuar",

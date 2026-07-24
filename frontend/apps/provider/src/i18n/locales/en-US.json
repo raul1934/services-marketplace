@@ -10,9 +10,19 @@
     "profile": "Profile"
   },
   "field": {
-    "title": "Field",
-    "subtitle": "Shift, route and service orders",
-    "soon": "The field flow — start shift, pick route, and run the service order on site — lands here as it's built."
+    "startTitle": "Start shift",
+    "greeting": "Good morning",
+    "notStarted": "shift not started",
+    "geoOk": "Location confirmed",
+    "crewLabel": "My crew today",
+    "gearLabel": "Equipment I'm taking",
+    "you": "Lead · you",
+    "chargeVisit": "charged per visit",
+    "chargeHour": "charged per hour",
+    "slide": "Slide to start the shift",
+    "slideDone": "Shift started",
+    "slideHint": "Activating confirms the shift start",
+    "startedNext": "Shift started. Next: pick the route (coming soon)."
   },
   "common": {
     "continue": "Continue",
