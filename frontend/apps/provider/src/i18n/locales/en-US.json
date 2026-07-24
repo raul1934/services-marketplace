@@ -67,7 +67,9 @@
     "history": "Visit history",
     "openOS": "Open work order",
     "addServiceTitle": "Add service",
-    "catalogHint": "From the site catalog · assigned to you"
+    "catalogHint": "From the site catalog · assigned to you",
+    "noneMandatory": "No mandatory services.",
+    "noHistory": "No visits yet."
   },
   "fieldNav": {
     "section": "Operations",

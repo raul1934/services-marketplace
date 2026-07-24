@@ -67,7 +67,9 @@
     "history": "Histórico de visitas",
     "openOS": "Abrir ordem de serviço",
     "addServiceTitle": "Adicionar serviço",
-    "catalogHint": "Do catálogo do site · atribuído a você"
+    "catalogHint": "Do catálogo do site · atribuído a você",
+    "noneMandatory": "Nenhum serviço obrigatório.",
+    "noHistory": "Sem visitas ainda."
   },
   "fieldNav": {
     "section": "Operação",

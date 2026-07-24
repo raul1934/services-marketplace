@@ -4,23 +4,18 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { FieldShell } from '../../src/field/FieldShell';
-
-const SITES: { id: string; name: string; contract: string; address: string; services: number; required: number }[] = [
-  { id: 'rio-fortore', name: 'Cond. Rio Fortore', contract: 'Nadruz', address: 'Av. Anísio Haddad, 2000', services: 3, required: 2 },
-  { id: 'solar', name: 'Ed. Solar das Palmeiras', contract: 'Pacco', address: 'Av. Bady Bassitt, 3200', services: 2, required: 1 },
-  { id: 'villa', name: 'Cond. Villa Toscana', contract: 'Pacco', address: 'R. Cel. Spínola de Castro, 3100', services: 2, required: 1 },
-  { id: 'anavec', name: 'Ed. Anavec', contract: 'Nadruz', address: 'R. Silva Jardim, 890', services: 2, required: 1 },
-];
+import { mandatoryServices, orderedSites } from '../../src/field/data';
 
 export default function Sites() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
+  const sites = orderedSites();
 
   return (
-    <FieldShell title={tr('fieldNav.sites')} sub={tr('field.sitesCount', { n: SITES.length })}>
+    <FieldShell title={tr('fieldNav.sites')} sub={tr('field.sitesCount', { n: sites.length })}>
       <View style={{ gap: 10, paddingTop: 2 }}>
-        {SITES.map((s) => (
+        {sites.map((s) => (
           <Pressable
             key={s.id}
             accessibilityRole="button"
@@ -40,8 +35,8 @@ export default function Sites() {
               <Text variant="caption" style={{ flex: 1 }}>{s.address}</Text>
             </Row>
             <Row gap={7} style={{ marginTop: 2 }}>
-              <Badge label={tr('field.services', { n: s.services })} />
-              <Badge label={tr('field.required', { n: s.required })} tone="must" />
+              <Badge label={tr('field.services', { n: s.services.length })} />
+              <Badge label={tr('field.required', { n: mandatoryServices(s).length })} tone="must" />
             </Row>
           </Pressable>
         ))}

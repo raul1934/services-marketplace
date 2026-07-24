@@ -4,51 +4,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { CATALOG, Service, SITES } from '../../../src/field/data';
 
-const SITE_NAMES: Record<string, string> = {
-  'rio-fortore': 'Cond. Rio Fortore',
-  solar: 'Ed. Solar das Palmeiras',
-  villa: 'Cond. Villa Toscana',
-  anavec: 'Ed. Anavec',
-};
-
-type Nest = { icon: string; label: string; sub: string; value: string; tone?: 'charge' | 'free' };
-type Svc = { id: string; name: string; who: string; whoName: string; rate: 'visit' | 'hour'; done: boolean; obrig: boolean; live?: boolean; nest: Nest[] };
-
-const SERVICES: Svc[] = [
-  {
-    id: 'bomba', name: "Bomba d'água — preventiva", who: 'AN', whoName: 'Você', rate: 'visit', done: true, obrig: true,
-    nest: [
-      { icon: '🔧', label: 'Multímetro', sub: 'equipamento', value: '1h' },
-      { icon: '📦', label: 'Pressostato', sub: 'material', value: 'cobra à parte', tone: 'charge' },
-      { icon: '✓', label: 'Checklist da bomba', sub: '', value: '2/2' },
-    ],
-  },
-  {
-    id: 'quadro', name: 'Quadro elétrico — revisão', who: 'BR', whoName: 'Bruno', rate: 'hour', done: true, obrig: true,
-    nest: [{ icon: '🔧', label: 'Alicate-amperímetro', sub: 'equipamento', value: '1,5h' }],
-  },
-  {
-    id: 'portao', name: 'Portão automático — lubrificação', who: 'CA', whoName: 'Carla', rate: 'visit', done: false, obrig: false,
-    nest: [{ icon: '📦', label: 'Graxa', sub: 'material', value: 'sem custo', tone: 'free' }],
-  },
-];
-
-type CatalogItem = { id: string; name: string; rate: 'visit' | 'hour'; obrig: boolean };
-const CATALOG: CatalogItem[] = [
-  { id: 'para-raios', name: 'Para-raios — inspeção', rate: 'visit', obrig: true },
-  { id: 'hidrante', name: 'Hidrante — teste de pressão', rate: 'visit', obrig: false },
-  { id: 'cftv', name: 'CFTV — verificação', rate: 'hour', obrig: false },
-  { id: 'bomba-incendio', name: 'Bomba de incêndio — teste', rate: 'visit', obrig: true },
-];
+type CatalogItem = (typeof CATALOG)[number];
 
 export default function OS() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const site = SITE_NAMES[id ?? ''] ?? tr('fieldNav.sites');
-  const [services, setServices] = useState<Svc[]>(SERVICES);
+  const site = SITES[id ?? ''] ?? SITES['rio-fortore'];
+  const [services, setServices] = useState<Service[]>(site.services);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const addFromCatalog = (c: CatalogItem) => {
@@ -59,14 +25,14 @@ export default function OS() {
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <SafeAreaView edges={['top']}>
-        <BackBar title={site} onBack={() => router.back()} backLabel={tr('field.back')} />
+        <BackBar title={site.name} onBack={() => router.back()} backLabel={tr('field.back')} />
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, gap: 14 }} showsVerticalScrollIndicator={false}>
         {/* site + presence */}
         <View style={{ gap: 8 }}>
           <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text variant="caption" style={{ flex: 1 }}>{tr('field.contract', { name: 'Nadruz' })} · Av. Anísio Haddad, 2000</Text>
+            <Text variant="caption" style={{ flex: 1 }}>{tr('field.contract', { name: site.contract })} · {site.address}</Text>
             <Row style={{ marginLeft: 8 }}>
               {['AN', 'BR', 'CA'].map((a, i) => (
                 <View key={a} style={{ marginLeft: i === 0 ? 0 : -8, borderWidth: 2, borderColor: t.colors.bg, borderRadius: 999 }}>
@@ -111,7 +77,7 @@ export default function OS() {
                     <Text variant="caption">{s.whoName} · {s.obrig ? tr('field.obrig') : tr('field.optional')} · {s.done ? tr('field.statusDone').toLowerCase() : tr('field.statusDoing').toLowerCase()}</Text>
                   </Row>
                 </View>
-                <Text style={{ fontFamily: undefined, fontSize: 10.5, fontWeight: '700' }} color={t.colors.ink2}>{s.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
+                <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={t.colors.ink2}>{s.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
               </Row>
               {s.nest.length ? (
                 <View style={{ marginLeft: 40, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
