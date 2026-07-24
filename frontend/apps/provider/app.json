@@ -38,6 +38,7 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/withNotifeeRepo",
       [
         "expo-splash-screen",
         {
