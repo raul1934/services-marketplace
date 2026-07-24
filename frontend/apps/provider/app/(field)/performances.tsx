@@ -1,19 +1,21 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { FieldShell } from '../../src/field/FieldShell';
 
 type Status = 'done' | 'doing';
-const PERFS: { id: string; site: string; day: 'today' | 'yesterday'; time: string; services: number; crew: number; status: Status }[] = [
-  { id: 'p1', site: 'Cond. Rio Fortore', day: 'today', time: '8:33', services: 4, crew: 3, status: 'done' },
-  { id: 'p2', site: 'Ed. Solar das Palmeiras', day: 'today', time: '9:58', services: 2, crew: 2, status: 'doing' },
-  { id: 'p3', site: 'Cond. Villa Toscana', day: 'yesterday', time: '16:10', services: 3, crew: 2, status: 'done' },
-  { id: 'p4', site: 'Ed. Anavec', day: 'yesterday', time: '11:05', services: 3, crew: 3, status: 'done' },
+const PERFS: { id: string; siteId: string; site: string; day: 'today' | 'yesterday'; time: string; services: number; crew: number; status: Status }[] = [
+  { id: 'p1', siteId: 'rio-fortore', site: 'Cond. Rio Fortore', day: 'today', time: '8:33', services: 4, crew: 3, status: 'done' },
+  { id: 'p2', siteId: 'solar', site: 'Ed. Solar das Palmeiras', day: 'today', time: '9:58', services: 2, crew: 2, status: 'doing' },
+  { id: 'p3', siteId: 'villa', site: 'Cond. Villa Toscana', day: 'yesterday', time: '16:10', services: 3, crew: 2, status: 'done' },
+  { id: 'p4', siteId: 'anavec', site: 'Ed. Anavec', day: 'yesterday', time: '11:05', services: 3, crew: 3, status: 'done' },
 ];
 
 export default function Performances() {
   const t = useTheme();
+  const router = useRouter();
   const { t: tr } = useTranslation();
   const done = PERFS.filter((p) => p.status === 'done').length;
 
@@ -27,6 +29,7 @@ export default function Performances() {
               key={p.id}
               accessibilityRole="button"
               accessibilityLabel={p.site}
+              onPress={() => router.push(`/(field)/os/${p.siteId}`)}
               style={{ backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: t.colors.line, padding: 14, gap: 8 }}
             >
               <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>

@@ -62,7 +62,12 @@
     "addService": "+ Adicionar serviço · e atribuir",
     "finishOS": "Concluir OS · grava no aparelho",
     "finishedOS": "OS concluída",
-    "finishHint": "Ativar conclui a ordem de serviço"
+    "finishHint": "Ativar conclui a ordem de serviço",
+    "siteMandatory": "Serviços obrigatórios",
+    "history": "Histórico de visitas",
+    "openOS": "Abrir ordem de serviço",
+    "addServiceTitle": "Adicionar serviço",
+    "catalogHint": "Do catálogo do site · atribuído a você"
   },
   "fieldNav": {
     "section": "Operação",
@@ -74,6 +79,7 @@
   "common": {
     "continue": "Continuar",
     "back": "Voltar",
+    "close": "Fechar",
     "save": "Salvar",
     "cancel": "Cancelar",
     "send": "Enviar",

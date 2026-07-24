@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { FieldShell } from '../../src/field/FieldShell';
@@ -13,6 +14,7 @@ const SITES: { id: string; name: string; contract: string; address: string; serv
 
 export default function Sites() {
   const t = useTheme();
+  const router = useRouter();
   const { t: tr } = useTranslation();
 
   return (
@@ -23,6 +25,7 @@ export default function Sites() {
             key={s.id}
             accessibilityRole="button"
             accessibilityLabel={s.name}
+            onPress={() => router.push(`/(field)/site/${s.id}`)}
             style={{ backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: t.colors.line, padding: 14, gap: 6 }}
           >
             <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>

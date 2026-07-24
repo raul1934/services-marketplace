@@ -3,7 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, BackBar, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 
 const SITE_NAMES: Record<string, string> = {
   'rio-fortore': 'Cond. Rio Fortore',
@@ -34,12 +34,27 @@ const SERVICES: Svc[] = [
   },
 ];
 
+type CatalogItem = { id: string; name: string; rate: 'visit' | 'hour'; obrig: boolean };
+const CATALOG: CatalogItem[] = [
+  { id: 'para-raios', name: 'Para-raios — inspeção', rate: 'visit', obrig: true },
+  { id: 'hidrante', name: 'Hidrante — teste de pressão', rate: 'visit', obrig: false },
+  { id: 'cftv', name: 'CFTV — verificação', rate: 'hour', obrig: false },
+  { id: 'bomba-incendio', name: 'Bomba de incêndio — teste', rate: 'visit', obrig: true },
+];
+
 export default function OS() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const site = SITE_NAMES[id ?? ''] ?? tr('fieldNav.sites');
+  const [services, setServices] = useState<Svc[]>(SERVICES);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const addFromCatalog = (c: CatalogItem) => {
+    setServices((prev) => [...prev, { id: c.id, name: c.name, who: 'AN', whoName: 'Você', rate: c.rate, done: false, obrig: c.obrig, nest: [] }]);
+    setPickerOpen(false);
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
@@ -82,10 +97,10 @@ export default function OS() {
         <View style={{ gap: 9 }}>
           <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
             <Text variant="label">{tr('field.visitServices')}</Text>
-            <Text variant="caption">{tr('field.selected', { n: SERVICES.filter((s) => s.done).length, total: SERVICES.length })}</Text>
+            <Text variant="caption">{tr('field.selected', { n: services.filter((s) => s.done).length, total: services.length })}</Text>
           </Row>
 
-          {SERVICES.map((s) => (
+          {services.map((s) => (
             <View key={s.id} style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: s.done ? t.colors.line : t.colors.accent, borderRadius: 12, paddingBottom: s.nest.length ? 6 : 0 }}>
               <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
                 <Check on={s.done} />
@@ -116,7 +131,7 @@ export default function OS() {
             </View>
           ))}
 
-          <Pressable accessibilityRole="button" style={{ borderWidth: 1.5, borderColor: t.colors.line, borderStyle: 'dashed', borderRadius: 11, paddingVertical: 11, alignItems: 'center' }}>
+          <Pressable accessibilityRole="button" onPress={() => setPickerOpen(true)} style={{ borderWidth: 1.5, borderColor: t.colors.line, borderStyle: 'dashed', borderRadius: 11, paddingVertical: 11, alignItems: 'center' }}>
             <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addService')}</Text>
           </Pressable>
         </View>
@@ -125,6 +140,32 @@ export default function OS() {
       <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
         <SlideToConfirm label={tr('field.finishOS')} doneLabel={tr('field.finishedOS')} confirmHint={tr('field.finishHint')} onConfirm={() => router.back()} />
       </SafeAreaView>
+
+      <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title={tr('field.addServiceTitle')} closeLabel={tr('common.close')} maxHeight="72%">
+        <Text variant="caption" style={{ marginBottom: 10 }}>{tr('field.catalogHint')}</Text>
+        <View style={{ gap: 8 }}>
+          {CATALOG.filter((c) => !services.some((s) => s.id === c.id)).map((c) => (
+            <Pressable
+              key={c.id}
+              accessibilityRole="button"
+              accessibilityLabel={c.name}
+              onPress={() => addFromCatalog(c)}
+              style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, borderRadius: 12, padding: 13 }}
+            >
+              <Row gap={10} style={{ alignItems: 'center' }}>
+                <View style={{ width: 34, height: 34, borderRadius: 9, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon name="wrench" size={17} color={t.colors.ink3} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text weight="600" style={{ fontSize: 13.5 }}>{c.name}</Text>
+                  <Text variant="caption">{c.obrig ? tr('field.obrig') : tr('field.optional')} · {c.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
+                </View>
+                <Icon name="plus" size={18} color={t.colors.accent} />
+              </Row>
+            </Pressable>
+          ))}
+        </View>
+      </Sheet>
     </View>
   );
 }

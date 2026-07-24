@@ -62,7 +62,12 @@
     "addService": "+ Add service · and assign",
     "finishOS": "Finish work order · saved on device",
     "finishedOS": "Work order done",
-    "finishHint": "Activating completes the work order"
+    "finishHint": "Activating completes the work order",
+    "siteMandatory": "Mandatory services",
+    "history": "Visit history",
+    "openOS": "Open work order",
+    "addServiceTitle": "Add service",
+    "catalogHint": "From the site catalog · assigned to you"
   },
   "fieldNav": {
     "section": "Operations",
@@ -74,6 +79,7 @@
   "common": {
     "continue": "Continue",
     "back": "Back",
+    "close": "Close",
     "save": "Save",
     "cancel": "Cancel",
     "send": "Send",
