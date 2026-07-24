@@ -2,11 +2,17 @@
   "brand": "Chama Fácil",
   "brandSuffix": "pro",
   "tabs": {
+    "field": "Campo",
     "dashboard": "Painel",
     "nearby": "Buscar",
     "jobs": "Trabalhos",
     "agenda": "Agenda",
     "profile": "Perfil"
+  },
+  "field": {
+    "title": "Campo",
+    "subtitle": "Turno, rota e ordens de serviço",
+    "soon": "O fluxo de campo — iniciar turno, escolher rota e executar a ordem de serviço no local — chega aqui conforme for construído."
   },
   "common": {
     "continue": "Continuar",

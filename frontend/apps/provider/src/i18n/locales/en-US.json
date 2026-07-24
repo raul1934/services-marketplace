@@ -2,11 +2,17 @@
   "brand": "Chama Fácil",
   "brandSuffix": "pro",
   "tabs": {
+    "field": "Field",
     "dashboard": "Dashboard",
     "nearby": "Find",
     "jobs": "Work",
     "agenda": "Schedule",
     "profile": "Profile"
+  },
+  "field": {
+    "title": "Field",
+    "subtitle": "Shift, route and service orders",
+    "soon": "The field flow — start shift, pick route, and run the service order on site — lands here as it's built."
   },
   "common": {
     "continue": "Continue",

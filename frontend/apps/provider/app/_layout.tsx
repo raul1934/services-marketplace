@@ -18,6 +18,7 @@ import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/spac
 import { addNotificationResponseListener, AuthProvider, OfflineBanner, ThemeProvider, UpdateBanner, useAuth, usePushSync, useNotificationChime, useRealtimeNotifications, useSystemBars, useTheme } from '@chamafacil/shared';
 import { authApi, pushApi } from '../src/api';
 import { initServices } from '../src/init';
+import { flags } from '../src/flags';
 import '../src/i18n';
 
 initServices();
@@ -71,14 +72,24 @@ function Gate() {
     if (status === 'loading') return;
     const inAuth = segments[0] === '(auth)';
     const inOnboarding = segments[0] === 'onboarding';
+    const inPending = segments[0] === 'pending';
 
     if (status === 'guest') {
       if (!inAuth) router.replace('/(auth)/welcome');
       return;
     }
-    // Authed flow: no categories → onboarding; submitted but not yet approved
-    // → pending lock; approved → dashboard.
-    const inPending = segments[0] === 'pending';
+
+    // Field-service standalone (marketplace flag off): the marketplace gates —
+    // onboarding (service categories) and pending (admin approval) — don't apply.
+    // The operator is provisioned by their maintenance company, so an authed
+    // user goes straight to the field home.
+    if (!flags.marketplace) {
+      if (inAuth || inOnboarding || inPending) router.replace('/(tabs)/field');
+      return;
+    }
+
+    // Marketplace flow: no categories → onboarding; submitted but not yet
+    // approved → pending lock; approved → dashboard.
     const hasCategories = !!user?.categories?.length;
     const approved = !!user?.provider_profile?.is_approved;
 
