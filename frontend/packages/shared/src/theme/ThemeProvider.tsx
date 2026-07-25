@@ -15,7 +15,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({
   children,
-  initial = 'sunset',
+  initial = 'customer',
 }: {
   children: React.ReactNode;
   /** This app's brand palette — what light mode (and daylight `auto`) resolves to. */

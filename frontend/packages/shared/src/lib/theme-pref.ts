@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 /**
  * What the user picks, which is *not* a theme name.
  *
- * Themes are brand palettes ('sunset' for the client, 'trust' for the provider,
+ * Themes are brand palettes ('customer' for the client, 'provider' for the provider,
  * 'night' for dark). Which brand palette applies is the app's business, not a
  * choice — offering it let a client pick the provider's colors. So the picker
  * offers modes, and each app maps `light` to its own palette.

@@ -1,11 +1,12 @@
 /**
- * Chama Fácil theme tokens — ported from chamafacil-ui.css (.t-sunset / .t-trust / .t-night).
+ * Chama Fácil theme tokens — ported from chamafacil-ui.css (.t-sunset→customer /
+ * .t-trust→provider / .t-night). Names are per-app: customer (orange), provider (purple).
  * CSS custom properties become a typed theme object consumed by the shared UI kit
  * via ThemeProvider / useTheme(). Gradients are expressed as ordered color-stop
  * arrays for use with expo-linear-gradient.
  */
 
-export type ThemeName = 'sunset' | 'trust' | 'night';
+export type ThemeName = 'customer' | 'provider' | 'night';
 
 export interface ThemeShadow {
   shadowColor: string;
@@ -61,8 +62,8 @@ export interface Theme {
   headWeight: '700' | '800';
 }
 
-export const sunset: Theme = {
-  name: 'sunset',
+export const customer: Theme = {
+  name: 'customer',
   dark: false,
   colors: {
     bg: '#eef2f7',
@@ -107,8 +108,8 @@ export const sunset: Theme = {
   headWeight: '800',
 };
 
-export const trust: Theme = {
-  name: 'trust',
+export const provider: Theme = {
+  name: 'provider',
   dark: false,
   colors: {
     bg: '#f3f6fa',
@@ -123,7 +124,7 @@ export const trust: Theme = {
     accent2: '#0ea5a5',
     accentInk: '#ffffff',
     accentSoft: '#ecebfd',
-    // 3.02:1 before — same failure as sunset's, same fix. Now 5.73:1.
+    // 3.02:1 before — same failure as customer's, same fix. Now 5.73:1.
     ok: '#0b7272',
     okSoft: '#e2f6f6',
     danger: '#e11d48',
@@ -174,4 +175,4 @@ export const night: Theme = {
   headWeight: '800',
 };
 
-export const themes: Record<ThemeName, Theme> = { sunset, trust, night };
+export const themes: Record<ThemeName, Theme> = { customer, provider, night };
