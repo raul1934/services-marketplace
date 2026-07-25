@@ -201,6 +201,20 @@ function MapViewImpl(
         return;
       }
 
+      // Numbered pin (MapPin): coloured circle + number, pulse ring when active.
+      const np = React.isValidElement(p.children)
+        ? (p.children.props as { number?: number | string; color?: string; iconName?: string; active?: boolean })
+        : null;
+      if (np?.color && !np.iconName && (np.number != null || np.active != null)) {
+        injectPulseKeyframes();
+        const ring = np.active ? `<div class="cfpulse" style="background:${np.color};"></div>` : '';
+        const txt = np.number != null && np.number !== '' ? `<span style="color:#fff;font-weight:800;font-size:13px;font-family:system-ui,sans-serif;line-height:1;">${np.number}</span>` : '';
+        const html = `${ring}<div class="cfnum-c" style="background:${np.color};">${txt}</div>`;
+        const m = L.marker(ll, { icon: L.divIcon({ html, className: 'cfnum', iconSize: [34, 34], iconAnchor: [17, 17] }) }).addTo(layer);
+        if (p.onPress) m.on('click', p.onPress);
+        return;
+      }
+
       const color = p.pinColor ?? t.colors.accent;
       const cm = L.circleMarker(ll, { color: '#fff', weight: 2, fillColor: color, fillOpacity: 1, radius: 9 }).addTo(layer);
       // Tapping the pin fires onPress (selection); a popup/callout fires onCalloutPress.
@@ -220,6 +234,15 @@ function MapViewImpl(
 const MapView = React.forwardRef(MapViewImpl);
 export default MapView;
 
+let pulseInjected = false;
+function injectPulseKeyframes() {
+  if (pulseInjected || typeof document === 'undefined') return;
+  pulseInjected = true;
+  const el = document.createElement('style');
+  el.textContent = '.cfnum{position:relative;display:flex;align-items:center;justify-content:center;background:transparent;border:0;}.cfnum-c{position:relative;width:30px;height:30px;border-radius:50%;border:2.5px solid #fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.35);}.cfpulse{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;animation:cfp 1.6s ease-out infinite;}@keyframes cfp{0%{transform:scale(.7);opacity:.5}100%{transform:scale(2.4);opacity:0}}';
+  document.head.appendChild(el);
+}
+
 export function Marker(_props: {
   coordinate: LatLng;
   pinColor?: string;
@@ -229,6 +252,10 @@ export function Marker(_props: {
   onCalloutPress?: () => void;
   children?: React.ReactNode;
 }) {
+  return null;
+}
+
+export function MapPin(_props: { number?: number | string; color: string; active?: boolean }) {
   return null;
 }
 

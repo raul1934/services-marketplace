@@ -103,7 +103,8 @@ export const SITES: Record<string, Site> = {
 };
 
 export type StopStatus = 'now' | 'next' | 'done';
-export type RouteStop = { siteId: string; km: string; status: StopStatus; here?: string };
+/** `times`: how many times this site was performed in the current shift (done). */
+export type RouteStop = { siteId: string; km: string; status: StopStatus; here?: string; times?: number };
 export type Route = { id: string; name: string; km: number; stops: RouteStop[] };
 
 export const ROUTES: Record<string, Route> = {
@@ -131,6 +132,23 @@ export const PERFORMANCES: Performance[] = [
   { id: 'p3', siteId: 'villa', day: 'yesterday', time: '16:10', crew: 2, status: 'done' },
   { id: 'p4', siteId: 'anavec', day: 'yesterday', time: '11:05', crew: 3, status: 'done' },
 ];
+
+/** Geo coords per site (São José do Rio Preto region) for the map markers. */
+export const SITE_GEO: Record<string, { lat: number; lng: number }> = {
+  'rio-fortore': { lat: -20.815, lng: -49.38 },
+  solar: { lat: -20.805, lng: -49.372 },
+  villa: { lat: -20.82, lng: -49.388 },
+  anavec: { lat: -20.8, lng: -49.365 },
+  represa: { lat: -20.83, lng: -49.395 },
+  damha: { lat: -20.795, lng: -49.36 },
+};
+
+/** Execution state — a route/site visit is either not started or in progress. */
+export type RunStatus = 'idle' | 'running';
+const ROUTE_STATUS: Record<string, RunStatus> = { 'centro-norte': 'running' };
+const SITE_STATUS: Record<string, RunStatus> = { 'rio-fortore': 'running' };
+export const routeStatus = (id: string): RunStatus => ROUTE_STATUS[id] ?? 'idle';
+export const siteStatus = (id: string): RunStatus => SITE_STATUS[id] ?? 'idle';
 
 export const orderedSites = (): Site[] => Object.values(SITES);
 export const orderedRoutes = (): Route[] => Object.values(ROUTES);

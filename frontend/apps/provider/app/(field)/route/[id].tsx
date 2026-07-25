@@ -1,93 +1,114 @@
-import React from 'react';
-import { Linking, Pressable, ScrollView, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import MapView, { MapPin, Marker, Region } from 'react-native-maps';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Button, Icon, Row, Text, useTheme } from '@chamafacil/shared';
-import { ROUTES, SITES, StopStatus } from '../../../src/field/data';
+import { BackBar, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { ROUTES, routeStatus, SITE_GEO, SITES, StopStatus } from '../../../src/field/data';
+import { OpenInMaps } from '../../../src/field/OpenInMaps';
 
-const shortName = (serviceName: string) => serviceName.split(' — ')[0];
+function fitRegion(pts: { lat: number; lng: number }[]): Region {
+  const lats = pts.map((p) => p.lat), lngs = pts.map((p) => p.lng);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  return {
+    latitude: (minLat + maxLat) / 2,
+    longitude: (minLng + maxLng) / 2,
+    latitudeDelta: Math.max((maxLat - minLat) * 1.6, 0.02),
+    longitudeDelta: Math.max((maxLng - minLng) * 1.6, 0.02),
+  };
+}
+
+const toneColor = (t: ReturnType<typeof useTheme>, s: StopStatus) => (s === 'done' ? t.colors.ok : s === 'now' ? t.colors.accent : t.colors.ink3);
 
 export default function RouteStops() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
-  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const route = ROUTES[id ?? ''] ?? ROUTES['centro-norte'];
-  const done = route.stops.filter((s) => s.status === 'done').length;
-  const nextStop = route.stops.find((s) => s.status === 'now') ?? route.stops.find((s) => s.status === 'next');
+  const [running, setRunning] = useState(routeStatus(route.id) === 'running');
 
-  const openMaps = (kind: 'waze' | 'gmaps') => {
-    const dest = encodeURIComponent(nextStop ? SITES[nextStop.siteId].address : '');
-    const url = kind === 'waze' ? `https://waze.com/ul?q=${dest}&navigate=yes` : `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
-    Linking.openURL(url).catch(() => {});
+  const stops = route.stops.map((s, i) => ({ ...s, site: SITES[s.siteId], geo: SITE_GEO[s.siteId], n: i + 1 }));
+  const region = fitRegion(stops.map((s) => s.geo).filter(Boolean));
+  const dest = stops.find((s) => s.status === 'now') ?? stops.find((s) => s.status === 'next') ?? stops[0];
+
+  // Recenter to fit all points after 5s without the user touching the map.
+  const mapRef = useRef<MapView>(null);
+  const idle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleRecenter = () => {
+    if (idle.current) clearTimeout(idle.current);
+    idle.current = setTimeout(() => mapRef.current?.animateToRegion(region, 600), 5000);
   };
+  useEffect(() => () => { if (idle.current) clearTimeout(idle.current); }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <SafeAreaView edges={['top']}>
-        <BackBar title={`${tr('fieldNav.routes')} · ${route.name}`} onBack={() => router.back()} backLabel={tr('field.back')} />
+        <BackBar title={tr('fieldNav.routes')} onBack={() => router.back()} backLabel={tr('field.back')} />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom, gap: 12 }} showsVerticalScrollIndicator={false}>
-        <Text variant="caption">{tr('field.routeProgress', { done, total: route.stops.length })}</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
+        <View style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
+          <Text weight="800" style={{ fontSize: 24, letterSpacing: -0.4 }}>{route.name}</Text>
+          <Text variant="caption">{tr('field.stops', { n: route.stops.length })} · {route.km} km · {running ? tr('field.statusDoing') : tr('field.stopNext')}</Text>
+        </View>
 
-        <Row gap={10}>
-          <View style={{ flex: 1 }}><Button title="Waze" variant="soft" full left={<Icon name="navigate" size={16} color={t.colors.accent} />} onPress={() => openMaps('waze')} /></View>
-          <View style={{ flex: 1 }}><Button title="Google Maps" variant="soft" full left={<Icon name="pin" size={16} color={t.colors.accent} />} onPress={() => openMaps('gmaps')} /></View>
-        </Row>
+        <View style={{ marginHorizontal: 20, height: 220, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.line }}>
+          <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={region} onPanDrag={scheduleRecenter}>
+            {stops.map((s) => (s.geo ? (
+              <Marker
+                key={s.siteId}
+                coordinate={{ latitude: s.geo.lat, longitude: s.geo.lng }}
+                onPress={() => router.push(`/(field)/os/${s.siteId}`)}
+              >
+                <MapPin number={s.n} color={toneColor(t, s.status)} active={s.status === 'now'} />
+              </Marker>
+            ) : null))}
+          </MapView>
+        </View>
 
-        {route.stops.map((stop) => {
-          const site = SITES[stop.siteId];
-          const isNow = stop.status === 'now';
-          const isDone = stop.status === 'done';
-          return (
-            <Pressable
-              key={stop.siteId}
-              accessibilityRole="button"
-              accessibilityLabel={site.name}
-              onPress={() => router.push(`/(field)/os/${stop.siteId}`)}
-              style={{ backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: isNow ? t.colors.accent : t.colors.line, padding: 14, gap: 8, opacity: isDone ? 0.7 : 1 }}
-            >
-              <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <View style={{ flex: 1 }}>
-                  <Text weight="700" style={{ fontSize: 15 }}>{site.name}</Text>
-                  <Text variant="caption">{tr('field.contract', { name: site.contract })}</Text>
-                </View>
-                <StatusPill status={stop.status} />
-              </Row>
-              <Row gap={6} style={{ alignItems: 'center' }}>
-                <Icon name="location" size={13} color={t.colors.ink3} />
-                <Text variant="caption" style={{ flex: 1 }}>{site.address}</Text>
-                <Text variant="caption" style={{ fontVariant: ['tabular-nums'] }}>{isNow && stop.here ? tr('field.hereFor', { time: stop.here }) : `${stop.km} km`}</Text>
-              </Row>
-              <Row gap={6} style={{ flexWrap: 'wrap' }}>
-                {site.services.map((sv) => (
-                  <View key={sv.id} style={{ backgroundColor: sv.obrig ? t.colors.accentSoft : t.colors.surface2, borderRadius: 7, paddingHorizontal: 8, paddingVertical: 2 }}>
-                    <Text style={{ fontSize: 11, fontWeight: '600' }} color={sv.obrig ? t.colors.accent : t.colors.ink2}>{shortName(sv.name)}{sv.obrig ? ' ·obr.' : ''}</Text>
+        <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
+          <OpenInMaps address={dest ? dest.site.address : route.name} />
+        </View>
+
+        <View style={{ paddingHorizontal: 20, paddingTop: 16, gap: 8 }}>
+          <Text variant="label">{tr('field.routeSites')}</Text>
+          {stops.map((s) => {
+            const label = s.status === 'done' ? tr('field.times', { n: s.times ?? 1 }) : s.status === 'now' ? tr('field.inProgress') : tr('field.stopNext');
+            return (
+              <Pressable
+                key={s.siteId}
+                accessibilityRole="button"
+                accessibilityLabel={s.site.name}
+                onPress={() => router.push(`/(field)/os/${s.siteId}`)}
+                style={{ backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: s.status === 'now' ? t.colors.accent : t.colors.line, padding: 12 }}
+              >
+                <Row gap={11} style={{ alignItems: 'center' }}>
+                  <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: toneColor(t, s.status), alignItems: 'center', justifyContent: 'center' }}>
+                    <Text weight="800" style={{ fontSize: 12.5, color: '#fff' }}>{s.n}</Text>
                   </View>
-                ))}
-              </Row>
-            </Pressable>
-          );
-        })}
+                  <View style={{ flex: 1 }}>
+                    <Text weight="700" style={{ fontSize: 14 }}>{s.site.name}</Text>
+                    <Text variant="caption">{s.site.address}</Text>
+                  </View>
+                  <Text style={{ fontSize: 11, fontWeight: '700' }} color={toneColor(t, s.status)}>{label}</Text>
+                  <Icon name="chevronsR" size={15} color={t.colors.ink3} />
+                </Row>
+              </Pressable>
+            );
+          })}
+        </View>
       </ScrollView>
-    </View>
-  );
-}
 
-function StatusPill({ status }: { status: StopStatus }) {
-  const t = useTheme();
-  const { t: tr } = useTranslation();
-  const map = {
-    now: { bg: t.colors.accentSoft, fg: t.colors.accent, label: tr('field.stopNow') },
-    next: { bg: t.colors.surface2, fg: t.colors.ink3, label: tr('field.stopNext') },
-    done: { bg: t.colors.okSoft, fg: t.colors.ok, label: tr('field.stopDone') },
-  }[status];
-  return (
-    <View style={{ backgroundColor: map.bg, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 }}>
-      <Text style={{ fontSize: 11, fontWeight: '700' }} color={map.fg}>{map.label}</Text>
+      <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
+        {running ? (
+          <SlideToConfirm variant="success" label={tr('field.finishRoute')} doneLabel={tr('field.finishRouteDone')} confirmHint={tr('field.finishRouteHint')} onConfirm={() => setRunning(false)} />
+        ) : (
+          <SlideToConfirm label={tr('field.startRoute')} doneLabel={tr('field.startRouteDone')} confirmHint={tr('field.startRouteHint')} onConfirm={() => setRunning(true)} />
+        )}
+      </SafeAreaView>
     </View>
   );
 }

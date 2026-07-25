@@ -59,6 +59,8 @@ interface MarkerLike {
   onDragEnd?: (e: MapPress) => void;
   onPress?: () => void;
   onCalloutPress?: () => void;
+  /** Re-capture the custom marker view (needed on Android for animated/late-laid-out children). */
+  tracksViewChanges?: boolean;
   children?: React.ReactNode;
 }
 
@@ -69,6 +71,9 @@ interface MapViewProps {
   children?: React.ReactNode;
   onPress?: (e: MapPress) => void;
   onRegionChangeComplete?: (region: Region) => void;
+  /** Fired while the user pans the map — used to detect interaction (e.g. to
+   *  auto-recenter after an idle period). */
+  onPanDrag?: () => void;
   /** When false, the map won't pan on drag — so it doesn't swallow the parent
    *  ScrollView's vertical scroll. Tap-to-place and marker drag still work. */
   scrollEnabled?: boolean;
@@ -94,10 +99,19 @@ const richOf = (p: MarkerLike): { color: string; label: string; iconName: string
   const lp = c.props as { color?: string; label?: string; iconName?: string };
   return lp.color && lp.iconName ? { color: lp.color, label: lp.label ?? '', iconName: lp.iconName } : null;
 };
+// Numbered pin (MapPin): a coloured circle with a white number and, when active,
+// a CSS pulse ring. Recognised by { color, number?, active } and no iconName.
+const numOf = (p: MarkerLike): { number: string; color: string; active: boolean } | null => {
+  const c = p.children;
+  if (!React.isValidElement(c)) return null;
+  const lp = c.props as { number?: number | string; color?: string; iconName?: string; active?: boolean };
+  if (!lp.color || lp.iconName || (lp.number == null && lp.active == null)) return null;
+  return { number: lp.number != null ? String(lp.number) : '', color: lp.color, active: !!lp.active };
+};
 
 interface Layer {
   id: string;
-  kind: 'pin' | 'circle' | 'label' | 'rich' | 'polygon' | 'polyline';
+  kind: 'pin' | 'circle' | 'label' | 'rich' | 'num' | 'polygon' | 'polyline';
   coord?: [number, number];
   coords?: [number, number][];
   color?: string;
@@ -109,6 +123,7 @@ interface Layer {
   description?: string;
   label?: { text: string; tone?: string };
   rich?: { color: string; label: string };
+  num?: { number: string; color: string; active: boolean };
   press?: boolean;
   callout?: boolean;
 }
@@ -145,6 +160,11 @@ function serialize(children: React.ReactNode): Layer[] {
       out.push({ id, kind: 'rich', coord, color: rich.color, rich, press: !!p.onPress });
       return;
     }
+    const num = numOf(p);
+    if (num) {
+      out.push({ id, kind: 'num', coord, color: num.color, num, press: !!p.onPress });
+      return;
+    }
     out.push({
       id,
       kind: p.draggable ? 'pin' : 'circle',
@@ -166,7 +186,11 @@ function htmlDoc(center: [number, number], zoom: number, dark: boolean, accent: 
   return `<!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<style>html,body,#map{height:100%;margin:0;padding:0;background:${dark ? '#0e141d' : '#eef1f4'}}</style>
+<style>html,body,#map{height:100%;margin:0;padding:0;background:${dark ? '#0e141d' : '#eef1f4'}}
+.cfnum{position:relative;display:flex;align-items:center;justify-content:center;background:transparent;border:0;}
+.cfnum-c{position:relative;width:30px;height:30px;border-radius:50%;border:2.5px solid #fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+.cfpulse{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;animation:cfp 1.6s ease-out infinite;}
+@keyframes cfp{0%{transform:scale(.7);opacity:.5}100%{transform:scale(2.4);opacity:0}}</style>
 </head><body><div id="map"></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
@@ -181,6 +205,7 @@ function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;
 function pinIcon(color){var d=18;return L.divIcon({className:'',html:'<div style="box-sizing:border-box;width:'+d+'px;height:'+d+'px;border-radius:9px;background:'+color+';border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>',iconSize:[d,d],iconAnchor:[9,9]});}
 function labelIcon(text,tone){var area=tone==='area';var skin=area?('background:'+ACCENT+';color:#fff;'):'background:rgba(255,255,255,0.92);color:#222;border:1px solid rgba(0,0,0,0.08);';return L.divIcon({className:'',html:'<div style="transform:translate(-50%,-50%);white-space:nowrap;'+skin+'font:700 '+(area?12:11)+'px system-ui,sans-serif;padding:2px 6px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.25);">'+esc(text)+'</div>',iconSize:[0,0]});}
 function richIcon(color,label){var lab=label?('<div style="background:#fff;border:1px solid '+color+';border-radius:8px;padding:1px 6px;margin-top:2px;"><span style="color:'+color+';font-weight:800;font-size:11px;font-family:system-ui,sans-serif;">'+esc(label)+'</span></div>'):'';return L.divIcon({className:'',html:'<div style="transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;white-space:nowrap;"><div style="width:32px;height:32px;border-radius:16px;background:#fff;border:2px solid '+color+';display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,0.3);"><div style="width:12px;height:12px;border-radius:6px;background:'+color+';"></div></div>'+lab+'</div>',iconSize:[0,0]});}
+function numIcon(color,number,active){var ring=active?('<div class="cfpulse" style="background:'+color+';"></div>'):'';var txt=number?('<span style="color:#fff;font-weight:800;font-size:13px;font-family:system-ui,sans-serif;line-height:1;">'+esc(number)+'</span>'):'';return L.divIcon({className:'cfnum',html:ring+'<div class="cfnum-c" style="background:'+color+';">'+txt+'</div>',iconSize:[34,34],iconAnchor:[17,17]});}
 function setTiles(d){map.removeLayer(tile);tile=L.tileLayer(d?${JSON.stringify(DARK_TILES)}:${JSON.stringify(LIGHT_TILES)},{subdomains:'abcd',maxZoom:19}).addTo(map);}
 function styleOf(d){if(d.kind==='polygon')return {color:d.color||ACCENT,weight:d.strokeWidth||2,fillColor:d.fillColor||d.color||ACCENT,fillOpacity:d.fillOpacity==null?1:d.fillOpacity};if(d.kind==='polyline')return {color:d.color||ACCENT,weight:d.strokeWidth||5,opacity:0.9};return null;}
 function makeLayer(d){
@@ -189,6 +214,7 @@ function makeLayer(d){
   if(d.kind==='polyline')return L.polyline(d.coords,styleOf(d));
   if(d.kind==='label')return L.marker(d.coord,{icon:labelIcon(d.label.text,d.label.tone),interactive:false});
   if(d.kind==='rich'){var rm=L.marker(d.coord,{icon:richIcon(color,d.rich?d.rich.label:'')});if(d.press)rm.on('click',function(){post({t:'markerPress',id:d.id});});return rm;}
+  if(d.kind==='num'){var nm=L.marker(d.coord,{icon:numIcon(color,d.num?d.num.number:'',d.num&&d.num.active)});if(d.press)nm.on('click',function(){post({t:'markerPress',id:d.id});});return nm;}
   if(d.kind==='pin'){
     var mk=L.marker(d.coord,{draggable:!!d.draggable,icon:pinIcon(color)});
     if(d.draggable){
@@ -216,6 +242,7 @@ function setLayers(list){
     if(d.kind==='polygon'||d.kind==='polyline'){lyr.setLatLngs(d.coords);var s=styleOf(d);if(s)lyr.setStyle(s);return;}
     if(d.kind==='label'){lyr.setLatLng(d.coord);lyr.setIcon(labelIcon(d.label.text,d.label.tone));return;}
     if(d.kind==='rich'){if(!dragging[d.id])lyr.setLatLng(d.coord);lyr.setIcon(richIcon(d.color||ACCENT,d.rich?d.rich.label:''));return;}
+    if(d.kind==='num'){lyr.setLatLng(d.coord);lyr.setIcon(numIcon(d.color||ACCENT,d.num?d.num.number:'',d.num&&d.num.active));return;}
     if(!dragging[d.id])lyr.setLatLng(d.coord);
   })(list[i]);}
   for(var id in layers){if(!seen[id]){map.removeLayer(layers[id].layer);delete layers[id];}}
@@ -342,6 +369,14 @@ export default class MapView extends React.Component<MapViewProps> {
 // Prop-carrier components (read by MapView via React.Children; never rendered
 // on their own) — mirror the react-native-maps + web-stub API.
 export function Marker(_props: MarkerLike & { anchor?: { x: number; y: number } }) {
+  return null;
+}
+/**
+ * Numbered/active map pin. Place as the sole child of a <Marker>. The WebView
+ * draws a coloured circle with the number (if given) and a pulse ring when
+ * `active`. It renders nothing itself — only its props are read.
+ */
+export function MapPin(_props: { number?: number | string; color: string; active?: boolean }) {
   return null;
 }
 export function Polygon(_props: {
