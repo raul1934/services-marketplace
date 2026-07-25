@@ -29,7 +29,7 @@
       "package": "com.chamafacil.provider",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#4f46e5"
+        "backgroundColor": "#ffffff"
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
@@ -44,7 +44,7 @@
         {
           "image": "./assets/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#4f46e5",
+          "backgroundColor": "#ffffff",
           "imageWidth": 288
         }
       ],
