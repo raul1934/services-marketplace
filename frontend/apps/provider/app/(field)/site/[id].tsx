@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Icon, Row, Text, useTheme } from '@chamafacil/shared';
@@ -10,6 +10,7 @@ export default function SiteDetail() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const s = SITES[id ?? ''] ?? SITES['rio-fortore'];
   const mandatory = mandatoryServices(s);
@@ -20,7 +21,7 @@ export default function SiteDetail() {
         <BackBar title={s.name} onBack={() => router.back()} backLabel={tr('field.back')} />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 + insets.bottom, gap: 16 }} showsVerticalScrollIndicator={false}>
         <View style={{ backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: t.colors.line, padding: 14, gap: 8 }}>
           <Text variant="caption">{tr('field.contract', { name: s.contract })}</Text>
           <Row gap={6} style={{ alignItems: 'center' }}>

@@ -1,18 +1,17 @@
-import { configureApi, configureGoogleSignIn, configureRealtime, setupWeb } from '@chamafacil/shared';
+import { configureGoogleSignIn, setupWeb } from '@chamafacil/shared';
 import { config } from './config';
+import { applyApiEnv, loadApiEnv } from './apiEnv';
 
 let done = false;
 export function initServices() {
   if (done) return;
   done = true;
   setupWeb();
-  configureApi({ baseUrl: config.apiUrl, tokenKey: config.tokenKey });
-  configureRealtime({
-    appKey: config.reverb.appKey,
-    wsHost: config.reverb.wsHost,
-    wsPort: config.reverb.wsPort,
-    forceTLS: config.reverb.forceTLS,
-    authBaseUrl: config.apiHost,
+  // Point at the build's default (dev/localhost via .env) first, then re-apply a
+  // persisted dev/prod choice once SecureStore resolves (see apiEnv.ts).
+  applyApiEnv('dev');
+  loadApiEnv().then((env) => {
+    if (env !== 'dev') applyApiEnv(env);
   });
   configureGoogleSignIn(config.googleClientId);
 }

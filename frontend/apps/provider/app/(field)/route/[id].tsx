@@ -1,6 +1,6 @@
 import React from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Button, Icon, Row, Text, useTheme } from '@chamafacil/shared';
@@ -12,6 +12,7 @@ export default function RouteStops() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
   const route = ROUTES[id ?? ''] ?? ROUTES['centro-norte'];
   const done = route.stops.filter((s) => s.status === 'done').length;
@@ -29,7 +30,7 @@ export default function RouteStops() {
         <BackBar title={`${tr('fieldNav.routes')} · ${route.name}`} onBack={() => router.back()} backLabel={tr('field.back')} />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28, gap: 12 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom, gap: 12 }} showsVerticalScrollIndicator={false}>
         <Text variant="caption">{tr('field.routeProgress', { done, total: route.stops.length })}</Text>
 
         <Row gap={10}>

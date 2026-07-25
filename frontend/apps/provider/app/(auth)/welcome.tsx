@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BrandMark, Button, Icon, IconName, Text, useTheme } from '@chamafacil/shared';
@@ -12,6 +12,7 @@ export default function Welcome() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
+  const insets = useSafeAreaInsets();
   const [i, setI] = useState(0);
   const slides = tr('welcome.slides', { returnObjects: true }) as { title: string; body: string }[];
   const eyebrows = tr('welcome.eyebrows', { returnObjects: true }) as string[];
@@ -37,7 +38,7 @@ export default function Welcome() {
         </View>
       </LinearGradient>
 
-      <View style={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -28, padding: 26, paddingBottom: 34, gap: 14 }}>
+      <View style={{ backgroundColor: t.colors.surface, borderTopLeftRadius: 30, borderTopRightRadius: 30, marginTop: -28, padding: 26, paddingBottom: 34 + insets.bottom, gap: 14 }}>
         <View style={{ flexDirection: 'row', gap: 7 }}>
           {slides.map((_, k) => (
             <View key={k} style={{ width: k === i ? 22 : 7, height: 7, borderRadius: 4, backgroundColor: k === i ? t.colors.accent : t.colors.line }} />

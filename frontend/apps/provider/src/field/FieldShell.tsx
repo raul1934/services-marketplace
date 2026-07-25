@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { AppBar, AppDrawer, IconButton, useAuth, useTheme } from '@chamafacil/shared';
@@ -16,6 +16,7 @@ export function FieldShell({ title, sub, children }: { title: string; sub?: stri
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const [drawer, setDrawer] = useState(false);
 
   const go = (path: string) => {
@@ -33,7 +34,7 @@ export function FieldShell({ title, sub, children }: { title: string; sub?: stri
         />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom }} showsVerticalScrollIndicator={false}>
         {children}
       </ScrollView>
 

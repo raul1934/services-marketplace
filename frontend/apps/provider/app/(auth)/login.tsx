@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Segment, Text, isValidPhoneBR, maskPhoneBR, toE164BR, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
+import { ApiEnv, loadApiEnv, setApiEnv } from '../../src/apiEnv';
 
 type Mode = 'phone' | 'email';
 
@@ -23,6 +24,11 @@ export default function Login() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Dev-only: point the app at the local backend or production without a rebuild.
+  const [apiEnv, setEnv] = useState<ApiEnv>('dev');
+  useEffect(() => {
+    loadApiEnv().then(setEnv);
+  }, []);
 
   const submit = async () => {
     setErrors({});
@@ -63,6 +69,15 @@ export default function Login() {
         <BrandMark />
         <Text weight="800" color={t.colors.ink3} style={{ fontSize: 18 }}>pro</Text>
       </View>
+      {__DEV__ ? (
+        <View style={{ paddingHorizontal: 26, paddingTop: 12 }}>
+          <Segment<ApiEnv>
+            value={apiEnv}
+            onChange={(e) => { setEnv(e); setApiEnv(e); }}
+            items={[{ value: 'dev', label: 'Dev · localhost' }, { value: 'prod', label: 'Prod' }]}
+          />
+        </View>
+      ) : null}
       {/* `Screen scroll={false}` means the layout cannot get out of the
           keyboard's way on its own: on a small phone the keyboard covered the
           password field and the submit button, and nothing scrolled. */}
