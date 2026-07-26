@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { FieldShell } from '../../src/field/FieldShell';
-import { orderedRoutes, routeRequired, SITES } from '../../src/field/data';
+import { fieldApi } from '../../src/field/api';
+import { ErrorState, Loading, useAsync } from '../../src/field/async';
 
 const WD = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 const MO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -13,40 +14,42 @@ export default function Routes() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
-  const routes = orderedRoutes();
+  const { data: routes, loading, error, reload } = useAsync(() => fieldApi.routes(), []);
   const now = new Date();
   const dateLabel = `${WD[now.getDay()]}, ${now.getDate()} ${MO[now.getMonth()]}`;
 
   return (
-    <FieldShell title={tr('field.routesToday')} sub={`${dateLabel} · ${tr('field.routesCount', { n: routes.length })}`}>
-      <View style={{ gap: 12, paddingTop: 2 }}>
-        {routes.map((r, idx) => {
-          const first = idx === 0;
-          const preview = r.stops.slice(0, 3).map((st) => SITES[st.siteId].name);
-          return (
-            <Pressable
-              key={r.id}
-              accessibilityRole="button"
-              accessibilityLabel={r.name}
-              onPress={() => router.push(`/(field)/route/${r.id}`)}
-              style={{ backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: first ? t.colors.accent : t.colors.line, padding: 14, gap: 10 }}
-            >
-              <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text weight="700" style={{ fontSize: 15.5 }}>{r.name}</Text>
-                <Row gap={6} style={{ alignItems: 'center' }}>
-                  <Pill tone={first ? 'accent' : 'mut'} label={first ? tr('field.next') : tr('field.scheduled')} />
-                  <Icon name="chevronsR" size={16} color={t.colors.ink3} />
+    <FieldShell title={tr('field.routesToday')} sub={routes ? `${dateLabel} · ${tr('field.routesCount', { n: routes.length })}` : dateLabel}>
+      {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
+        <View style={{ gap: 12, paddingTop: 2 }}>
+          {routes!.map((r) => {
+            const running = r.status === 'running';
+            const preview = r.stops.slice(0, 3).map((st) => st.site?.name ?? st.siteId);
+            return (
+              <Pressable
+                key={r.id}
+                accessibilityRole="button"
+                accessibilityLabel={r.name}
+                onPress={() => router.push(`/(field)/route/${r.id}`)}
+                style={{ backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: running ? t.colors.accent : t.colors.line, padding: 14, gap: 10 }}
+              >
+                <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text weight="700" style={{ fontSize: 15.5 }}>{r.name}</Text>
+                  <Row gap={6} style={{ alignItems: 'center' }}>
+                    <Pill tone={running ? 'accent' : 'mut'} label={running ? tr('field.next') : tr('field.scheduled')} />
+                    <Icon name="chevronsR" size={16} color={t.colors.ink3} />
+                  </Row>
                 </Row>
-              </Row>
-              <Text variant="caption">{tr('field.stops', { n: r.stops.length })} · {tr('field.required', { n: routeRequired(r) })} · {r.km} km</Text>
-              <Row gap={6} style={{ flexWrap: 'wrap' }}>
-                {preview.map((name) => <Tag key={name} label={name} />)}
-                {r.stops.length > preview.length ? <Tag label={`+${r.stops.length - preview.length}`} muted /> : null}
-              </Row>
-            </Pressable>
-          );
-        })}
-      </View>
+                <Text variant="caption">{tr('field.stops', { n: r.stops.length })} · {tr('field.required', { n: r.required })} · {r.km} km</Text>
+                <Row gap={6} style={{ flexWrap: 'wrap' }}>
+                  {preview.map((name) => <Tag key={name} label={name} />)}
+                  {r.stops.length > preview.length ? <Tag label={`+${r.stops.length - preview.length}`} muted /> : null}
+                </Row>
+              </Pressable>
+            );
+          })}
+        </View>
+      )}
     </FieldShell>
   );
 }

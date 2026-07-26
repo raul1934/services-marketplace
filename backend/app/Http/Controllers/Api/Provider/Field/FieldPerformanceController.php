@@ -13,6 +13,7 @@ class FieldPerformanceController extends Controller
     {
         $performances = FieldSitePerformance::query()
             ->with('site:id,name')
+            ->withCount(['servicePerformances as services_done' => fn ($q) => $q->where('done', true)])
             ->where('created_at', '>=', now()->subDay()->startOfDay())
             ->orderByDesc('created_at')
             ->get();
@@ -25,6 +26,7 @@ class FieldPerformanceController extends Controller
                 'day' => $p->created_at?->isToday() ? 'today' : 'yesterday',
                 'time' => $p->time,
                 'crew' => (int) $p->crew,
+                'services' => (int) $p->services_done,
                 'status' => $p->status === 'running' ? 'doing' : 'done',
             ])->values(),
         ]);

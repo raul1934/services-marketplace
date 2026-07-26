@@ -86,7 +86,9 @@
     "finishVisitHint": "Activating confirms finishing the visit",
     "openInMaps": "Open in a maps app",
     "times": "{{n}}x",
-    "inProgress": "in progress"
+    "inProgress": "in progress",
+    "loadError": "Couldn't load. Please try again.",
+    "retry": "Try again"
   },
   "fieldNav": {
     "section": "Operations",

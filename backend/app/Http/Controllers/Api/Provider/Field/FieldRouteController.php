@@ -19,7 +19,7 @@ class FieldRouteController extends Controller
 {
     public function index(): JsonResponse
     {
-        $routes = FieldRoute::query()->with(['stops', 'stops.site'])->orderBy('name')->get();
+        $routes = FieldRoute::query()->with($this->stopLoad())->orderBy('name')->get();
         $snap = ShiftSnapshot::current();
 
         return response()->json([
@@ -29,9 +29,17 @@ class FieldRouteController extends Controller
 
     public function show(FieldRoute $route): JsonResponse
     {
-        $route->load(['stops', 'stops.site']);
+        $route->load($this->stopLoad());
 
         return response()->json(['data' => $this->shape($route, ShiftSnapshot::current())]);
+    }
+
+    /** Eager-loads each stop's site with its mandatory-service count. */
+    private function stopLoad(): array
+    {
+        return ['stops.site' => fn ($q) => $q->withCount([
+            'services as obrig_count' => fn ($s) => $s->where('obrig', true),
+        ])];
     }
 
     /** Begin running the route in the open shift (slider "iniciar rota"). */
@@ -82,6 +90,7 @@ class FieldRouteController extends Controller
             'name' => $route->name,
             'km' => (float) $route->km,
             'status' => $snap->routeStatus($route->id),
+            'required' => $route->stops->sum(fn ($s) => (int) ($s->site->obrig_count ?? 0)),
             'stops' => $route->stops->map(function ($stop) use ($route, $snap) {
                 $state = $snap->stopState($route->id, $stop->site_id);
 
