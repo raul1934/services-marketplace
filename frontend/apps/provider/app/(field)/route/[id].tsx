@@ -8,6 +8,7 @@ import { BackBar, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/
 import { fieldApi, Geo, StopStatus } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
+import { useMyLocation } from '../../../src/location';
 
 function fitRegion(pts: Geo[]): Region {
   const lats = pts.map((p) => p.lat), lngs = pts.map((p) => p.lng);
@@ -35,9 +36,14 @@ export default function RouteStops() {
   const recentering = useRef(false);
   useEffect(() => () => { if (idle.current) clearTimeout(idle.current); }, []);
 
+  const me = useMyLocation();
   const geoStops = (route?.stops ?? []).filter((s) => !!s.site?.geo);
-  const geoPts = geoStops.map((s) => s.site!.geo!) as Geo[];
   const line = geoStops.map((s) => ({ latitude: s.site!.geo!.lat, longitude: s.site!.geo!.lng }));
+  // Fit the route plus the user's dot (so "you are here" is always in view).
+  const geoPts = [
+    ...geoStops.map((s) => s.site!.geo!),
+    ...(me ? [{ lat: me.latitude, lng: me.longitude }] : []),
+  ] as Geo[];
   const region = geoPts.length ? fitRegion(geoPts) : undefined;
   // Recenter to fit the whole route ~3s after the user stops panning/zooming.
   // Our own animateToRegion also settles the map, so a flag skips that echo.
@@ -46,6 +52,17 @@ export default function RouteStops() {
     if (idle.current) clearTimeout(idle.current);
     if (region) idle.current = setTimeout(() => { recentering.current = true; mapRef.current?.animateToRegion(region, 500); }, 3000);
   };
+
+  // Re-fit once when the GPS dot first arrives (initialRegion only applies on mount).
+  const fittedMe = useRef(false);
+  useEffect(() => {
+    if (me && region && !fittedMe.current) {
+      fittedMe.current = true;
+      recentering.current = true;
+      mapRef.current?.animateToRegion(region, 500);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [me?.latitude, me?.longitude]);
   const dest = route?.stops.find((s) => s.status === 'now') ?? route?.stops.find((s) => s.status === 'next') ?? route?.stops[0];
   const running = route?.status === 'running';
 
@@ -71,6 +88,11 @@ export default function RouteStops() {
               <View style={{ marginHorizontal: 20, height: 220, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.line }}>
                 <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={region} onRegionChangeComplete={onRegionSettled}>
                   {line.length >= 2 ? <Polyline coordinates={line} strokeColor={t.colors.accent} strokeWidth={3} /> : null}
+                  {me ? (
+                    <Marker key="me" coordinate={me}>
+                      <MapPin color="#1a73e8" active />
+                    </Marker>
+                  ) : null}
                   {route.stops.map((s, i) => (s.site?.geo ? (
                     <Marker
                       key={s.siteId}
