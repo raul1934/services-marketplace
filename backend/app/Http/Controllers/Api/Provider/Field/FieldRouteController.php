@@ -47,6 +47,8 @@ class FieldRouteController extends Controller
     {
         $shift = $this->activeShift();
 
+        // Starting a route only opens the route — it does NOT start any site.
+        // The tech drives to each stop and starts that visit by hand.
         FieldRoutePerformance::firstOrCreate(
             ['shift_id' => $shift->id, 'route_id' => $route->id, 'status' => 'running'],
             ['started_at' => now()],

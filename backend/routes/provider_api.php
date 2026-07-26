@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\Provider\CounterOfferController;
 use App\Http\Controllers\Api\Provider\DashboardController;
 use App\Http\Controllers\Api\Provider\DisputeController;
 use App\Http\Controllers\Api\Provider\Field\FieldCatalogController;
+use App\Http\Controllers\Api\Provider\Field\FieldOsController;
 use App\Http\Controllers\Api\Provider\Field\FieldPerformanceController;
 use App\Http\Controllers\Api\Provider\Field\FieldRouteController;
 use App\Http\Controllers\Api\Provider\Field\FieldShiftController;
@@ -154,6 +155,11 @@ Route::prefix('provider/v1')->group(function () {
             Route::get('sites/{site}', [FieldSiteController::class, 'show']);
             Route::post('sites/{site}/start', [FieldSiteController::class, 'start']);
             Route::post('sites/{site}/finish', [FieldSiteController::class, 'finish']);
+
+            // Work order (OS) — the editable face of a site visit
+            Route::get('os/{site}', [FieldOsController::class, 'show']);
+            Route::put('os/{site}/services/{service}', [FieldOsController::class, 'toggleService']);
+            Route::post('os/{site}/catalog/{item}', [FieldOsController::class, 'addCatalog']);
 
             // Performances feed + add-on catalog
             Route::get('performances', [FieldPerformanceController::class, 'index']);
