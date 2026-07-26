@@ -20,6 +20,11 @@ class FieldServiceResource extends JsonResource
             'done' => (bool) $this->done,
             'obrig' => (bool) $this->obrig,
             'nest' => $this->nest ?? [],
+            // Execution overlay (set by the OS controller): who did it in the
+            // field and which catalog resources were used. Null/[] elsewhere.
+            'assignee' => $this->assignee,
+            'assigneeName' => $this->assignee_name,
+            'resources' => $this->exec_resources ?? [],
         ];
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\Provider\Field;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Field\FieldServiceResource;
 use App\Models\Field\FieldCatalogItem;
+use App\Models\Field\FieldResource;
+use App\Models\Field\FieldResourceCategory;
 use App\Models\Field\FieldRoutePerformance;
 use App\Models\Field\FieldService;
 use App\Models\Field\FieldServicePerformance;
@@ -31,10 +33,25 @@ class FieldOsController extends Controller
         $site->load('services');
         $shift = FieldShift::active();
         $visit = $this->readVisit($site);
-        $doneMap = $visit
-            ? $visit->servicePerformances()->pluck('done', 'service_id')
+        // Execution rows for this visit, keyed by service — carry done, the
+        // in-field assignee, and the resources actually used.
+        $perfs = $visit
+            ? $visit->servicePerformances()->with('resources')->get()->keyBy('service_id')
             : collect();
-        $site->services->each(fn ($s) => $s->setAttribute('done', (bool) ($doneMap[$s->id] ?? false)));
+        $site->services->each(function ($s) use ($perfs) {
+            $p = $perfs->get($s->id);
+            $s->setAttribute('done', (bool) ($p?->done ?? false));
+            $s->setAttribute('assignee', $p?->assignee);
+            $s->setAttribute('assignee_name', $p?->assignee_name);
+            $s->setAttribute('exec_resources', $p ? $p->resources->map(fn ($r) => [
+                'id' => $r->id,
+                'kind' => $r->kind,
+                'name' => $r->name,
+                'rate' => $r->rate,
+                'cost' => $r->cost,
+                'qty' => (int) $r->pivot->qty,
+            ])->values()->all() : []);
+        });
 
         // Catalog add-ons not yet on this site.
         $existing = $site->services->pluck('id')->all();
@@ -67,6 +84,9 @@ class FieldOsController extends Controller
                     'shiftMinutes' => $shift?->started_at ? (int) $shift->started_at->diffInMinutes(now()) : null,
                 ],
                 'presence' => $this->presence(),
+                // The crew on the open shift (current operator first), for the
+                // per-service assignee picker.
+                'crew' => $this->crew(),
                 'services' => FieldServiceResource::collection($site->services),
                 'catalog' => $catalog->map(fn ($c) => [
                     'id' => $c->id,
@@ -74,6 +94,9 @@ class FieldOsController extends Controller
                     'rate' => $c->rate,
                     'obrig' => (bool) $c->obrig,
                 ])->values(),
+                // The site's company catalog of equipment/consumables, grouped by
+                // category, for the per-service resource picker.
+                'resourceCatalog' => $this->resourceCatalog($site),
             ],
         ]);
     }
@@ -184,6 +207,103 @@ class FieldOsController extends Controller
         );
 
         return $this->show($site);
+    }
+
+    /** Assign a service on this visit to one of the open shift's operators. */
+    public function assignService(Request $request, FieldSite $site, FieldService $service): JsonResponse
+    {
+        $shiftId = $request->validate(['shift_id' => ['required', 'string']])['shift_id'];
+
+        $shift = FieldShift::active();
+        if (! $shift) {
+            throw ValidationException::withMessages(['shift' => 'Nenhum turno aberto. Inicie um turno primeiro.']);
+        }
+
+        // The chosen operator must be on this shift (the leader or its crew).
+        $operator = collect([$shift])->merge($shift->crew)->firstWhere('id', $shiftId);
+        if (! $operator) {
+            throw ValidationException::withMessages(['shift_id' => 'Operador não está neste turno.']);
+        }
+
+        $visit = $this->runningVisit($site);
+        FieldServicePerformance::updateOrCreate(
+            ['site_performance_id' => $visit->id, 'service_id' => $service->id],
+            ['assignee' => $this->initials($operator->tech), 'assignee_name' => $operator->tech],
+        );
+
+        return $this->show($site);
+    }
+
+    /** Record an equipment/consumable used on a service (any number per service). */
+    public function addResource(Request $request, FieldSite $site, FieldService $service, FieldResource $resource): JsonResponse
+    {
+        if ($resource->company_id !== $site->company_id) {
+            throw ValidationException::withMessages(['resource' => 'Recurso não pertence à empresa do site.']);
+        }
+
+        $qty = max(1, (int) $request->input('qty', 1));
+        $visit = $this->runningVisit($site);
+        $perf = FieldServicePerformance::firstOrCreate(
+            ['site_performance_id' => $visit->id, 'service_id' => $service->id],
+            ['done' => false],
+        );
+        $perf->resources()->syncWithoutDetaching([$resource->id => ['qty' => $qty]]);
+
+        return $this->show($site);
+    }
+
+    /** Remove a resource previously recorded on a service. */
+    public function removeResource(FieldSite $site, FieldService $service, FieldResource $resource): JsonResponse
+    {
+        $visit = $this->runningVisit($site);
+        $perf = FieldServicePerformance::query()
+            ->where('site_performance_id', $visit->id)
+            ->where('service_id', $service->id)
+            ->first();
+        $perf?->resources()->detach($resource->id);
+
+        return $this->show($site);
+    }
+
+    /** The open shift's operators (leader first), for the assignee picker. */
+    private function crew(): array
+    {
+        $shift = FieldShift::active();
+        if (! $shift) {
+            return [];
+        }
+
+        return collect([$shift])->merge($shift->crew)
+            ->map(fn ($s) => ['shiftId' => $s->id, 'tech' => $s->tech, 'who' => $this->initials($s->tech)])
+            ->values()
+            ->all();
+    }
+
+    /** The site's company catalog, grouped by category within each kind. */
+    private function resourceCatalog(FieldSite $site): array
+    {
+        if (! $site->company_id) {
+            return ['equipment' => [], 'consumable' => []];
+        }
+
+        $categories = FieldResourceCategory::query()
+            ->where('company_id', $site->company_id)
+            ->orderBy('position')
+            ->with(['resources' => fn ($q) => $q->orderBy('position')])
+            ->get();
+
+        $group = fn (string $kind) => $categories->where('kind', $kind)->map(fn ($cat) => [
+            'category' => $cat->name,
+            'items' => $cat->resources->map(fn ($r) => [
+                'id' => $r->id,
+                'name' => $r->name,
+                'kind' => $r->kind,
+                'rate' => $r->rate,
+                'cost' => $r->cost,
+            ])->values(),
+        ])->values();
+
+        return ['equipment' => $group('equipment'), 'consumable' => $group('consumable')];
     }
 
     /** Latest visit for this site in the open shift, if any (read-only). */

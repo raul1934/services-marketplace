@@ -159,6 +159,9 @@ Route::prefix('provider/v1')->group(function () {
             // Work order (OS) — the editable face of a site visit
             Route::get('os/{site}', [FieldOsController::class, 'show']);
             Route::put('os/{site}/services/{service}', [FieldOsController::class, 'toggleService']);
+            Route::put('os/{site}/services/{service}/assignee', [FieldOsController::class, 'assignService']);
+            Route::post('os/{site}/services/{service}/resources/{resource}', [FieldOsController::class, 'addResource']);
+            Route::delete('os/{site}/services/{service}/resources/{resource}', [FieldOsController::class, 'removeResource']);
             Route::post('os/{site}/catalog/{item}', [FieldOsController::class, 'addCatalog']);
             Route::post('os/{site}/photos', [FieldOsController::class, 'attachPhoto']);
             Route::put('os/{site}/weather', [FieldOsController::class, 'setWeather']);
