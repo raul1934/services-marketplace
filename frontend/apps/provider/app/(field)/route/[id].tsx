@@ -110,7 +110,11 @@ export default function RouteStops() {
             ) : null}
 
             <View style={{ paddingHorizontal: 20, paddingTop: 12 }}>
-              <OpenInMaps address={dest?.site?.address ?? route.name} />
+              <OpenInMaps
+                waypoints={geoStops.map((s) => ({ lat: s.site!.geo!.lat, lng: s.site!.geo!.lng }))}
+                primary={dest?.site?.geo ? { lat: dest.site.geo.lat, lng: dest.site.geo.lng } : undefined}
+                address={dest?.site?.address ?? route.name}
+              />
             </View>
 
             <View style={{ paddingHorizontal: 20, paddingTop: 16, gap: 8 }}>
