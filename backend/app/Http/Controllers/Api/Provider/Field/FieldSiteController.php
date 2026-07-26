@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Provider\Field;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Field\FieldServiceResource;
 use App\Models\Field\FieldRoutePerformance;
+use App\Models\Field\FieldRouteStop;
 use App\Models\Field\FieldShift;
 use App\Models\Field\FieldSite;
 use App\Models\Field\FieldSitePerformance;
@@ -93,12 +94,23 @@ class FieldSiteController extends Controller
     {
         $shift = $this->activeShift();
 
-        // Tie the visit to whichever route is currently being run, if any.
+        // Tie the visit to whichever route is currently being run.
         $runningRoutePerf = FieldRoutePerformance::query()
             ->where('shift_id', $shift->id)
             ->where('status', 'running')
             ->latest('started_at')
             ->first();
+
+        // Starting a site with no route running also starts the site's route.
+        if (! $runningRoutePerf) {
+            $routeId = FieldRouteStop::query()->where('site_id', $site->id)->orderBy('route_id')->value('route_id');
+            if ($routeId) {
+                $runningRoutePerf = FieldRoutePerformance::firstOrCreate(
+                    ['shift_id' => $shift->id, 'route_id' => $routeId, 'status' => 'running'],
+                    ['started_at' => now()],
+                );
+            }
+        }
 
         FieldSitePerformance::firstOrCreate(
             ['shift_id' => $shift->id, 'site_id' => $site->id, 'status' => 'running'],
