@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, Image, Modal, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +19,7 @@ export default function OS() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const me = useMyLocation();
   const [uploading, setUploading] = useState<'before' | 'after' | null>(null);
+  const [viewer, setViewer] = useState<{ photos: OsPhoto[]; index: number } | null>(null);
 
   // Within the site's geofence? (~150 m). null while there's no fix yet.
   const inside = me && os?.site.geo ? distanceMeters(me, os.site.geo) <= 150 : null;
@@ -92,9 +93,12 @@ export default function OS() {
             </View>
 
             <View style={{ gap: 10 }}>
-              <Text variant="label">{tr('field.photos')}</Text>
-              <PhotoRow label={tr('field.before')} photos={os.photos.before} busy={uploading === 'before'} onAdd={() => shootPhoto('before')} />
-              <PhotoRow label={tr('field.after')} photos={os.photos.after} busy={uploading === 'after'} onAdd={() => shootPhoto('after')} />
+              <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text variant="label">{tr('field.photos')}</Text>
+                <Text variant="caption">{os.photos.before.length + os.photos.after.length}/{PHOTO_MAX}</Text>
+              </Row>
+              <PhotoRow label={tr('field.before')} photos={os.photos.before} busy={uploading === 'before'} canAdd={os.photos.before.length + os.photos.after.length < PHOTO_MAX} onAdd={() => shootPhoto('before')} onOpen={(i) => setViewer({ photos: os.photos.before, index: i })} />
+              <PhotoRow label={tr('field.after')} photos={os.photos.after} busy={uploading === 'after'} canAdd={os.photos.before.length + os.photos.after.length < PHOTO_MAX} onAdd={() => shootPhoto('after')} onOpen={(i) => setViewer({ photos: os.photos.after, index: i })} />
             </View>
 
             <View style={{ gap: 9 }}>
@@ -178,44 +182,91 @@ export default function OS() {
               ))}
             </View>
           </Sheet>
+
+          {viewer ? <PhotoViewer photos={viewer.photos} index={viewer.index} onClose={() => setViewer(null)} /> : null}
         </>
       )}
     </View>
   );
 }
 
-/** One phase's photos (Antes/Depois) as a horizontal gallery, in capture order. */
-function PhotoRow({ label, photos, busy, onAdd }: { label: string; photos: OsPhoto[]; busy: boolean; onAdd: () => void }) {
+const PHOTO_MAX = 15;
+const GRID_COLS = 3;
+const GRID_GAP = 8;
+const GRID_SIZE = (Dimensions.get('window').width - 40 - GRID_GAP * (GRID_COLS - 1)) / GRID_COLS;
+
+/** One phase's photos (Antes/Depois) as a 3-per-row grid, in capture order. */
+function PhotoRow({ label, photos, busy, canAdd, onAdd, onOpen }: { label: string; photos: OsPhoto[]; busy: boolean; canAdd: boolean; onAdd: () => void; onOpen: (i: number) => void }) {
   const t = useTheme();
   const { t: tr } = useTranslation();
   return (
     <View style={{ gap: 6 }}>
       <Text weight="700" style={{ fontSize: 12.5 }} color={t.colors.ink2}>{label} · {photos.length}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: GRID_GAP }}>
         {photos.map((p, i) => (
-          <View key={p.mediaId ?? i} style={{ width: 92, height: 92, borderRadius: 11, overflow: 'hidden', backgroundColor: '#46586a' }}>
+          <Pressable key={p.mediaId ?? i} accessibilityRole="imagebutton" accessibilityLabel={`${label} ${i + 1}`} onPress={() => onOpen(i)} style={{ width: GRID_SIZE, height: GRID_SIZE, borderRadius: 11, overflow: 'hidden', backgroundColor: '#46586a' }}>
             <Image source={{ uri: p.url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
             <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 6, paddingVertical: 3, backgroundColor: 'rgba(0,0,0,0.4)' }}>
               <Text style={{ fontSize: 10, fontWeight: '700' }} color="#fff">{i + 1} · {p.at}</Text>
             </View>
-          </View>
+          </Pressable>
         ))}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${tr('field.addPhoto')} · ${label}`}
-          onPress={onAdd}
-          disabled={busy}
-          style={{ width: 92, height: 92, borderRadius: 11, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center', gap: 3 }}
-        >
-          {busy ? <ActivityIndicator color={t.colors.accent} /> : (
-            <>
-              <Icon name="plus" size={20} color={t.colors.ink3} />
-              <Text variant="caption">{tr('field.addPhoto')}</Text>
-            </>
-          )}
-        </Pressable>
-      </ScrollView>
+        {canAdd ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${tr('field.addPhoto')} · ${label}`}
+            onPress={onAdd}
+            disabled={busy}
+            style={{ width: GRID_SIZE, height: GRID_SIZE, borderRadius: 11, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center', gap: 3 }}
+          >
+            {busy ? <ActivityIndicator color={t.colors.accent} /> : (
+              <>
+                <Icon name="plus" size={20} color={t.colors.ink3} />
+                <Text variant="caption">{tr('field.addPhoto')}</Text>
+              </>
+            )}
+          </Pressable>
+        ) : null}
+      </View>
     </View>
+  );
+}
+
+/** Full-screen swipeable viewer: browse a phase's photos in order, with info. */
+function PhotoViewer({ photos, index, onClose }: { photos: OsPhoto[]; index: number; onClose: () => void }) {
+  const { t: tr } = useTranslation();
+  const width = Dimensions.get('window').width;
+  const [i, setI] = useState(index);
+  const cur = photos[i];
+  return (
+    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.94)' }}>
+        <SafeAreaView edges={['top']} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 }}>
+          <Text weight="700" style={{ fontSize: 15, color: '#fff' }}>{i + 1} / {photos.length}</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel={tr('common.close')} onPress={onClose} hitSlop={12}>
+            <Icon name="close" size={24} color="#fff" />
+          </Pressable>
+        </SafeAreaView>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          contentOffset={{ x: index * width, y: 0 }}
+          onMomentumScrollEnd={(e) => setI(Math.round(e.nativeEvent.contentOffset.x / width))}
+          style={{ flex: 1 }}
+        >
+          {photos.map((p, k) => (
+            <View key={p.mediaId ?? k} style={{ width, flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Image source={{ uri: p.url }} style={{ width, height: '100%' }} resizeMode="contain" />
+            </View>
+          ))}
+        </ScrollView>
+        <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingVertical: 14 }}>
+          <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.photoNum', { n: i + 1 })}</Text>
+          <Text style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{cur?.takenAt ? new Date(cur.takenAt).toLocaleString('pt-BR') : cur?.at}</Text>
+        </SafeAreaView>
+      </View>
+    </Modal>
   );
 }
 

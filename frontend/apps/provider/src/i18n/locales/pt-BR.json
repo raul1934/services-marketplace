@@ -55,6 +55,8 @@
     "photos": "Fotos · antes e depois",
     "addPhoto": "Adicionar",
     "photoError": "Falha na foto",
+    "photoNum": "Foto {{n}}",
+    "photoMax": "Limite de {{n}} fotos atingido",
     "before": "Antes",
     "after": "Depois",
     "visitServices": "Serviços da visita",

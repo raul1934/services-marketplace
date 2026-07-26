@@ -132,6 +132,11 @@ export interface RequestOptions {
   signal?: AbortSignal;
 }
 
+/** Absolute URL for a path against the configured base — for native uploaders. */
+export function resolveUrl(path: string): string {
+  return buildUrl(path);
+}
+
 function buildUrl(path: string, query?: RequestOptions['query']): string {
   const { baseUrl } = requireConfig();
   const url = new URL(path.replace(/^\//, ''), baseUrl.endsWith('/') ? baseUrl : baseUrl + '/');

@@ -39,6 +39,8 @@ services:
       # disk. App code stays bind-mounted so edits still hot-reload.
       # Populate with: docker compose run --rm backend composer install
       - backend-vendor:/app/vendor
+      # Raise PHP's upload limits for full-resolution OS photos (EXIF kept).
+      - ./backend/docker/uploads.ini:/usr/local/etc/php/conf.d/zz-uploads.ini:ro
     ports:
       - "19000:8000"
     depends_on:

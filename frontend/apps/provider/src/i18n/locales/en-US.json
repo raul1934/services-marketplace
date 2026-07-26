@@ -55,6 +55,8 @@
     "photos": "Photos · before & after",
     "addPhoto": "Add",
     "photoError": "Photo failed",
+    "photoNum": "Photo {{n}}",
+    "photoMax": "Reached the {{n}}-photo limit",
     "before": "Before",
     "after": "After",
     "visitServices": "Visit services",

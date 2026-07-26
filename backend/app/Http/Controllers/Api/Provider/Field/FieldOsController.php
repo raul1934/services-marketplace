@@ -83,10 +83,16 @@ class FieldOsController extends Controller
     {
         $data = $request->validate([
             'phase' => ['required', 'in:before,after'],
-            'photo' => ['required', 'image', 'max:12288'],
+            'photo' => ['required', 'image', 'max:25600'],
         ]);
 
         $visit = $this->runningVisit($site);
+
+        // At most 15 photos per visit across both phases.
+        if (count($visit->photo_before ?? []) + count($visit->photo_after ?? []) >= 15) {
+            throw ValidationException::withMessages(['photo' => 'Limite de 15 fotos por visita atingido.']);
+        }
+
         $phase = $data['phase'];
         $col = 'photo_'.$phase;
         $list = $visit->{$col} ?? [];
@@ -107,6 +113,7 @@ class FieldOsController extends Controller
         $list[] = [
             'url' => $media->url,
             'at' => now()->format('G:i'),
+            'takenAt' => now()->toIso8601String(),
             'index' => $index,
             'mediaId' => $media->id,
         ];

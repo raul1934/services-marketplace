@@ -5,8 +5,9 @@
  * the open shift — the app just renders what it returns. Replaces the old mock
  * in data.ts; the shapes below mirror the JSON the controllers emit.
  */
-import { http } from '@chamafacil/shared';
-import { appendPhoto, PickedPhoto } from '../photos';
+import * as LegacyFS from 'expo-file-system/legacy';
+import { ApiError, getToken, http, resolveUrl } from '@chamafacil/shared';
+import { PickedPhoto } from '../photos';
 
 export type Charge = 'visit' | 'hour';
 export type RunStatus = 'idle' | 'running' | 'done';
@@ -31,7 +32,7 @@ export type ShiftCrew = { id: string; tech: string; status: string };
 export type Shift = { id: string; tech: string; date: string; status: string; isMaster: boolean; startedAt: string | null; endedAt: string | null; crew: ShiftCrew[] };
 
 export type CatalogItem = { id: string; name: string; rate: Charge; obrig: boolean };
-export type OsPhoto = { url: string; at: string; mediaId: number | null };
+export type OsPhoto = { url: string; at: string; takenAt?: string; mediaId: number | null };
 export type Os = {
   site: { id: string; name: string; contract: string; address: string; geo: Geo | null };
   visit: { id: string; status: string } | null;
@@ -64,12 +65,27 @@ export const fieldApi = {
     http.put<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}`, { body: { done } }).then(unwrap),
   addCatalog: (siteId: string, catalogId: string) =>
     http.post<{ data: Os }>(`${base}/os/${siteId}/catalog/${encodeURIComponent(catalogId)}`).then(unwrap),
-  // Uploads the photo file itself (multipart) so the backend can store it
-  // untouched (EXIF kept) under its lineage filename.
-  attachPhoto: async (siteId: string, phase: 'before' | 'after', photo: PickedPhoto) => {
-    const form = new FormData();
-    form.append('phase', phase);
-    await appendPhoto(form, 'photo', photo);
-    return http.post<{ data: Os }>(`${base}/os/${siteId}/photos`, { form }).then(unwrap);
+  // Uploads the photo file itself via the NATIVE uploader (expo-file-system),
+  // not fetch/FormData — RN's fetch multipart drops the request on the New
+  // Architecture. The file is stored untouched (EXIF kept) under its lineage
+  // filename by the backend.
+  attachPhoto: async (siteId: string, phase: 'before' | 'after', photo: PickedPhoto): Promise<Os> => {
+    const token = await getToken();
+    const res = await LegacyFS.uploadAsync(resolveUrl(`${base}/os/${siteId}/photos`), photo.uri, {
+      httpMethod: 'POST',
+      uploadType: LegacyFS.FileSystemUploadType.MULTIPART,
+      fieldName: 'photo',
+      mimeType: photo.mimeType,
+      parameters: { phase },
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (res.status < 200 || res.status >= 300) {
+      const payload = res.body ? JSON.parse(res.body) : null;
+      throw new ApiError(res.status, payload?.message ?? `Upload failed (${res.status})`, payload?.errors, payload);
+    }
+    return (JSON.parse(res.body) as { data: Os }).data;
   },
 };
