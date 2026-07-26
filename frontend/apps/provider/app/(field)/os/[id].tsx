@@ -21,11 +21,15 @@ export default function OS() {
   const [uploading, setUploading] = useState<'before' | 'after' | null>(null);
   const [viewer, setViewer] = useState<{ photos: OsPhoto[]; index: number } | null>(null);
   const [weatherOpen, setWeatherOpen] = useState(false);
-  // The operator whose "add service" menu is open, and its search text.
+  // The operator whose "add service" menu is open, its search, and the staged
+  // selection (service ids) that a footer button commits on confirm.
   const [menuForOp, setMenuForOp] = useState<Crew | null>(null);
   const [menuSearch, setMenuSearch] = useState('');
-  // The service instance whose resource picker is open (by its id).
+  const [menuSel, setMenuSel] = useState<string[]>([]);
+  // The service instance whose resource picker is open (by id), and its staged
+  // resource selection (resource ids).
   const [resourcesForId, setResourcesForId] = useState<string | null>(null);
+  const [resSel, setResSel] = useState<string[]>([]);
 
   const pickWeather = async (type: WeatherType) => {
     setWeatherOpen(false);
@@ -53,38 +57,6 @@ export default function OS() {
     }
   };
 
-  // Add a service instance under an operator. Services can repeat, so the menu
-  // stays open and each tap adds one more.
-  const addService = async (item: MenuItem, op: Crew) => {
-    try {
-      setData(await fieldApi.addService(siteId, item.id, op.shiftId));
-    } catch {
-      reload();
-    }
-  };
-
-  const removeInstance = async (inst: ServiceInstance) => {
-    setData((prev) => (prev ? { ...prev, services: prev.services.filter((s) => s.id !== inst.id) } : prev));
-    try {
-      setData(await fieldApi.removeService(siteId, inst.id));
-    } catch {
-      reload();
-    }
-  };
-
-  // Add/remove a resource on one service instance (the picker is a toggle).
-  const toggleResource = async (inst: ServiceInstance, item: ResourceItem) => {
-    const has = inst.resources.some((r) => r.id === item.id);
-    setData((prev) => (prev ? { ...prev, services: prev.services.map((s) => (s.id === inst.id
-      ? { ...s, resources: has ? s.resources.filter((r) => r.id !== item.id) : [...s.resources, { ...item, qty: 1 }] }
-      : s)) } : prev));
-    try {
-      setData(await (has ? fieldApi.removeResource(siteId, inst.id, item.id) : fieldApi.addResource(siteId, inst.id, item.id)));
-    } catch {
-      reload();
-    }
-  };
-
   const resourceValue = (r: { kind: ResourceKind; rate: ServiceResource['rate']; cost: ServiceResource['cost'] }) =>
     r.kind === 'equipment'
       ? (r.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))
@@ -103,6 +75,40 @@ export default function OS() {
   const resourceInst = os ? os.services.find((s) => s.id === resourcesForId) ?? null : null;
   const instancesFor = (op: Crew) => (os ? os.services.filter((s) => s.assigneeName === op.tech) : []);
 
+  // The pickers stage a selection and commit it on a footer button, instead of
+  // adding item by item on tap.
+  const openMenu = (op: Crew) => { setMenuForOp(op); setMenuSearch(''); setMenuSel(instancesFor(op).map((i) => i.serviceId)); };
+  const confirmMenu = async () => {
+    const op = menuForOp;
+    if (!op) return;
+    const current = instancesFor(op);
+    const toAdd = menuSel.filter((id) => !current.some((i) => i.serviceId === id));
+    const toRemove = current.filter((i) => !menuSel.includes(i.serviceId));
+    setMenuForOp(null);
+    try {
+      for (const id of toAdd) await fieldApi.addService(siteId, id, op.shiftId);
+      for (const inst of toRemove) await fieldApi.removeService(siteId, inst.id);
+    } finally {
+      reload();
+    }
+  };
+
+  const openResources = (inst: ServiceInstance) => { setResourcesForId(inst.id); setResSel(inst.resources.map((r) => r.id)); };
+  const confirmResources = async () => {
+    const inst = resourceInst;
+    if (!inst) return;
+    const currentIds = inst.resources.map((r) => r.id);
+    const toAdd = resSel.filter((id) => !currentIds.includes(id));
+    const toRemove = currentIds.filter((id) => !resSel.includes(id));
+    setResourcesForId(null);
+    try {
+      for (const id of toAdd) await fieldApi.addResource(siteId, inst.id, id);
+      for (const id of toRemove) await fieldApi.removeResource(siteId, inst.id, id);
+    } finally {
+      reload();
+    }
+  };
+
   const instanceCard = (inst: ServiceInstance) => (
     <View key={inst.id} style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, borderRadius: 12, paddingBottom: inst.resources.length || hasResourceCatalog ? 6 : 0 }}>
       <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
@@ -112,9 +118,6 @@ export default function OS() {
             {inst.obrig ? tr('field.obrig') : tr('field.optional')}{inst.required.length ? `  ·  ${requiredText(inst.required)}` : ''}
           </Text>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel={`${tr('common.remove')} ${inst.name}`} onPress={() => removeInstance(inst)} hitSlop={8}>
-          <Icon name="close" size={16} color={t.colors.ink3} />
-        </Pressable>
       </Row>
       {inst.resources.length || hasResourceCatalog ? (
         <View style={{ marginLeft: 12, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
@@ -127,13 +130,10 @@ export default function OS() {
                 <Text weight="600" style={{ fontSize: 12.5 }}>{r.name}</Text>{` · ${r.kind === 'equipment' ? tr('field.equipment') : tr('field.consumable')}`}{r.qty > 1 ? ` ×${r.qty}` : ''}
               </Text>
               <Text style={{ fontSize: 10.5, fontWeight: r.kind === 'consumable' ? '700' : '400' }} color={r.kind === 'consumable' ? (r.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(r)}</Text>
-              <Pressable accessibilityRole="button" accessibilityLabel={`${tr('common.remove')} ${r.name}`} onPress={() => toggleResource(inst, r)} hitSlop={8}>
-                <Icon name="close" size={13} color={t.colors.ink3} />
-              </Pressable>
             </Row>
           ))}
           {hasResourceCatalog ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={tr('field.addResource')} onPress={() => setResourcesForId(inst.id)} style={{ alignSelf: 'flex-start', paddingVertical: 3 }}>
+            <Pressable accessibilityRole="button" accessibilityLabel={tr('field.addResource')} onPress={() => openResources(inst)} style={{ alignSelf: 'flex-start', paddingVertical: 3 }}>
               <Text weight="700" style={{ fontSize: 12 }} color={t.colors.accent}>{tr('field.addResource')}</Text>
             </Pressable>
           ) : null}
@@ -147,7 +147,7 @@ export default function OS() {
       key={key}
       accessibilityRole="button"
       accessibilityLabel={tr('field.addService')}
-      onPress={() => { setMenuForOp(op); setMenuSearch(''); }}
+      onPress={() => openMenu(op)}
       style={{ borderWidth: 1.5, borderColor: t.colors.line, borderStyle: 'dashed', borderRadius: 11, paddingVertical: 11, alignItems: 'center' }}
     >
       <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addService')}</Text>
@@ -161,20 +161,17 @@ export default function OS() {
     const filtered = os.serviceMenu.filter((m) => !q || m.name.toLowerCase().includes(q));
     const mandatory = filtered.filter((m) => m.obrig);
     const others = filtered.filter((m) => !m.obrig);
-    // A service can go to several operators, but only once each — so the menu is
-    // a per-operator toggle: added shows a check and tapping removes it.
-    const addedInstance = (id: string) => os.services.find((s) => s.serviceId === id && s.assigneeName === menuForOp!.tech);
-
+    // A service can go to several operators, but only once each. The menu stages
+    // the selection locally; a footer button commits it.
     const menuRow = (m: MenuItem) => {
-      const inst = addedInstance(m.id);
-      const added = !!inst;
+      const added = menuSel.includes(m.id);
       return (
         <Pressable
           key={m.id}
           accessibilityRole="button"
           accessibilityState={{ selected: added }}
           accessibilityLabel={m.name}
-          onPress={() => (inst ? removeInstance(inst) : addService(m, menuForOp!))}
+          onPress={() => setMenuSel((prev) => (prev.includes(m.id) ? prev.filter((x) => x !== m.id) : [...prev, m.id]))}
           style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: added ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
         >
           <Row gap={10} style={{ alignItems: 'center' }}>
@@ -216,6 +213,14 @@ export default function OS() {
           ) : null}
           {!filtered.length ? <Text variant="caption" style={{ paddingVertical: 12 }}>{tr('field.noResults')}</Text> : null}
         </ScrollView>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={tr('field.confirmAdd')}
+          onPress={confirmMenu}
+          style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 12 }}
+        >
+          <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.confirmAdd')}</Text>
+        </Pressable>
       </>
     );
   };
@@ -335,6 +340,7 @@ export default function OS() {
 
           <Sheet visible={!!resourceInst} onClose={() => setResourcesForId(null)} title={tr('field.resourcesTitle')} closeLabel={tr('common.close')} maxHeight="82%">
             {resourceInst ? (
+              <>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
                 <Text variant="caption" style={{ marginBottom: 10 }}>{resourceInst.name}</Text>
                 {(['equipment', 'consumable'] as ResourceKind[]).map((kind) => {
@@ -347,14 +353,14 @@ export default function OS() {
                         <View key={g.category} style={{ gap: 6 }}>
                           <Text variant="caption" style={{ marginTop: 2 }}>{g.category}</Text>
                           {g.items.map((item) => {
-                            const on = resourceInst.resources.some((r) => r.id === item.id);
+                            const on = resSel.includes(item.id);
                             return (
                               <Pressable
                                 key={item.id}
                                 accessibilityRole="button"
                                 accessibilityState={{ selected: on }}
                                 accessibilityLabel={item.name}
-                                onPress={() => toggleResource(resourceInst, item)}
+                                onPress={() => setResSel((prev) => (prev.includes(item.id) ? prev.filter((x) => x !== item.id) : [...prev, item.id]))}
                                 style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: on ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
                               >
                                 <Row gap={10} style={{ alignItems: 'center' }}>
@@ -371,7 +377,16 @@ export default function OS() {
                     </View>
                   );
                 })}
-              </ScrollView>
+                </ScrollView>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={tr('field.confirmAdd')}
+                  onPress={confirmResources}
+                  style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 12 }}
+                >
+                  <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.confirmAdd')}</Text>
+                </Pressable>
+              </>
             ) : null}
           </Sheet>
 

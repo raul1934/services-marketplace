@@ -68,6 +68,7 @@
     "rateVisit": "por visita",
     "rateHour": "por hora",
     "addService": "+ Adicionar serviço",
+    "confirmAdd": "Adicionar",
     "servicesTotal": "{{n}} adicionados",
     "searchService": "Buscar serviço",
     "mandatory": "Obrigatórios",

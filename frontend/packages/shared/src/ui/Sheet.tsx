@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Pressable, View, ViewStyle } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme';
 import { focusRing } from '../lib/a11y';
@@ -53,6 +53,8 @@ export function Sheet({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      {/* Lift the panel above the keyboard when a field inside it is focused. */}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <Pressable
         accessible={false}
         // `accessible={false}` alone is not enough on Android: a clickable
@@ -104,6 +106,7 @@ export function Sheet({
           {children}
         </Pressable>
       </Pressable>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
