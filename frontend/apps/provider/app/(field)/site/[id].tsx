@@ -16,8 +16,9 @@ function regionFor(pts: Geo[]) {
   return {
     latitude: (minLat + maxLat) / 2,
     longitude: (minLng + maxLng) / 2,
-    latitudeDelta: Math.max((maxLat - minLat) * 2.4, 0.004),
-    longitudeDelta: Math.max((maxLng - minLng) * 2.4, 0.004),
+    // Tight enough to read the geofence, with room for the side labels outside.
+    latitudeDelta: Math.max((maxLat - minLat) * 1.7, 0.003),
+    longitudeDelta: Math.max((maxLng - minLng) * 1.7, 0.003),
   };
 }
 
@@ -60,8 +61,11 @@ export default function SiteDetail() {
                     ? s.geofence.map((p, i) => {
                         const next = s.geofence![(i + 1) % s.geofence!.length];
                         const mid = edgeMidpoint(p, next);
+                        const c = polygonCentroid(s.geofence!);
+                        // Push the label outside the ring, away from the centre.
+                        const out = { lat: mid.lat + (mid.lat - c.lat) * 0.6, lng: mid.lng + (mid.lng - c.lng) * 0.6 };
                         return (
-                          <Marker key={`edge-${i}`} coordinate={{ latitude: mid.lat, longitude: mid.lng }}>
+                          <Marker key={`edge-${i}`} coordinate={{ latitude: out.lat, longitude: out.lng }}>
                             <MapLabel text={`${Math.round(metersBetweenLL(p, next))} m`} />
                           </Marker>
                         );
@@ -77,7 +81,7 @@ export default function SiteDetail() {
                         );
                       })()]
                     : null}
-                  {s.geo ? (
+                  {s.geo && !(s.geofence && s.geofence.length >= 3) ? (
                     <Marker coordinate={{ latitude: s.geo.lat, longitude: s.geo.lng }}>
                       <MapPin color={t.colors.accent} active={running} />
                     </Marker>
