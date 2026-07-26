@@ -91,7 +91,9 @@
     "loadError": "Não foi possível carregar. Tente novamente.",
     "retry": "Tentar de novo",
     "outGeofence": "fora da geocerca",
-    "locating": "localizando…"
+    "locating": "localizando…",
+    "continueSite": "Continuar site",
+    "shiftHistory": "Neste turno"
   },
   "fieldNav": {
     "section": "Operação",

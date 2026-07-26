@@ -100,7 +100,7 @@ export default function RouteStops() {
                     <Marker
                       key={s.siteId}
                       coordinate={{ latitude: s.site.geo.lat, longitude: s.site.geo.lng }}
-                      onPress={() => router.push(`/(field)/os/${s.siteId}`)}
+                      onPress={() => router.push(`/(field)/site/${s.siteId}`)}
                     >
                       <MapPin number={i + 1} color={toneColor(t, s.status)} active={s.status === 'now'} />
                     </Marker>
@@ -122,7 +122,7 @@ export default function RouteStops() {
                     key={s.siteId}
                     accessibilityRole="button"
                     accessibilityLabel={s.site?.name ?? s.siteId}
-                    onPress={() => router.push(`/(field)/os/${s.siteId}`)}
+                    onPress={() => router.push(`/(field)/site/${s.siteId}`)}
                     style={{ backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: s.status === 'now' ? t.colors.accent : t.colors.line, padding: 12 }}
                   >
                     <Row gap={11} style={{ alignItems: 'center' }}>

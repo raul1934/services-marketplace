@@ -91,7 +91,9 @@
     "loadError": "Couldn't load. Please try again.",
     "retry": "Try again",
     "outGeofence": "outside the geofence",
-    "locating": "locating…"
+    "locating": "locating…",
+    "continueSite": "Continue site",
+    "shiftHistory": "This shift"
   },
   "fieldNav": {
     "section": "Operations",

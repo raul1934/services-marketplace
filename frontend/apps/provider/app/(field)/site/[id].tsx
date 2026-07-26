@@ -1,10 +1,10 @@
 import React from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import MapView, { MapPin, Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { BackBar, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { fieldApi } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
@@ -65,11 +65,41 @@ export default function SiteDetail() {
                 </View>
               ))}
             </View>
+
+            {s.shiftHistory.length ? (
+              <View style={{ paddingHorizontal: 20, paddingTop: 18, gap: 8 }}>
+                <Text variant="label">{tr('field.shiftHistory')}</Text>
+                {s.shiftHistory.map((h) => {
+                  const doing = h.status === 'doing';
+                  return (
+                    <View key={h.id} style={{ backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: t.colors.line, padding: 12 }}>
+                      <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                        <View style={{ flex: 1 }}>
+                          <Text weight="700" style={{ fontSize: 13.5, fontVariant: ['tabular-nums'] }}>{h.time}</Text>
+                          <Text variant="caption">{tr('field.services', { n: h.services })}</Text>
+                        </View>
+                        <View style={{ backgroundColor: doing ? t.colors.accentSoft : t.colors.okSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
+                          <Text style={{ fontSize: 11, fontWeight: '700' }} color={doing ? t.colors.accent : t.colors.ok}>{doing ? tr('field.statusDoing') : tr('field.statusDone')}</Text>
+                        </View>
+                      </Row>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : null}
           </ScrollView>
 
           <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
             {running ? (
-              <SlideToConfirm variant="success" label={tr('field.finishVisit')} doneLabel={tr('field.finishVisitDone')} confirmHint={tr('field.finishVisitHint')} onConfirm={() => confirm(() => fieldApi.finishSite(s.id))} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={tr('field.continueSite')}
+                onPress={() => router.push(`/(field)/os/${s.id}`)}
+                style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+              >
+                <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.continueSite')}</Text>
+                <Icon name="chevronsR" size={17} color="#fff" />
+              </Pressable>
             ) : (
               <SlideToConfirm label={tr('field.startVisit')} doneLabel={tr('field.startVisitDone')} confirmHint={tr('field.startVisitHint')} onConfirm={() => confirm(() => fieldApi.startSite(s.id))} />
             )}

@@ -10,7 +10,6 @@ use App\Models\Field\FieldSite;
 use App\Models\Field\FieldSitePerformance;
 use App\Support\Field\ShiftSnapshot;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -48,19 +47,24 @@ class FieldSiteController extends Controller
 
     public function show(FieldSite $site): JsonResponse
     {
-        $site->load(['services', 'performances', 'performances.servicePerformances']);
+        $site->load('services');
         $snap = ShiftSnapshot::current();
+        $shift = FieldShift::active();
 
-        // Reflect the current/last visit's per-service done state onto the
-        // definitions (done is execution state, kept on ServicePerformance).
-        $visit = FieldSitePerformance::query()
-            ->where('site_id', $site->id)
-            ->when(FieldShift::active(), fn ($q, $shift) => $q->where('shift_id', $shift->id))
-            ->orderByRaw("case when status = 'running' then 0 else 1 end")
-            ->latest('id')
-            ->with('servicePerformances')
-            ->first();
-        $doneMap = $visit ? $visit->servicePerformances->pluck('done', 'service_id') : collect();
+        // This site's visits in the OPEN shift only — the history the options
+        // screen shows, and the source of the current per-service done state.
+        $shiftVisits = $shift
+            ? FieldSitePerformance::query()
+                ->where('shift_id', $shift->id)
+                ->where('site_id', $site->id)
+                ->with('servicePerformances')
+                ->orderByRaw("case when status = 'running' then 0 else 1 end")
+                ->latest('id')
+                ->get()
+            : collect();
+
+        $current = $shiftVisits->first();
+        $doneMap = $current ? $current->servicePerformances->pluck('done', 'service_id') : collect();
         $site->services->each(fn ($s) => $s->setAttribute('done', (bool) ($doneMap[$s->id] ?? false)));
 
         return response()->json([
@@ -72,9 +76,9 @@ class FieldSiteController extends Controller
                 'status' => $snap->siteRunning($site->id) ? 'running' : 'idle',
                 'geo' => $this->geo($site),
                 'services' => FieldServiceResource::collection($site->services),
-                'history' => $site->performances->map(fn ($p) => [
+                // Times this site was performed in the current shift.
+                'shiftHistory' => $shiftVisits->map(fn ($p) => [
                     'id' => (string) $p->id,
-                    'day' => $this->dayOf($p->created_at),
                     'time' => $p->time,
                     'services' => $p->servicePerformances->where('done', true)->count(),
                     'status' => $p->status === 'running' ? 'doing' : 'done',
@@ -141,14 +145,5 @@ class FieldSiteController extends Controller
         return $site->lat !== null && $site->lng !== null
             ? ['lat' => (float) $site->lat, 'lng' => (float) $site->lng]
             : null;
-    }
-
-    private function dayOf(?Carbon $at): string
-    {
-        if (! $at) {
-            return 'today';
-        }
-
-        return $at->isToday() ? 'today' : ($at->isYesterday() ? 'yesterday' : $at->format('d/m'));
     }
 }
