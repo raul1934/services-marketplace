@@ -259,6 +259,10 @@ export function MapPin(_props: { number?: number | string; color: string; active
   return null;
 }
 
+export function MapLabel(_props: { text: string; tone?: string }) {
+  return null;
+}
+
 export function Polygon(_props: {
   coordinates: LatLng[];
   strokeColor?: string;

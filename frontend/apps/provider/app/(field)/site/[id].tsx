@@ -1,13 +1,25 @@
 import React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import MapView, { MapPin, Marker } from 'react-native-maps';
+import MapView, { MapLabel, MapPin, Marker, Polygon } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
-import { fieldApi } from '../../../src/field/api';
+import { fieldApi, Geo } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
+import { edgeMidpoint, metersBetweenLL, polygonAreaSqm, polygonCentroid } from '../../../src/location';
+
+function regionFor(pts: Geo[]) {
+  const lats = pts.map((p) => p.lat), lngs = pts.map((p) => p.lng);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats), minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  return {
+    latitude: (minLat + maxLat) / 2,
+    longitude: (minLng + maxLng) / 2,
+    latitudeDelta: Math.max((maxLat - minLat) * 2.4, 0.004),
+    longitudeDelta: Math.max((maxLng - minLng) * 2.4, 0.004),
+  };
+}
 
 export default function SiteDetail() {
   const t = useTheme();
@@ -35,12 +47,41 @@ export default function SiteDetail() {
               <Text variant="caption">{tr('field.contract', { name: s.contract })} · {s.address}</Text>
             </View>
 
-            {s.geo ? (
-              <View style={{ marginHorizontal: 20, height: 220, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.line }}>
-                <MapView style={{ flex: 1 }} initialRegion={{ latitude: s.geo.lat, longitude: s.geo.lng, latitudeDelta: 0.02, longitudeDelta: 0.02 }}>
-                  <Marker coordinate={{ latitude: s.geo.lat, longitude: s.geo.lng }}>
-                    <MapPin color={t.colors.accent} active={running} />
-                  </Marker>
+            {s.geo || (s.geofence && s.geofence.length) ? (
+              <View style={{ marginHorizontal: 20, height: 240, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.line }}>
+                <MapView
+                  style={{ flex: 1 }}
+                  initialRegion={s.geofence && s.geofence.length >= 3 ? regionFor(s.geofence) : { latitude: s.geo!.lat, longitude: s.geo!.lng, latitudeDelta: 0.006, longitudeDelta: 0.006 }}
+                >
+                  {s.geofence && s.geofence.length >= 3 ? (
+                    <Polygon coordinates={s.geofence.map((p) => ({ latitude: p.lat, longitude: p.lng }))} strokeColor={t.colors.accent} strokeWidth={2} fillColor={t.colors.accent} fillOpacity={0.12} />
+                  ) : null}
+                  {s.geofence && s.geofence.length >= 3
+                    ? s.geofence.map((p, i) => {
+                        const next = s.geofence![(i + 1) % s.geofence!.length];
+                        const mid = edgeMidpoint(p, next);
+                        return (
+                          <Marker key={`edge-${i}`} coordinate={{ latitude: mid.lat, longitude: mid.lng }}>
+                            <MapLabel text={`${Math.round(metersBetweenLL(p, next))} m`} />
+                          </Marker>
+                        );
+                      })
+                    : null}
+                  {s.geofence && s.geofence.length >= 3
+                    ? [(() => {
+                        const c = polygonCentroid(s.geofence);
+                        return (
+                          <Marker key="area" coordinate={{ latitude: c.lat, longitude: c.lng }}>
+                            <MapLabel text={`${Math.round(polygonAreaSqm(s.geofence)).toLocaleString('pt-BR')} m²`} tone="area" />
+                          </Marker>
+                        );
+                      })()]
+                    : null}
+                  {s.geo ? (
+                    <Marker coordinate={{ latitude: s.geo.lat, longitude: s.geo.lng }}>
+                      <MapPin color={t.colors.accent} active={running} />
+                    </Marker>
+                  ) : null}
                 </MapView>
               </View>
             ) : null}

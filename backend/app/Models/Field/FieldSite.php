@@ -12,11 +12,12 @@ class FieldSite extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'name', 'contract', 'address', 'lat', 'lng'];
+    protected $fillable = ['id', 'name', 'contract', 'address', 'lat', 'lng', 'geofence'];
 
     protected $casts = [
         'lat' => 'float',
         'lng' => 'float',
+        'geofence' => 'array',
     ];
 
     public function services(): HasMany

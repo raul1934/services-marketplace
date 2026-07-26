@@ -86,6 +86,7 @@ class FieldServiceSeeder extends Seeder
         foreach ($sites as $site) {
             $services = $site['services'];
             unset($site['services']);
+            $site['geofence'] = $this->geofence($site['lat'], $site['lng'], $site['id']);
             FieldSite::updateOrCreate(['id' => $site['id']], $site);
 
             foreach ($services as $i => $svc) {
@@ -135,6 +136,28 @@ class FieldServiceSeeder extends Seeder
         foreach ($catalog as $i => $item) {
             FieldCatalogItem::updateOrCreate(['id' => $item['id']], $item + ['position' => $i]);
         }
+    }
+
+    /**
+     * A rectangular geofence around the site — sized a bit differently per site
+     * (from its id) so the sides read as distinct lengths on the map.
+     *
+     * @return array<int, array{lat: float, lng: float}>
+     */
+    private function geofence(float $lat, float $lng, string $id): array
+    {
+        $seed = crc32($id);
+        $halfW = 40 + ($seed % 40);          // 40–79 m
+        $halfH = 35 + (intdiv($seed, 8) % 45); // 35–79 m
+        $dLat = $halfH / 111320.0;
+        $dLng = $halfW / (111320.0 * cos(deg2rad($lat)));
+
+        return [
+            ['lat' => $lat - $dLat, 'lng' => $lng - $dLng],
+            ['lat' => $lat - $dLat, 'lng' => $lng + $dLng],
+            ['lat' => $lat + $dLat, 'lng' => $lng + $dLng],
+            ['lat' => $lat + $dLat, 'lng' => $lng - $dLng],
+        ];
     }
 
     /** Reproduces the app's live state: an open shift mid-route. */

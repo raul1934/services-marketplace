@@ -75,6 +75,7 @@ class FieldSiteController extends Controller
                 'address' => $site->address,
                 'status' => $snap->siteRunning($site->id) ? 'running' : 'idle',
                 'geo' => $this->geo($site),
+                'geofence' => $site->geofence,
                 'services' => FieldServiceResource::collection($site->services),
                 // Times this site was performed in the current shift.
                 'shiftHistory' => $shiftVisits->map(fn ($p) => [

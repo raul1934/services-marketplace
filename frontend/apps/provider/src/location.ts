@@ -25,6 +25,38 @@ export function distanceMeters(a: Coords, b: { lat: number; lng: number }): numb
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
+type LL = { lat: number; lng: number };
+
+/** Metres between two {lat,lng} points. */
+export function metersBetweenLL(a: LL, b: LL): number {
+  return distanceMeters({ latitude: a.lat, longitude: a.lng }, b);
+}
+
+/** Average of the ring's vertices — good enough to place the area label. */
+export function polygonCentroid(pts: LL[]): LL {
+  const n = pts.length || 1;
+  return { lat: pts.reduce((s, p) => s + p.lat, 0) / n, lng: pts.reduce((s, p) => s + p.lng, 0) / n };
+}
+
+export function edgeMidpoint(a: LL, b: LL): LL {
+  return { lat: (a.lat + b.lat) / 2, lng: (a.lng + b.lng) / 2 };
+}
+
+/** Area (m²) of a small lat/lng ring via a local equirectangular projection. */
+export function polygonAreaSqm(pts: LL[]): number {
+  if (pts.length < 3) return 0;
+  const R = 6371000;
+  const lat0 = (polygonCentroid(pts).lat * Math.PI) / 180;
+  const k = Math.cos(lat0);
+  const xy = pts.map((p) => ({ x: (p.lng * Math.PI) / 180 * R * k, y: (p.lat * Math.PI) / 180 * R }));
+  let a = 0;
+  for (let i = 0; i < xy.length; i++) {
+    const j = (i + 1) % xy.length;
+    a += xy[i].x * xy[j].y - xy[j].x * xy[i].y;
+  }
+  return Math.abs(a) / 2;
+}
+
 /** Request permission + return current position. Throws if denied. */
 export async function getCurrentCoords(): Promise<Coords> {
   const { status } = await Location.requestForegroundPermissionsAsync();

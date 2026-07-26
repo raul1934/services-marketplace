@@ -379,6 +379,13 @@ export function Marker(_props: MarkerLike & { anchor?: { x: number; y: number } 
 export function MapPin(_props: { number?: number | string; color: string; active?: boolean }) {
   return null;
 }
+/**
+ * Text label at a coordinate (a Marker child). `tone: 'area'` renders it in the
+ * accent colour (used for the geofence area); otherwise a neutral chip.
+ */
+export function MapLabel(_props: { text: string; tone?: string }) {
+  return null;
+}
 export function Polygon(_props: {
   coordinates: LatLng[];
   strokeColor?: string;

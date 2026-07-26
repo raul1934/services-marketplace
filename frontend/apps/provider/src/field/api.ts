@@ -23,7 +23,7 @@ export type Route = { id: string; name: string; km: number; status: RunStatus; r
 
 export type SiteListItem = { id: string; name: string; contract: string; address: string; status: RunStatus; geo: Geo | null; servicesCount: number; obrigCount: number };
 export type SiteHistory = { id: string; time: string; services: number; status: 'done' | 'doing' };
-export type Site = { id: string; name: string; contract: string; address: string; status: RunStatus; geo: Geo | null; services: Service[]; shiftHistory: SiteHistory[] };
+export type Site = { id: string; name: string; contract: string; address: string; status: RunStatus; geo: Geo | null; geofence: Geo[] | null; services: Service[]; shiftHistory: SiteHistory[] };
 
 export type Performance = { id: string; siteId: string; siteName: string; day: 'today' | 'yesterday'; time: string; crew: number; services: number; status: 'done' | 'doing' };
 
