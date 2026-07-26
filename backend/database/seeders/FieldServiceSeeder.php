@@ -149,28 +149,29 @@ class FieldServiceSeeder extends Seeder
         }
 
         $this->resourceCatalog();
-        $this->requiredResources();
+        $this->requiredFlags();
     }
 
-    /** What each service requires (equipment/consumable), from its company catalog. */
-    private function requiredResources(): void
+    /** Whether each service requires equipment and/or a consumable (a flag). */
+    private function requiredFlags(): void
     {
-        $required = [
-            'rio-fortore:bomba' => ['nadruz:res:multimetro', 'nadruz:res:pressostato'],
-            'rio-fortore:quadro' => ['nadruz:res:alicate'],
-            'rio-fortore:portao' => ['nadruz:res:graxa'],
-            'solar:gerador' => ['pacco:res:alicate', 'pacco:res:diesel'],
-            'solar:ar' => ['pacco:res:gas-r410'],
-            'villa:elevador' => ['pacco:res:alicate'],
-            'villa:portao' => ['pacco:res:selo'],
-            'anavec:quadro-geral' => ['nadruz:res:termografica'],
-            'anavec:iluminacao' => ['nadruz:res:led'],
-            'represa:bomba-piscina' => ['pacco:res:selo'],
-            'damha:guarita' => ['nadruz:res:multimetro'],
+        // [service => [requires equipment, requires consumable]]
+        $req = [
+            'rio-fortore:bomba' => [true, true],
+            'rio-fortore:quadro' => [true, false],
+            'rio-fortore:portao' => [false, true],
+            'solar:gerador' => [true, true],
+            'solar:ar' => [false, true],
+            'villa:elevador' => [true, false],
+            'villa:portao' => [false, true],
+            'anavec:quadro-geral' => [true, false],
+            'anavec:iluminacao' => [false, true],
+            'represa:bomba-piscina' => [false, true],
+            'damha:guarita' => [true, false],
         ];
 
-        foreach ($required as $serviceId => $resourceIds) {
-            FieldService::find($serviceId)?->requiredResources()->sync($resourceIds);
+        foreach ($req as $serviceId => [$equipment, $consumable]) {
+            FieldService::where('id', $serviceId)->update(['req_equipment' => $equipment, 'req_consumable' => $consumable]);
         }
     }
 

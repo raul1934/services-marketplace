@@ -26,9 +26,9 @@ export default function OS() {
   const [menuForOp, setMenuForOp] = useState<Crew | null>(null);
   const [menuSearch, setMenuSearch] = useState('');
   const [menuSel, setMenuSel] = useState<string[]>([]);
-  // The service instance whose resource picker is open (by id), and its staged
-  // resource selection (resource ids).
-  const [resourcesForId, setResourcesForId] = useState<string | null>(null);
+  // The service instance + kind whose resource picker is open (equipment and
+  // consumable are separate sheets), and its staged resource selection.
+  const [resPicker, setResPicker] = useState<{ instId: string; kind: ResourceKind } | null>(null);
   const [resSel, setResSel] = useState<string[]>([]);
 
   const pickWeather = async (type: WeatherType) => {
@@ -62,17 +62,19 @@ export default function OS() {
       ? (r.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))
       : (r.cost === 'free' ? tr('field.free') : tr('field.charged'));
 
-  // A service's required equipment/consumable, as a compact string.
-  const requiredText = (req: { kind: ResourceKind; name: string }[]) =>
-    req.map((r) => `${r.kind === 'equipment' ? '🔧' : '📦'} ${r.name}`).join('  ·  ');
+  // A service's requirements as a message (a flag, not specific items).
+  const requiresText = (r: { equipment: boolean; consumable: boolean }) =>
+    [r.equipment ? tr('field.reqEquipment') : null, r.consumable ? tr('field.reqConsumable') : null].filter(Boolean).join('  ·  ');
+  const hasRequires = (r: { equipment: boolean; consumable: boolean }) => r.equipment || r.consumable;
 
   const site = os?.site;
   // The OS is organised by operator. Adding a service (no select/done step) puts
   // an instance under an operator; a service can appear more than once.
   const crew = os?.crew ?? [];
   const soloShift = crew.length <= 1;
-  const hasResourceCatalog = !!os && (os.resourceCatalog.equipment.length > 0 || os.resourceCatalog.consumable.length > 0);
-  const resourceInst = os ? os.services.find((s) => s.id === resourcesForId) ?? null : null;
+  const hasEquipment = !!os && os.resourceCatalog.equipment.length > 0;
+  const hasConsumable = !!os && os.resourceCatalog.consumable.length > 0;
+  const resourceInst = os ? os.services.find((s) => s.id === resPicker?.instId) ?? null : null;
   const instancesFor = (op: Crew) => (os ? os.services.filter((s) => s.assigneeName === op.tech) : []);
 
   // The pickers stage a selection and commit it on a footer button, instead of
@@ -93,14 +95,19 @@ export default function OS() {
     }
   };
 
-  const openResources = (inst: ServiceInstance) => { setResourcesForId(inst.id); setResSel(inst.resources.map((r) => r.id)); };
+  // Equipment and consumable are separate pickers, staged then committed.
+  const openResources = (inst: ServiceInstance, kind: ResourceKind) => {
+    setResPicker({ instId: inst.id, kind });
+    setResSel(inst.resources.filter((r) => r.kind === kind).map((r) => r.id));
+  };
   const confirmResources = async () => {
     const inst = resourceInst;
-    if (!inst) return;
-    const currentIds = inst.resources.map((r) => r.id);
+    const kind = resPicker?.kind;
+    if (!inst || !kind) return;
+    const currentIds = inst.resources.filter((r) => r.kind === kind).map((r) => r.id);
     const toAdd = resSel.filter((id) => !currentIds.includes(id));
     const toRemove = currentIds.filter((id) => !resSel.includes(id));
-    setResourcesForId(null);
+    setResPicker(null);
     try {
       for (const id of toAdd) await fieldApi.addResource(siteId, inst.id, id);
       for (const id of toRemove) await fieldApi.removeResource(siteId, inst.id, id);
@@ -109,34 +116,49 @@ export default function OS() {
     }
   };
 
+  const anyResourceBtn = hasEquipment || hasConsumable;
   const instanceCard = (inst: ServiceInstance) => (
-    <View key={inst.id} style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, borderRadius: 12, paddingBottom: inst.resources.length || hasResourceCatalog ? 6 : 0 }}>
+    <View key={inst.id} style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, borderRadius: 12, paddingBottom: inst.resources.length || anyResourceBtn ? 6 : 0 }}>
       <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
           <Text weight="700" style={{ fontSize: 13.5 }}>{inst.name}</Text>
           <Text variant="caption">
-            {inst.obrig ? tr('field.obrig') : tr('field.optional')}{inst.required.length ? `  ·  ${requiredText(inst.required)}` : ''}
+            {inst.obrig ? tr('field.obrig') : tr('field.optional')}{hasRequires(inst.requires) ? `  ·  ${requiresText(inst.requires)}` : ''}
           </Text>
         </View>
       </Row>
-      {inst.resources.length || hasResourceCatalog ? (
+      {inst.resources.length || anyResourceBtn ? (
         <View style={{ marginLeft: 12, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
           {inst.resources.map((r) => (
             <Row key={r.id} gap={8} style={{ alignItems: 'center' }}>
-              <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 11 }}>{r.kind === 'equipment' ? '🔧' : '📦'}</Text>
-              </View>
               <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
                 <Text weight="600" style={{ fontSize: 12.5 }}>{r.name}</Text>{` · ${r.kind === 'equipment' ? tr('field.equipment') : tr('field.consumable')}`}{r.qty > 1 ? ` ×${r.qty}` : ''}
               </Text>
               <Text style={{ fontSize: 10.5, fontWeight: r.kind === 'consumable' ? '700' : '400' }} color={r.kind === 'consumable' ? (r.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(r)}</Text>
             </Row>
           ))}
-          {hasResourceCatalog ? (
-            <Pressable accessibilityRole="button" accessibilityLabel={tr('field.addResource')} onPress={() => openResources(inst)} style={{ alignSelf: 'flex-start', paddingVertical: 3 }}>
-              <Text weight="700" style={{ fontSize: 12 }} color={t.colors.accent}>{tr('field.addResource')}</Text>
-            </Pressable>
-          ) : null}
+          <Row gap={8} style={{ paddingTop: 4 }}>
+            {hasEquipment ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={tr('field.addEquipment')}
+                onPress={() => openResources(inst, 'equipment')}
+                style={{ flex: 1, backgroundColor: t.colors.accentSoft, borderRadius: 10, paddingVertical: 10, alignItems: 'center' }}
+              >
+                <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addEquipment')}</Text>
+              </Pressable>
+            ) : null}
+            {hasConsumable ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={tr('field.addConsumable')}
+                onPress={() => openResources(inst, 'consumable')}
+                style={{ flex: 1, backgroundColor: t.colors.accentSoft, borderRadius: 10, paddingVertical: 10, alignItems: 'center' }}
+              >
+                <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addConsumable')}</Text>
+              </Pressable>
+            ) : null}
+          </Row>
         </View>
       ) : null}
     </View>
@@ -180,7 +202,7 @@ export default function OS() {
             </View>
             <View style={{ flex: 1 }}>
               <Text weight="600" style={{ fontSize: 13.5 }}>{m.name}</Text>
-              <Text variant="caption">{m.required.length ? requiredText(m.required) : (m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))}</Text>
+              <Text variant="caption">{hasRequires(m.requires) ? requiresText(m.requires) : (m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))}</Text>
             </View>
             <Icon name={added ? 'check' : 'plus'} size={18} color={t.colors.accent} />
           </Row>
@@ -338,45 +360,35 @@ export default function OS() {
             </View>
           </Sheet>
 
-          <Sheet visible={!!resourceInst} onClose={() => setResourcesForId(null)} title={tr('field.resourcesTitle')} closeLabel={tr('common.close')} maxHeight="82%">
-            {resourceInst ? (
+          <Sheet visible={!!resourceInst} onClose={() => setResPicker(null)} title={resPicker?.kind === 'consumable' ? tr('field.consumableSection') : tr('field.equipmentSection')} closeLabel={tr('common.close')} maxHeight="82%">
+            {resourceInst && resPicker ? (
               <>
               <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
                 <Text variant="caption" style={{ marginBottom: 10 }}>{resourceInst.name}</Text>
-                {(['equipment', 'consumable'] as ResourceKind[]).map((kind) => {
-                  const groups = os.resourceCatalog[kind];
-                  if (!groups.length) return null;
-                  return (
-                    <View key={kind} style={{ gap: 8, marginBottom: 14 }}>
-                      <Text variant="label">{kind === 'equipment' ? tr('field.equipmentSection') : tr('field.consumableSection')}</Text>
-                      {groups.map((g) => (
-                        <View key={g.category} style={{ gap: 6 }}>
-                          <Text variant="caption" style={{ marginTop: 2 }}>{g.category}</Text>
-                          {g.items.map((item) => {
-                            const on = resSel.includes(item.id);
-                            return (
-                              <Pressable
-                                key={item.id}
-                                accessibilityRole="button"
-                                accessibilityState={{ selected: on }}
-                                accessibilityLabel={item.name}
-                                onPress={() => setResSel((prev) => (prev.includes(item.id) ? prev.filter((x) => x !== item.id) : [...prev, item.id]))}
-                                style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: on ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
-                              >
-                                <Row gap={10} style={{ alignItems: 'center' }}>
-                                  <Text style={{ fontSize: 17 }}>{kind === 'equipment' ? '🔧' : '📦'}</Text>
-                                  <Text weight="600" style={{ flex: 1, fontSize: 13.5 }}>{item.name}</Text>
-                                  <Text style={{ fontSize: 10.5, fontWeight: item.kind === 'consumable' ? '700' : '400' }} color={item.kind === 'consumable' ? (item.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(item)}</Text>
-                                  <Icon name={on ? 'check' : 'plus'} size={17} color={t.colors.accent} />
-                                </Row>
-                              </Pressable>
-                            );
-                          })}
-                        </View>
-                      ))}
-                    </View>
-                  );
-                })}
+                {os.resourceCatalog[resPicker.kind].map((g) => (
+                  <View key={g.category} style={{ gap: 6, marginBottom: 12 }}>
+                    <Text variant="label">{g.category}</Text>
+                    {g.items.map((item) => {
+                      const on = resSel.includes(item.id);
+                      return (
+                        <Pressable
+                          key={item.id}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: on }}
+                          accessibilityLabel={item.name}
+                          onPress={() => setResSel((prev) => (prev.includes(item.id) ? prev.filter((x) => x !== item.id) : [...prev, item.id]))}
+                          style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: on ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
+                        >
+                          <Row gap={10} style={{ alignItems: 'center' }}>
+                            <Text weight="600" style={{ flex: 1, fontSize: 13.5 }}>{item.name}</Text>
+                            <Text style={{ fontSize: 10.5, fontWeight: item.kind === 'consumable' ? '700' : '400' }} color={item.kind === 'consumable' ? (item.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(item)}</Text>
+                            <Icon name={on ? 'check' : 'plus'} size={17} color={t.colors.accent} />
+                          </Row>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ))}
                 </ScrollView>
                 <Pressable
                   accessibilityRole="button"

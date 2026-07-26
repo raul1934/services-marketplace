@@ -29,26 +29,28 @@ class FieldOsController extends Controller
     /** The OS: services with their done state, who's present, catalog add-ons. */
     public function show(FieldSite $site): JsonResponse
     {
-        $site->load('services.requiredResources');
+        $site->load('services');
         $shift = FieldShift::active();
         $visit = $this->readVisit($site);
 
-        // Equipment/consumables a service declares it needs (shown on the card).
-        $required = fn ($service) => $service
-            ? $service->requiredResources->map(fn ($r) => ['kind' => $r->kind, 'name' => $r->name])->values()
-            : collect();
+        // Whether a service needs equipment and/or a consumable — a flag/message,
+        // not a specific catalog item.
+        $requires = fn ($service) => [
+            'equipment' => (bool) ($service?->req_equipment ?? false),
+            'consumable' => (bool) ($service?->req_consumable ?? false),
+        ];
 
         // The visit's services are the instances the tech added — repeatable,
         // each owned by an operator and carrying its own resources. There is no
         // separate "select/done" step: adding a service IS performing it.
         $instances = $visit
-            ? $visit->servicePerformances()->with(['service.requiredResources', 'resources'])->orderBy('id')->get()->map(fn ($p) => [
+            ? $visit->servicePerformances()->with(['service', 'resources'])->orderBy('id')->get()->map(fn ($p) => [
                 'id' => (string) $p->id,
                 'serviceId' => $p->service_id,
                 'name' => $p->service?->name ?? $p->service_id,
                 'rate' => $p->service?->rate ?? 'visit',
                 'obrig' => (bool) ($p->service?->obrig ?? false),
-                'required' => $required($p->service),
+                'requires' => $requires($p->service),
                 'assignee' => $p->assignee,
                 'assigneeName' => $p->assignee_name,
                 'resources' => $p->resources->map(fn ($r) => [
@@ -65,9 +67,9 @@ class FieldOsController extends Controller
         // The "add service" menu: the site's own services (mandatory ones lead),
         // then the company add-on catalog. The app groups it and offers search.
         $menu = $site->services->map(fn ($s) => [
-            'id' => $s->id, 'name' => $s->name, 'obrig' => (bool) $s->obrig, 'rate' => $s->rate, 'required' => $required($s),
+            'id' => $s->id, 'name' => $s->name, 'obrig' => (bool) $s->obrig, 'rate' => $s->rate, 'requires' => $requires($s),
         ])->concat(FieldCatalogItem::query()->orderBy('position')->get()->map(fn ($c) => [
-            'id' => $c->id, 'name' => $c->name, 'obrig' => (bool) $c->obrig, 'rate' => $c->rate, 'required' => collect(),
+            'id' => $c->id, 'name' => $c->name, 'obrig' => (bool) $c->obrig, 'rate' => $c->rate, 'requires' => $requires(null),
         ]))->sortByDesc('obrig')->values();
 
         return response()->json([
