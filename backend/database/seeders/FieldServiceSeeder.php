@@ -82,14 +82,17 @@ class FieldServiceSeeder extends Seeder
             ]],
         ];
 
+        $serviceIds = [];
         foreach ($sites as $site) {
             $services = $site['services'];
             unset($site['services']);
             FieldSite::updateOrCreate(['id' => $site['id']], $site);
 
             foreach ($services as $i => $svc) {
+                $id = $site['id'].':'.$svc['id'];
+                $serviceIds[] = $id;
                 FieldService::updateOrCreate(
-                    ['id' => $site['id'].':'.$svc['id']],
+                    ['id' => $id],
                     [
                         'site_id' => $site['id'],
                         'name' => $svc['name'],
@@ -103,6 +106,10 @@ class FieldServiceSeeder extends Seeder
                 );
             }
         }
+
+        // Drop services promoted from the catalog in earlier runs so re-seeding
+        // is deterministic (keeps only the canonical set above).
+        FieldService::whereNotIn('id', $serviceIds)->delete();
 
         $routes = [
             ['id' => 'centro-norte', 'name' => 'Centro–Norte', 'km' => 18, 'stops' => [['villa', '0,0'], ['rio-fortore', '1,2'], ['solar', '3,8'], ['anavec', '5,1']]],

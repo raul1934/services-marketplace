@@ -17,7 +17,7 @@ export type Service = { id: string; name: string; who: string; whoName: string; 
 
 export type SiteSummary = { id: string; name: string; address: string; geo: Geo | null };
 export type RouteStop = { siteId: string; km: string; status: StopStatus; times: number; site: SiteSummary | null };
-export type Route = { id: string; name: string; km: number; status: RunStatus; required: number; stops: RouteStop[] };
+export type Route = { id: string; name: string; km: number; status: RunStatus; required: number; performedTimes: number; stops: RouteStop[] };
 
 export type SiteListItem = { id: string; name: string; contract: string; address: string; status: RunStatus; geo: Geo | null; servicesCount: number; obrigCount: number };
 export type SiteHistory = { id: string; day: string; time: string; services: number; status: 'done' | 'doing' };

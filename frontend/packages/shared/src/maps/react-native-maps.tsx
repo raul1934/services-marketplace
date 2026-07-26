@@ -187,7 +187,7 @@ function htmlDoc(center: [number, number], zoom: number, dark: boolean, accent: 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>html,body,#map{height:100%;margin:0;padding:0;background:${dark ? '#0e141d' : '#eef1f4'}}
-.cfnum{position:relative;display:flex;align-items:center;justify-content:center;background:transparent;border:0;}
+.cfnum{display:flex;align-items:center;justify-content:center;background:transparent;border:0;}
 .cfnum-c{position:relative;width:30px;height:30px;border-radius:50%;border:2.5px solid #fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.35);}
 .cfpulse{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;animation:cfp 1.6s ease-out infinite;}
 @keyframes cfp{0%{transform:scale(.7);opacity:.5}100%{transform:scale(2.4);opacity:0}}</style>

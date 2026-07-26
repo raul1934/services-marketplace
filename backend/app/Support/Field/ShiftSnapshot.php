@@ -15,8 +15,11 @@ class ShiftSnapshot
 {
     private ?FieldShift $shift;
 
-    /** RoutePerformances keyed by route_id. */
-    private Collection $routePerfs;
+    /** The currently running RoutePerformance per route_id (drives now/next/done). */
+    private Collection $runningRoutePerfs;
+
+    /** Count of finished route runs per route_id — anchored to the shift. */
+    private Collection $doneRouteCounts;
 
     /** All SitePerformances of the shift. */
     private Collection $sitePerfs;
@@ -27,10 +30,13 @@ class ShiftSnapshot
 
         if ($shift) {
             $shift->loadMissing(['routePerformances', 'sitePerformances']);
-            $this->routePerfs = $shift->routePerformances->keyBy('route_id');
+            $this->runningRoutePerfs = $shift->routePerformances->where('status', 'running')->keyBy('route_id');
+            $this->doneRouteCounts = $shift->routePerformances->where('status', 'done')
+                ->groupBy('route_id')->map->count();
             $this->sitePerfs = $shift->sitePerformances;
         } else {
-            $this->routePerfs = collect();
+            $this->runningRoutePerfs = collect();
+            $this->doneRouteCounts = collect();
             $this->sitePerfs = collect();
         }
     }
@@ -45,12 +51,16 @@ class ShiftSnapshot
         return $this->shift;
     }
 
-    /** 'idle' (not started) | 'running' | 'done'. */
+    /** 'running' while a run is open, else 'idle' — a finished route resets to idle. */
     public function routeStatus(string $routeId): string
     {
-        $rp = $this->routePerfs->get($routeId);
+        return $this->runningRoutePerfs->has($routeId) ? 'running' : 'idle';
+    }
 
-        return $rp ? $rp->status : 'idle';
+    /** How many times this route was completed in the shift (shift-anchored). */
+    public function routePerformedTimes(string $routeId): int
+    {
+        return (int) ($this->doneRouteCounts[$routeId] ?? 0);
     }
 
     /** Whether the site currently has an open (running) visit this shift. */
@@ -69,9 +79,10 @@ class ShiftSnapshot
      */
     public function stopState(string $routeId, string $siteId): array
     {
-        $rp = $this->routePerfs->get($routeId);
+        $rp = $this->runningRoutePerfs->get($routeId);
 
         if (! $rp) {
+            // No run in progress → nothing performed yet this run (reset).
             return ['status' => 'next', 'times' => 0];
         }
 

@@ -32,6 +32,7 @@
     "routesToday": "Rotas de hoje",
     "routesCount": "{{n}} rotas",
     "scheduled": "Agendada",
+    "doneTimes": "concluída {{n}}x",
     "stops": "{{n}} paradas",
     "required": "{{n}} obrigatórios",
     "sitesCount": "{{n}} sites",

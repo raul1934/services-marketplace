@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import MapView, { MapPin, Marker, Region } from 'react-native-maps';
+import MapView, { MapPin, Marker, Polyline, Region } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -32,13 +32,19 @@ export default function RouteStops() {
 
   const mapRef = useRef<MapView>(null);
   const idle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const recentering = useRef(false);
   useEffect(() => () => { if (idle.current) clearTimeout(idle.current); }, []);
 
-  const geoPts = (route?.stops ?? []).map((s) => s.site?.geo).filter((g): g is Geo => !!g);
+  const geoStops = (route?.stops ?? []).filter((s) => !!s.site?.geo);
+  const geoPts = geoStops.map((s) => s.site!.geo!) as Geo[];
+  const line = geoStops.map((s) => ({ latitude: s.site!.geo!.lat, longitude: s.site!.geo!.lng }));
   const region = geoPts.length ? fitRegion(geoPts) : undefined;
-  const scheduleRecenter = () => {
+  // Recenter to fit the whole route ~3s after the user stops panning/zooming.
+  // Our own animateToRegion also settles the map, so a flag skips that echo.
+  const onRegionSettled = () => {
+    if (recentering.current) { recentering.current = false; return; }
     if (idle.current) clearTimeout(idle.current);
-    if (region) idle.current = setTimeout(() => mapRef.current?.animateToRegion(region, 600), 5000);
+    if (region) idle.current = setTimeout(() => { recentering.current = true; mapRef.current?.animateToRegion(region, 500); }, 3000);
   };
   const dest = route?.stops.find((s) => s.status === 'now') ?? route?.stops.find((s) => s.status === 'next') ?? route?.stops[0];
   const running = route?.status === 'running';
@@ -63,7 +69,8 @@ export default function RouteStops() {
 
             {region ? (
               <View style={{ marginHorizontal: 20, height: 220, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: t.colors.line }}>
-                <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={region} onPanDrag={scheduleRecenter}>
+                <MapView ref={mapRef} style={{ flex: 1 }} initialRegion={region} onRegionChangeComplete={onRegionSettled}>
+                  {line.length >= 2 ? <Polyline coordinates={line} strokeColor={t.colors.accent} strokeWidth={3} /> : null}
                   {route.stops.map((s, i) => (s.site?.geo ? (
                     <Marker
                       key={s.siteId}

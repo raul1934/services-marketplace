@@ -32,6 +32,7 @@
     "routesToday": "Today's routes",
     "routesCount": "{{n}} routes",
     "scheduled": "Scheduled",
+    "doneTimes": "done {{n}}x",
     "stops": "{{n}} stops",
     "required": "{{n}} required",
     "sitesCount": "{{n}} sites",

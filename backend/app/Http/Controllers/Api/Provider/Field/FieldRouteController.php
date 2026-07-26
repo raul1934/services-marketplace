@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Field\FieldRoute;
 use App\Models\Field\FieldRoutePerformance;
 use App\Models\Field\FieldShift;
+use App\Models\Field\FieldSitePerformance;
 use App\Support\Field\ShiftSnapshot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -57,16 +58,29 @@ class FieldRouteController extends Controller
         return $this->show($route);
     }
 
-    /** Close the route (slider "finalizar rota"). */
+    /**
+     * Close the route (slider "finalizar rota"). Finishing resets the run: the
+     * route goes back to idle and its still-open visits are closed, so the next
+     * run starts fresh (per-site "performed" counts are per run). Only the count
+     * of completed runs stays, anchored to the shift.
+     */
     public function finish(FieldRoute $route): JsonResponse
     {
         $shift = $this->activeShift();
 
-        FieldRoutePerformance::query()
+        $runs = FieldRoutePerformance::query()
             ->where('shift_id', $shift->id)
             ->where('route_id', $route->id)
             ->where('status', 'running')
-            ->update(['status' => 'done', 'ended_at' => now()]);
+            ->get();
+
+        foreach ($runs as $run) {
+            $run->update(['status' => 'done', 'ended_at' => now()]);
+            FieldSitePerformance::query()
+                ->where('route_performance_id', $run->id)
+                ->where('status', 'running')
+                ->update(['status' => 'done', 'ended_at' => now()]);
+        }
 
         return $this->show($route);
     }
@@ -93,6 +107,7 @@ class FieldRouteController extends Controller
             'km' => (float) $route->km,
             'status' => $snap->routeStatus($route->id),
             'required' => $route->stops->sum(fn ($s) => (int) ($s->site->obrig_count ?? 0)),
+            'performedTimes' => $snap->routePerformedTimes($route->id),
             'stops' => $route->stops->map(function ($stop) use ($route, $snap) {
                 $state = $snap->stopState($route->id, $stop->site_id);
 

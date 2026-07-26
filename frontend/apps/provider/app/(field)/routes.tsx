@@ -40,7 +40,7 @@ export default function Routes() {
                     <Icon name="chevronsR" size={16} color={t.colors.ink3} />
                   </Row>
                 </Row>
-                <Text variant="caption">{tr('field.stops', { n: r.stops.length })} · {tr('field.required', { n: r.required })} · {r.km} km</Text>
+                <Text variant="caption">{tr('field.stops', { n: r.stops.length })} · {tr('field.required', { n: r.required })} · {r.km} km{r.performedTimes > 0 ? ` · ${tr('field.doneTimes', { n: r.performedTimes })}` : ''}</Text>
                 <Row gap={6} style={{ flexWrap: 'wrap' }}>
                   {preview.map((name) => <Tag key={name} label={name} />)}
                   {r.stops.length > preview.length ? <Tag label={`+${r.stops.length - preview.length}`} muted /> : null}
