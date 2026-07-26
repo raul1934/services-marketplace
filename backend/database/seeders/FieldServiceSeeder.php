@@ -202,14 +202,13 @@ class FieldServiceSeeder extends Seeder
         FieldServicePerformance::create(['site_performance_id' => $villa->id, 'service_id' => 'villa:portao', 'done' => true]);
 
         // Rio Fortore: in progress (running → stop shows "now", site shows running).
-        $rio = FieldSitePerformance::create([
+        // No services pre-selected — a visit starts with nothing checked; the
+        // tech marks each service as it's performed.
+        FieldSitePerformance::create([
             'shift_id' => $master->id, 'route_performance_id' => $cn->id, 'site_id' => 'rio-fortore',
             'status' => 'running', 'crew' => 3, 'time' => '8:33',
             'started_at' => now()->subMinutes(11),
         ]);
-        FieldServicePerformance::create(['site_performance_id' => $rio->id, 'service_id' => 'rio-fortore:bomba', 'done' => true]);
-        FieldServicePerformance::create(['site_performance_id' => $rio->id, 'service_id' => 'rio-fortore:quadro', 'done' => true]);
-        FieldServicePerformance::create(['site_performance_id' => $rio->id, 'service_id' => 'rio-fortore:portao', 'done' => false]);
 
         // ── Yesterday's closed shift (feeds the performances screen + history) ──
         $yst = FieldShift::create([

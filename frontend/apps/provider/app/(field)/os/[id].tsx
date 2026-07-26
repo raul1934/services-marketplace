@@ -4,10 +4,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
-import { CatalogItem, fieldApi, OsPhoto, Service } from '../../../src/field/api';
+import { CatalogItem, fieldApi, OsPhoto, Service, WeatherType } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { distanceMeters, useMyLocation } from '../../../src/location';
 import { capturePhoto } from '../../../src/photos';
+import { WEATHER_TYPES, weatherOf } from '../../../src/weather';
 
 export default function OS() {
   const t = useTheme();
@@ -20,6 +21,16 @@ export default function OS() {
   const me = useMyLocation();
   const [uploading, setUploading] = useState<'before' | 'after' | null>(null);
   const [viewer, setViewer] = useState<{ photos: OsPhoto[]; index: number } | null>(null);
+  const [weatherOpen, setWeatherOpen] = useState(false);
+
+  const pickWeather = async (type: WeatherType) => {
+    setWeatherOpen(false);
+    try {
+      setData(await fieldApi.setWeather(siteId, type));
+    } catch {
+      reload();
+    }
+  };
 
   // Within the site's geofence? (~150 m). null while there's no fix yet.
   const inside = me && os?.site.geo ? distanceMeters(me, os.site.geo) <= 150 : null;
@@ -91,6 +102,22 @@ export default function OS() {
                 </Text>
               </Row>
             </View>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={tr('field.weather')}
+              onPress={() => setWeatherOpen(true)}
+              style={{ backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: t.colors.line, padding: 12 }}
+            >
+              <Row gap={11} style={{ alignItems: 'center' }}>
+                <Text style={{ fontSize: 22 }}>{os.weather.type ? weatherOf(os.weather.type)?.icon : '🌡️'}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text weight="700" style={{ fontSize: 14 }}>{os.weather.type ? weatherOf(os.weather.type)?.label : tr('field.setWeather')}</Text>
+                  <Text variant="caption">{tr('field.weather')}{os.weather.temp != null ? ` · ${os.weather.temp}°C` : ''}</Text>
+                </View>
+                <Icon name="chevronsR" size={16} color={t.colors.ink3} />
+              </Row>
+            </Pressable>
 
             <View style={{ gap: 10 }}>
               <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -177,6 +204,26 @@ export default function OS() {
                       <Text variant="caption">{c.obrig ? tr('field.obrig') : tr('field.optional')} · {c.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
                     </View>
                     <Icon name="plus" size={18} color={t.colors.accent} />
+                  </Row>
+                </Pressable>
+              ))}
+            </View>
+          </Sheet>
+
+          <Sheet visible={weatherOpen} onClose={() => setWeatherOpen(false)} title={tr('field.weather')} closeLabel={tr('common.close')}>
+            <View style={{ gap: 8 }}>
+              {WEATHER_TYPES.map((w) => (
+                <Pressable
+                  key={w.type}
+                  accessibilityRole="button"
+                  accessibilityLabel={w.label}
+                  onPress={() => pickWeather(w.type)}
+                  style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: os.weather.type === w.type ? t.colors.accent : t.colors.line, borderRadius: 12, padding: 13 }}
+                >
+                  <Row gap={11} style={{ alignItems: 'center' }}>
+                    <Text style={{ fontSize: 22 }}>{w.icon}</Text>
+                    <Text weight="700" style={{ flex: 1, fontSize: 14.5 }}>{w.label}</Text>
+                    {os.weather.type === w.type ? <Icon name="check" size={18} color={t.colors.accent} /> : null}
                   </Row>
                 </Pressable>
               ))}

@@ -12,6 +12,7 @@ use App\Models\Field\FieldShift;
 use App\Models\Field\FieldSite;
 use App\Models\Field\FieldSitePerformance;
 use App\Models\Media;
+use App\Support\Field\Weather;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -52,6 +53,10 @@ class FieldOsController extends Controller
                         : null,
                 ],
                 'visit' => $visit ? ['id' => (string) $visit->id, 'status' => $visit->status] : null,
+                'weather' => [
+                    'type' => $visit?->weather['type'] ?? null,
+                    'temp' => $visit?->weather['temp'] ?? Weather::currentTemp($site->lat, $site->lng),
+                ],
                 'photos' => [
                     'before' => $visit?->photo_before ?? [],
                     'after' => $visit?->photo_after ?? [],
@@ -118,6 +123,23 @@ class FieldOsController extends Controller
             'mediaId' => $media->id,
         ];
         $visit->update([$col => $list]);
+
+        return $this->show($site);
+    }
+
+    /** Record the weather: the tech picks the type; the temperature comes from
+     *  the backend (Open-Meteo, best-effort). */
+    public function setWeather(Request $request, FieldSite $site): JsonResponse
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:claro,parcialmente-nublado,nublado,chuvoso,tempestade,neblina'],
+        ]);
+
+        $visit = $this->runningVisit($site);
+        $visit->update(['weather' => [
+            'type' => $data['type'],
+            'temp' => Weather::currentTemp($site->lat, $site->lng),
+        ]]);
 
         return $this->show($site);
     }

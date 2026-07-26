@@ -161,6 +161,7 @@ Route::prefix('provider/v1')->group(function () {
             Route::put('os/{site}/services/{service}', [FieldOsController::class, 'toggleService']);
             Route::post('os/{site}/catalog/{item}', [FieldOsController::class, 'addCatalog']);
             Route::post('os/{site}/photos', [FieldOsController::class, 'attachPhoto']);
+            Route::put('os/{site}/weather', [FieldOsController::class, 'setWeather']);
 
             // Performances feed + add-on catalog
             Route::get('performances', [FieldPerformanceController::class, 'index']);

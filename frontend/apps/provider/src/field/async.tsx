@@ -3,8 +3,9 @@
  * reload, plus centered Loading and Error views (the error offers a retry and
  * shows the API's localized message).
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { ApiError, Text, useTheme } from '@chamafacil/shared';
 import { useTranslation } from 'react-i18next';
 
@@ -29,6 +30,21 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]) {
   }, [...deps, nonce]);
 
   const reload = useCallback(() => setNonce((n) => n + 1), []);
+
+  // Refetch when the screen regains focus (e.g. back from the OS after finishing
+  // a visit), so it never shows stale data — but not on the initial mount, which
+  // the effect above already handles.
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      setNonce((n) => n + 1);
+    }, []),
+  );
+
   return { data, error, loading, reload, setData };
 }
 

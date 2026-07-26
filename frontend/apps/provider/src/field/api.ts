@@ -33,9 +33,12 @@ export type Shift = { id: string; tech: string; date: string; status: string; is
 
 export type CatalogItem = { id: string; name: string; rate: Charge; obrig: boolean };
 export type OsPhoto = { url: string; at: string; takenAt?: string; mediaId: number | null };
+export type WeatherType = 'claro' | 'parcialmente-nublado' | 'nublado' | 'chuvoso' | 'tempestade' | 'neblina';
+export type Weather = { type: WeatherType | null; temp: number | null };
 export type Os = {
   site: { id: string; name: string; contract: string; address: string; geo: Geo | null };
   visit: { id: string; status: string } | null;
+  weather: Weather;
   photos: { before: OsPhoto[]; after: OsPhoto[] };
   durations: { siteMinutes: number | null; shiftMinutes: number | null };
   presence: string[];
@@ -61,6 +64,8 @@ export const fieldApi = {
   shift: () => http.get<{ data: Shift | null }>(`${base}/shift`).then(unwrap),
 
   os: (siteId: string) => http.get<{ data: Os }>(`${base}/os/${siteId}`).then(unwrap),
+  setWeather: (siteId: string, type: WeatherType) =>
+    http.put<{ data: Os }>(`${base}/os/${siteId}/weather`, { body: { type } }).then(unwrap),
   toggleService: (siteId: string, serviceId: string, done: boolean) =>
     http.put<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}`, { body: { done } }).then(unwrap),
   addCatalog: (siteId: string, catalogId: string) =>

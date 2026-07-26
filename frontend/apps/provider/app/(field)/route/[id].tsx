@@ -167,7 +167,15 @@ export default function RouteStops() {
             {running ? (
               <SlideToConfirm variant="success" label={tr('field.finishRoute')} doneLabel={tr('field.finishRouteDone')} confirmHint={tr('field.finishRouteHint')} onConfirm={finishRoute} />
             ) : (
-              <SlideToConfirm label={tr('field.startRoute')} doneLabel={tr('field.startRouteDone')} confirmHint={tr('field.startRouteHint')} onConfirm={() => confirm(() => fieldApi.startRoute(route.id))} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={tr('field.startRoute')}
+                onPress={() => confirm(() => fieldApi.startRoute(route.id))}
+                style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+              >
+                <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.startRoute')}</Text>
+                <Icon name="chevronsR" size={17} color="#fff" />
+              </Pressable>
             )}
           </SafeAreaView>
         </>

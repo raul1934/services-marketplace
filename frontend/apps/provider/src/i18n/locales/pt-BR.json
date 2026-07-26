@@ -57,6 +57,8 @@
     "photoError": "Falha na foto",
     "photoNum": "Foto {{n}}",
     "photoMax": "Limite de {{n}} fotos atingido",
+    "weather": "Clima",
+    "setWeather": "Definir clima",
     "before": "Antes",
     "after": "Depois",
     "visitServices": "Serviços da visita",

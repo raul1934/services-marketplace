@@ -4,7 +4,7 @@ import MapView, { MapLabel, MapPin, Marker, Polygon } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { BackBar, Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { fieldApi, Geo } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
@@ -146,7 +146,15 @@ export default function SiteDetail() {
                 <Icon name="chevronsR" size={17} color="#fff" />
               </Pressable>
             ) : (
-              <SlideToConfirm label={tr('field.startVisit')} doneLabel={tr('field.startVisitDone')} confirmHint={tr('field.startVisitHint')} onConfirm={() => confirm(() => fieldApi.startSite(s.id))} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={tr('field.startVisit')}
+                onPress={() => confirm(() => fieldApi.startSite(s.id))}
+                style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+              >
+                <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.startVisit')}</Text>
+                <Icon name="chevronsR" size={17} color="#fff" />
+              </Pressable>
             )}
           </SafeAreaView>
         </>

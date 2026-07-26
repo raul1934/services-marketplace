@@ -57,6 +57,8 @@
     "photoError": "Photo failed",
     "photoNum": "Photo {{n}}",
     "photoMax": "Reached the {{n}}-photo limit",
+    "weather": "Weather",
+    "setWeather": "Set weather",
     "before": "Before",
     "after": "After",
     "visitServices": "Visit services",

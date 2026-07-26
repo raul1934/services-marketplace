@@ -13,10 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class FieldSitePerformance extends Model
 {
-    protected $fillable = ['shift_id', 'route_performance_id', 'site_id', 'status', 'crew', 'time', 'photo_before', 'photo_after', 'started_at', 'ended_at'];
+    protected $fillable = ['shift_id', 'route_performance_id', 'site_id', 'status', 'crew', 'time', 'weather', 'photo_before', 'photo_after', 'started_at', 'ended_at'];
 
     protected $casts = [
         'crew' => 'integer',
+        'weather' => 'array',
         'photo_before' => 'array',
         'photo_after' => 'array',
         'started_at' => 'datetime',
