@@ -6,6 +6,7 @@
  * in data.ts; the shapes below mirror the JSON the controllers emit.
  */
 import { http } from '@chamafacil/shared';
+import { appendPhoto, PickedPhoto } from '../photos';
 
 export type Charge = 'visit' | 'hour';
 export type RunStatus = 'idle' | 'running' | 'done';
@@ -30,9 +31,11 @@ export type ShiftCrew = { id: string; tech: string; status: string };
 export type Shift = { id: string; tech: string; date: string; status: string; isMaster: boolean; startedAt: string | null; endedAt: string | null; crew: ShiftCrew[] };
 
 export type CatalogItem = { id: string; name: string; rate: Charge; obrig: boolean };
+export type OsPhoto = { url: string; at: string; mediaId: number | null };
 export type Os = {
   site: { id: string; name: string; contract: string; address: string; geo: Geo | null };
   visit: { id: string; status: string } | null;
+  photos: { before: OsPhoto | null; after: OsPhoto | null };
   durations: { siteMinutes: number | null; shiftMinutes: number | null };
   presence: string[];
   services: Service[];
@@ -61,4 +64,12 @@ export const fieldApi = {
     http.put<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}`, { body: { done } }).then(unwrap),
   addCatalog: (siteId: string, catalogId: string) =>
     http.post<{ data: Os }>(`${base}/os/${siteId}/catalog/${encodeURIComponent(catalogId)}`).then(unwrap),
+  // Uploads the photo file itself (multipart) so the backend can store it
+  // untouched (EXIF kept) under its lineage filename.
+  attachPhoto: async (siteId: string, phase: 'before' | 'after', photo: PickedPhoto) => {
+    const form = new FormData();
+    form.append('phase', phase);
+    await appendPhoto(form, 'photo', photo);
+    return http.post<{ data: Os }>(`${base}/os/${siteId}/photos`, { form }).then(unwrap);
+  },
 };

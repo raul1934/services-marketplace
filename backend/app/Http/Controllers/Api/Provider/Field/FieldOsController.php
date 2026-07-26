@@ -11,6 +11,7 @@ use App\Models\Field\FieldServicePerformance;
 use App\Models\Field\FieldShift;
 use App\Models\Field\FieldSite;
 use App\Models\Field\FieldSitePerformance;
+use App\Models\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -51,6 +52,10 @@ class FieldOsController extends Controller
                         : null,
                 ],
                 'visit' => $visit ? ['id' => (string) $visit->id, 'status' => $visit->status] : null,
+                'photos' => [
+                    'before' => $visit?->photo_before,
+                    'after' => $visit?->photo_after,
+                ],
                 // Minutes on this visit and on the shift (null when not started).
                 'durations' => [
                     'siteMinutes' => $visit?->started_at ? (int) $visit->started_at->diffInMinutes(now()) : null,
@@ -66,6 +71,47 @@ class FieldOsController extends Controller
                 ])->values(),
             ],
         ]);
+    }
+
+    /**
+     * Attach a before/after photo to the running visit. Stored UNTOUCHED — the
+     * GPS + date/time EXIF is the proof the work happened on-site, so nothing is
+     * stripped or re-encoded. The file is named by its lineage for traceability:
+     * {shift}_{routePerformance}_{sitePerformance}_{phase}_{index}.{ext}.
+     */
+    public function attachPhoto(Request $request, FieldSite $site): JsonResponse
+    {
+        $data = $request->validate([
+            'phase' => ['required', 'in:before,after'],
+            'photo' => ['required', 'image', 'max:12288'],
+        ]);
+
+        $visit = $this->runningVisit($site);
+        $phase = $data['phase'];
+        $index = (int) (($visit->{'photo_'.$phase}['index'] ?? 0)) + 1;
+
+        $file = $request->file('photo');
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
+        $name = implode('_', [$visit->shift_id, $visit->route_performance_id ?? 0, $visit->id, $phase, $index]).'.'.$ext;
+        $path = $file->storeAs('uploads/field/'.$visit->shift_id, $name, 'public');
+
+        $media = Media::create([
+            'uploaded_by_id' => $request->user()->id,
+            'disk' => 'public',
+            'path' => $path,
+            'tag' => 'field-os',
+        ]);
+
+        $visit->update([
+            'photo_'.$phase => [
+                'url' => $media->url,
+                'at' => now()->format('G:i'),
+                'index' => $index,
+                'mediaId' => $media->id,
+            ],
+        ]);
+
+        return $this->show($site);
     }
 
     /** Check a service done/undone on the running visit. */

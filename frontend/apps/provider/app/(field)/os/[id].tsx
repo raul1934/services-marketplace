@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
-import { CatalogItem, fieldApi, Service } from '../../../src/field/api';
+import { CatalogItem, fieldApi, OsPhoto, Service } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { distanceMeters, useMyLocation } from '../../../src/location';
+import { capturePhoto } from '../../../src/photos';
 
 export default function OS() {
   const t = useTheme();
@@ -17,9 +18,23 @@ export default function OS() {
   const { data: os, loading, error, reload, setData } = useAsync(() => fieldApi.os(siteId), [siteId]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const me = useMyLocation();
+  const [uploading, setUploading] = useState<'before' | 'after' | null>(null);
 
   // Within the site's geofence? (~150 m). null while there's no fix yet.
   const inside = me && os?.site.geo ? distanceMeters(me, os.site.geo) <= 150 : null;
+
+  const shootPhoto = async (phase: 'before' | 'after') => {
+    try {
+      const p = await capturePhoto();
+      if (!p) return;
+      setUploading(phase);
+      setData(await fieldApi.attachPhoto(siteId, phase, p));
+    } catch {
+      reload();
+    } finally {
+      setUploading(null);
+    }
+  };
 
   const toggle = async (svc: Service) => {
     const next = !svc.done;
@@ -78,8 +93,8 @@ export default function OS() {
             <View style={{ gap: 7 }}>
               <Text variant="label">{tr('field.photos')}</Text>
               <Row gap={10}>
-                <Photo label={`${tr('field.before')} · 8:22`} />
-                <Photo label={`${tr('field.after')} · 8:29`} />
+                <PhotoSlot label={tr('field.before')} photo={os.photos.before} busy={uploading === 'before'} onPress={() => shootPhoto('before')} />
+                <PhotoSlot label={tr('field.after')} photo={os.photos.after} busy={uploading === 'after'} onPress={() => shootPhoto('after')} />
               </Row>
             </View>
 
@@ -170,15 +185,36 @@ export default function OS() {
   );
 }
 
-function Photo({ label }: { label: string }) {
+function PhotoSlot({ label, photo, busy, onPress }: { label: string; photo: OsPhoto | null; busy: boolean; onPress: () => void }) {
   const t = useTheme();
   return (
-    <View style={{ flex: 1, height: 96, borderRadius: 11, overflow: 'hidden', backgroundColor: '#46586a', justifyContent: 'flex-end', padding: 8 }}>
-      <Row gap={4} style={{ alignItems: 'center' }}>
-        <Icon name="pin" size={11} color="#fff" />
-        <Text style={{ fontSize: 10.5, fontWeight: '700' }} color="#fff">{label}</Text>
-      </Row>
-    </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={onPress}
+      disabled={busy}
+      style={{ flex: 1, height: 96, borderRadius: 11, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: photo ? '#46586a' : t.colors.surface2, borderWidth: photo ? 0 : 1.5, borderColor: t.colors.line, borderStyle: photo ? 'solid' : 'dashed' }}
+    >
+      {photo ? <Image source={{ uri: photo.url }} style={{ position: 'absolute', width: '100%', height: '100%' }} resizeMode="cover" /> : null}
+      {photo ? (
+        <View style={{ padding: 8 }}>
+          <Row gap={4} style={{ alignItems: 'center' }}>
+            <Icon name="pin" size={11} color="#fff" />
+            <Text style={{ fontSize: 10.5, fontWeight: '700' }} color="#fff">{label} · {photo.at}</Text>
+          </Row>
+        </View>
+      ) : (
+        <View style={{ position: 'absolute', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+          <Icon name="plus" size={20} color={t.colors.ink3} />
+          <Text variant="caption">{label}</Text>
+        </View>
+      )}
+      {busy ? (
+        <View style={{ position: 'absolute', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.35)' }}>
+          <ActivityIndicator color="#fff" />
+        </View>
+      ) : null}
+    </Pressable>
   );
 }
 

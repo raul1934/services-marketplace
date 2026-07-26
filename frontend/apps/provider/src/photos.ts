@@ -23,6 +23,30 @@ export async function appendPhoto(form: FormData, field: string, p: PickedPhoto)
   }
 }
 
+/**
+ * Capture a single photo with the camera for a work order. Uses quality 1 (no
+ * recompression) so the file keeps its EXIF — GPS + date/time are the proof the
+ * work happened on-site, so nothing is stripped. Returns null if cancelled.
+ */
+export async function capturePhoto(): Promise<PickedPhoto | null> {
+  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  if (status !== 'granted') throw new Error('Permissão de câmera negada.');
+
+  const result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    quality: 1,
+    exif: true,
+  });
+  if (result.canceled) return null;
+
+  const a = result.assets[0];
+  return {
+    uri: a.uri,
+    fileName: a.fileName ?? `os-${Date.now()}.jpg`,
+    mimeType: a.mimeType ?? 'image/jpeg',
+  };
+}
+
 /** Pick up to `remaining` images from the library. */
 export async function pickPhotos(remaining: number): Promise<PickedPhoto[]> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
