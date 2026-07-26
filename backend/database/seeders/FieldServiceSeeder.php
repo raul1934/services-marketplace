@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Field\FieldCatalogItem;
+use App\Models\Field\FieldCompany;
+use App\Models\Field\FieldResource;
+use App\Models\Field\FieldResourceCategory;
 use App\Models\Field\FieldRoute;
 use App\Models\Field\FieldRoutePerformance;
 use App\Models\Field\FieldRouteStop;
@@ -30,6 +33,13 @@ class FieldServiceSeeder extends Seeder
     /** Master data: sites + their services, route templates, add-on catalog. */
     private function definitions(): void
     {
+        // Companies own the sites and the resource catalogs. The `contract`
+        // label on each site is kept; `company_id` is its slug.
+        $companies = ['nadruz' => 'Nadruz', 'pacco' => 'Pacco'];
+        foreach ($companies as $id => $name) {
+            FieldCompany::updateOrCreate(['id' => $id], ['name' => $name]);
+        }
+
         $sites = [
             ['id' => 'rio-fortore', 'name' => 'Cond. Rio Fortore', 'contract' => 'Nadruz', 'address' => 'Av. Anísio Haddad, 2000', 'lat' => -20.815, 'lng' => -49.38, 'services' => [
                 ['id' => 'bomba', 'name' => "Bomba d'água — preventiva", 'who' => 'AN', 'who_name' => 'Você', 'rate' => 'visit', 'obrig' => true, 'nest' => [
@@ -86,6 +96,7 @@ class FieldServiceSeeder extends Seeder
         foreach ($sites as $site) {
             $services = $site['services'];
             unset($site['services']);
+            $site['company_id'] = strtolower($site['contract']);
             $site['geofence'] = $this->geofence($site['lat'], $site['lng'], $site['id']);
             FieldSite::updateOrCreate(['id' => $site['id']], $site);
 
@@ -135,6 +146,75 @@ class FieldServiceSeeder extends Seeder
         ];
         foreach ($catalog as $i => $item) {
             FieldCatalogItem::updateOrCreate(['id' => $item['id']], $item + ['position' => $i]);
+        }
+
+        $this->resourceCatalog();
+    }
+
+    /**
+     * Each company's equipment/consumable catalog, with categories (N:N). The
+     * items mirror what the services already reference in their `nest`, so the
+     * picker (Phase 3) offers exactly what the demo shows.
+     */
+    private function resourceCatalog(): void
+    {
+        $catalogs = [
+            'nadruz' => [
+                'categories' => [
+                    'equipment' => ['medicao' => 'Medição', 'eletrica' => 'Elétrica'],
+                    'consumable' => ['pecas' => 'Peças', 'lubrificantes' => 'Lubrificantes'],
+                ],
+                'resources' => [
+                    // [slug, name, kind, rate|cost, [category slugs]]
+                    ['multimetro', 'Multímetro', 'equipment', 'hour', ['medicao', 'eletrica']],
+                    ['alicate', 'Alicate-amperímetro', 'equipment', 'hour', ['medicao', 'eletrica']],
+                    ['termografica', 'Câmera termográfica', 'equipment', 'hour', ['medicao']],
+                    ['pressostato', 'Pressostato', 'consumable', 'charged', ['pecas']],
+                    ['graxa', 'Graxa', 'consumable', 'free', ['lubrificantes']],
+                    ['led', 'Lâmpadas LED', 'consumable', 'charged', ['pecas']],
+                ],
+            ],
+            'pacco' => [
+                'categories' => [
+                    'equipment' => ['climatizacao' => 'Climatização', 'eletrica' => 'Elétrica'],
+                    'consumable' => ['gases' => 'Gases', 'pecas' => 'Peças'],
+                ],
+                'resources' => [
+                    ['alicate', 'Alicate-amperímetro', 'equipment', 'hour', ['eletrica']],
+                    ['manifold', 'Manifold', 'equipment', 'visit', ['climatizacao']],
+                    ['vacuometro', 'Vacuômetro', 'equipment', 'hour', ['climatizacao']],
+                    ['gas-r410', 'Gás R-410', 'consumable', 'charged', ['gases']],
+                    ['diesel', 'Diesel', 'consumable', 'charged', ['gases']],
+                    ['selo', 'Selo mecânico', 'consumable', 'free', ['pecas']],
+                ],
+            ],
+        ];
+
+        foreach ($catalogs as $companyId => $cat) {
+            $catPos = 0;
+            foreach ($cat['categories'] as $kind => $cats) {
+                foreach ($cats as $slug => $name) {
+                    FieldResourceCategory::updateOrCreate(
+                        ['id' => "$companyId:cat:$slug"],
+                        ['company_id' => $companyId, 'kind' => $kind, 'name' => $name, 'position' => $catPos++],
+                    );
+                }
+            }
+
+            foreach ($cat['resources'] as $i => [$slug, $name, $kind, $rateOrCost, $catSlugs]) {
+                $resource = FieldResource::updateOrCreate(
+                    ['id' => "$companyId:res:$slug"],
+                    [
+                        'company_id' => $companyId,
+                        'kind' => $kind,
+                        'name' => $name,
+                        'rate' => $kind === 'equipment' ? $rateOrCost : null,
+                        'cost' => $kind === 'consumable' ? $rateOrCost : null,
+                        'position' => $i,
+                    ],
+                );
+                $resource->categories()->sync(array_map(fn ($c) => "$companyId:cat:$c", $catSlugs));
+            }
         }
     }
 

@@ -3,6 +3,7 @@
 namespace App\Models\Field;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /** A serviced site (condomínio/edifício). Master data — no execution state. */
@@ -12,13 +13,18 @@ class FieldSite extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'name', 'contract', 'address', 'lat', 'lng', 'geofence'];
+    protected $fillable = ['id', 'name', 'contract', 'company_id', 'address', 'lat', 'lng', 'geofence'];
 
     protected $casts = [
         'lat' => 'float',
         'lng' => 'float',
         'geofence' => 'array',
     ];
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(FieldCompany::class, 'company_id');
+    }
 
     public function services(): HasMany
     {
