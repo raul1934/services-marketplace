@@ -53,8 +53,8 @@ class FieldOsController extends Controller
                 ],
                 'visit' => $visit ? ['id' => (string) $visit->id, 'status' => $visit->status] : null,
                 'photos' => [
-                    'before' => $visit?->photo_before,
-                    'after' => $visit?->photo_after,
+                    'before' => $visit?->photo_before ?? [],
+                    'after' => $visit?->photo_after ?? [],
                 ],
                 // Minutes on this visit and on the shift (null when not started).
                 'durations' => [
@@ -88,7 +88,9 @@ class FieldOsController extends Controller
 
         $visit = $this->runningVisit($site);
         $phase = $data['phase'];
-        $index = (int) (($visit->{'photo_'.$phase}['index'] ?? 0)) + 1;
+        $col = 'photo_'.$phase;
+        $list = $visit->{$col} ?? [];
+        $index = count($list) + 1; // position in the phase, in capture order
 
         $file = $request->file('photo');
         $ext = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'jpg');
@@ -102,14 +104,13 @@ class FieldOsController extends Controller
             'tag' => 'field-os',
         ]);
 
-        $visit->update([
-            'photo_'.$phase => [
-                'url' => $media->url,
-                'at' => now()->format('G:i'),
-                'index' => $index,
-                'mediaId' => $media->id,
-            ],
-        ]);
+        $list[] = [
+            'url' => $media->url,
+            'at' => now()->format('G:i'),
+            'index' => $index,
+            'mediaId' => $media->id,
+        ];
+        $visit->update([$col => $list]);
 
         return $this->show($site);
     }

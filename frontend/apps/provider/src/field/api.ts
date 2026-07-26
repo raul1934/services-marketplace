@@ -35,7 +35,7 @@ export type OsPhoto = { url: string; at: string; mediaId: number | null };
 export type Os = {
   site: { id: string; name: string; contract: string; address: string; geo: Geo | null };
   visit: { id: string; status: string } | null;
-  photos: { before: OsPhoto | null; after: OsPhoto | null };
+  photos: { before: OsPhoto[]; after: OsPhoto[] };
   durations: { siteMinutes: number | null; shiftMinutes: number | null };
   presence: string[];
   services: Service[];

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { ApiError, Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { CatalogItem, fieldApi, OsPhoto, Service } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { distanceMeters, useMyLocation } from '../../../src/location';
@@ -29,7 +29,8 @@ export default function OS() {
       if (!p) return;
       setUploading(phase);
       setData(await fieldApi.attachPhoto(siteId, phase, p));
-    } catch {
+    } catch (e) {
+      Alert.alert(tr('field.photoError'), e instanceof ApiError ? e.message : String((e as Error)?.message ?? e));
       reload();
     } finally {
       setUploading(null);
@@ -90,12 +91,10 @@ export default function OS() {
               </Row>
             </View>
 
-            <View style={{ gap: 7 }}>
+            <View style={{ gap: 10 }}>
               <Text variant="label">{tr('field.photos')}</Text>
-              <Row gap={10}>
-                <PhotoSlot label={tr('field.before')} photo={os.photos.before} busy={uploading === 'before'} onPress={() => shootPhoto('before')} />
-                <PhotoSlot label={tr('field.after')} photo={os.photos.after} busy={uploading === 'after'} onPress={() => shootPhoto('after')} />
-              </Row>
+              <PhotoRow label={tr('field.before')} photos={os.photos.before} busy={uploading === 'before'} onAdd={() => shootPhoto('before')} />
+              <PhotoRow label={tr('field.after')} photos={os.photos.after} busy={uploading === 'after'} onAdd={() => shootPhoto('after')} />
             </View>
 
             <View style={{ gap: 9 }}>
@@ -185,36 +184,38 @@ export default function OS() {
   );
 }
 
-function PhotoSlot({ label, photo, busy, onPress }: { label: string; photo: OsPhoto | null; busy: boolean; onPress: () => void }) {
+/** One phase's photos (Antes/Depois) as a horizontal gallery, in capture order. */
+function PhotoRow({ label, photos, busy, onAdd }: { label: string; photos: OsPhoto[]; busy: boolean; onAdd: () => void }) {
   const t = useTheme();
+  const { t: tr } = useTranslation();
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      disabled={busy}
-      style={{ flex: 1, height: 96, borderRadius: 11, overflow: 'hidden', justifyContent: 'flex-end', backgroundColor: photo ? '#46586a' : t.colors.surface2, borderWidth: photo ? 0 : 1.5, borderColor: t.colors.line, borderStyle: photo ? 'solid' : 'dashed' }}
-    >
-      {photo ? <Image source={{ uri: photo.url }} style={{ position: 'absolute', width: '100%', height: '100%' }} resizeMode="cover" /> : null}
-      {photo ? (
-        <View style={{ padding: 8 }}>
-          <Row gap={4} style={{ alignItems: 'center' }}>
-            <Icon name="pin" size={11} color="#fff" />
-            <Text style={{ fontSize: 10.5, fontWeight: '700' }} color="#fff">{label} · {photo.at}</Text>
-          </Row>
-        </View>
-      ) : (
-        <View style={{ position: 'absolute', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-          <Icon name="plus" size={20} color={t.colors.ink3} />
-          <Text variant="caption">{label}</Text>
-        </View>
-      )}
-      {busy ? (
-        <View style={{ position: 'absolute', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.35)' }}>
-          <ActivityIndicator color="#fff" />
-        </View>
-      ) : null}
-    </Pressable>
+    <View style={{ gap: 6 }}>
+      <Text weight="700" style={{ fontSize: 12.5 }} color={t.colors.ink2}>{label} · {photos.length}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+        {photos.map((p, i) => (
+          <View key={p.mediaId ?? i} style={{ width: 92, height: 92, borderRadius: 11, overflow: 'hidden', backgroundColor: '#46586a' }}>
+            <Image source={{ uri: p.url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+            <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 6, paddingVertical: 3, backgroundColor: 'rgba(0,0,0,0.4)' }}>
+              <Text style={{ fontSize: 10, fontWeight: '700' }} color="#fff">{i + 1} · {p.at}</Text>
+            </View>
+          </View>
+        ))}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${tr('field.addPhoto')} · ${label}`}
+          onPress={onAdd}
+          disabled={busy}
+          style={{ width: 92, height: 92, borderRadius: 11, borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center', gap: 3 }}
+        >
+          {busy ? <ActivityIndicator color={t.colors.accent} /> : (
+            <>
+              <Icon name="plus" size={20} color={t.colors.ink3} />
+              <Text variant="caption">{tr('field.addPhoto')}</Text>
+            </>
+          )}
+        </Pressable>
+      </ScrollView>
+    </View>
   );
 }
 
