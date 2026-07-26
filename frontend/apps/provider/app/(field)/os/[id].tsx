@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Dimensions, Image, Modal, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, Image, Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
-import { CatalogItem, Crew, fieldApi, OsPhoto, Service, WeatherType } from '../../../src/field/api';
+import { Crew, fieldApi, MenuItem, OsPhoto, ResourceItem, ResourceKind, ServiceInstance, ServiceResource, WeatherType } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { distanceMeters, useMyLocation } from '../../../src/location';
 import { capturePhoto } from '../../../src/photos';
@@ -17,13 +17,15 @@ export default function OS() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const siteId = id ?? 'rio-fortore';
   const { data: os, loading, error, reload, setData } = useAsync(() => fieldApi.os(siteId), [siteId]);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const me = useMyLocation();
   const [uploading, setUploading] = useState<'before' | 'after' | null>(null);
   const [viewer, setViewer] = useState<{ photos: OsPhoto[]; index: number } | null>(null);
   const [weatherOpen, setWeatherOpen] = useState(false);
-  const [assigneeFor, setAssigneeFor] = useState<Service | null>(null);
-  const [addForOp, setAddForOp] = useState<Crew | null>(null);
+  // The operator whose "add service" menu is open, and its search text.
+  const [menuForOp, setMenuForOp] = useState<Crew | null>(null);
+  const [menuSearch, setMenuSearch] = useState('');
+  // The service instance whose resource picker is open (by its id).
+  const [resourcesForId, setResourcesForId] = useState<string | null>(null);
 
   const pickWeather = async (type: WeatherType) => {
     setWeatherOpen(false);
@@ -51,123 +53,167 @@ export default function OS() {
     }
   };
 
-  const toggle = async (svc: Service) => {
-    const next = !svc.done;
-    setData((prev) => (prev ? { ...prev, services: prev.services.map((s) => (s.id === svc.id ? { ...s, done: next } : s)) } : prev));
+  // Add a service instance under an operator. Services can repeat, so the menu
+  // stays open and each tap adds one more.
+  const addService = async (item: MenuItem, op: Crew) => {
     try {
-      setData(await fieldApi.toggleService(siteId, svc.id, next));
+      setData(await fieldApi.addService(siteId, item.id, op.shiftId));
     } catch {
       reload();
     }
   };
 
-  // Add a catalog service. From an operator's own button it's also assigned to
-  // them; from the solo/global button it just lands (defaults to the operator).
-  const addFromCatalog = async (c: CatalogItem) => {
-    const op = addForOp;
-    setPickerOpen(false);
-    setAddForOp(null);
+  const removeInstance = async (inst: ServiceInstance) => {
+    setData((prev) => (prev ? { ...prev, services: prev.services.filter((s) => s.id !== inst.id) } : prev));
     try {
-      const added = await fieldApi.addCatalog(siteId, c.id);
-      setData(op ? await fieldApi.assignService(siteId, `${siteId}:${c.id}`, op.shiftId) : added);
+      setData(await fieldApi.removeService(siteId, inst.id));
     } catch {
       reload();
     }
   };
 
-  const assign = async (svc: Service, op: Crew) => {
-    setAssigneeFor(null);
-    setData((prev) => (prev ? { ...prev, services: prev.services.map((s) => (s.id === svc.id ? { ...s, assignee: op.who, assigneeName: op.tech } : s)) } : prev));
+  // Add/remove a resource on one service instance (the picker is a toggle).
+  const toggleResource = async (inst: ServiceInstance, item: ResourceItem) => {
+    const has = inst.resources.some((r) => r.id === item.id);
+    setData((prev) => (prev ? { ...prev, services: prev.services.map((s) => (s.id === inst.id
+      ? { ...s, resources: has ? s.resources.filter((r) => r.id !== item.id) : [...s.resources, { ...item, qty: 1 }] }
+      : s)) } : prev));
     try {
-      setData(await fieldApi.assignService(siteId, svc.id, op.shiftId));
+      setData(await (has ? fieldApi.removeResource(siteId, inst.id, item.id) : fieldApi.addResource(siteId, inst.id, item.id)));
     } catch {
       reload();
     }
   };
+
+  const resourceValue = (r: { kind: ResourceKind; rate: ServiceResource['rate']; cost: ServiceResource['cost'] }) =>
+    r.kind === 'equipment'
+      ? (r.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))
+      : (r.cost === 'free' ? tr('field.free') : tr('field.charged'));
 
   const site = os?.site;
-  // Solo shift → every service is the current operator's, shown as a flat list.
-  // Crew → services group under the operator they belong to. The in-field
-  // assignee wins; with none, a service falls to its usual `who` IF that person
-  // is on the shift, otherwise to the current operator (never a phantom group).
+  // The OS is organised by operator. Adding a service (no select/done step) puts
+  // an instance under an operator; a service can appear more than once.
   const crew = os?.crew ?? [];
   const soloShift = crew.length <= 1;
-  const currentOp = crew[0];
-  const effAssignee = (s: Service): { who: string; name: string } => {
-    if (s.assignee) return { who: s.assignee, name: s.assigneeName ?? s.who };
-    const usual = crew.find((c) => c.tech === s.whoName);
-    if (usual) return { who: usual.who, name: usual.tech };
-    return { who: currentOp?.who ?? s.who, name: currentOp?.tech ?? s.whoName };
-  };
-  const openAdd = (op: Crew | null) => { setAddForOp(op); setPickerOpen(true); };
+  const hasResourceCatalog = !!os && (os.resourceCatalog.equipment.length > 0 || os.resourceCatalog.consumable.length > 0);
+  const resourceInst = os ? os.services.find((s) => s.id === resourcesForId) ?? null : null;
+  const instancesFor = (op: Crew) => (os ? os.services.filter((s) => s.assigneeName === op.tech) : []);
 
-  const serviceCard = (s: Service) => {
-    const a = effAssignee(s);
-    const meta = `${s.obrig ? tr('field.obrig') : tr('field.optional')} · ${s.done ? tr('field.statusDone').toLowerCase() : tr('field.statusDoing').toLowerCase()}`;
-    return (
-      <Pressable
-        key={s.id}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: s.done }}
-        accessibilityLabel={s.name}
-        onPress={() => toggle(s)}
-        style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: s.done ? t.colors.line : t.colors.accent, borderRadius: 12, paddingBottom: s.nest.length ? 6 : 0 }}
-      >
-        <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
-          <Check on={s.done} />
-          <View style={{ flex: 1 }}>
-            <Text weight="700" style={{ fontSize: 13.5 }}>{s.name}</Text>
-            {soloShift ? (
-              <Row gap={5} style={{ alignItems: 'center' }}>
-                <Avatar name={a.who} size={16} />
-                <Text variant="caption">{a.name} · {meta}</Text>
-              </Row>
-            ) : (
-              // Crew: the assignee is tappable to reassign the service.
-              <Pressable accessibilityRole="button" accessibilityLabel={tr('field.assignTo')} onPress={() => setAssigneeFor(s)} hitSlop={6}>
-                <Row gap={5} style={{ alignItems: 'center' }}>
-                  <Avatar name={a.who} size={16} />
-                  <Text variant="caption" color={t.colors.accent}>{a.name}</Text>
-                  <Icon name="edit" size={11} color={t.colors.accent} />
-                  <Text variant="caption">· {meta}</Text>
-                </Row>
+  const instanceCard = (inst: ServiceInstance) => (
+    <View key={inst.id} style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, borderRadius: 12, paddingBottom: inst.resources.length || hasResourceCatalog ? 6 : 0 }}>
+      <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
+        <View style={{ flex: 1 }}>
+          <Text weight="700" style={{ fontSize: 13.5 }}>{inst.name}</Text>
+          <Text variant="caption">{inst.obrig ? tr('field.obrig') : tr('field.optional')}</Text>
+        </View>
+        <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={t.colors.ink2}>{inst.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={`${tr('common.remove')} ${inst.name}`} onPress={() => removeInstance(inst)} hitSlop={8}>
+          <Icon name="close" size={16} color={t.colors.ink3} />
+        </Pressable>
+      </Row>
+      {inst.resources.length || hasResourceCatalog ? (
+        <View style={{ marginLeft: 12, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
+          {inst.resources.map((r) => (
+            <Row key={r.id} gap={8} style={{ alignItems: 'center' }}>
+              <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 11 }}>{r.kind === 'equipment' ? '🔧' : '📦'}</Text>
+              </View>
+              <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
+                <Text weight="600" style={{ fontSize: 12.5 }}>{r.name}</Text>{` · ${r.kind === 'equipment' ? tr('field.equipment') : tr('field.consumable')}`}{r.qty > 1 ? ` ×${r.qty}` : ''}
+              </Text>
+              <Text style={{ fontSize: 10.5, fontWeight: r.kind === 'consumable' ? '700' : '400' }} color={r.kind === 'consumable' ? (r.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(r)}</Text>
+              <Pressable accessibilityRole="button" accessibilityLabel={`${tr('common.remove')} ${r.name}`} onPress={() => toggleResource(inst, r)} hitSlop={8}>
+                <Icon name="close" size={13} color={t.colors.ink3} />
               </Pressable>
-            )}
-          </View>
-          <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={t.colors.ink2}>{s.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
-        </Row>
-        {s.nest.length ? (
-          <View style={{ marginLeft: 40, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
-            {s.nest.map((n, i) => (
-              <Row key={i} gap={8} style={{ alignItems: 'center' }}>
-                <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ fontSize: 11 }}>{n.icon}</Text>
-                </View>
-                <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
-                  <Text weight="600" style={{ fontSize: 12.5 }}>{n.label}</Text>{n.sub ? ` · ${n.sub}` : ''}
-                </Text>
-                <Text style={{ fontSize: 10.5, fontWeight: n.tone ? '700' : '400' }} color={n.tone === 'charge' ? t.colors.warn : n.tone === 'free' ? t.colors.ok : t.colors.ink3}>{n.value}</Text>
-              </Row>
-            ))}
-          </View>
-        ) : null}
-      </Pressable>
+            </Row>
+          ))}
+          {hasResourceCatalog ? (
+            <Pressable accessibilityRole="button" accessibilityLabel={tr('field.addResource')} onPress={() => setResourcesForId(inst.id)} style={{ alignSelf: 'flex-start', paddingVertical: 3 }}>
+              <Text weight="700" style={{ fontSize: 12 }} color={t.colors.accent}>{tr('field.addResource')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const addServiceButton = (op: Crew, key?: string) => (
+    <Pressable
+      key={key}
+      accessibilityRole="button"
+      accessibilityLabel={tr('field.addService')}
+      onPress={() => { setMenuForOp(op); setMenuSearch(''); }}
+      style={{ borderWidth: 1.5, borderColor: t.colors.line, borderStyle: 'dashed', borderRadius: 11, paddingVertical: 11, alignItems: 'center' }}
+    >
+      <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addService')}</Text>
+    </Pressable>
+  );
+
+  // The "add service" menu: search + a Mandatory group, then the rest.
+  const renderServiceMenu = () => {
+    if (!os || !menuForOp) return null;
+    const q = menuSearch.trim().toLowerCase();
+    const filtered = os.serviceMenu.filter((m) => !q || m.name.toLowerCase().includes(q));
+    const mandatory = filtered.filter((m) => m.obrig);
+    const others = filtered.filter((m) => !m.obrig);
+    // A service can go to several operators, but only once each — so the menu is
+    // a per-operator toggle: added shows a check and tapping removes it.
+    const addedInstance = (id: string) => os.services.find((s) => s.serviceId === id && s.assigneeName === menuForOp!.tech);
+
+    const menuRow = (m: MenuItem) => {
+      const inst = addedInstance(m.id);
+      const added = !!inst;
+      return (
+        <Pressable
+          key={m.id}
+          accessibilityRole="button"
+          accessibilityState={{ selected: added }}
+          accessibilityLabel={m.name}
+          onPress={() => (inst ? removeInstance(inst) : addService(m, menuForOp!))}
+          style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: added ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
+        >
+          <Row gap={10} style={{ alignItems: 'center' }}>
+            <View style={{ width: 34, height: 34, borderRadius: 9, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="wrench" size={17} color={t.colors.ink3} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text weight="600" style={{ fontSize: 13.5 }}>{m.name}</Text>
+              <Text variant="caption">{m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
+            </View>
+            <Icon name={added ? 'check' : 'plus'} size={18} color={t.colors.accent} />
+          </Row>
+        </Pressable>
+      );
+    };
+
+    return (
+      <>
+        <TextInput
+          value={menuSearch}
+          onChangeText={setMenuSearch}
+          placeholder={tr('field.searchService')}
+          placeholderTextColor={t.colors.ink3}
+          accessibilityLabel={tr('field.searchService')}
+          style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 14, color: t.colors.ink, marginBottom: 10 }}
+        />
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" style={{ maxHeight: 420 }}>
+          {mandatory.length ? (
+            <View style={{ gap: 6, marginBottom: 12 }}>
+              <Text variant="label">{tr('field.mandatory')}</Text>
+              {mandatory.map(menuRow)}
+            </View>
+          ) : null}
+          {others.length ? (
+            <View style={{ gap: 6 }}>
+              <Text variant="label">{tr('field.others')}</Text>
+              {others.map(menuRow)}
+            </View>
+          ) : null}
+          {!filtered.length ? <Text variant="caption" style={{ paddingVertical: 12 }}>{tr('field.noResults')}</Text> : null}
+        </ScrollView>
+      </>
     );
   };
-
-  // Crew view: one section per operator on the shift (leader first), each with
-  // the services assigned to them — empty operators still get a section so they
-  // have an "add service" button.
-  const crewGroups = (services: Service[]) =>
-    crew.map((c) => ({ crew: c, services: services.filter((s) => effAssignee(s).name === c.tech) }));
-
-  // The dashed "add a catalog service" button (per operator, or global for solo).
-  const addServiceButton = (op: Crew | null, key?: string) =>
-    os && os.catalog.length ? (
-      <Pressable key={key} accessibilityRole="button" accessibilityLabel={tr('field.addService')} onPress={() => openAdd(op)} style={{ borderWidth: 1.5, borderColor: t.colors.line, borderStyle: 'dashed', borderRadius: 11, paddingVertical: 11, alignItems: 'center' }}>
-        <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addService')}</Text>
-      </Pressable>
-    ) : null;
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
@@ -230,24 +276,24 @@ export default function OS() {
             <View style={{ gap: 9 }}>
               <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text variant="label">{tr('field.visitServices')}</Text>
-                <Text variant="caption">{tr('field.selected', { n: os.services.filter((s) => s.done).length, total: os.services.length })}</Text>
+                <Text variant="caption">{tr('field.servicesTotal', { n: os.services.length })}</Text>
               </Row>
 
               {soloShift ? (
                 <>
-                  {os.services.map((s) => serviceCard(s))}
-                  {addServiceButton(null)}
+                  {crew[0] ? instancesFor(crew[0]).map(instanceCard) : null}
+                  {crew[0] ? addServiceButton(crew[0]) : null}
                 </>
               ) : (
-                crewGroups(os.services).map((g) => (
-                  <View key={g.crew.shiftId} style={{ gap: 8, marginTop: 2 }}>
+                crew.map((c) => (
+                  <View key={c.shiftId} style={{ gap: 8, marginTop: 2 }}>
                     <Row gap={8} style={{ alignItems: 'center' }}>
-                      <Avatar name={g.crew.who} size={22} />
-                      <Text weight="700" style={{ fontSize: 13 }}>{g.crew.tech}</Text>
-                      <Text variant="caption">· {tr('field.selected', { n: g.services.filter((s) => s.done).length, total: g.services.length })}</Text>
+                      <Avatar name={c.who} size={22} />
+                      <Text weight="700" style={{ fontSize: 13 }}>{c.tech}</Text>
+                      <Text variant="caption">· {instancesFor(c).length}</Text>
                     </Row>
-                    {g.services.map((s) => serviceCard(s))}
-                    {addServiceButton(g.crew, `add-${g.crew.shiftId}`)}
+                    {instancesFor(c).map(instanceCard)}
+                    {addServiceButton(c, `add-${c.shiftId}`)}
                   </View>
                 ))
               )}
@@ -258,30 +304,8 @@ export default function OS() {
             <SlideToConfirm label={tr('field.finishOS')} doneLabel={tr('field.finishedOS')} confirmHint={tr('field.finishHint')} onConfirm={() => fieldApi.finishSite(siteId).catch(() => {}).finally(() => router.back())} />
           </SafeAreaView>
 
-          <Sheet visible={pickerOpen} onClose={() => { setPickerOpen(false); setAddForOp(null); }} title={addForOp ? tr('field.addServiceFor', { name: addForOp.tech }) : tr('field.addServiceTitle')} closeLabel={tr('common.close')} maxHeight="72%">
-            <Text variant="caption" style={{ marginBottom: 10 }}>{addForOp ? tr('field.catalogHintFor', { name: addForOp.tech }) : tr('field.catalogHint')}</Text>
-            <View style={{ gap: 8 }}>
-              {os.catalog.map((c) => (
-                <Pressable
-                  key={c.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={c.name}
-                  onPress={() => addFromCatalog(c)}
-                  style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: t.colors.line, borderRadius: 12, padding: 13 }}
-                >
-                  <Row gap={10} style={{ alignItems: 'center' }}>
-                    <View style={{ width: 34, height: 34, borderRadius: 9, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-                      <Icon name="wrench" size={17} color={t.colors.ink3} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text weight="600" style={{ fontSize: 13.5 }}>{c.name}</Text>
-                      <Text variant="caption">{c.obrig ? tr('field.obrig') : tr('field.optional')} · {c.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
-                    </View>
-                    <Icon name="plus" size={18} color={t.colors.accent} />
-                  </Row>
-                </Pressable>
-              ))}
-            </View>
+          <Sheet visible={!!menuForOp} onClose={() => setMenuForOp(null)} title={menuForOp ? tr('field.addServiceFor', { name: menuForOp.tech }) : tr('field.addServiceTitle')} closeLabel={tr('common.close')} maxHeight="82%">
+            {renderServiceMenu()}
           </Sheet>
 
           <Sheet visible={weatherOpen} onClose={() => setWeatherOpen(false)} title={tr('field.weather')} closeLabel={tr('common.close')}>
@@ -304,27 +328,46 @@ export default function OS() {
             </View>
           </Sheet>
 
-          <Sheet visible={!!assigneeFor} onClose={() => setAssigneeFor(null)} title={tr('field.assignTo')} closeLabel={tr('common.close')}>
-            <View style={{ gap: 8 }}>
-              {os.crew.map((c) => {
-                const chosen = assigneeFor ? effAssignee(assigneeFor).name === c.tech : false;
-                return (
-                  <Pressable
-                    key={c.shiftId}
-                    accessibilityRole="button"
-                    accessibilityLabel={c.tech}
-                    onPress={() => assigneeFor && assign(assigneeFor, c)}
-                    style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: chosen ? t.colors.accent : t.colors.line, borderRadius: 12, padding: 12 }}
-                  >
-                    <Row gap={11} style={{ alignItems: 'center' }}>
-                      <Avatar name={c.who} size={30} />
-                      <Text weight="700" style={{ flex: 1, fontSize: 14.5 }}>{c.tech}</Text>
-                      {chosen ? <Icon name="check" size={18} color={t.colors.accent} /> : null}
-                    </Row>
-                  </Pressable>
-                );
-              })}
-            </View>
+          <Sheet visible={!!resourceInst} onClose={() => setResourcesForId(null)} title={tr('field.resourcesTitle')} closeLabel={tr('common.close')} maxHeight="82%">
+            {resourceInst ? (
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 460 }}>
+                <Text variant="caption" style={{ marginBottom: 10 }}>{resourceInst.name}</Text>
+                {(['equipment', 'consumable'] as ResourceKind[]).map((kind) => {
+                  const groups = os.resourceCatalog[kind];
+                  if (!groups.length) return null;
+                  return (
+                    <View key={kind} style={{ gap: 8, marginBottom: 14 }}>
+                      <Text variant="label">{kind === 'equipment' ? tr('field.equipmentSection') : tr('field.consumableSection')}</Text>
+                      {groups.map((g) => (
+                        <View key={g.category} style={{ gap: 6 }}>
+                          <Text variant="caption" style={{ marginTop: 2 }}>{g.category}</Text>
+                          {g.items.map((item) => {
+                            const on = resourceInst.resources.some((r) => r.id === item.id);
+                            return (
+                              <Pressable
+                                key={item.id}
+                                accessibilityRole="button"
+                                accessibilityState={{ selected: on }}
+                                accessibilityLabel={item.name}
+                                onPress={() => toggleResource(resourceInst, item)}
+                                style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: on ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
+                              >
+                                <Row gap={10} style={{ alignItems: 'center' }}>
+                                  <Text style={{ fontSize: 17 }}>{kind === 'equipment' ? '🔧' : '📦'}</Text>
+                                  <Text weight="600" style={{ flex: 1, fontSize: 13.5 }}>{item.name}</Text>
+                                  <Text style={{ fontSize: 10.5, fontWeight: item.kind === 'consumable' ? '700' : '400' }} color={item.kind === 'consumable' ? (item.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(item)}</Text>
+                                  <Icon name={on ? 'check' : 'plus'} size={17} color={t.colors.accent} />
+                                </Row>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
+                      ))}
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            ) : null}
           </Sheet>
 
           {viewer ? <PhotoViewer photos={viewer.photos} index={viewer.index} onClose={() => setViewer(null)} /> : null}
@@ -411,14 +454,5 @@ function PhotoViewer({ photos, index, onClose }: { photos: OsPhoto[]; index: num
         </SafeAreaView>
       </View>
     </Modal>
-  );
-}
-
-function Check({ on }: { on: boolean }) {
-  const t = useTheme();
-  return (
-    <View style={{ width: 22, height: 22, borderRadius: 7, borderWidth: on ? 0 : 1.5, borderColor: t.colors.line, backgroundColor: on ? t.colors.accent : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
-      {on ? <Icon name="check" size={14} color="#fff" /> : null}
-    </View>
   );
 }

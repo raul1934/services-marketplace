@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\Provider\Field;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Field\FieldServiceResource;
 use App\Models\Field\FieldCatalogItem;
 use App\Models\Field\FieldResource;
 use App\Models\Field\FieldResourceCategory;
@@ -33,30 +32,37 @@ class FieldOsController extends Controller
         $site->load('services');
         $shift = FieldShift::active();
         $visit = $this->readVisit($site);
-        // Execution rows for this visit, keyed by service — carry done, the
-        // in-field assignee, and the resources actually used.
-        $perfs = $visit
-            ? $visit->servicePerformances()->with('resources')->get()->keyBy('service_id')
-            : collect();
-        $site->services->each(function ($s) use ($perfs) {
-            $p = $perfs->get($s->id);
-            $s->setAttribute('done', (bool) ($p?->done ?? false));
-            $s->setAttribute('assignee', $p?->assignee);
-            $s->setAttribute('assignee_name', $p?->assignee_name);
-            $s->setAttribute('exec_resources', $p ? $p->resources->map(fn ($r) => [
-                'id' => $r->id,
-                'kind' => $r->kind,
-                'name' => $r->name,
-                'rate' => $r->rate,
-                'cost' => $r->cost,
-                'qty' => (int) $r->pivot->qty,
-            ])->values()->all() : []);
-        });
 
-        // Catalog add-ons not yet on this site.
-        $existing = $site->services->pluck('id')->all();
-        $catalog = FieldCatalogItem::query()->orderBy('position')->get()
-            ->reject(fn ($c) => in_array($site->id.':'.$c->id, $existing, true));
+        // The visit's services are the instances the tech added — repeatable,
+        // each owned by an operator and carrying its own resources. There is no
+        // separate "select/done" step: adding a service IS performing it.
+        $instances = $visit
+            ? $visit->servicePerformances()->with(['service', 'resources'])->orderBy('id')->get()->map(fn ($p) => [
+                'id' => (string) $p->id,
+                'serviceId' => $p->service_id,
+                'name' => $p->service?->name ?? $p->service_id,
+                'rate' => $p->service?->rate ?? 'visit',
+                'obrig' => (bool) ($p->service?->obrig ?? false),
+                'assignee' => $p->assignee,
+                'assigneeName' => $p->assignee_name,
+                'resources' => $p->resources->map(fn ($r) => [
+                    'id' => $r->id,
+                    'kind' => $r->kind,
+                    'name' => $r->name,
+                    'rate' => $r->rate,
+                    'cost' => $r->cost,
+                    'qty' => (int) $r->pivot->qty,
+                ])->values(),
+            ])->values()
+            : collect();
+
+        // The "add service" menu: the site's own services (mandatory ones lead),
+        // then the company add-on catalog. The app groups it and offers search.
+        $menu = $site->services->map(fn ($s) => [
+            'id' => $s->id, 'name' => $s->name, 'obrig' => (bool) $s->obrig, 'rate' => $s->rate,
+        ])->concat(FieldCatalogItem::query()->orderBy('position')->get()->map(fn ($c) => [
+            'id' => $c->id, 'name' => $c->name, 'obrig' => (bool) $c->obrig, 'rate' => $c->rate,
+        ]))->sortByDesc('obrig')->values();
 
         return response()->json([
             'data' => [
@@ -84,16 +90,13 @@ class FieldOsController extends Controller
                     'shiftMinutes' => $shift?->started_at ? (int) $shift->started_at->diffInMinutes(now()) : null,
                 ],
                 'presence' => $this->presence(),
-                // The crew on the open shift (current operator first), for the
-                // per-service assignee picker.
+                // The crew on the open shift (current operator first): the visit's
+                // services are grouped under them, and each has an "add" button.
                 'crew' => $this->crew(),
-                'services' => FieldServiceResource::collection($site->services),
-                'catalog' => $catalog->map(fn ($c) => [
-                    'id' => $c->id,
-                    'name' => $c->name,
-                    'rate' => $c->rate,
-                    'obrig' => (bool) $c->obrig,
-                ])->values(),
+                // The added service instances (grouped by operator in the app).
+                'services' => $instances,
+                // The menu to add from (mandatory first, then the catalog).
+                'serviceMenu' => $menu,
                 // The site's company catalog of equipment/consumables, grouped by
                 // category, for the per-service resource picker.
                 'resourceCatalog' => $this->resourceCatalog($site),
@@ -167,102 +170,110 @@ class FieldOsController extends Controller
         return $this->show($site);
     }
 
-    /** Check a service done/undone on the running visit. */
-    public function toggleService(Request $request, FieldSite $site, FieldService $service): JsonResponse
+    /**
+     * Add a service to the visit under one operator. A service can be added to
+     * several operators, but at most ONCE per operator — so this is idempotent
+     * on (visit, service, operator). Adding it IS performing it (no done flag).
+     * The service_id is a site service, or a catalog item promoted on the fly.
+     */
+    public function addService(Request $request, FieldSite $site): JsonResponse
     {
-        $done = $request->validate(['done' => ['required', 'boolean']])['done'];
+        $data = $request->validate([
+            'service_id' => ['required', 'string'],
+            'shift_id' => ['required', 'string'],
+        ]);
+
+        $operator = $this->operatorOnShift($data['shift_id']);
+        $serviceId = $this->resolveService($site, $data['service_id']);
         $visit = $this->runningVisit($site);
-
-        FieldServicePerformance::updateOrCreate(
-            ['site_performance_id' => $visit->id, 'service_id' => $service->id],
-            ['done' => $done],
-        );
-
-        return $this->show($site);
-    }
-
-    /** Add a company-catalog service to this visit (promotes it to a site service). */
-    public function addCatalog(FieldSite $site, FieldCatalogItem $item): JsonResponse
-    {
-        $visit = $this->runningVisit($site);
-        $serviceId = $site->id.':'.$item->id;
-
-        $service = FieldService::firstOrCreate(
-            ['id' => $serviceId],
-            [
-                'site_id' => $site->id,
-                'name' => $item->name,
-                'who' => 'AN',
-                'who_name' => 'Você',
-                'rate' => $item->rate,
-                'obrig' => $item->obrig,
-                'nest' => [],
-                'position' => 90,
-            ],
-        );
 
         FieldServicePerformance::firstOrCreate(
-            ['site_performance_id' => $visit->id, 'service_id' => $service->id],
-            ['done' => false],
+            ['site_performance_id' => $visit->id, 'service_id' => $serviceId, 'assignee_name' => $operator->tech],
+            ['assignee' => $this->initials($operator->tech), 'done' => true],
         );
 
         return $this->show($site);
     }
 
-    /** Assign a service on this visit to one of the open shift's operators. */
-    public function assignService(Request $request, FieldSite $site, FieldService $service): JsonResponse
+    /** Remove one added service instance from the visit. */
+    public function removeService(FieldSite $site, FieldServicePerformance $performance): JsonResponse
     {
-        $shiftId = $request->validate(['shift_id' => ['required', 'string']])['shift_id'];
-
-        $shift = FieldShift::active();
-        if (! $shift) {
-            throw ValidationException::withMessages(['shift' => 'Nenhum turno aberto. Inicie um turno primeiro.']);
-        }
-
-        // The chosen operator must be on this shift (the leader or its crew).
-        $operator = collect([$shift])->merge($shift->crew)->firstWhere('id', $shiftId);
-        if (! $operator) {
-            throw ValidationException::withMessages(['shift_id' => 'Operador não está neste turno.']);
-        }
-
         $visit = $this->runningVisit($site);
-        FieldServicePerformance::updateOrCreate(
-            ['site_performance_id' => $visit->id, 'service_id' => $service->id],
-            ['assignee' => $this->initials($operator->tech), 'assignee_name' => $operator->tech],
-        );
+        if ($performance->site_performance_id === $visit->id) {
+            $performance->delete();
+        }
 
         return $this->show($site);
     }
 
-    /** Record an equipment/consumable used on a service (any number per service). */
-    public function addResource(Request $request, FieldSite $site, FieldService $service, FieldResource $resource): JsonResponse
+    /** Record an equipment/consumable used on one service instance. */
+    public function addResource(Request $request, FieldSite $site, FieldServicePerformance $performance, FieldResource $resource): JsonResponse
     {
+        $this->assertOwnsPerformance($site, $performance);
         if ($resource->company_id !== $site->company_id) {
             throw ValidationException::withMessages(['resource' => 'Recurso não pertence à empresa do site.']);
         }
 
         $qty = max(1, (int) $request->input('qty', 1));
-        $visit = $this->runningVisit($site);
-        $perf = FieldServicePerformance::firstOrCreate(
-            ['site_performance_id' => $visit->id, 'service_id' => $service->id],
-            ['done' => false],
-        );
-        $perf->resources()->syncWithoutDetaching([$resource->id => ['qty' => $qty]]);
+        $performance->resources()->syncWithoutDetaching([$resource->id => ['qty' => $qty]]);
 
         return $this->show($site);
     }
 
-    /** Remove a resource previously recorded on a service. */
-    public function removeResource(FieldSite $site, FieldService $service, FieldResource $resource): JsonResponse
+    /** Remove a resource from one service instance. */
+    public function removeResource(FieldSite $site, FieldServicePerformance $performance, FieldResource $resource): JsonResponse
     {
-        $visit = $this->runningVisit($site);
-        $perf = FieldServicePerformance::query()
-            ->where('site_performance_id', $visit->id)
-            ->where('service_id', $service->id)
-            ->first();
-        $perf?->resources()->detach($resource->id);
+        $this->assertOwnsPerformance($site, $performance);
+        $performance->resources()->detach($resource->id);
 
         return $this->show($site);
+    }
+
+    /** The operator (leader or crew) on the open shift, or a validation error. */
+    private function operatorOnShift(string $shiftId): FieldShift
+    {
+        $shift = FieldShift::active();
+        if (! $shift) {
+            throw ValidationException::withMessages(['shift' => 'Nenhum turno aberto. Inicie um turno primeiro.']);
+        }
+        $operator = collect([$shift])->merge($shift->crew)->firstWhere('id', $shiftId);
+        if (! $operator) {
+            throw ValidationException::withMessages(['shift_id' => 'Operador não está neste turno.']);
+        }
+
+        return $operator;
+    }
+
+    /** A menu id → a site-service id, promoting a catalog item if needed. */
+    private function resolveService(FieldSite $site, string $id): string
+    {
+        if (FieldService::whereKey($id)->where('site_id', $site->id)->exists()) {
+            return $id;
+        }
+
+        $item = FieldCatalogItem::findOrFail($id);
+        $serviceId = $site->id.':'.$item->id;
+        FieldService::firstOrCreate(['id' => $serviceId], [
+            'site_id' => $site->id,
+            'name' => $item->name,
+            'who' => 'AN',
+            'who_name' => 'Você',
+            'rate' => $item->rate,
+            'obrig' => $item->obrig,
+            'nest' => [],
+            'position' => 90,
+        ]);
+
+        return $serviceId;
+    }
+
+    /** Guard: the performance instance must belong to this site's running visit. */
+    private function assertOwnsPerformance(FieldSite $site, FieldServicePerformance $performance): void
+    {
+        $visit = $this->runningVisit($site);
+        if ($performance->site_performance_id !== $visit->id) {
+            throw ValidationException::withMessages(['performance' => 'Serviço não pertence a esta visita.']);
+        }
     }
 
     /** The open shift's operators (leader first), for the assignee picker. */

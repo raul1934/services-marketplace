@@ -19,11 +19,14 @@ export type ResourceKind = 'equipment' | 'consumable';
 /** A catalog item used on a service (from the execution overlay). */
 export type ServiceResource = { id: string; kind: ResourceKind; name: string; rate: Charge | null; cost: 'free' | 'charged' | null; qty: number };
 
-export type Service = {
-  id: string; name: string; who: string; whoName: string; rate: Charge; done: boolean; obrig: boolean; nest: Nest[];
-  // Execution overlay: who did it in the field and which resources were used.
-  assignee: string | null; assigneeName: string | null; resources: ServiceResource[];
-};
+// A site's service definition (used on the site detail screen).
+export type Service = { id: string; name: string; who: string; whoName: string; rate: Charge; done: boolean; obrig: boolean; nest: Nest[] };
+
+// On the OS, a service is an added *instance* (repeatable), owned by an operator
+// and carrying its own resources. Adding one IS performing it — no done flag.
+export type ServiceInstance = { id: string; serviceId: string; name: string; rate: Charge; obrig: boolean; assignee: string | null; assigneeName: string | null; resources: ServiceResource[] };
+// An entry in the "add service" menu (site services + catalog add-ons).
+export type MenuItem = { id: string; name: string; obrig: boolean; rate: Charge };
 
 /** An operator on the open shift (for the per-service assignee picker). */
 export type Crew = { shiftId: string; tech: string; who: string };
@@ -58,8 +61,8 @@ export type Os = {
   durations: { siteMinutes: number | null; shiftMinutes: number | null };
   presence: string[];
   crew: Crew[];
-  services: Service[];
-  catalog: CatalogItem[];
+  services: ServiceInstance[];
+  serviceMenu: MenuItem[];
   resourceCatalog: ResourceCatalog;
 };
 
@@ -83,16 +86,16 @@ export const fieldApi = {
   os: (siteId: string) => http.get<{ data: Os }>(`${base}/os/${siteId}`).then(unwrap),
   setWeather: (siteId: string, type: WeatherType) =>
     http.put<{ data: Os }>(`${base}/os/${siteId}/weather`, { body: { type } }).then(unwrap),
-  toggleService: (siteId: string, serviceId: string, done: boolean) =>
-    http.put<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}`, { body: { done } }).then(unwrap),
-  assignService: (siteId: string, serviceId: string, shiftId: string) =>
-    http.put<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}/assignee`, { body: { shift_id: shiftId } }).then(unwrap),
-  addResource: (siteId: string, serviceId: string, resourceId: string, qty = 1) =>
-    http.post<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}/resources/${encodeURIComponent(resourceId)}`, { body: { qty } }).then(unwrap),
-  removeResource: (siteId: string, serviceId: string, resourceId: string) =>
-    http.del<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}/resources/${encodeURIComponent(resourceId)}`).then(unwrap),
-  addCatalog: (siteId: string, catalogId: string) =>
-    http.post<{ data: Os }>(`${base}/os/${siteId}/catalog/${encodeURIComponent(catalogId)}`).then(unwrap),
+  // Add a service instance to the visit under an operator (repeatable).
+  addService: (siteId: string, serviceId: string, shiftId: string) =>
+    http.post<{ data: Os }>(`${base}/os/${siteId}/services`, { body: { service_id: serviceId, shift_id: shiftId } }).then(unwrap),
+  removeService: (siteId: string, performanceId: string) =>
+    http.del<{ data: Os }>(`${base}/os/${siteId}/performances/${performanceId}`).then(unwrap),
+  // Equipment/consumable on one service instance.
+  addResource: (siteId: string, performanceId: string, resourceId: string, qty = 1) =>
+    http.post<{ data: Os }>(`${base}/os/${siteId}/performances/${performanceId}/resources/${encodeURIComponent(resourceId)}`, { body: { qty } }).then(unwrap),
+  removeResource: (siteId: string, performanceId: string, resourceId: string) =>
+    http.del<{ data: Os }>(`${base}/os/${siteId}/performances/${performanceId}/resources/${encodeURIComponent(resourceId)}`).then(unwrap),
   // Uploads the photo file itself via the NATIVE uploader (expo-file-system),
   // not fetch/FormData — RN's fetch multipart drops the request on the New
   // Architecture. The file is stored untouched (EXIF kept) under its lineage
