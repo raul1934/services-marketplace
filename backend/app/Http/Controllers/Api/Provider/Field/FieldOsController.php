@@ -29,20 +29,26 @@ class FieldOsController extends Controller
     /** The OS: services with their done state, who's present, catalog add-ons. */
     public function show(FieldSite $site): JsonResponse
     {
-        $site->load('services');
+        $site->load('services.requiredResources');
         $shift = FieldShift::active();
         $visit = $this->readVisit($site);
+
+        // Equipment/consumables a service declares it needs (shown on the card).
+        $required = fn ($service) => $service
+            ? $service->requiredResources->map(fn ($r) => ['kind' => $r->kind, 'name' => $r->name])->values()
+            : collect();
 
         // The visit's services are the instances the tech added — repeatable,
         // each owned by an operator and carrying its own resources. There is no
         // separate "select/done" step: adding a service IS performing it.
         $instances = $visit
-            ? $visit->servicePerformances()->with(['service', 'resources'])->orderBy('id')->get()->map(fn ($p) => [
+            ? $visit->servicePerformances()->with(['service.requiredResources', 'resources'])->orderBy('id')->get()->map(fn ($p) => [
                 'id' => (string) $p->id,
                 'serviceId' => $p->service_id,
                 'name' => $p->service?->name ?? $p->service_id,
                 'rate' => $p->service?->rate ?? 'visit',
                 'obrig' => (bool) ($p->service?->obrig ?? false),
+                'required' => $required($p->service),
                 'assignee' => $p->assignee,
                 'assigneeName' => $p->assignee_name,
                 'resources' => $p->resources->map(fn ($r) => [
@@ -59,9 +65,9 @@ class FieldOsController extends Controller
         // The "add service" menu: the site's own services (mandatory ones lead),
         // then the company add-on catalog. The app groups it and offers search.
         $menu = $site->services->map(fn ($s) => [
-            'id' => $s->id, 'name' => $s->name, 'obrig' => (bool) $s->obrig, 'rate' => $s->rate,
+            'id' => $s->id, 'name' => $s->name, 'obrig' => (bool) $s->obrig, 'rate' => $s->rate, 'required' => $required($s),
         ])->concat(FieldCatalogItem::query()->orderBy('position')->get()->map(fn ($c) => [
-            'id' => $c->id, 'name' => $c->name, 'obrig' => (bool) $c->obrig, 'rate' => $c->rate,
+            'id' => $c->id, 'name' => $c->name, 'obrig' => (bool) $c->obrig, 'rate' => $c->rate, 'required' => collect(),
         ]))->sortByDesc('obrig')->values();
 
         return response()->json([

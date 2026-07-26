@@ -149,6 +149,29 @@ class FieldServiceSeeder extends Seeder
         }
 
         $this->resourceCatalog();
+        $this->requiredResources();
+    }
+
+    /** What each service requires (equipment/consumable), from its company catalog. */
+    private function requiredResources(): void
+    {
+        $required = [
+            'rio-fortore:bomba' => ['nadruz:res:multimetro', 'nadruz:res:pressostato'],
+            'rio-fortore:quadro' => ['nadruz:res:alicate'],
+            'rio-fortore:portao' => ['nadruz:res:graxa'],
+            'solar:gerador' => ['pacco:res:alicate', 'pacco:res:diesel'],
+            'solar:ar' => ['pacco:res:gas-r410'],
+            'villa:elevador' => ['pacco:res:alicate'],
+            'villa:portao' => ['pacco:res:selo'],
+            'anavec:quadro-geral' => ['nadruz:res:termografica'],
+            'anavec:iluminacao' => ['nadruz:res:led'],
+            'represa:bomba-piscina' => ['pacco:res:selo'],
+            'damha:guarita' => ['nadruz:res:multimetro'],
+        ];
+
+        foreach ($required as $serviceId => $resourceIds) {
+            FieldService::find($serviceId)?->requiredResources()->sync($resourceIds);
+        }
     }
 
     /**

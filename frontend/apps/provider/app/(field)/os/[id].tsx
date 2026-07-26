@@ -90,6 +90,10 @@ export default function OS() {
       ? (r.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))
       : (r.cost === 'free' ? tr('field.free') : tr('field.charged'));
 
+  // A service's required equipment/consumable, as a compact string.
+  const requiredText = (req: { kind: ResourceKind; name: string }[]) =>
+    req.map((r) => `${r.kind === 'equipment' ? '🔧' : '📦'} ${r.name}`).join('  ·  ');
+
   const site = os?.site;
   // The OS is organised by operator. Adding a service (no select/done step) puts
   // an instance under an operator; a service can appear more than once.
@@ -104,9 +108,10 @@ export default function OS() {
       <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
           <Text weight="700" style={{ fontSize: 13.5 }}>{inst.name}</Text>
-          <Text variant="caption">{inst.obrig ? tr('field.obrig') : tr('field.optional')}</Text>
+          <Text variant="caption">
+            {inst.obrig ? tr('field.obrig') : tr('field.optional')}{inst.required.length ? `  ·  ${requiredText(inst.required)}` : ''}
+          </Text>
         </View>
-        <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={t.colors.ink2}>{inst.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
         <Pressable accessibilityRole="button" accessibilityLabel={`${tr('common.remove')} ${inst.name}`} onPress={() => removeInstance(inst)} hitSlop={8}>
           <Icon name="close" size={16} color={t.colors.ink3} />
         </Pressable>
@@ -178,7 +183,7 @@ export default function OS() {
             </View>
             <View style={{ flex: 1 }}>
               <Text weight="600" style={{ fontSize: 13.5 }}>{m.name}</Text>
-              <Text variant="caption">{m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
+              <Text variant="caption">{m.required.length ? requiredText(m.required) : (m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))}</Text>
             </View>
             <Icon name={added ? 'check' : 'plus'} size={18} color={t.colors.accent} />
           </Row>

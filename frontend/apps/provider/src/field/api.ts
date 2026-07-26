@@ -22,11 +22,13 @@ export type ServiceResource = { id: string; kind: ResourceKind; name: string; ra
 // A site's service definition (used on the site detail screen).
 export type Service = { id: string; name: string; who: string; whoName: string; rate: Charge; done: boolean; obrig: boolean; nest: Nest[] };
 
+// A resource a service declares it needs (shown on the card in place of rate).
+export type RequiredResource = { kind: ResourceKind; name: string };
 // On the OS, a service is an added *instance* (repeatable), owned by an operator
 // and carrying its own resources. Adding one IS performing it — no done flag.
-export type ServiceInstance = { id: string; serviceId: string; name: string; rate: Charge; obrig: boolean; assignee: string | null; assigneeName: string | null; resources: ServiceResource[] };
+export type ServiceInstance = { id: string; serviceId: string; name: string; rate: Charge; obrig: boolean; required: RequiredResource[]; assignee: string | null; assigneeName: string | null; resources: ServiceResource[] };
 // An entry in the "add service" menu (site services + catalog add-ons).
-export type MenuItem = { id: string; name: string; obrig: boolean; rate: Charge };
+export type MenuItem = { id: string; name: string; obrig: boolean; rate: Charge; required: RequiredResource[] };
 
 /** An operator on the open shift (for the per-service assignee picker). */
 export type Crew = { shiftId: string; tech: string; who: string };
