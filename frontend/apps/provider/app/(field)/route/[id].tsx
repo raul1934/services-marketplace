@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import { Alert, Pressable, ScrollView, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
 import MapView, { MapPin, Marker, Polyline, Region } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { BackBar, Icon, Pulse, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { fieldApi, Geo, StopStatus } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
@@ -73,21 +73,25 @@ export default function RouteStops() {
     try { await fn(); } finally { reload(); }
   };
 
-  // Finishing a route closes any still-open site visits — confirm first.
+  // Finishing a route closes any still-open site visits. With none open it just
+  // finishes; with some open it asks first, via a sheet (not the OS Alert).
+  const [finishSheet, setFinishSheet] = useState(false);
+  // Bumped to send the slide-to-confirm back to rest when the user backs out of
+  // the "close open sites?" sheet — otherwise the completed slide keeps reading
+  // "Rota finalizada" even though nothing was finished.
+  const [slideReset, setSlideReset] = useState(0);
+  const openCount = (route?.stops ?? []).filter((s) => s.status === 'now').length;
   const finishRoute = () => {
-    const openSites = (route?.stops ?? []).filter((s) => s.status === 'now');
-    if (openSites.length === 0) {
-      confirm(() => fieldApi.finishRoute(route!.id));
-      return;
-    }
-    Alert.alert(
-      tr('field.finishRouteOpenTitle'),
-      tr('field.finishRouteOpenBody', { n: openSites.length }),
-      [
-        { text: tr('field.cancel'), style: 'cancel' },
-        { text: tr('field.finishRouteCloseSites'), style: 'destructive', onPress: () => confirm(() => fieldApi.finishRoute(route!.id)) },
-      ],
-    );
+    if (openCount === 0) { confirm(() => fieldApi.finishRoute(route!.id)); return; }
+    setFinishSheet(true);
+  };
+  const cancelFinish = () => {
+    setFinishSheet(false);
+    setSlideReset((n) => n + 1);
+  };
+  const finishAndCloseSites = () => {
+    setFinishSheet(false);
+    confirm(() => fieldApi.finishRoute(route!.id));
   };
 
   return (
@@ -165,19 +169,53 @@ export default function RouteStops() {
 
           <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
             {running ? (
-              <SlideToConfirm variant="success" label={tr('field.finishRoute')} doneLabel={tr('field.finishRouteDone')} confirmHint={tr('field.finishRouteHint')} onConfirm={finishRoute} />
+              <SlideToConfirm variant="success" label={tr('field.finishRoute')} doneLabel={tr('field.finishRouteDone')} confirmHint={tr('field.finishRouteHint')} onConfirm={finishRoute} resetSignal={slideReset} />
             ) : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={tr('field.startRoute')}
-                onPress={() => confirm(() => fieldApi.startRoute(route.id))}
-                style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
-              >
-                <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.startRoute')}</Text>
-                <Icon name="chevronsR" size={17} color="#fff" />
-              </Pressable>
+              <View style={{ borderRadius: 14 }}>
+                <Pulse color={t.colors.accent} radius={14} />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={tr('field.startRoute')}
+                  onPress={() => confirm(() => fieldApi.startRoute(route.id))}
+                  style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+                >
+                  <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.startRoute')}</Text>
+                  <Icon name="chevronsR" size={17} color="#fff" />
+                </Pressable>
+              </View>
             )}
           </SafeAreaView>
+
+          <Sheet
+            visible={finishSheet}
+            onClose={cancelFinish}
+            title={tr('field.finishRouteOpenTitle')}
+            closeLabel={tr('field.cancel')}
+          >
+            <Row gap={12} style={{ alignItems: 'flex-start' }}>
+              <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: t.colors.dangerSoft, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="alert" size={22} color={t.colors.danger} />
+              </View>
+              <Text style={{ flex: 1, fontSize: 14.5, lineHeight: 21 }} color={t.colors.ink2}>
+                {tr('field.finishRouteOpenBody', { n: openCount })}
+              </Text>
+            </Row>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={tr('field.finishRouteCloseSites')}
+              onPress={finishAndCloseSites}
+              style={{ backgroundColor: t.colors.danger, borderRadius: 14, paddingVertical: 15, alignItems: 'center' }}
+            >
+              <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.finishRouteCloseSites')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={cancelFinish}
+              style={{ paddingVertical: 12, alignItems: 'center' }}
+            >
+              <Text weight="700" style={{ fontSize: 14 }} color={t.colors.ink3}>{tr('field.cancel')}</Text>
+            </Pressable>
+          </Sheet>
         </>
       )}
     </View>

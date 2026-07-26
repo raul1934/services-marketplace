@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, PanResponder, View } from 'react-native';
 import { useTheme } from '../theme';
 import { Text } from './Text';
@@ -38,6 +38,7 @@ export function SlideToConfirm({
   variant = 'accept',
   compact,
   confirmHint,
+  resetSignal,
 }: {
   label: string;
   doneLabel: string;
@@ -51,6 +52,12 @@ export function SlideToConfirm({
    * this package renders strings, it does not author them.
    */
   confirmHint?: string;
+  /**
+   * Bump this (any changing value) to send the control back to its resting
+   * state. For confirms that hand off to a follow-up dialog: if the user backs
+   * out there, the completed slide must not stay showing "done".
+   */
+  resetSignal?: number;
 }) {
   const t = useTheme();
   const color = variant === 'success' ? t.colors.ok : variant === 'error' ? t.colors.danger : t.colors.accent;
@@ -69,6 +76,16 @@ export function SlideToConfirm({
   // the live values in a ref the handlers can read on every gesture.
   const live = useRef({ maxX, done, disabled, onConfirm, doneLabel });
   live.current = { maxX, done, disabled, onConfirm, doneLabel };
+
+  // Sent back to rest by the parent (e.g. the confirm dialog was dismissed).
+  // Skips the initial render so a mounted, untouched control does not animate.
+  const firstReset = useRef(true);
+  useEffect(() => {
+    if (firstReset.current) { firstReset.current = false; return; }
+    setDone(false);
+    Animated.spring(x, { toValue: 0, useNativeDriver: false }).start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetSignal]);
 
   // The one place that completes, so the gesture and the screen reader cannot
   // drift apart. Only reads refs and stable setters, so the PanResponder closure

@@ -4,7 +4,7 @@ import MapView, { MapLabel, MapPin, Marker, Polygon } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { BackBar, Icon, Pulse, Row, Text, useTheme } from '@chamafacil/shared';
 import { fieldApi, Geo } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
@@ -135,27 +135,30 @@ export default function SiteDetail() {
           </ScrollView>
 
           <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
-            {running ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={tr('field.continueSite')}
-                onPress={() => router.push(`/(field)/os/${s.id}`)}
-                style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
-              >
-                <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.continueSite')}</Text>
-                <Icon name="chevronsR" size={17} color="#fff" />
-              </Pressable>
-            ) : (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={tr('field.startVisit')}
-                onPress={() => confirm(() => fieldApi.startSite(s.id))}
-                style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
-              >
-                <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.startVisit')}</Text>
-                <Icon name="chevronsR" size={17} color="#fff" />
-              </Pressable>
-            )}
+            <View style={{ borderRadius: 14 }}>
+              <Pulse color={t.colors.accent} radius={14} />
+              {running ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={tr('field.continueSite')}
+                  onPress={() => router.push(`/(field)/os/${s.id}`)}
+                  style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+                >
+                  <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.continueSite')}</Text>
+                  <Icon name="chevronsR" size={17} color="#fff" />
+                </Pressable>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={tr('field.startVisit')}
+                  onPress={() => confirm(() => fieldApi.startSite(s.id))}
+                  style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 15, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 8 }}
+                >
+                  <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.startVisit')}</Text>
+                  <Icon name="chevronsR" size={17} color="#fff" />
+                </Pressable>
+              )}
+            </View>
           </SafeAreaView>
         </>
       )}

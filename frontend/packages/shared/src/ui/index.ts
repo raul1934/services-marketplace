@@ -29,6 +29,7 @@ export * from './NotFoundView';
 export * from './DictationModal';
 export * from './PaginatedList';
 export * from './Skeleton';
+export * from './Pulse';
 export * from './OfflineBanner';
 export * from './UpdateBanner';
 export * from './TestBanner'; // TEMP — test bots. Remove with backend app/Bots.

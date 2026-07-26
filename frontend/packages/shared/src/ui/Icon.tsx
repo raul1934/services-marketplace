@@ -1,6 +1,7 @@
 import React from 'react';
 import { ColorValue } from 'react-native';
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Banknote,
@@ -65,6 +66,7 @@ import { useTheme } from '../theme';
  * meaningless and letting a typo'd name through to the runtime fallback.
  */
 const ICONS = {
+  alert: AlertTriangle,
   arrowR: ArrowRight,
   back: ArrowLeft,
   battery: BatteryCharging,
