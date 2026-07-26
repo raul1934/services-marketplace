@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import MapView, { MapPin, Marker, Polyline, Region } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -71,6 +71,23 @@ export default function RouteStops() {
 
   const confirm = async (fn: () => Promise<unknown>) => {
     try { await fn(); } finally { reload(); }
+  };
+
+  // Finishing a route closes any still-open site visits — confirm first.
+  const finishRoute = () => {
+    const openSites = (route?.stops ?? []).filter((s) => s.status === 'now');
+    if (openSites.length === 0) {
+      confirm(() => fieldApi.finishRoute(route!.id));
+      return;
+    }
+    Alert.alert(
+      tr('field.finishRouteOpenTitle'),
+      tr('field.finishRouteOpenBody', { n: openSites.length }),
+      [
+        { text: tr('field.cancel'), style: 'cancel' },
+        { text: tr('field.finishRouteCloseSites'), style: 'destructive', onPress: () => confirm(() => fieldApi.finishRoute(route!.id)) },
+      ],
+    );
   };
 
   return (
@@ -148,7 +165,7 @@ export default function RouteStops() {
 
           <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
             {running ? (
-              <SlideToConfirm variant="success" label={tr('field.finishRoute')} doneLabel={tr('field.finishRouteDone')} confirmHint={tr('field.finishRouteHint')} onConfirm={() => confirm(() => fieldApi.finishRoute(route.id))} />
+              <SlideToConfirm variant="success" label={tr('field.finishRoute')} doneLabel={tr('field.finishRouteDone')} confirmHint={tr('field.finishRouteHint')} onConfirm={finishRoute} />
             ) : (
               <SlideToConfirm label={tr('field.startRoute')} doneLabel={tr('field.startRouteDone')} confirmHint={tr('field.startRouteHint')} onConfirm={() => confirm(() => fieldApi.startRoute(route.id))} />
             )}
