@@ -15,7 +15,22 @@ export type StopStatus = 'now' | 'next' | 'done';
 export type Geo = { lat: number; lng: number };
 export type Nest = { icon: string; label: string; sub: string; value: string; tone?: 'charge' | 'free' };
 
-export type Service = { id: string; name: string; who: string; whoName: string; rate: Charge; done: boolean; obrig: boolean; nest: Nest[] };
+export type ResourceKind = 'equipment' | 'consumable';
+/** A catalog item used on a service (from the execution overlay). */
+export type ServiceResource = { id: string; kind: ResourceKind; name: string; rate: Charge | null; cost: 'free' | 'charged' | null; qty: number };
+
+export type Service = {
+  id: string; name: string; who: string; whoName: string; rate: Charge; done: boolean; obrig: boolean; nest: Nest[];
+  // Execution overlay: who did it in the field and which resources were used.
+  assignee: string | null; assigneeName: string | null; resources: ServiceResource[];
+};
+
+/** An operator on the open shift (for the per-service assignee picker). */
+export type Crew = { shiftId: string; tech: string; who: string };
+/** Company catalog for the resource picker: items grouped by category, per kind. */
+export type ResourceItem = { id: string; name: string; kind: ResourceKind; rate: Charge | null; cost: 'free' | 'charged' | null };
+export type CatalogGroup = { category: string; items: ResourceItem[] };
+export type ResourceCatalog = { equipment: CatalogGroup[]; consumable: CatalogGroup[] };
 
 export type SiteSummary = { id: string; name: string; address: string; geo: Geo | null };
 export type RouteStop = { siteId: string; km: string; status: StopStatus; times: number; site: SiteSummary | null };
@@ -42,8 +57,10 @@ export type Os = {
   photos: { before: OsPhoto[]; after: OsPhoto[] };
   durations: { siteMinutes: number | null; shiftMinutes: number | null };
   presence: string[];
+  crew: Crew[];
   services: Service[];
   catalog: CatalogItem[];
+  resourceCatalog: ResourceCatalog;
 };
 
 const unwrap = <T>(r: { data: T }): T => r.data;
@@ -68,6 +85,12 @@ export const fieldApi = {
     http.put<{ data: Os }>(`${base}/os/${siteId}/weather`, { body: { type } }).then(unwrap),
   toggleService: (siteId: string, serviceId: string, done: boolean) =>
     http.put<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}`, { body: { done } }).then(unwrap),
+  assignService: (siteId: string, serviceId: string, shiftId: string) =>
+    http.put<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}/assignee`, { body: { shift_id: shiftId } }).then(unwrap),
+  addResource: (siteId: string, serviceId: string, resourceId: string, qty = 1) =>
+    http.post<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}/resources/${encodeURIComponent(resourceId)}`, { body: { qty } }).then(unwrap),
+  removeResource: (siteId: string, serviceId: string, resourceId: string) =>
+    http.del<{ data: Os }>(`${base}/os/${siteId}/services/${encodeURIComponent(serviceId)}/resources/${encodeURIComponent(resourceId)}`).then(unwrap),
   addCatalog: (siteId: string, catalogId: string) =>
     http.post<{ data: Os }>(`${base}/os/${siteId}/catalog/${encodeURIComponent(catalogId)}`).then(unwrap),
   // Uploads the photo file itself via the NATIVE uploader (expo-file-system),

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
-import { CatalogItem, fieldApi, OsPhoto, Service, WeatherType } from '../../../src/field/api';
+import { CatalogItem, Crew, fieldApi, OsPhoto, Service, WeatherType } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { distanceMeters, useMyLocation } from '../../../src/location';
 import { capturePhoto } from '../../../src/photos';
@@ -22,6 +22,8 @@ export default function OS() {
   const [uploading, setUploading] = useState<'before' | 'after' | null>(null);
   const [viewer, setViewer] = useState<{ photos: OsPhoto[]; index: number } | null>(null);
   const [weatherOpen, setWeatherOpen] = useState(false);
+  const [assigneeFor, setAssigneeFor] = useState<Service | null>(null);
+  const [addForOp, setAddForOp] = useState<Crew | null>(null);
 
   const pickWeather = async (type: WeatherType) => {
     setWeatherOpen(false);
@@ -59,16 +61,113 @@ export default function OS() {
     }
   };
 
+  // Add a catalog service. From an operator's own button it's also assigned to
+  // them; from the solo/global button it just lands (defaults to the operator).
   const addFromCatalog = async (c: CatalogItem) => {
+    const op = addForOp;
     setPickerOpen(false);
+    setAddForOp(null);
     try {
-      setData(await fieldApi.addCatalog(siteId, c.id));
+      const added = await fieldApi.addCatalog(siteId, c.id);
+      setData(op ? await fieldApi.assignService(siteId, `${siteId}:${c.id}`, op.shiftId) : added);
+    } catch {
+      reload();
+    }
+  };
+
+  const assign = async (svc: Service, op: Crew) => {
+    setAssigneeFor(null);
+    setData((prev) => (prev ? { ...prev, services: prev.services.map((s) => (s.id === svc.id ? { ...s, assignee: op.who, assigneeName: op.tech } : s)) } : prev));
+    try {
+      setData(await fieldApi.assignService(siteId, svc.id, op.shiftId));
     } catch {
       reload();
     }
   };
 
   const site = os?.site;
+  // Solo shift → every service is the current operator's, shown as a flat list.
+  // Crew → services group under the operator they belong to. The in-field
+  // assignee wins; with none, a service falls to its usual `who` IF that person
+  // is on the shift, otherwise to the current operator (never a phantom group).
+  const crew = os?.crew ?? [];
+  const soloShift = crew.length <= 1;
+  const currentOp = crew[0];
+  const effAssignee = (s: Service): { who: string; name: string } => {
+    if (s.assignee) return { who: s.assignee, name: s.assigneeName ?? s.who };
+    const usual = crew.find((c) => c.tech === s.whoName);
+    if (usual) return { who: usual.who, name: usual.tech };
+    return { who: currentOp?.who ?? s.who, name: currentOp?.tech ?? s.whoName };
+  };
+  const openAdd = (op: Crew | null) => { setAddForOp(op); setPickerOpen(true); };
+
+  const serviceCard = (s: Service) => {
+    const a = effAssignee(s);
+    const meta = `${s.obrig ? tr('field.obrig') : tr('field.optional')} · ${s.done ? tr('field.statusDone').toLowerCase() : tr('field.statusDoing').toLowerCase()}`;
+    return (
+      <Pressable
+        key={s.id}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: s.done }}
+        accessibilityLabel={s.name}
+        onPress={() => toggle(s)}
+        style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: s.done ? t.colors.line : t.colors.accent, borderRadius: 12, paddingBottom: s.nest.length ? 6 : 0 }}
+      >
+        <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
+          <Check on={s.done} />
+          <View style={{ flex: 1 }}>
+            <Text weight="700" style={{ fontSize: 13.5 }}>{s.name}</Text>
+            {soloShift ? (
+              <Row gap={5} style={{ alignItems: 'center' }}>
+                <Avatar name={a.who} size={16} />
+                <Text variant="caption">{a.name} · {meta}</Text>
+              </Row>
+            ) : (
+              // Crew: the assignee is tappable to reassign the service.
+              <Pressable accessibilityRole="button" accessibilityLabel={tr('field.assignTo')} onPress={() => setAssigneeFor(s)} hitSlop={6}>
+                <Row gap={5} style={{ alignItems: 'center' }}>
+                  <Avatar name={a.who} size={16} />
+                  <Text variant="caption" color={t.colors.accent}>{a.name}</Text>
+                  <Icon name="edit" size={11} color={t.colors.accent} />
+                  <Text variant="caption">· {meta}</Text>
+                </Row>
+              </Pressable>
+            )}
+          </View>
+          <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={t.colors.ink2}>{s.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
+        </Row>
+        {s.nest.length ? (
+          <View style={{ marginLeft: 40, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
+            {s.nest.map((n, i) => (
+              <Row key={i} gap={8} style={{ alignItems: 'center' }}>
+                <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 11 }}>{n.icon}</Text>
+                </View>
+                <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
+                  <Text weight="600" style={{ fontSize: 12.5 }}>{n.label}</Text>{n.sub ? ` · ${n.sub}` : ''}
+                </Text>
+                <Text style={{ fontSize: 10.5, fontWeight: n.tone ? '700' : '400' }} color={n.tone === 'charge' ? t.colors.warn : n.tone === 'free' ? t.colors.ok : t.colors.ink3}>{n.value}</Text>
+              </Row>
+            ))}
+          </View>
+        ) : null}
+      </Pressable>
+    );
+  };
+
+  // Crew view: one section per operator on the shift (leader first), each with
+  // the services assigned to them — empty operators still get a section so they
+  // have an "add service" button.
+  const crewGroups = (services: Service[]) =>
+    crew.map((c) => ({ crew: c, services: services.filter((s) => effAssignee(s).name === c.tech) }));
+
+  // The dashed "add a catalog service" button (per operator, or global for solo).
+  const addServiceButton = (op: Crew | null, key?: string) =>
+    os && os.catalog.length ? (
+      <Pressable key={key} accessibilityRole="button" accessibilityLabel={tr('field.addService')} onPress={() => openAdd(op)} style={{ borderWidth: 1.5, borderColor: t.colors.line, borderStyle: 'dashed', borderRadius: 11, paddingVertical: 11, alignItems: 'center' }}>
+        <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addService')}</Text>
+      </Pressable>
+    ) : null;
 
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
@@ -134,49 +233,24 @@ export default function OS() {
                 <Text variant="caption">{tr('field.selected', { n: os.services.filter((s) => s.done).length, total: os.services.length })}</Text>
               </Row>
 
-              {os.services.map((s) => (
-                <Pressable
-                  key={s.id}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked: s.done }}
-                  accessibilityLabel={s.name}
-                  onPress={() => toggle(s)}
-                  style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: s.done ? t.colors.line : t.colors.accent, borderRadius: 12, paddingBottom: s.nest.length ? 6 : 0 }}
-                >
-                  <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
-                    <Check on={s.done} />
-                    <View style={{ flex: 1 }}>
-                      <Text weight="700" style={{ fontSize: 13.5 }}>{s.name}</Text>
-                      <Row gap={5} style={{ alignItems: 'center' }}>
-                        <Avatar name={s.who} size={16} />
-                        <Text variant="caption">{s.whoName} · {s.obrig ? tr('field.obrig') : tr('field.optional')} · {s.done ? tr('field.statusDone').toLowerCase() : tr('field.statusDoing').toLowerCase()}</Text>
-                      </Row>
-                    </View>
-                    <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={t.colors.ink2}>{s.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
-                  </Row>
-                  {s.nest.length ? (
-                    <View style={{ marginLeft: 40, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
-                      {s.nest.map((n, i) => (
-                        <Row key={i} gap={8} style={{ alignItems: 'center' }}>
-                          <View style={{ width: 22, height: 22, borderRadius: 6, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ fontSize: 11 }}>{n.icon}</Text>
-                          </View>
-                          <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
-                            <Text weight="600" style={{ fontSize: 12.5 }}>{n.label}</Text>{n.sub ? ` · ${n.sub}` : ''}
-                          </Text>
-                          <Text style={{ fontSize: 10.5, fontWeight: n.tone ? '700' : '400' }} color={n.tone === 'charge' ? t.colors.warn : n.tone === 'free' ? t.colors.ok : t.colors.ink3}>{n.value}</Text>
-                        </Row>
-                      ))}
-                    </View>
-                  ) : null}
-                </Pressable>
-              ))}
-
-              {os.catalog.length ? (
-                <Pressable accessibilityRole="button" onPress={() => setPickerOpen(true)} style={{ borderWidth: 1.5, borderColor: t.colors.line, borderStyle: 'dashed', borderRadius: 11, paddingVertical: 11, alignItems: 'center' }}>
-                  <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addService')}</Text>
-                </Pressable>
-              ) : null}
+              {soloShift ? (
+                <>
+                  {os.services.map((s) => serviceCard(s))}
+                  {addServiceButton(null)}
+                </>
+              ) : (
+                crewGroups(os.services).map((g) => (
+                  <View key={g.crew.shiftId} style={{ gap: 8, marginTop: 2 }}>
+                    <Row gap={8} style={{ alignItems: 'center' }}>
+                      <Avatar name={g.crew.who} size={22} />
+                      <Text weight="700" style={{ fontSize: 13 }}>{g.crew.tech}</Text>
+                      <Text variant="caption">· {tr('field.selected', { n: g.services.filter((s) => s.done).length, total: g.services.length })}</Text>
+                    </Row>
+                    {g.services.map((s) => serviceCard(s))}
+                    {addServiceButton(g.crew, `add-${g.crew.shiftId}`)}
+                  </View>
+                ))
+              )}
             </View>
           </ScrollView>
 
@@ -184,8 +258,8 @@ export default function OS() {
             <SlideToConfirm label={tr('field.finishOS')} doneLabel={tr('field.finishedOS')} confirmHint={tr('field.finishHint')} onConfirm={() => fieldApi.finishSite(siteId).catch(() => {}).finally(() => router.back())} />
           </SafeAreaView>
 
-          <Sheet visible={pickerOpen} onClose={() => setPickerOpen(false)} title={tr('field.addServiceTitle')} closeLabel={tr('common.close')} maxHeight="72%">
-            <Text variant="caption" style={{ marginBottom: 10 }}>{tr('field.catalogHint')}</Text>
+          <Sheet visible={pickerOpen} onClose={() => { setPickerOpen(false); setAddForOp(null); }} title={addForOp ? tr('field.addServiceFor', { name: addForOp.tech }) : tr('field.addServiceTitle')} closeLabel={tr('common.close')} maxHeight="72%">
+            <Text variant="caption" style={{ marginBottom: 10 }}>{addForOp ? tr('field.catalogHintFor', { name: addForOp.tech }) : tr('field.catalogHint')}</Text>
             <View style={{ gap: 8 }}>
               {os.catalog.map((c) => (
                 <Pressable
@@ -227,6 +301,29 @@ export default function OS() {
                   </Row>
                 </Pressable>
               ))}
+            </View>
+          </Sheet>
+
+          <Sheet visible={!!assigneeFor} onClose={() => setAssigneeFor(null)} title={tr('field.assignTo')} closeLabel={tr('common.close')}>
+            <View style={{ gap: 8 }}>
+              {os.crew.map((c) => {
+                const chosen = assigneeFor ? effAssignee(assigneeFor).name === c.tech : false;
+                return (
+                  <Pressable
+                    key={c.shiftId}
+                    accessibilityRole="button"
+                    accessibilityLabel={c.tech}
+                    onPress={() => assigneeFor && assign(assigneeFor, c)}
+                    style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: chosen ? t.colors.accent : t.colors.line, borderRadius: 12, padding: 12 }}
+                  >
+                    <Row gap={11} style={{ alignItems: 'center' }}>
+                      <Avatar name={c.who} size={30} />
+                      <Text weight="700" style={{ flex: 1, fontSize: 14.5 }}>{c.tech}</Text>
+                      {chosen ? <Icon name="check" size={18} color={t.colors.accent} /> : null}
+                    </Row>
+                  </Pressable>
+                );
+              })}
             </View>
           </Sheet>
 
