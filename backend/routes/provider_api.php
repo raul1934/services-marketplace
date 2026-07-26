@@ -3,12 +3,17 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\JobPartController;
-use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\JobUpdateController;
-use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PhoneAuthController;
 use App\Http\Controllers\Api\Provider\CounterOfferController;
 use App\Http\Controllers\Api\Provider\DashboardController;
 use App\Http\Controllers\Api\Provider\DisputeController;
+use App\Http\Controllers\Api\Provider\Field\FieldCatalogController;
+use App\Http\Controllers\Api\Provider\Field\FieldPerformanceController;
+use App\Http\Controllers\Api\Provider\Field\FieldRouteController;
+use App\Http\Controllers\Api\Provider\Field\FieldShiftController;
+use App\Http\Controllers\Api\Provider\Field\FieldSiteController;
 use App\Http\Controllers\Api\Provider\JobController;
 use App\Http\Controllers\Api\Provider\NearbyController;
 use App\Http\Controllers\Api\Provider\OdometerController;
@@ -23,9 +28,9 @@ use App\Http\Controllers\Api\Provider\RescheduleController;
 use App\Http\Controllers\Api\Provider\ReviewController;
 use App\Http\Controllers\Api\Provider\SurchargeController;
 use App\Http\Controllers\Api\Provider\WalletController;
-use App\Http\Controllers\Api\PhoneAuthController;
 use App\Http\Controllers\Api\PushTokenController;
 use App\Http\Controllers\Api\SocialAuthController;
+use App\Http\Controllers\Api\UploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -127,5 +132,32 @@ Route::prefix('provider/v1')->group(function () {
         Route::delete('parts/{jobPart}', [JobPartController::class, 'destroy']);
         // Odometer reading recorded by the provider during the service (e.g. oil change).
         Route::post('requests/{serviceRequest}/odometer', [OdometerController::class, 'store']);
+
+        // ── Field service (B2B prototype) ────────────────────
+        // Master data + shift-scoped execution. Everything hangs off an open
+        // shift; routes/sites are templates, their running state is derived.
+        Route::prefix('provider/field')->group(function () {
+            // Shift (turno) lifecycle
+            Route::get('shift', [FieldShiftController::class, 'current']);
+            Route::post('shift/start', [FieldShiftController::class, 'start']);
+            Route::post('shift/crew', [FieldShiftController::class, 'addCrew']);
+            Route::post('shift/finish', [FieldShiftController::class, 'finish']);
+
+            // Routes (templates; start/finish drive a RoutePerformance)
+            Route::get('routes', [FieldRouteController::class, 'index']);
+            Route::get('routes/{route}', [FieldRouteController::class, 'show']);
+            Route::post('routes/{route}/start', [FieldRouteController::class, 'start']);
+            Route::post('routes/{route}/finish', [FieldRouteController::class, 'finish']);
+
+            // Sites (master data; start/finish drive a SitePerformance)
+            Route::get('sites', [FieldSiteController::class, 'index']);
+            Route::get('sites/{site}', [FieldSiteController::class, 'show']);
+            Route::post('sites/{site}/start', [FieldSiteController::class, 'start']);
+            Route::post('sites/{site}/finish', [FieldSiteController::class, 'finish']);
+
+            // Performances feed + add-on catalog
+            Route::get('performances', [FieldPerformanceController::class, 'index']);
+            Route::get('catalog', [FieldCatalogController::class, 'index']);
+        });
     });
 });

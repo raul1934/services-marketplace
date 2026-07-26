@@ -27,5 +27,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ServiceRequestSeeder::class);
         $this->call(DevJobSeeder::class);
         $this->call(AssetHistorySeeder::class);
+        $this->call(FieldServiceSeeder::class);
     }
 }
