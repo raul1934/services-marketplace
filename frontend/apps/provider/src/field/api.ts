@@ -16,8 +16,10 @@ export type Geo = { lat: number; lng: number };
 export type Nest = { icon: string; label: string; sub: string; value: string; tone?: 'charge' | 'free' };
 
 export type ResourceKind = 'equipment' | 'consumable';
-/** A catalog item used on a service (from the execution overlay). */
-export type ServiceResource = { id: string; kind: ResourceKind; name: string; rate: Charge | null; cost: 'free' | 'charged' | null; qty: number };
+/** A catalog item used on a service (from the execution overlay). For
+ *  equipment, its billed duration: fixed `minutes` or `siteDuration` (follow the
+ *  visit). */
+export type ServiceResource = { id: string; kind: ResourceKind; name: string; rate: Charge | null; cost: 'free' | 'charged' | null; qty: number; minutes: number | null; siteDuration: boolean };
 
 // A site's service definition (used on the site detail screen).
 export type Service = { id: string; name: string; who: string; whoName: string; rate: Charge; done: boolean; obrig: boolean; nest: Nest[] };
@@ -94,9 +96,12 @@ export const fieldApi = {
     http.post<{ data: Os }>(`${base}/os/${siteId}/services`, { body: { service_id: serviceId, shift_id: shiftId } }).then(unwrap),
   removeService: (siteId: string, performanceId: string) =>
     http.del<{ data: Os }>(`${base}/os/${siteId}/performances/${performanceId}`).then(unwrap),
-  // Equipment/consumable on one service instance.
-  addResource: (siteId: string, performanceId: string, resourceId: string, qty = 1) =>
-    http.post<{ data: Os }>(`${base}/os/${siteId}/performances/${performanceId}/resources/${encodeURIComponent(resourceId)}`, { body: { qty } }).then(unwrap),
+  // Equipment/consumable on one service instance. Equipment carries a duration:
+  // fixed `minutes` or `siteDuration` (follow the visit).
+  addResource: (siteId: string, performanceId: string, resourceId: string, opts?: { qty?: number; minutes?: number | null; siteDuration?: boolean }) =>
+    http.post<{ data: Os }>(`${base}/os/${siteId}/performances/${performanceId}/resources/${encodeURIComponent(resourceId)}`, {
+      body: { qty: opts?.qty ?? 1, minutes: opts?.minutes ?? null, site_duration: opts?.siteDuration ?? false },
+    }).then(unwrap),
   removeResource: (siteId: string, performanceId: string, resourceId: string) =>
     http.del<{ data: Os }>(`${base}/os/${siteId}/performances/${performanceId}/resources/${encodeURIComponent(resourceId)}`).then(unwrap),
   // Uploads the photo file itself via the NATIVE uploader (expo-file-system),

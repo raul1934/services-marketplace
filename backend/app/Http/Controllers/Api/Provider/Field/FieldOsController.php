@@ -60,6 +60,8 @@ class FieldOsController extends Controller
                     'rate' => $r->rate,
                     'cost' => $r->cost,
                     'qty' => (int) $r->pivot->qty,
+                    'minutes' => $r->pivot->minutes !== null ? (int) $r->pivot->minutes : null,
+                    'siteDuration' => (bool) $r->pivot->site_duration,
                 ])->values(),
             ])->values()
             : collect();
@@ -214,7 +216,8 @@ class FieldOsController extends Controller
         return $this->show($site);
     }
 
-    /** Record an equipment/consumable used on one service instance. */
+    /** Record an equipment/consumable used on one service instance. For
+     *  equipment, its billed duration: fixed minutes or "follow the site". */
     public function addResource(Request $request, FieldSite $site, FieldServicePerformance $performance, FieldResource $resource): JsonResponse
     {
         $this->assertOwnsPerformance($site, $performance);
@@ -222,8 +225,17 @@ class FieldOsController extends Controller
             throw ValidationException::withMessages(['resource' => 'Recurso não pertence à empresa do site.']);
         }
 
-        $qty = max(1, (int) $request->input('qty', 1));
-        $performance->resources()->syncWithoutDetaching([$resource->id => ['qty' => $qty]]);
+        $data = $request->validate([
+            'qty' => ['nullable', 'integer', 'min:1'],
+            'minutes' => ['nullable', 'integer', 'min:0'],
+            'site_duration' => ['nullable', 'boolean'],
+        ]);
+
+        $performance->resources()->syncWithoutDetaching([$resource->id => [
+            'qty' => max(1, (int) ($data['qty'] ?? 1)),
+            'minutes' => $data['minutes'] ?? null,
+            'site_duration' => (bool) ($data['site_duration'] ?? false),
+        ]]);
 
         return $this->show($site);
     }

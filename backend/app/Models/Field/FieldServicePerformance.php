@@ -32,7 +32,7 @@ class FieldServicePerformance extends Model
     public function resources(): BelongsToMany
     {
         return $this->belongsToMany(FieldResource::class, 'field_service_performance_resources', 'service_performance_id', 'resource_id')
-            ->withPivot('qty')
+            ->withPivot('qty', 'minutes', 'site_duration')
             ->withTimestamps();
     }
 }

@@ -124,7 +124,8 @@
     "outGeofence": "outside the geofence",
     "locating": "locating…",
     "continueSite": "Continue site",
-    "shiftHistory": "This shift"
+    "shiftHistory": "This shift",
+    "siteDuration": "Site duration"
   },
   "fieldNav": {
     "section": "Operations",

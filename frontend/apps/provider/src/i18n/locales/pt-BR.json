@@ -124,7 +124,8 @@
     "outGeofence": "fora da geocerca",
     "locating": "localizando…",
     "continueSite": "Continuar site",
-    "shiftHistory": "Neste turno"
+    "shiftHistory": "Neste turno",
+    "siteDuration": "Duração do site"
   },
   "fieldNav": {
     "section": "Operação",

@@ -29,7 +29,9 @@ export default function OS() {
   // The service instance + kind whose resource picker is open (equipment and
   // consumable are separate sheets), and its staged resource selection.
   const [resPicker, setResPicker] = useState<{ instId: string; kind: ResourceKind } | null>(null);
-  const [resSel, setResSel] = useState<string[]>([]);
+  // Staged resource selection → per resource, its equipment duration (site =
+  // follow the visit; else fixed minutes). For consumables the duration is unused.
+  const [resSel, setResSel] = useState<Record<string, { site: boolean; minutes: number }>>({});
 
   const pickWeather = async (type: WeatherType) => {
     setWeatherOpen(false);
@@ -98,23 +100,38 @@ export default function OS() {
   // Equipment and consumable are separate pickers, staged then committed.
   const openResources = (inst: ServiceInstance, kind: ResourceKind) => {
     setResPicker({ instId: inst.id, kind });
-    setResSel(inst.resources.filter((r) => r.kind === kind).map((r) => r.id));
+    const sel: Record<string, { site: boolean; minutes: number }> = {};
+    inst.resources.filter((r) => r.kind === kind).forEach((r) => { sel[r.id] = { site: r.siteDuration, minutes: r.minutes ?? 30 }; });
+    setResSel(sel);
   };
+  const toggleRes = (id: string) => setResSel((prev) => {
+    const next = { ...prev };
+    if (next[id]) delete next[id]; else next[id] = { site: true, minutes: 30 };
+    return next;
+  });
+  const setResDur = (id: string, patch: Partial<{ site: boolean; minutes: number }>) =>
+    setResSel((prev) => ({ ...prev, [id]: { ...prev[id], ...patch } }));
   const confirmResources = async () => {
     const inst = resourceInst;
     const kind = resPicker?.kind;
     if (!inst || !kind) return;
     const currentIds = inst.resources.filter((r) => r.kind === kind).map((r) => r.id);
-    const toAdd = resSel.filter((id) => !currentIds.includes(id));
-    const toRemove = currentIds.filter((id) => !resSel.includes(id));
+    const selIds = Object.keys(resSel);
+    const toRemove = currentIds.filter((id) => !selIds.includes(id));
     setResPicker(null);
     try {
-      for (const id of toAdd) await fieldApi.addResource(siteId, inst.id, id);
+      // Add or update each selected (equipment carries its duration).
+      for (const id of selIds) {
+        const d = resSel[id];
+        await fieldApi.addResource(siteId, inst.id, id, kind === 'equipment' ? { siteDuration: d.site, minutes: d.site ? null : d.minutes } : undefined);
+      }
       for (const id of toRemove) await fieldApi.removeResource(siteId, inst.id, id);
     } finally {
       reload();
     }
   };
+  // minutes → "H:MM"
+  const fmtDur = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
 
   const anyResourceBtn = hasEquipment || hasConsumable;
   const instanceCard = (inst: ServiceInstance) => (
@@ -132,9 +149,11 @@ export default function OS() {
           {inst.resources.map((r) => (
             <Row key={r.id} gap={8} style={{ alignItems: 'center' }}>
               <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
-                <Text weight="600" style={{ fontSize: 12.5 }}>{r.name}</Text>{` · ${r.kind === 'equipment' ? tr('field.equipment') : tr('field.consumable')}`}{r.qty > 1 ? ` ×${r.qty}` : ''}
+                <Text weight="600" style={{ fontSize: 12.5 }}>{r.name}</Text>{` · ${r.kind === 'equipment' ? tr('field.equipment') : tr('field.consumable')}`}
               </Text>
-              <Text style={{ fontSize: 10.5, fontWeight: r.kind === 'consumable' ? '700' : '400' }} color={r.kind === 'consumable' ? (r.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(r)}</Text>
+              <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={r.kind === 'consumable' ? (r.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.accent}>
+                {r.kind === 'equipment' ? (r.siteDuration ? tr('field.siteDuration') : fmtDur(r.minutes ?? 0)) : resourceValue(r)}
+              </Text>
             </Row>
           ))}
           <Row gap={8} style={{ paddingTop: 4 }}>
@@ -369,22 +388,48 @@ export default function OS() {
                   <View key={g.category} style={{ gap: 6, marginBottom: 12 }}>
                     <Text variant="label">{g.category}</Text>
                     {g.items.map((item) => {
-                      const on = resSel.includes(item.id);
+                      const sel = resSel[item.id];
+                      const on = !!sel;
                       return (
-                        <Pressable
-                          key={item.id}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected: on }}
-                          accessibilityLabel={item.name}
-                          onPress={() => setResSel((prev) => (prev.includes(item.id) ? prev.filter((x) => x !== item.id) : [...prev, item.id]))}
-                          style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: on ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
-                        >
-                          <Row gap={10} style={{ alignItems: 'center' }}>
-                            <Text weight="600" style={{ flex: 1, fontSize: 13.5 }}>{item.name}</Text>
-                            <Text style={{ fontSize: 10.5, fontWeight: item.kind === 'consumable' ? '700' : '400' }} color={item.kind === 'consumable' ? (item.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(item)}</Text>
-                            <Icon name={on ? 'check' : 'plus'} size={17} color={t.colors.accent} />
-                          </Row>
-                        </Pressable>
+                        <View key={item.id} style={{ gap: 6 }}>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: on }}
+                            accessibilityLabel={item.name}
+                            onPress={() => toggleRes(item.id)}
+                            style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: on ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
+                          >
+                            <Row gap={10} style={{ alignItems: 'center' }}>
+                              <Text weight="600" style={{ flex: 1, fontSize: 13.5 }}>{item.name}</Text>
+                              <Text style={{ fontSize: 10.5, fontWeight: item.kind === 'consumable' ? '700' : '400' }} color={item.kind === 'consumable' ? (item.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.ink3}>{resourceValue(item)}</Text>
+                              <Icon name={on ? 'check' : 'plus'} size={17} color={t.colors.accent} />
+                            </Row>
+                          </Pressable>
+                          {resPicker.kind === 'equipment' && sel ? (
+                            <Row gap={8} style={{ alignItems: 'center', paddingLeft: 2, paddingBottom: 2 }}>
+                              <Pressable
+                                accessibilityRole="button"
+                                accessibilityState={{ selected: sel.site }}
+                                accessibilityLabel={tr('field.siteDuration')}
+                                onPress={() => setResDur(item.id, { site: !sel.site })}
+                                style={{ borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, backgroundColor: sel.site ? t.colors.accentSoft : t.colors.surface, borderWidth: 1, borderColor: sel.site ? t.colors.accent : t.colors.line }}
+                              >
+                                <Text weight="700" style={{ fontSize: 12 }} color={sel.site ? t.colors.accent : t.colors.ink2}>{tr('field.siteDuration')}</Text>
+                              </Pressable>
+                              {!sel.site ? (
+                                <Row gap={4} style={{ alignItems: 'center' }}>
+                                  <Pressable accessibilityRole="button" accessibilityLabel="-15 min" onPress={() => setResDur(item.id, { minutes: Math.max(15, sel.minutes - 15) })} style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Icon name="minus" size={16} color={t.colors.ink} />
+                                  </Pressable>
+                                  <Text weight="800" style={{ fontSize: 14, minWidth: 48, textAlign: 'center', fontVariant: ['tabular-nums'] }}>{fmtDur(sel.minutes)}</Text>
+                                  <Pressable accessibilityRole="button" accessibilityLabel="+15 min" onPress={() => setResDur(item.id, { minutes: sel.minutes + 15 })} style={{ width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: t.colors.line, alignItems: 'center', justifyContent: 'center' }}>
+                                    <Icon name="plus" size={16} color={t.colors.ink} />
+                                  </Pressable>
+                                </Row>
+                              ) : null}
+                            </Row>
+                          ) : null}
+                        </View>
                       );
                     })}
                   </View>
