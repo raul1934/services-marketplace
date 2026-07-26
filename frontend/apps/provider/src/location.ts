@@ -13,6 +13,18 @@ const toCoords = (p: Location.LocationObject): Coords => ({
   accuracy: p.coords.accuracy ?? undefined,
 });
 
+/** Great-circle distance in metres between the user and a {lat,lng} point. */
+export function distanceMeters(a: Coords, b: { lat: number; lng: number }): number {
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.latitude);
+  const dLng = toRad(b.lng - a.longitude);
+  const lat1 = toRad(a.latitude);
+  const lat2 = toRad(b.lat);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
 /** Request permission + return current position. Throws if denied. */
 export async function getCurrentCoords(): Promise<Coords> {
   const { status } = await Location.requestForegroundPermissionsAsync();

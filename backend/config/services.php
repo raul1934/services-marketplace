@@ -68,4 +68,10 @@ return [
         'graph_version' => env('META_GRAPH_VERSION', 'v21.0'),
     ],
 
+    // OSRM routing for the field-service route line. Public demo by default;
+    // point FIELD_OSRM_URL at a self-hosted instance (docker-compose.osrm.yml).
+    'osrm' => [
+        'url' => env('FIELD_OSRM_URL', 'https://router.project-osrm.org'),
+    ],
+
 ];

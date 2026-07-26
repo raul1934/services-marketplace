@@ -27,6 +27,7 @@ class FieldOsController extends Controller
     public function show(FieldSite $site): JsonResponse
     {
         $site->load('services');
+        $shift = FieldShift::active();
         $visit = $this->readVisit($site);
         $doneMap = $visit
             ? $visit->servicePerformances()->pluck('done', 'service_id')
@@ -45,8 +46,16 @@ class FieldOsController extends Controller
                     'name' => $site->name,
                     'contract' => $site->contract,
                     'address' => $site->address,
+                    'geo' => $site->lat !== null && $site->lng !== null
+                        ? ['lat' => (float) $site->lat, 'lng' => (float) $site->lng]
+                        : null,
                 ],
                 'visit' => $visit ? ['id' => (string) $visit->id, 'status' => $visit->status] : null,
+                // Minutes on this visit and on the shift (null when not started).
+                'durations' => [
+                    'siteMinutes' => $visit?->started_at ? (int) $visit->started_at->diffInMinutes(now()) : null,
+                    'shiftMinutes' => $shift?->started_at ? (int) $shift->started_at->diffInMinutes(now()) : null,
+                ],
                 'presence' => $this->presence(),
                 'services' => FieldServiceResource::collection($site->services),
                 'catalog' => $catalog->map(fn ($c) => [

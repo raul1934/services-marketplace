@@ -150,7 +150,7 @@ class FieldServiceSeeder extends Seeder
             'tech' => 'Você',
             'date' => today(),
             'status' => 'active',
-            'started_at' => now()->setTime(7, 45),
+            'started_at' => now()->subMinutes(50),
         ]);
         FieldShift::create([
             'id' => 'shift-crew-bruno',
@@ -182,7 +182,7 @@ class FieldServiceSeeder extends Seeder
         $rio = FieldSitePerformance::create([
             'shift_id' => $master->id, 'route_performance_id' => $cn->id, 'site_id' => 'rio-fortore',
             'status' => 'running', 'crew' => 3, 'time' => '8:33',
-            'started_at' => now()->setTime(8, 33),
+            'started_at' => now()->subMinutes(11),
         ]);
         FieldServicePerformance::create(['site_performance_id' => $rio->id, 'service_id' => 'rio-fortore:bomba', 'done' => true]);
         FieldServicePerformance::create(['site_performance_id' => $rio->id, 'service_id' => 'rio-fortore:quadro', 'done' => true]);

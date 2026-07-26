@@ -38,7 +38,10 @@ export default function RouteStops() {
 
   const me = useMyLocation();
   const geoStops = (route?.stops ?? []).filter((s) => !!s.site?.geo);
-  const line = geoStops.map((s) => ({ latitude: s.site!.geo!.lat, longitude: s.site!.geo!.lng }));
+  // Road-following path from OSRM when available; else straight stop-to-stop.
+  const line = route?.geometry?.length
+    ? route.geometry
+    : geoStops.map((s) => ({ latitude: s.site!.geo!.lat, longitude: s.site!.geo!.lng }));
   // Fit the route plus the user's dot (so "you are here" is always in view).
   const geoPts = [
     ...geoStops.map((s) => s.site!.geo!),

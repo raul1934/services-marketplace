@@ -7,6 +7,7 @@ use App\Models\Field\FieldRoute;
 use App\Models\Field\FieldRoutePerformance;
 use App\Models\Field\FieldShift;
 use App\Models\Field\FieldSitePerformance;
+use App\Support\Field\Osrm;
 use App\Support\Field\ShiftSnapshot;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -31,8 +32,29 @@ class FieldRouteController extends Controller
     public function show(FieldRoute $route): JsonResponse
     {
         $route->load($this->stopLoad());
+        $this->ensureGeometry($route);
 
-        return response()->json(['data' => $this->shape($route, ShiftSnapshot::current())]);
+        return response()->json(['data' => $this->shape($route, ShiftSnapshot::current(), withGeometry: true)]);
+    }
+
+    /** Compute + cache the road geometry once (stops are a stable template). */
+    private function ensureGeometry(FieldRoute $route): void
+    {
+        if (! empty($route->geometry)) {
+            return;
+        }
+
+        $geometry = Osrm::routeGeometry(
+            $route->stops
+                ->filter(fn ($s) => $s->site && $s->site->lat !== null && $s->site->lng !== null)
+                ->map(fn ($s) => [(float) $s->site->lat, (float) $s->site->lng])
+                ->values()
+                ->all(),
+        );
+
+        if ($geometry) {
+            $route->update(['geometry' => $geometry]);
+        }
     }
 
     /** Eager-loads each stop's site with its mandatory-service count. */
@@ -99,7 +121,7 @@ class FieldRouteController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function shape(FieldRoute $route, ShiftSnapshot $snap): array
+    private function shape(FieldRoute $route, ShiftSnapshot $snap, bool $withGeometry = false): array
     {
         return [
             'id' => $route->id,
@@ -108,6 +130,8 @@ class FieldRouteController extends Controller
             'status' => $snap->routeStatus($route->id),
             'required' => $route->stops->sum(fn ($s) => (int) ($s->site->obrig_count ?? 0)),
             'performedTimes' => $snap->routePerformedTimes($route->id),
+            // Cached road-following polyline (OSRM); null → straight line.
+            'geometry' => $withGeometry ? $route->geometry : null,
             'stops' => $route->stops->map(function ($stop) use ($route, $snap) {
                 $state = $snap->stopState($route->id, $stop->site_id);
 

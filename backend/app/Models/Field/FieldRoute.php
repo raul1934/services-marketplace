@@ -12,10 +12,11 @@ class FieldRoute extends Model
 
     protected $keyType = 'string';
 
-    protected $fillable = ['id', 'name', 'km'];
+    protected $fillable = ['id', 'name', 'km', 'geometry'];
 
     protected $casts = [
         'km' => 'float',
+        'geometry' => 'array',
     ];
 
     public function stops(): HasMany

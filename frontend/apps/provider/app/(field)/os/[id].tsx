@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { CatalogItem, fieldApi, Service } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
+import { distanceMeters, useMyLocation } from '../../../src/location';
 
 export default function OS() {
   const t = useTheme();
@@ -15,6 +16,10 @@ export default function OS() {
   const siteId = id ?? 'rio-fortore';
   const { data: os, loading, error, reload, setData } = useAsync(() => fieldApi.os(siteId), [siteId]);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const me = useMyLocation();
+
+  // Within the site's geofence? (~150 m). null while there's no fix yet.
+  const inside = me && os?.site.geo ? distanceMeters(me, os.site.geo) <= 150 : null;
 
   const toggle = async (svc: Service) => {
     const next = !svc.done;
@@ -59,10 +64,14 @@ export default function OS() {
               </Row>
               <Row gap={12} style={{ alignItems: 'center' }}>
                 <Row gap={6} style={{ alignItems: 'center' }}>
-                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: t.colors.ok }} />
-                  <Text variant="caption" color={t.colors.ok}>{tr('field.inGeofence')}</Text>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: inside === null ? t.colors.ink3 : inside ? t.colors.ok : t.colors.warn }} />
+                  <Text variant="caption" color={inside === null ? t.colors.ink3 : inside ? t.colors.ok : t.colors.warn}>
+                    {inside === null ? tr('field.locating') : inside ? tr('field.inGeofence') : tr('field.outGeofence')}
+                  </Text>
                 </Row>
-                <Text variant="caption" style={{ fontVariant: ['tabular-nums'] }}>{tr('field.durSite')} 11 min · {tr('field.durShift')} 50 min</Text>
+                <Text variant="caption" style={{ fontVariant: ['tabular-nums'] }}>
+                  {tr('field.durSite')} {os.durations.siteMinutes ?? '—'} min · {tr('field.durShift')} {os.durations.shiftMinutes ?? '—'} min
+                </Text>
               </Row>
             </View>
 

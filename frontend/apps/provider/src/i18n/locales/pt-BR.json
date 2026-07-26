@@ -89,7 +89,9 @@
     "times": "{{n}}x",
     "inProgress": "em progresso",
     "loadError": "Não foi possível carregar. Tente novamente.",
-    "retry": "Tentar de novo"
+    "retry": "Tentar de novo",
+    "outGeofence": "fora da geocerca",
+    "locating": "localizando…"
   },
   "fieldNav": {
     "section": "Operação",
