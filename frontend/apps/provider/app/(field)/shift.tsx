@@ -90,7 +90,9 @@ export default function Shift() {
       sub={onCrew ? tr('field.crewSub') : tr('field.gearSub')}
       stepLabel={`${tr('field.stepShort')} ${step}/2`}
       backLabel={tr('field.back')}
-      onBack={() => (step > 1 ? setStep(step - 1) : router.back())}
+      // O drawer chega aqui via router.replace (sem pilha), entao router.back()
+      // no passo 1 dispara "GO_BACK nao tratado" (#268) — cair nas Rotas.
+      onBack={() => (step > 1 ? setStep(step - 1) : router.canGoBack() ? router.back() : router.replace('/(field)/routes'))}
       footer={
         onCrew
           ? { primary: { label: tr('field.next'), onPress: () => setStep(2), disabled: crew.size === 0 } }
