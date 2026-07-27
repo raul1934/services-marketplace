@@ -245,7 +245,15 @@ export default function OS() {
               <Text weight="600" style={{ fontSize: 13.5 }}>{m.name}</Text>
               <Text variant="caption">{hasRequires(m.requires) ? requiresText(m.requires) : (m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))}</Text>
             </View>
-            <Icon name={added ? 'check' : 'plus'} size={18} color={t.colors.accent} />
+            {/* Checkbox, not a "+": the row toggles a staged selection that the
+                footer commits — a "+" read as "add now" (OS-07). */}
+            {added ? (
+              <View style={{ width: 22, height: 22, borderRadius: 7, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="check" size={14} color="#fff" />
+              </View>
+            ) : (
+              <View style={{ width: 22, height: 22, borderRadius: 7, borderWidth: 1.5, borderColor: t.colors.line }} />
+            )}
           </Row>
         </Pressable>
       );
@@ -280,9 +288,10 @@ export default function OS() {
           accessibilityRole="button"
           accessibilityLabel={tr('field.confirmAdd')}
           onPress={confirmMenu}
-          style={{ backgroundColor: t.colors.accent, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 12 }}
+          disabled={!menuSel.length}
+          style={{ backgroundColor: menuSel.length ? t.colors.accent : t.colors.ink3, borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 12, opacity: menuSel.length ? 1 : 0.6 }}
         >
-          <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.confirmAdd')}</Text>
+          <Text weight="800" style={{ fontSize: 15, color: '#fff' }}>{tr('field.confirmAdd')}{menuSel.length ? ` (${menuSel.length})` : ''}</Text>
         </Pressable>
       </>
     );

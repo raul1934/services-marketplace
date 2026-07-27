@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { EmptyState, Icon, Row, Text, useTheme } from '@chamafacil/shared';
 import { FieldShell } from '../../src/field/FieldShell';
 import { fieldApi } from '../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../src/field/async';
@@ -16,7 +16,9 @@ export default function Performances() {
 
   return (
     <FieldShell section="performances" title={tr('fieldNav.performances')} sub={perfs ? tr('field.perfCount', { done, total: perfs.length }) : undefined}>
-      {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
+      {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : !perfs!.length ? (
+        <EmptyState icon="list" title={tr('field.perfEmptyTitle')} body={tr('field.perfEmptyBody')} />
+      ) : (
         <View style={{ gap: 10, paddingTop: 2 }}>
           {perfs!.map((p) => {
             const isDone = p.status === 'done';

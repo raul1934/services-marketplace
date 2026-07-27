@@ -134,7 +134,9 @@
     "routesCount_plural": "{{count}} routes",
     "stops_plural": "{{count}} stops",
     "startError": "Could not start the visit",
-    "shiftStartError": "Could not start the shift"
+    "shiftStartError": "Could not start the shift",
+    "perfEmptyTitle": "No visits yet",
+    "perfEmptyBody": "Today and yesterday visits show up here."
   },
   "fieldNav": {
     "section": "Operations",

@@ -134,7 +134,9 @@
     "routesCount_plural": "{{count}} rotas",
     "stops_plural": "{{count}} paradas",
     "startError": "Não foi possível iniciar a visita",
-    "shiftStartError": "Não foi possível iniciar o turno"
+    "shiftStartError": "Não foi possível iniciar o turno",
+    "perfEmptyTitle": "Nenhuma visita ainda",
+    "perfEmptyBody": "As visitas de hoje e ontem aparecem aqui."
   },
   "fieldNav": {
     "section": "Operação",
