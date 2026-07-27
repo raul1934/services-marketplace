@@ -139,7 +139,11 @@
     "perfEmptyBody": "As visitas de hoje e ontem aparecem aqui.",
     "visitedTimes": "visitado {{count}} vez",
     "visitedTimes_plural": "visitado {{count}} vezes",
-    "area": "Área"
+    "area": "Área",
+    "endShift": "Encerrar turno",
+    "endShiftDone": "Turno encerrado",
+    "endShiftHint": "Deslizar encerra o turno",
+    "endShiftError": "Não foi possível encerrar o turno"
   },
   "fieldNav": {
     "section": "Operação",

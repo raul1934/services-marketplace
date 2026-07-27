@@ -27,7 +27,7 @@ export const SECTION: Record<FieldSection, { accent: string; icon: IconName }> =
  * `section` drives the wayfinding landmark: the header identity chip and the
  * highlighted drawer row.
  */
-export function FieldShell({ title, sub, section, children }: { title: string; sub?: string; section?: FieldSection; children: React.ReactNode }) {
+export function FieldShell({ title, sub, section, footer, children }: { title: string; sub?: string; section?: FieldSection; footer?: React.ReactNode; children: React.ReactNode }) {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
@@ -63,6 +63,13 @@ export function FieldShell({ title, sub, section, children }: { title: string; s
       <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom }} showsVerticalScrollIndicator>
         {children}
       </ScrollView>
+
+      {/* Optional sticky footer (e.g. the end-shift slider on Rotas). */}
+      {footer ? (
+        <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
+          {footer}
+        </SafeAreaView>
+      ) : null}
 
       <AppDrawer
         visible={drawer}

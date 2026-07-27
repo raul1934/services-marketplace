@@ -1,8 +1,8 @@
-import React from 'react';
-import { Pressable, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Icon, Row, Text, useTheme } from '@chamafacil/shared';
+import { ApiError, Icon, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { FieldShell } from '../../src/field/FieldShell';
 import { fieldApi } from '../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../src/field/async';
@@ -15,11 +15,39 @@ export default function Routes() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { data: routes, loading, error, reload } = useAsync(() => fieldApi.routes(), []);
+  // The open shift drives the end-shift slider in the footer (#266).
+  const { data: shift, reload: reloadShift } = useAsync(() => fieldApi.shift(), []);
+  const [endReset, setEndReset] = useState(0);
   const now = new Date();
   const dateLabel = `${WD[now.getDay()]}, ${now.getDate()} ${MO[now.getMonth()]}`;
 
+  // Only leave the shift closed on success — never silently (mirrors OS-01).
+  const endShift = async () => {
+    try {
+      await fieldApi.finishShift();
+      reloadShift();
+      reload();
+    } catch (e) {
+      Alert.alert(tr('field.endShiftError'), e instanceof ApiError ? e.message : String((e as Error)?.message ?? e));
+      setEndReset((n) => n + 1);
+    }
+  };
+
   return (
-    <FieldShell section="routes" title={tr('field.routesToday')} sub={routes ? `${dateLabel} · ${tr('field.routesCount', { count: routes.length })}` : dateLabel}>
+    <FieldShell
+      section="routes"
+      title={tr('field.routesToday')}
+      sub={routes ? `${dateLabel} · ${tr('field.routesCount', { count: routes.length })}` : dateLabel}
+      footer={shift ? (
+        <SlideToConfirm
+          label={tr('field.endShift')}
+          doneLabel={tr('field.endShiftDone')}
+          confirmHint={tr('field.endShiftHint')}
+          onConfirm={endShift}
+          resetSignal={endReset}
+        />
+      ) : undefined}
+    >
       {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
         <View style={{ gap: 12, paddingTop: 2 }}>
           {routes!.map((r) => {
