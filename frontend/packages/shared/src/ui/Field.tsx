@@ -13,9 +13,12 @@ interface Props extends TextInputProps {
   right?: React.ReactNode;
   /** Show a microphone button that dictates speech into the field (web). */
   voiceInput?: boolean;
+  /** Accessible label for the mic button. Injected by the consumer so it can be
+   *  localized — this package has no i18n (DS-06). Defaults to pt-BR. */
+  micLabel?: string;
 }
 
-export function Field({ label, error, hint, right, voiceInput, style, ...rest }: Props) {
+export function Field({ label, error, hint, right, voiceInput, micLabel, style, ...rest }: Props) {
   const t = useTheme();
   const [focused, setFocused] = useState(false);
   const [voiceOpen, setVoiceOpen] = useState(false);
@@ -79,7 +82,7 @@ export function Field({ label, error, hint, right, voiceInput, style, ...rest }:
             onPress={onMic}
             hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel="Ditar por voz"
+            accessibilityLabel={micLabel ?? 'Ditar por voz'}
             style={{
               paddingLeft: 8,
               alignSelf: rest.multiline ? 'flex-start' : 'center',

@@ -82,8 +82,11 @@ export default function SiteDetail() {
                   {s.geofence && s.geofence.length >= 3
                     ? [(() => {
                         const c = polygonCentroid(s.geofence);
+                        // Sit the area chip halfway between the centre and the top
+                        // edge, off the busy dead-centre of the polygon (SITE-05).
+                        const topLat = Math.max(...s.geofence.map((p) => p.lat));
                         return (
-                          <Marker key="area" coordinate={{ latitude: c.lat, longitude: c.lng }}>
+                          <Marker key="area" coordinate={{ latitude: (c.lat + topLat) / 2, longitude: c.lng }} anchor={{ x: 0.5, y: 0.5 }}>
                             <MapLabel text={`${Math.round(polygonAreaSqm(s.geofence)).toLocaleString('pt-BR')} m²`} tone="area" />
                           </Marker>
                         );
@@ -107,8 +110,11 @@ export default function SiteDetail() {
               {s.services.map((sv, i) => (
                 <View key={sv.id} style={{ backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: t.colors.line, padding: 12 }}>
                   <Row gap={11} style={{ alignItems: 'center' }}>
-                    <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: sv.done ? t.colors.ok : sv.obrig ? t.colors.accent : t.colors.ink3, alignItems: 'center', justifyContent: 'center' }}>
-                      <Text weight="800" style={{ fontSize: 12.5, color: '#fff' }}>{i + 1}</Text>
+                    {/* Number = order, check = done. Obrigatorio/opcional is in
+                        the caption, so the circle no longer double-encodes it
+                        by colour (SITE-04). */}
+                    <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: sv.done ? t.colors.ok : t.colors.ink3, alignItems: 'center', justifyContent: 'center' }}>
+                      {sv.done ? <Icon name="check" size={14} color="#fff" /> : <Text weight="800" style={{ fontSize: 12.5, color: '#fff' }}>{i + 1}</Text>}
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text weight="700" style={{ fontSize: 14 }}>{sv.name}</Text>
