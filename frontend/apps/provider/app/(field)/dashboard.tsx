@@ -1,8 +1,8 @@
-import React from 'react';
-import { Pressable, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Icon, IconName, Row, Text, useTheme } from '@chamafacil/shared';
+import { ApiError, Icon, IconName, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { FieldShell, SECTION } from '../../src/field/FieldShell';
 import { fieldApi } from '../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../src/field/async';
@@ -10,23 +10,53 @@ import { ErrorState, Loading, useAsync } from '../../src/field/async';
 const WD = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 const MO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
+// minutes → "Xh Ymin" / "Ymin"
+const humanMin = (m: number) => (m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}min` : `${Math.floor(m / 60)}h`);
+
+/** Ticks every 30s so the shift duration stays live without churning. */
+function useNowMinute() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
+
 /**
- * Field home — a day overview: shift status, today's routes summary (with a
- * resume for the running one), and shortcuts. Replaces the raw routes list as
- * the initial screen.
+ * Field home — a day overview: shift (live duration + end), day progress, next
+ * stop, today's routes summary, and shortcuts.
  */
 export default function Dashboard() {
   const t = useTheme();
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { data: routes, loading, error, reload } = useAsync(() => fieldApi.routes(), []);
-  const { data: shift } = useAsync(() => fieldApi.shift(), []);
+  const { data: shift, reload: reloadShift } = useAsync(() => fieldApi.shift(), []);
   const now = new Date();
+  const nowMs = useNowMinute();
+  const [endReset, setEndReset] = useState(0);
   const dateLabel = `${WD[now.getDay()]}, ${now.getDate()} ${MO[now.getMonth()]}`;
 
   const running = routes?.find((r) => r.status === 'running');
-  const totalStops = routes?.reduce((s, r) => s + r.stops.length, 0) ?? 0;
+  const allStops = routes?.flatMap((r) => r.stops) ?? [];
+  const doneStops = allStops.filter((s) => s.status === 'done').length;
+  const totalStops = allStops.length;
   const totalKm = routes?.reduce((s, r) => s + r.km, 0) ?? 0;
+  const progress = totalStops ? doneStops / totalStops : 0;
+  const nextStop = allStops.find((s) => s.status === 'now') ?? allStops.find((s) => s.status === 'next');
+  const shiftMinutes = shift?.startedAt ? Math.max(0, Math.round((nowMs - Date.parse(shift.startedAt)) / 60000)) : null;
+
+  const endShift = async () => {
+    try {
+      await fieldApi.finishShift();
+      reloadShift();
+      reload();
+    } catch (e) {
+      Alert.alert(tr('field.endShiftError'), e instanceof ApiError ? e.message : String((e as Error)?.message ?? e));
+      setEndReset((n) => n + 1);
+    }
+  };
 
   const card = { backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: t.colors.line, padding: 14, gap: 12 } as const;
 
@@ -41,9 +71,15 @@ export default function Dashboard() {
                 <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: shift ? t.colors.ok : t.colors.ink3 }} />
                 <Text weight="700" style={{ fontSize: 15 }}>{shift ? tr('field.shiftOn') : tr('field.shiftOff')}</Text>
               </Row>
-              {shift ? <Text variant="caption">{tr('field.crewN', { n: shift.crew?.length ?? 1 })}</Text> : null}
+              {shift ? (
+                <Text variant="caption" style={{ fontVariant: ['tabular-nums'] }}>
+                  {shiftMinutes != null ? `${humanMin(shiftMinutes)} · ` : ''}{tr('field.crewN', { n: shift.crew?.length ?? 1 })}
+                </Text>
+              ) : null}
             </Row>
-            {!shift ? (
+            {shift ? (
+              <SlideToConfirm label={tr('field.endShift')} doneLabel={tr('field.endShiftDone')} confirmHint={tr('field.endShiftHint')} onConfirm={endShift} resetSignal={endReset} />
+            ) : (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={tr('field.startTitle')}
@@ -53,8 +89,44 @@ export default function Dashboard() {
                 <Icon name="clock" size={18} color="#fff" />
                 <Text weight="800" style={{ fontSize: 15 }} color="#fff">{tr('field.startTitle')}</Text>
               </Pressable>
-            ) : null}
+            )}
           </View>
+
+          {/* Progresso do dia */}
+          {totalStops ? (
+            <View style={card}>
+              <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text variant="label">{tr('field.dayProgress')}</Text>
+                <Text weight="800" style={{ fontSize: 13, fontVariant: ['tabular-nums'] }} color={t.colors.ok}>{Math.round(progress * 100)}%</Text>
+              </Row>
+              <View style={{ height: 8, borderRadius: 4, backgroundColor: t.colors.surface2, overflow: 'hidden' }}>
+                <View style={{ width: `${Math.round(progress * 100)}%`, height: '100%', backgroundColor: t.colors.ok, borderRadius: 4 }} />
+              </View>
+              <Text variant="caption">{tr('field.stopsDone', { done: doneStops, total: totalStops })}</Text>
+            </View>
+          ) : null}
+
+          {/* Próxima parada */}
+          {nextStop?.site ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${tr('field.nextStop')}: ${nextStop.site.name}`}
+              onPress={() => router.push(`/(field)/site/${nextStop.siteId}`)}
+              style={{ ...card, gap: 8 }}
+            >
+              <Row gap={8} style={{ alignItems: 'center' }}>
+                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: SECTION.sites.accent }} />
+                <Text variant="label">{tr('field.nextStop')}</Text>
+              </Row>
+              <Row gap={11} style={{ alignItems: 'center' }}>
+                <View style={{ flex: 1 }}>
+                  <Text weight="700" style={{ fontSize: 15 }}>{nextStop.site.name}</Text>
+                  <Text variant="caption">{nextStop.site.address}</Text>
+                </View>
+                <Icon name="chevronsR" size={17} color={t.colors.ink3} />
+              </Row>
+            </Pressable>
+          ) : null}
 
           {/* Rotas de hoje */}
           <View style={card}>

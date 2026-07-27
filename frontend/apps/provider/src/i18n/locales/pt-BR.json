@@ -151,7 +151,11 @@
     "shortcuts": "Atalhos",
     "statRoutes": "rotas",
     "statStops": "paradas",
-    "statKm": "km"
+    "statKm": "km",
+    "dayProgress": "Progresso do dia",
+    "stopsDone": "{{done}} de {{total}} paradas concluídas",
+    "nextStop": "Próxima parada",
+    "goToSite": "Ir para o site"
   },
   "fieldNav": {
     "section": "Operação",
