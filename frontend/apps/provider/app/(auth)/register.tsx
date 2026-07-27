@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Linking, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
+import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, isValidPhoneBR, Screen, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
 import { config } from '../../src/config';
 
 export default function Register() {
@@ -20,6 +20,15 @@ export default function Register() {
   const submit = async () => {
     setErrors({});
     setFormError(null);
+    // Client-side pre-check (AUTH-04): catch the obvious before a round-trip.
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = tr('register.errName');
+    if (form.phone.trim() && !isValidPhoneBR(form.phone)) errs.phone = tr('register.errPhone');
+    if (form.password.length < 8) errs.password = tr('register.errPassword');
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
     setLoading(true);
     try {
       await register({ name: form.name.trim(), email: form.email.trim(), phone: form.phone.trim() || undefined, password: form.password });

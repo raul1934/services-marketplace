@@ -142,11 +142,14 @@ export default function RouteStops() {
               <Text variant="label">{tr('field.routeSites')}</Text>
               {route.stops.map((s, i) => {
                 const label = s.status === 'done' ? tr('field.times', { n: s.times || 1 }) : s.status === 'now' ? tr('field.inProgress') : tr('field.stopNext');
+                // "1x" alone is opaque to a screen reader — announce the status
+                // in full alongside the site name (ROUTE-02).
+                const a11yStatus = s.status === 'done' ? tr('field.visitedTimes', { count: s.times || 1 }) : s.status === 'now' ? tr('field.inProgress') : tr('field.stopNext');
                 return (
                   <Pressable
                     key={s.siteId}
                     accessibilityRole="button"
-                    accessibilityLabel={s.site?.name ?? s.siteId}
+                    accessibilityLabel={`${s.site?.name ?? s.siteId}. ${a11yStatus}`}
                     onPress={() => router.push(`/(field)/site/${s.siteId}`)}
                     style={{ backgroundColor: t.colors.surface, borderRadius: 12, borderWidth: 1, borderColor: s.status === 'now' ? t.colors.accent : t.colors.line, padding: 12 }}
                   >

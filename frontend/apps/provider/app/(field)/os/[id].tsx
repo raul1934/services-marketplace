@@ -518,7 +518,7 @@ function PhotoRow({ label, photos, busy, canAdd, onAdd, onOpen }: { label: strin
       <Text weight="700" style={{ fontSize: 12.5 }} color={t.colors.ink2}>{label} · {photos.length}</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: GRID_GAP }}>
         {photos.map((p, i) => (
-          <Pressable key={p.mediaId ?? i} accessibilityRole="imagebutton" accessibilityLabel={`${label} ${i + 1}`} onPress={() => onOpen(i)} style={{ width: GRID_SIZE, height: GRID_SIZE, borderRadius: 11, overflow: 'hidden', backgroundColor: '#46586a' }}>
+          <Pressable key={p.mediaId ?? i} accessibilityRole="imagebutton" accessibilityLabel={`${label} ${i + 1}`} onPress={() => onOpen(i)} style={{ width: GRID_SIZE, height: GRID_SIZE, borderRadius: 11, overflow: 'hidden', backgroundColor: t.colors.surface2 }}>
             <Image source={{ uri: p.url }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
             <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: 6, paddingVertical: 3, backgroundColor: 'rgba(0,0,0,0.4)' }}>
               <Text style={{ fontSize: 10, fontWeight: '700' }} color="#fff">{i + 1} · {p.at}</Text>
