@@ -24,6 +24,9 @@ export default function Verify() {
   }, [seconds]);
 
   const verify = async (value: string) => {
+    // Auto-submit (on the 6th digit) and the button can both fire — guard so we
+    // never verify the same code twice concurrently (AUTH-02).
+    if (loading) return;
     setError(null);
     setLoading(true);
     try {
@@ -66,19 +69,19 @@ export default function Verify() {
         {/* The error lives inside OtpInput so it is announced with the field. */}
         <OtpInput value={code} onChange={onChange} label={tr('otp.title')} hint={tr('otp.a11yHint', { count: 6 })} error={error} />
 
-        <Button title={tr('otp.verify')} full loading={loading} disabled={code.length < 6} onPress={() => verify(code)} />
+        <Button title={tr('otp.verify')} full loading={loading} disabled={code.length < 6 || loading} onPress={() => verify(code)} />
 
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
           {seconds > 0 ? (
             tr('otp.resendIn', { seconds })
           ) : (
-            <Text color={t.colors.accent} weight="800" onPress={resend}>{tr('otp.resend')}</Text>
+            <Text accessibilityRole="link" color={t.colors.accent} weight="800" onPress={resend}>{tr('otp.resend')}</Text>
           )}
         </Text>
         <View style={{ flex: 1 }} />
 
         <Text center style={{ fontSize: 11, color: t.colors.ink3, lineHeight: 16 }}>
-          {tr('otp.wrongNumber')} <Text color={t.colors.ink2} weight="700" onPress={() => router.back()}>{tr('otp.edit')}</Text>
+          {tr('otp.wrongNumber')} <Text accessibilityRole="link" color={t.colors.ink2} weight="700" onPress={() => router.back()}>{tr('otp.edit')}</Text>
         </Text>
       </View>
     </Screen>

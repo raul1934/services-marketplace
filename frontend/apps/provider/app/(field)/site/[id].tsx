@@ -27,7 +27,7 @@ export default function SiteDetail() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: s, loading, error, reload } = useAsync(() => fieldApi.site(id ?? 'rio-fortore'), [id]);
+  const { data: s, loading, error, reload } = useAsync(() => fieldApi.site(id ?? ''), [id]);
 
   const running = s?.status === 'running';
   // Surface failures instead of swallowing them: starting a visit that fails

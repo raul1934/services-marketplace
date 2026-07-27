@@ -48,13 +48,19 @@ export default function Welcome() {
         <Text style={{ fontSize: 25, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.5 }}>{slides[i].title}</Text>
         <Text style={{ fontSize: 14.5, lineHeight: 22, color: t.colors.ink2 }}>{slides[i].body}</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
-          <Text style={{ flex: 1, fontSize: 13.5, fontWeight: '700', color: t.colors.ink3 }} onPress={() => router.push('/(auth)/register')}>
-            {last ? '' : tr('welcome.skip')}
-          </Text>
+          {/* On the last slide there's no skip — render a plain spacer instead of
+              an empty-labelled but still-tappable Text (AUTH-05). */}
+          {last ? (
+            <View style={{ flex: 1 }} />
+          ) : (
+            <Text accessibilityRole="link" style={{ flex: 1, fontSize: 13.5, fontWeight: '700', color: t.colors.ink3 }} onPress={() => router.push('/(auth)/register')}>
+              {tr('welcome.skip')}
+            </Text>
+          )}
           <Button title={last ? tr('welcome.cta') : tr('welcome.next')} onPress={() => (last ? router.push('/(auth)/register') : setI(i + 1))} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} />
         </View>
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
-          <Text color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('common.haveAccount')}</Text>
+          <Text accessibilityRole="link" color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('common.haveAccount')}</Text>
         </Text>
       </View>
     </View>

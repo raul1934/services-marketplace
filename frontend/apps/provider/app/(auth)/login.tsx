@@ -109,17 +109,17 @@ export default function Login() {
           </>
         )}
 
-        {formError ? <Text variant="caption" color={t.colors.danger}>{formError}</Text> : null}
+        {formError ? <Text variant="caption" color={t.colors.danger} accessibilityRole="alert" accessibilityLiveRegion="assertive">{formError}</Text> : null}
 
         <Button title={mode === 'phone' ? tr('login.sendCode') : tr('login.submit')} full loading={loading} onPress={submit} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} style={{ marginTop: 4 }} />
         <DividerOr label={tr('common.or')} />
         <GoogleButton label={tr('common.googleContinue')} loading={google.loading} onPress={google.signIn} />
-        {google.error ? <Text variant="caption" color={t.colors.danger} center>{google.error}</Text> : null}
+        {google.error ? <Text variant="caption" color={t.colors.danger} center accessibilityRole="alert" accessibilityLiveRegion="assertive">{google.error}</Text> : null}
 
         <View style={{ flex: 1 }} />
 
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
-          <Text color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/register')}>{tr('login.toRegister')}</Text>
+          <Text accessibilityRole="link" color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/register')}>{tr('login.toRegister')}</Text>
         </Text>
       </View>
       </KeyboardAvoidingView>

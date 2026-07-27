@@ -15,7 +15,7 @@ export default function OS() {
   const router = useRouter();
   const { t: tr } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const siteId = id ?? 'rio-fortore';
+  const siteId = id ?? '';
   const { data: os, loading, error, reload, setData } = useAsync(() => fieldApi.os(siteId), [siteId]);
   const me = useMyLocation();
   const [uploading, setUploading] = useState<'before' | 'after' | null>(null);

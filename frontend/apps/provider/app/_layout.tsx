@@ -59,9 +59,11 @@ function Gate() {
     }
   });
 
-  // Deep-link: tapping a push (background/quit) opens the relevant job.
+  // Deep-link: tapping a push (background/quit) opens the relevant job. Only in
+  // marketplace mode — `/job/[id]` is a marketplace route, so in field mode the
+  // Gate would just bounce it after a wasted mount + fetch (NAV-06).
   useEffect(() => {
-    if (status !== 'authed') return;
+    if (status !== 'authed' || !flags.marketplace) return;
     return addNotificationResponseListener((data) => {
       const rid = data.request_id ? Number(data.request_id) : null;
       if (rid) router.push(`/job/${rid}`);

@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Linking, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useTheme } from '@chamafacil/shared';
+import { ApiError, AuthField, BrandMark, Button, DividerOr, GoogleButton, Icon, Screen, Text, useAuth, useGoogleSignIn, useTheme } from '@chamafacil/shared';
 import { config } from '../../src/config';
 
 export default function Register() {
   const t = useTheme();
   const { register } = useAuth();
+  const google = useGoogleSignIn();
   const router = useRouter();
   const { t: tr } = useTranslation();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
@@ -50,11 +51,12 @@ export default function Register() {
         <AuthField icon="phone" label={tr('register.phone')} prefix="+55" value={form.phone} onChangeText={set('phone')} keyboardType="phone-pad" placeholder={tr('register.phonePlaceholder')} error={errors.phone} />
         <AuthField icon="key" label={tr('register.password')} value={form.password} onChangeText={set('password')} secureTextEntry revealLabel={tr('common.showPassword')} hideLabel={tr('common.hidePassword')} placeholder={tr('register.passwordPlaceholder')} error={errors.password} />
 
-        {formError ? <Text variant="caption" color={t.colors.danger}>{formError}</Text> : null}
+        {formError ? <Text variant="caption" color={t.colors.danger} accessibilityRole="alert" accessibilityLiveRegion="assertive">{formError}</Text> : null}
 
         <Button title={tr('register.submit')} full loading={loading} onPress={submit} right={<Icon name="arrowR" size={18} color={t.colors.accentInk} />} style={{ marginTop: 4 }} />
         <DividerOr label={tr('common.or')} />
-        <GoogleButton label={tr('common.googleSignup')} />
+        <GoogleButton label={tr('common.googleSignup')} loading={google.loading} onPress={google.signIn} />
+        {google.error ? <Text variant="caption" color={t.colors.danger} center accessibilityRole="alert" accessibilityLiveRegion="assertive">{google.error}</Text> : null}
 
         {/* Was a flat sentence: it told people they were agreeing to two
             documents and gave them no way to read either one. Legal problem
@@ -83,7 +85,7 @@ export default function Register() {
           {tr('register.legalSuffix')}
         </Text>
         <Text center style={{ fontSize: 13.5, fontWeight: '600', color: t.colors.ink2 }}>
-          <Text color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('common.haveAccount')}</Text>
+          <Text accessibilityRole="link" color={t.colors.accent} weight="800" onPress={() => router.push('/(auth)/login')}>{tr('common.haveAccount')}</Text>
         </Text>
       </View>
     </Screen>
