@@ -55,7 +55,7 @@ export function AppDrawer({
         {/* The panel is a raw Modal child, so no SafeAreaView pads it: the
             bottom inset has to be added by hand or the footer ("Sair") renders
             under Android's nav buttons. */}
-        <View style={{ width: '84%', maxWidth: 360, backgroundColor: t.colors.bg, paddingTop: 52, paddingBottom: 20 + insets.bottom, ...t.shadow }}>
+        <View style={{ width: '84%', maxWidth: 360, backgroundColor: t.colors.bg, paddingTop: insets.top + 14, paddingBottom: 20 + insets.bottom, ...t.shadow }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingBottom: 16 }}>
             <Avatar name={name} uri={avatarUri ?? undefined} size={52} />
             <View style={{ flex: 1 }}>
@@ -122,14 +122,13 @@ function DrawerRow({ item, onClose }: { item: DrawerItem; onClose: () => void })
       ]}
     >
       <Icon name={item.icon} size={20} color={item.danger ? t.colors.danger : active ? tint : t.colors.ink2} />
-      <Text weight={active ? '800' : '700'} style={{ flex: 1, fontSize: 15 }} color={color}>{item.label}</Text>
+      <Text weight={active ? '800' : '700'} style={{ flex: 1, fontSize: 15 }} color={color} numberOfLines={1}>{item.label}</Text>
+      {/* Badge só quando houver; o chevron por-linha era ruído (todo clique navega). */}
       {item.badge ? (
         <View style={{ minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 6, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
           <Text weight="800" color="#fff" style={{ fontSize: 11 }}>{item.badge}</Text>
         </View>
-      ) : (
-        !item.danger && <Icon name="arrowR" size={16} color={t.colors.ink3} />
-      )}
+      ) : null}
     </Pressable>
   );
 }
