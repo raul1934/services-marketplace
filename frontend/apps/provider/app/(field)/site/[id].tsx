@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, BackBar, Icon, Pulse, Row, Text, useTheme } from '@chamafacil/shared';
 import { fieldApi, Geo } from '../../../src/field/api';
+import { SECTION } from '../../../src/field/FieldShell';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
 import { edgeMidpoint, metersBetweenLL, polygonAreaSqm, polygonCentroid } from '../../../src/location';
@@ -45,7 +46,7 @@ export default function SiteDetail() {
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <SafeAreaView edges={['top']}>
-        <BackBar title={tr('fieldNav.sites')} onBack={() => router.back()} backLabel={tr('field.back')} />
+        <BackBar title={tr('fieldNav.sites')} onBack={() => router.back()} backLabel={tr('field.back')} accent={SECTION.sites.accent} icon={SECTION.sites.icon} />
       </SafeAreaView>
 
       {loading ? <Loading /> : error || !s ? <ErrorState error={error ?? new Error()} onRetry={reload} /> : (
@@ -54,6 +55,11 @@ export default function SiteDetail() {
             <View style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
               <Text weight="800" style={{ fontSize: 24, letterSpacing: -0.4 }}>{s.name}</Text>
               <Text variant="caption">{tr('field.contract', { name: s.contract })} · {s.address}</Text>
+              {/* Area as a legible caption instead of a chip crowding the map
+                  centre (SITE-05). The polygon + edge dimensions stay on the map. */}
+              {s.geofence && s.geofence.length >= 3 ? (
+                <Text variant="caption" style={{ marginTop: 2 }}>{tr('field.area')} ~{Math.round(polygonAreaSqm(s.geofence)).toLocaleString('pt-BR')} m²</Text>
+              ) : null}
             </View>
 
             {s.geo || (s.geofence && s.geofence.length) ? (
@@ -79,19 +85,8 @@ export default function SiteDetail() {
                         );
                       })
                     : null}
-                  {s.geofence && s.geofence.length >= 3
-                    ? [(() => {
-                        const c = polygonCentroid(s.geofence);
-                        // Sit the area chip halfway between the centre and the top
-                        // edge, off the busy dead-centre of the polygon (SITE-05).
-                        const topLat = Math.max(...s.geofence.map((p) => p.lat));
-                        return (
-                          <Marker key="area" coordinate={{ latitude: (c.lat + topLat) / 2, longitude: c.lng }} anchor={{ x: 0.5, y: 0.5 }}>
-                            <MapLabel text={`${Math.round(polygonAreaSqm(s.geofence)).toLocaleString('pt-BR')} m²`} tone="area" />
-                          </Marker>
-                        );
-                      })()]
-                    : null}
+                  {/* Area moved to a header caption (SITE-05) — was a chip on the
+                      crowded polygon centre. */}
                   {s.geo && !(s.geofence && s.geofence.length >= 3) ? (
                     <Marker coordinate={{ latitude: s.geo.lat, longitude: s.geo.lng }}>
                       <MapPin color={t.colors.accent} active={running} />

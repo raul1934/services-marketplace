@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { ApiError, Avatar, BackBar, Icon, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { Crew, fieldApi, MenuItem, OsPhoto, ResourceItem, ResourceKind, ServiceInstance, ServiceResource, WeatherType } from '../../../src/field/api';
+import { SECTION } from '../../../src/field/FieldShell';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { distanceMeters, useMyLocation } from '../../../src/location';
 import { capturePhoto } from '../../../src/photos';
@@ -300,7 +302,7 @@ export default function OS() {
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <SafeAreaView edges={['top']}>
-        <BackBar title={site?.name ?? tr('fieldNav.sites')} onBack={() => router.back()} backLabel={tr('field.back')} />
+        <BackBar title={site?.name ?? tr('fieldNav.sites')} onBack={() => router.back()} backLabel={tr('field.back')} accent={SECTION.sites.accent} icon={SECTION.sites.icon} />
       </SafeAreaView>
 
       {loading ? <Loading /> : error || !os || !site ? <ErrorState error={error ?? new Error()} onRetry={reload} /> : (
@@ -383,6 +385,9 @@ export default function OS() {
           </ScrollView>
 
           <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 10, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 12 }}>
+            {/* Fade sobre o conteudo logo acima do rodape: pista explicita de que
+                a lista passa por baixo do CTA fixo (UX-05). */}
+            <LinearGradient colors={['transparent', t.colors.bg]} pointerEvents="none" style={{ position: 'absolute', left: 0, right: 0, top: -22, height: 22 }} />
             {/* Resumo sempre visivel: o valor da OS (servicos/fotos/equipe) nao
                 deveria exigir rolar ate o fim (UX-05); tambem diz o que o slide
                 vai concluir. A sombra no topo sinaliza conteudo passando por baixo. */}

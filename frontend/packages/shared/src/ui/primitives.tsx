@@ -156,11 +156,13 @@ export function AppBar({ sub, title, left, right, accent, icon }: { sub?: string
   );
 }
 
-/** Back bar: round back button + inline title + optional trailing (chamafacil .backbar). */
-export function BackBar({ title, onBack, right, backLabel }: { title: string; onBack?: () => void; right?: React.ReactNode; backLabel: string }) {
+/** Back bar: round back button + inline title + optional trailing (chamafacil .backbar).
+ *  `accent`+`icon` add the same per-section identity chip as AppBar, so a detail
+ *  screen still reads as belonging to its section (UX-04). */
+export function BackBar({ title, onBack, right, backLabel, accent, icon }: { title: string; onBack?: () => void; right?: React.ReactNode; backLabel: string; accent?: string; icon?: IconName }) {
   const t = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingTop: 4, paddingBottom: 10 }}>
       <Pressable
         onPress={onBack}
         accessibilityRole="button"
@@ -174,6 +176,15 @@ export function BackBar({ title, onBack, right, backLabel }: { title: string; on
       >
         <Icon name="back" size={20} color={t.colors.ink} />
       </Pressable>
+      {icon && accent ? (
+        <View
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: accent + '1F', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Icon name={icon} size={17} color={accent} />
+        </View>
+      ) : null}
       <Text style={{ fontSize: 19, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.2 }} numberOfLines={1}>
         {title}
       </Text>

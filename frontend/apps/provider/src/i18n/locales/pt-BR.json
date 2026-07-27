@@ -138,7 +138,8 @@
     "perfEmptyTitle": "Nenhuma visita ainda",
     "perfEmptyBody": "As visitas de hoje e ontem aparecem aqui.",
     "visitedTimes": "visitado {{count}} vez",
-    "visitedTimes_plural": "visitado {{count}} vezes"
+    "visitedTimes_plural": "visitado {{count}} vezes",
+    "area": "Área"
   },
   "fieldNav": {
     "section": "Operação",

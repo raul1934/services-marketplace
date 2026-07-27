@@ -12,7 +12,7 @@ import { AppBar, AppDrawer, IconButton, useAuth, useTheme, type IconName } from 
  * deliberately kept off the cards so they don't collide with status semantics.
  */
 export type FieldSection = 'routes' | 'sites' | 'performances';
-const SECTION: Record<FieldSection, { accent: string; icon: IconName }> = {
+export const SECTION: Record<FieldSection, { accent: string; icon: IconName }> = {
   routes: { accent: '#0ea5a5', icon: 'navigate' },       // teal — matches "Finalizar rota"
   sites: { accent: '#4f46e5', icon: 'location' },        // indigo — matches "Iniciar visita"
   performances: { accent: '#9333ea', icon: 'list' },     // roxo — histórico/gestão

@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { BackBar, Icon, Pulse, Row, Sheet, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
 import { fieldApi, Geo, StopStatus } from '../../../src/field/api';
+import { SECTION } from '../../../src/field/FieldShell';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
 import { useMyLocation } from '../../../src/location';
@@ -97,7 +98,7 @@ export default function RouteStops() {
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <SafeAreaView edges={['top']}>
-        <BackBar title={tr('fieldNav.routes')} onBack={() => router.back()} backLabel={tr('field.back')} />
+        <BackBar title={tr('fieldNav.routes')} onBack={() => router.back()} backLabel={tr('field.back')} accent={SECTION.routes.accent} icon={SECTION.routes.icon} />
       </SafeAreaView>
 
       {loading ? <Loading /> : error || !route ? <ErrorState error={error ?? new Error()} onRetry={reload} /> : (

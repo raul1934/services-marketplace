@@ -21,7 +21,7 @@ export default function Sites() {
             <Pressable
               key={s.id}
               accessibilityRole="button"
-              accessibilityLabel={s.name}
+              accessibilityLabel={s.status === 'running' ? `${s.name}. ${tr('field.statusDoing')}` : s.name}
               onPress={() => router.push(`/(field)/site/${s.id}`)}
               style={{ backgroundColor: t.colors.surface, borderRadius: 14, borderWidth: 1, borderColor: s.status === 'running' ? t.colors.accent : t.colors.line, padding: 14, gap: 6 }}
             >
