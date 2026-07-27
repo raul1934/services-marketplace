@@ -90,6 +90,13 @@ export default function Dashboard() {
   const nextStop = allStops.find((s) => s.status === 'now') ?? allStops.find((s) => s.status === 'next');
   const shiftMinutes = shift?.startedAt ? Math.max(0, Math.round((nowMs - Date.parse(shift.startedAt)) / 60000)) : null;
 
+  // Actionable exceptions derivable from routes/shift. Richer ones (obrigatórios
+  // por serviço pendentes, fotos faltando) precisam de agregacao de OS no backend.
+  const pendingStops = totalStops - doneStops;
+  const alerts: { tone: 'warn' | 'info'; icon: IconName; text: string; onPress: () => void }[] = [];
+  if (!shift && (routes?.length ?? 0) > 0) alerts.push({ tone: 'warn', icon: 'clock', text: tr('field.alertNoShift'), onPress: () => router.replace('/(field)/shift') });
+  if (shift && pendingStops > 0) alerts.push({ tone: 'info', icon: 'location', text: tr('field.alertPendingStops', { n: pendingStops }), onPress: () => router.replace('/(field)/routes') });
+
   const endShift = async () => {
     try {
       await fieldApi.finishShift();
@@ -147,6 +154,28 @@ export default function Dashboard() {
               </Pressable>
             )}
           </View>
+
+          {/* Alertas */}
+          {alerts.length ? (
+            <View style={card}>
+              <Text variant="label">{tr('field.alerts')}</Text>
+              {alerts.map((a, i) => (
+                <Pressable
+                  key={i}
+                  accessibilityRole="button"
+                  accessibilityLabel={a.text}
+                  onPress={a.onPress}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
+                >
+                  <View style={{ width: 30, height: 30, borderRadius: 9, backgroundColor: (a.tone === 'warn' ? t.colors.warn : t.colors.accent) + '1F', alignItems: 'center', justifyContent: 'center' }}>
+                    <Icon name={a.icon} size={16} color={a.tone === 'warn' ? t.colors.warn : t.colors.accent} />
+                  </View>
+                  <Text weight="600" style={{ flex: 1, fontSize: 13.5 }} color={a.tone === 'warn' ? t.colors.warn : t.colors.ink}>{a.text}</Text>
+                  <Icon name="chevronsR" size={15} color={t.colors.ink3} />
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
 
           {/* Progresso do dia */}
           {totalStops ? (

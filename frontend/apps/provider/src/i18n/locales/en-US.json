@@ -155,7 +155,10 @@
     "dayProgress": "Today's progress",
     "stopsDone": "{{done}} of {{total}} stops done",
     "nextStop": "Next stop",
-    "goToSite": "Go to site"
+    "goToSite": "Go to site",
+    "alerts": "Alerts",
+    "alertNoShift": "Shift not started",
+    "alertPendingStops": "{{n}} stops not done yet"
   },
   "fieldNav": {
     "section": "Operations",

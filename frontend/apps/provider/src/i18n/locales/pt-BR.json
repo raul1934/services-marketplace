@@ -155,7 +155,10 @@
     "dayProgress": "Progresso do dia",
     "stopsDone": "{{done}} de {{total}} paradas concluídas",
     "nextStop": "Próxima parada",
-    "goToSite": "Ir para o site"
+    "goToSite": "Ir para o site",
+    "alerts": "Alertas",
+    "alertNoShift": "Turno não iniciado",
+    "alertPendingStops": "{{n}} paradas ainda não concluídas"
   },
   "fieldNav": {
     "section": "Operação",
