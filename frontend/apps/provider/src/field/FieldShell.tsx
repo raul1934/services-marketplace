@@ -59,8 +59,8 @@ export function FieldShell({ title, sub, section, children }: { title: string; s
       <AppDrawer
         visible={drawer}
         onClose={() => setDrawer(false)}
-        name={user?.name ?? 'Anderson Lima'}
-        subtitle="Prumo Manutenção Predial · Líder"
+        name={user?.name}
+        subtitle={user?.provider_profile?.company_name ?? undefined}
         avatarUri={user?.avatar_url}
         sections={[
           {

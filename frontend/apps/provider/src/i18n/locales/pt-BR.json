@@ -86,7 +86,7 @@
     "consumable": "consumível",
     "free": "sem custo",
     "charged": "cobra à parte",
-    "finishOS": "Concluir OS · grava no aparelho",
+    "finishOS": "Concluir OS",
     "finishedOS": "OS concluída",
     "finishHint": "Ativar conclui a ordem de serviço",
     "siteMandatory": "Serviços obrigatórios",
@@ -125,7 +125,8 @@
     "locating": "localizando…",
     "continueSite": "Continuar site",
     "shiftHistory": "Neste turno",
-    "siteDuration": "Duração do site"
+    "siteDuration": "Duração do site",
+    "finishError": "Não foi possível concluir a OS"
   },
   "fieldNav": {
     "section": "Operação",

@@ -86,7 +86,7 @@
     "consumable": "consumable",
     "free": "no cost",
     "charged": "billed separately",
-    "finishOS": "Finish work order · saved on device",
+    "finishOS": "Finish work order",
     "finishedOS": "Work order done",
     "finishHint": "Activating completes the work order",
     "siteMandatory": "Mandatory services",
@@ -125,7 +125,8 @@
     "locating": "locating…",
     "continueSite": "Continue site",
     "shiftHistory": "This shift",
-    "siteDuration": "Site duration"
+    "siteDuration": "Site duration",
+    "finishError": "Could not complete the work order"
   },
   "fieldNav": {
     "section": "Operations",

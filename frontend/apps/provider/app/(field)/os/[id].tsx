@@ -21,6 +21,8 @@ export default function OS() {
   const [uploading, setUploading] = useState<'before' | 'after' | null>(null);
   const [viewer, setViewer] = useState<{ photos: OsPhoto[]; index: number } | null>(null);
   const [weatherOpen, setWeatherOpen] = useState(false);
+  // Bump to snap the finish slider back after a failed conclude (OS-01).
+  const [finishReset, setFinishReset] = useState(0);
   // The operator whose "add service" menu is open, its search, and the staged
   // selection (service ids) that a footer button commits on confirm.
   const [menuForOp, setMenuForOp] = useState<Crew | null>(null);
@@ -39,6 +41,19 @@ export default function OS() {
       setData(await fieldApi.setWeather(siteId, type));
     } catch {
       reload();
+    }
+  };
+
+  // Conclude the OS. Only leave the screen on success — a failed conclude used to
+  // swallow the error and navigate back anyway, so the operator thought the work
+  // was saved when it wasn't (OS-01). On failure: surface it and reset the slider.
+  const finishOS = async () => {
+    try {
+      await fieldApi.finishSite(siteId);
+      router.back();
+    } catch (e) {
+      Alert.alert(tr('field.finishError'), e instanceof ApiError ? e.message : String((e as Error)?.message ?? e));
+      setFinishReset((n) => n + 1);
     }
   };
 
@@ -132,6 +147,13 @@ export default function OS() {
   };
   // minutes → "H:MM"
   const fmtDur = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+  // minutes → "Xh Ymin" / "Ymin" — never the raw "1698 min" (OS-03).
+  const humanMin = (m?: number | null) => {
+    if (m == null) return '—';
+    if (m < 60) return `${m} min`;
+    const mm = m % 60;
+    return mm ? `${Math.floor(m / 60)}h ${String(mm).padStart(2, '0')}min` : `${Math.floor(m / 60)}h`;
+  };
 
   const anyResourceBtn = hasEquipment || hasConsumable;
   const instanceCard = (inst: ServiceInstance) => (
@@ -294,7 +316,7 @@ export default function OS() {
                   </Text>
                 </Row>
                 <Text variant="caption" style={{ fontVariant: ['tabular-nums'] }}>
-                  {tr('field.durSite')} {os.durations.siteMinutes ?? '—'} min · {tr('field.durShift')} {os.durations.shiftMinutes ?? '—'} min
+                  {tr('field.durSite')} {humanMin(os.durations.siteMinutes)} · {tr('field.durShift')} {humanMin(os.durations.shiftMinutes)}
                 </Text>
               </Row>
             </View>
@@ -371,7 +393,7 @@ export default function OS() {
                 </Row>
               ) : null}
             </Row>
-            <SlideToConfirm label={tr('field.finishOS')} doneLabel={tr('field.finishedOS')} confirmHint={tr('field.finishHint')} onConfirm={() => fieldApi.finishSite(siteId).catch(() => {}).finally(() => router.back())} />
+            <SlideToConfirm label={tr('field.finishOS')} doneLabel={tr('field.finishedOS')} confirmHint={tr('field.finishHint')} resetSignal={finishReset} onConfirm={finishOS} />
           </SafeAreaView>
 
           <Sheet visible={!!menuForOp} onClose={() => setMenuForOp(null)} title={menuForOp ? tr('field.addServiceFor', { name: menuForOp.tech }) : tr('field.addServiceTitle')} closeLabel={tr('common.close')} maxHeight="82%">
