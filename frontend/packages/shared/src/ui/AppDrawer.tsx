@@ -13,6 +13,10 @@ export interface DrawerItem {
   label: string;
   badge?: number;
   danger?: boolean;
+  /** Marks the row as the current screen (accent bar + tint + bold). */
+  active?: boolean;
+  /** Section color used when `active`; falls back to the theme accent. */
+  accent?: string;
   onPress: () => void;
 }
 export interface DrawerSection {
@@ -100,18 +104,25 @@ export function AppDrawer({
 
 function DrawerRow({ item, onClose }: { item: DrawerItem; onClose: () => void }) {
   const t = useTheme();
-  const color = item.danger ? t.colors.danger : t.colors.ink;
+  const active = !!item.active;
+  const tint = item.accent ?? t.colors.accent;
+  const color = item.danger ? t.colors.danger : active ? tint : t.colors.ink;
   return (
     <Pressable
       onPress={() => { onClose(); item.onPress(); }}
+      accessibilityRole="button"
+      accessibilityLabel={item.label}
+      accessibilityState={{ selected: active }}
       style={({ pressed, focused }: any) => [
-        { flexDirection: 'row', alignItems: 'center', gap: 14, paddingHorizontal: 20, paddingVertical: 13 },
+        // A 3px bar is always reserved (transparent when inactive) so the active
+        // state never shifts the row's content sideways.
+        { flexDirection: 'row', alignItems: 'center', gap: 14, paddingLeft: 17, paddingRight: 20, paddingVertical: 13, borderLeftWidth: 3, borderLeftColor: active ? tint : 'transparent', backgroundColor: active ? tint + '14' : undefined },
         pressed && { backgroundColor: t.colors.surface2 },
         focusRing(t.colors.accent, focused),
       ]}
     >
-      <Icon name={item.icon} size={20} color={item.danger ? t.colors.danger : t.colors.ink2} />
-      <Text weight="700" style={{ flex: 1, fontSize: 15 }} color={color}>{item.label}</Text>
+      <Icon name={item.icon} size={20} color={item.danger ? t.colors.danger : active ? tint : t.colors.ink2} />
+      <Text weight={active ? '800' : '700'} style={{ flex: 1, fontSize: 15 }} color={color}>{item.label}</Text>
       {item.badge ? (
         <View style={{ minWidth: 20, height: 20, borderRadius: 10, paddingHorizontal: 6, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
           <Text weight="800" color="#fff" style={{ fontSize: 11 }}>{item.badge}</Text>

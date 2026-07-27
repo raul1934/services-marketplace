@@ -125,12 +125,26 @@ export function AvatarGrad({ initials, size = 42 }: { initials: string; size?: n
 }
 
 /** App bar with optional leading action, small subtitle + big title, and
- *  trailing actions (chamafacil .appbar). */
-export function AppBar({ sub, title, left, right }: { sub?: string; title: string; left?: React.ReactNode; right?: React.ReactNode }) {
+ *  trailing actions (chamafacil .appbar).
+ *
+ *  `accent` + `icon` add a per-section identity chip before the title — a
+ *  wayfinding landmark so near-identical list screens (routes/sites/…) read as
+ *  distinct places at a glance. Both optional; without them the bar is unchanged. */
+export function AppBar({ sub, title, left, right, accent, icon }: { sub?: string; title: string; left?: React.ReactNode; right?: React.ReactNode; accent?: string; icon?: IconName }) {
   const t = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 14 }}>
       {left}
+      {icon && accent ? (
+        <View
+          // Decorative landmark; the title already names the screen for AT.
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: accent + '1F', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Icon name={icon} size={19} color={accent} />
+        </View>
+      ) : null}
       <View style={{ flex: 1 }}>
         {sub ? (
           <Text style={{ color: t.colors.ink2, fontSize: 13, fontWeight: '600', marginBottom: 1 }}>{sub}</Text>

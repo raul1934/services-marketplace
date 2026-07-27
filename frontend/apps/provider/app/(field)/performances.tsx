@@ -15,7 +15,7 @@ export default function Performances() {
   const done = perfs?.filter((p) => p.status === 'done').length ?? 0;
 
   return (
-    <FieldShell title={tr('fieldNav.performances')} sub={perfs ? tr('field.perfCount', { done, total: perfs.length }) : undefined}>
+    <FieldShell section="performances" title={tr('fieldNav.performances')} sub={perfs ? tr('field.perfCount', { done, total: perfs.length }) : undefined}>
       {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
         <View style={{ gap: 10, paddingTop: 2 }}>
           {perfs!.map((p) => {

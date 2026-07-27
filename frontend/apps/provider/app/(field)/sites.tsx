@@ -14,7 +14,7 @@ export default function Sites() {
   const { data: sites, loading, error, reload } = useAsync(() => fieldApi.sites(), []);
 
   return (
-    <FieldShell title={tr('fieldNav.sites')} sub={sites ? tr('field.sitesCount', { n: sites.length }) : undefined}>
+    <FieldShell section="sites" title={tr('fieldNav.sites')} sub={sites ? tr('field.sitesCount', { n: sites.length }) : undefined}>
       {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
         <View style={{ gap: 10, paddingTop: 2 }}>
           {sites!.map((s) => (
@@ -36,7 +36,14 @@ export default function Sites() {
                 <Icon name="location" size={13} color={t.colors.ink3} />
                 <Text variant="caption" style={{ flex: 1 }}>{s.address}</Text>
               </Row>
-              <Row gap={7} style={{ marginTop: 2 }}>
+              <Row gap={7} style={{ marginTop: 2, alignItems: 'center' }}>
+                {/* Textual status, not border-only (SITE-02): color alone fails
+                    WCAG 1.4.1 and reads as "selected" instead of "in progress". */}
+                {s.status === 'running' ? (
+                  <View style={{ backgroundColor: t.colors.accentSoft, borderRadius: 7, paddingHorizontal: 8, paddingVertical: 2 }}>
+                    <Text style={{ fontSize: 11, fontWeight: '800' }} color={t.colors.accent}>{tr('field.statusDoing')}</Text>
+                  </View>
+                ) : null}
                 <Badge label={tr('field.services', { n: s.servicesCount })} />
                 <Badge label={tr('field.required', { n: s.obrigCount })} tone="must" />
               </Row>

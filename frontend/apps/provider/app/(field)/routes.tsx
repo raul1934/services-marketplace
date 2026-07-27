@@ -19,7 +19,7 @@ export default function Routes() {
   const dateLabel = `${WD[now.getDay()]}, ${now.getDate()} ${MO[now.getMonth()]}`;
 
   return (
-    <FieldShell title={tr('field.routesToday')} sub={routes ? `${dateLabel} · ${tr('field.routesCount', { n: routes.length })}` : dateLabel}>
+    <FieldShell section="routes" title={tr('field.routesToday')} sub={routes ? `${dateLabel} · ${tr('field.routesCount', { n: routes.length })}` : dateLabel}>
       {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
         <View style={{ gap: 12, paddingTop: 2 }}>
           {routes!.map((r) => {
