@@ -274,7 +274,7 @@ export default function OS() {
 
       {loading ? <Loading /> : error || !os || !site ? <ErrorState error={error ?? new Error()} onRetry={reload} /> : (
         <>
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, gap: 14 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, gap: 14 }} showsVerticalScrollIndicator>
             <View style={{ gap: 8 }}>
               <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text variant="caption" style={{ flex: 1 }}>{tr('field.contract', { name: site.contract })} · {site.address}</Text>
@@ -351,7 +351,26 @@ export default function OS() {
             </View>
           </ScrollView>
 
-          <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 8, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface }}>
+          <SafeAreaView edges={['bottom']} style={{ paddingHorizontal: 20, paddingTop: 10, borderTopWidth: 1, borderTopColor: t.colors.line, backgroundColor: t.colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.06, shadowRadius: 6, elevation: 12 }}>
+            {/* Resumo sempre visivel: o valor da OS (servicos/fotos/equipe) nao
+                deveria exigir rolar ate o fim (UX-05); tambem diz o que o slide
+                vai concluir. A sombra no topo sinaliza conteudo passando por baixo. */}
+            <Row gap={16} style={{ alignItems: 'center', justifyContent: 'center', paddingBottom: 8 }}>
+              <Row gap={5} style={{ alignItems: 'center' }}>
+                <Icon name="check" size={14} color={t.colors.ink3} />
+                <Text variant="caption">{os.services.length}</Text>
+              </Row>
+              <Row gap={5} style={{ alignItems: 'center' }}>
+                <Icon name="camera" size={14} color={t.colors.ink3} />
+                <Text variant="caption">{os.photos.before.length + os.photos.after.length}/{PHOTO_MAX}</Text>
+              </Row>
+              {!soloShift ? (
+                <Row gap={5} style={{ alignItems: 'center' }}>
+                  <Icon name="user" size={14} color={t.colors.ink3} />
+                  <Text variant="caption">{crew.length}</Text>
+                </Row>
+              ) : null}
+            </Row>
             <SlideToConfirm label={tr('field.finishOS')} doneLabel={tr('field.finishedOS')} confirmHint={tr('field.finishHint')} onConfirm={() => fieldApi.finishSite(siteId).catch(() => {}).finally(() => router.back())} />
           </SafeAreaView>
 

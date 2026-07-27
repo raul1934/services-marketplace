@@ -52,7 +52,7 @@ export function FieldShell({ title, sub, section, children }: { title: string; s
         />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 + insets.bottom }} showsVerticalScrollIndicator>
         {children}
       </ScrollView>
 

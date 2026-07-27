@@ -42,7 +42,7 @@ export default function SiteDetail() {
 
       {loading ? <Loading /> : error || !s ? <ErrorState error={error ?? new Error()} onRetry={reload} /> : (
         <>
-          <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator>
             <View style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
               <Text weight="800" style={{ fontSize: 24, letterSpacing: -0.4 }}>{s.name}</Text>
               <Text variant="caption">{tr('field.contract', { name: s.contract })} · {s.address}</Text>
