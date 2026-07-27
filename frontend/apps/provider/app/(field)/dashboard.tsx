@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { ApiError, Icon, IconName, Row, SlideToConfirm, Text, useTheme } from '@chamafacil/shared';
+import { ApiError, Icon, IconName, Row, SlideToConfirm, Text, useAuth, useTheme } from '@chamafacil/shared';
 import { FieldShell, SECTION } from '../../src/field/FieldShell';
 import { fieldApi } from '../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../src/field/async';
+import { OpenInMaps } from '../../src/field/OpenInMaps';
+import { useMyLocation } from '../../src/location';
 
 const WD = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
 const MO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -23,6 +25,43 @@ function useNowMinute() {
   return now;
 }
 
+// Open-Meteo WMO weather code → emoji + label (free API, no key).
+function weatherIcon(code: number): { icon: string; label: string } {
+  if (code === 0) return { icon: '☀️', label: 'Claro' };
+  if (code <= 2) return { icon: '⛅', label: 'Parcialmente nublado' };
+  if (code === 3) return { icon: '☁️', label: 'Nublado' };
+  if (code === 45 || code === 48) return { icon: '🌫️', label: 'Neblina' };
+  if (code >= 51 && code <= 67) return { icon: '🌧️', label: 'Chuva' };
+  if (code >= 71 && code <= 77) return { icon: '❄️', label: 'Neve' };
+  if (code >= 80 && code <= 82) return { icon: '🌦️', label: 'Pancadas' };
+  if (code >= 95) return { icon: '⛈️', label: 'Tempestade' };
+  return { icon: '🌡️', label: '' };
+}
+
+type Weather = { temp: number; icon: string; label: string };
+/** Current weather at the device location (Open-Meteo). Null until it resolves. */
+function useWeather(coords: { latitude: number; longitude: number } | null): Weather | null {
+  const [w, setW] = useState<Weather | null>(null);
+  const lat = coords?.latitude;
+  const lng = coords?.longitude;
+  useEffect(() => {
+    if (lat == null || lng == null) return;
+    let alive = true;
+    (async () => {
+      try {
+        const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code`);
+        const j = await r.json();
+        const cur = j?.current;
+        if (alive && cur?.temperature_2m != null) setW({ temp: Math.round(cur.temperature_2m), ...weatherIcon(cur.weather_code) });
+      } catch {
+        /* offline / API down — just omit the chip */
+      }
+    })();
+    return () => { alive = false; };
+  }, [lat, lng]);
+  return w;
+}
+
 /**
  * Field home — a day overview: shift (live duration + end), day progress, next
  * stop, today's routes summary, and shortcuts.
@@ -33,6 +72,10 @@ export default function Dashboard() {
   const { t: tr } = useTranslation();
   const { data: routes, loading, error, reload } = useAsync(() => fieldApi.routes(), []);
   const { data: shift, reload: reloadShift } = useAsync(() => fieldApi.shift(), []);
+  const { user } = useAuth();
+  const me = useMyLocation();
+  const weather = useWeather(me);
+  const firstName = (user?.name ?? '').trim().split(/\s+/)[0];
   const now = new Date();
   const nowMs = useNowMinute();
   const [endReset, setEndReset] = useState(0);
@@ -64,6 +107,19 @@ export default function Dashboard() {
     <FieldShell section="dashboard" title={tr('fieldNav.dashboard')} sub={dateLabel}>
       {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
         <View style={{ gap: 12, paddingTop: 2 }}>
+          {/* Saudação + clima */}
+          <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text weight="800" style={{ fontSize: 20, letterSpacing: -0.3 }} numberOfLines={1}>
+              {firstName ? `${tr('field.greeting', { name: firstName })} 👋` : ''}
+            </Text>
+            {weather ? (
+              <Row gap={6} style={{ alignItems: 'center', backgroundColor: t.colors.surface, borderRadius: 999, borderWidth: 1, borderColor: t.colors.line, paddingHorizontal: 11, paddingVertical: 6 }}>
+                <Text style={{ fontSize: 16 }}>{weather.icon}</Text>
+                <Text weight="800" style={{ fontSize: 14, fontVariant: ['tabular-nums'] }}>{weather.temp}°C</Text>
+              </Row>
+            ) : null}
+          </Row>
+
           {/* Turno */}
           <View style={card}>
             <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -108,24 +164,28 @@ export default function Dashboard() {
 
           {/* Próxima parada */}
           {nextStop?.site ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={`${tr('field.nextStop')}: ${nextStop.site.name}`}
-              onPress={() => router.push(`/(field)/site/${nextStop.siteId}`)}
-              style={{ ...card, gap: 8 }}
-            >
-              <Row gap={8} style={{ alignItems: 'center' }}>
-                <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: SECTION.sites.accent }} />
-                <Text variant="label">{tr('field.nextStop')}</Text>
-              </Row>
-              <Row gap={11} style={{ alignItems: 'center' }}>
-                <View style={{ flex: 1 }}>
-                  <Text weight="700" style={{ fontSize: 15 }}>{nextStop.site.name}</Text>
-                  <Text variant="caption">{nextStop.site.address}</Text>
-                </View>
-                <Icon name="chevronsR" size={17} color={t.colors.ink3} />
-              </Row>
-            </Pressable>
+            <View style={{ ...card, gap: 10 }}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`${tr('field.nextStop')}: ${nextStop.site.name}`}
+                onPress={() => router.push(`/(field)/site/${nextStop.siteId}`)}
+                style={{ gap: 8 }}
+              >
+                <Row gap={8} style={{ alignItems: 'center' }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: SECTION.sites.accent }} />
+                  <Text variant="label">{tr('field.nextStop')}</Text>
+                </Row>
+                <Row gap={11} style={{ alignItems: 'center' }}>
+                  <View style={{ flex: 1 }}>
+                    <Text weight="700" style={{ fontSize: 15 }}>{nextStop.site.name}</Text>
+                    <Text variant="caption">{nextStop.site.address}</Text>
+                  </View>
+                  <Icon name="chevronsR" size={17} color={t.colors.ink3} />
+                </Row>
+              </Pressable>
+              {/* Abrir a proxima parada num app de navegacao. */}
+              <OpenInMaps address={nextStop.site.address} />
+            </View>
           ) : null}
 
           {/* Rotas de hoje */}

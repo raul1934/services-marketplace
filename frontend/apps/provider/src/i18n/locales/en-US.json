@@ -11,7 +11,7 @@
   },
   "field": {
     "startTitle": "Start shift",
-    "greeting": "Good morning",
+    "greeting": "Hi, {{name}}",
     "notStarted": "shift not started",
     "geoOk": "Location confirmed",
     "stepShort": "STEP",

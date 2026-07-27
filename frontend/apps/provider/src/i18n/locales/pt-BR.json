@@ -11,7 +11,7 @@
   },
   "field": {
     "startTitle": "Iniciar turno",
-    "greeting": "Bom dia",
+    "greeting": "Olá, {{name}}",
     "notStarted": "turno não iniciado",
     "geoOk": "Local confirmado",
     "stepShort": "ETAPA",
