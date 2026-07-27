@@ -87,6 +87,15 @@ export const fieldApi = {
 
   performances: () => http.get<{ data: Performance[] }>(`${base}/performances`).then(unwrap),
   shift: () => http.get<{ data: Shift | null }>(`${base}/shift`).then(unwrap),
+  // Open the master shift for the logged-in leader (idempotent: returns the open
+  // one if there already is one). `tech` defaults to the user's name server-side.
+  startShift: (tech?: string) =>
+    http.post<{ data: Shift }>(`${base}/shift/start`, { body: { tech } }).then(unwrap),
+  // Add a crew member to the open shift.
+  addCrew: (tech: string) =>
+    http.post<{ data: Shift }>(`${base}/shift/crew`, { body: { tech } }).then(unwrap),
+  // Close the master shift and all its crew.
+  finishShift: () => http.post<{ data: Shift }>(`${base}/shift/finish`).then(unwrap),
 
   os: (siteId: string) => http.get<{ data: Os }>(`${base}/os/${siteId}`).then(unwrap),
   setWeather: (siteId: string, type: WeatherType) =>

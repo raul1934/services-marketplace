@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Card, Icon, Row, Text, useTheme, Wiz } from '@chamafacil/shared';
+import { ApiError, Avatar, Card, Icon, Row, Text, useTheme, Wiz } from '@chamafacil/shared';
+import { fieldApi } from '../../src/field/api';
 
 /**
  * Start the shift — the shared Wiz stepper. Step 1 picks the crew, step 2 the
@@ -47,6 +48,26 @@ export default function Shift() {
   const [step, setStep] = useState(1);
   const [crew, setCrew] = useState<Set<string>>(() => new Set(['an', 'br']));
   const [gear, setGear] = useState<Set<string>>(() => new Set(['multimetro', 'alicate', 'bomba']));
+  const [starting, setStarting] = useState(false);
+  const [slideReset, setSlideReset] = useState(0);
+
+  // Open the shift for real: master shift for the leader, then one crew add per
+  // selected member. On failure, surface it and snap the slider back to retry.
+  // (Equipment/GEAR has no shift-level backend field yet — kept as a local choice.)
+  const startShift = async () => {
+    if (starting) return;
+    setStarting(true);
+    try {
+      await fieldApi.startShift();
+      const members = CREW.filter((m) => crew.has(m.id) && !m.you);
+      for (const m of members) await fieldApi.addCrew(m.name);
+      router.replace('/(field)/routes');
+    } catch (e) {
+      Alert.alert(tr('field.shiftStartError'), e instanceof ApiError ? e.message : String((e as Error)?.message ?? e));
+      setSlideReset((n) => n + 1);
+      setStarting(false);
+    }
+  };
 
   const toggle = (current: Set<string>, apply: (s: Set<string>) => void, id: string) => {
     const next = new Set(current);
@@ -73,7 +94,7 @@ export default function Shift() {
       footer={
         onCrew
           ? { primary: { label: tr('field.next'), onPress: () => setStep(2), disabled: crew.size === 0 } }
-          : { slide: { label: tr('field.slide'), doneLabel: tr('field.slideDone'), confirmHint: tr('field.slideHint'), onConfirm: () => router.replace('/(field)/routes') } }
+          : { slide: { label: tr('field.slide'), doneLabel: tr('field.slideDone'), confirmHint: tr('field.slideHint'), onConfirm: startShift, resetSignal: slideReset } }
       }
     >
       <Card style={{ alignItems: 'center', gap: 5, paddingVertical: 14 }}>

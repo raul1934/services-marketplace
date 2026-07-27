@@ -133,7 +133,8 @@
     "sitesCount_plural": "{{count}} sites",
     "routesCount_plural": "{{count}} routes",
     "stops_plural": "{{count}} stops",
-    "startError": "Could not start the visit"
+    "startError": "Could not start the visit",
+    "shiftStartError": "Could not start the shift"
   },
   "fieldNav": {
     "section": "Operations",
