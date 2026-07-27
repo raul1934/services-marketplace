@@ -11,8 +11,9 @@ import { AppBar, AppDrawer, IconButton, useAuth, useTheme, type IconName } from 
  * and the active drawer row share the same color). These are landmark colors,
  * deliberately kept off the cards so they don't collide with status semantics.
  */
-export type FieldSection = 'routes' | 'sites' | 'performances';
+export type FieldSection = 'dashboard' | 'routes' | 'sites' | 'performances';
 export const SECTION: Record<FieldSection, { accent: string; icon: IconName }> = {
+  dashboard: { accent: '#0284c7', icon: 'home' },        // azul — visão geral do dia
   routes: { accent: '#0ea5a5', icon: 'navigate' },       // teal — matches "Finalizar rota"
   sites: { accent: '#4f46e5', icon: 'location' },        // indigo — matches "Iniciar visita"
   performances: { accent: '#9333ea', icon: 'list' },     // roxo — histórico/gestão
@@ -81,6 +82,7 @@ export function FieldShell({ title, sub, section, footer, children }: { title: s
           {
             title: tr('fieldNav.section'),
             items: [
+              { icon: 'home', label: tr('fieldNav.dashboard'), accent: SECTION.dashboard.accent, active: section === 'dashboard', onPress: () => go('/(field)/dashboard') },
               { icon: 'navigate', label: tr('fieldNav.routes'), accent: SECTION.routes.accent, active: section === 'routes', onPress: () => go('/(field)/routes') },
               { icon: 'location', label: tr('fieldNav.sites'), accent: SECTION.sites.accent, active: section === 'sites', onPress: () => go('/(field)/sites') },
               { icon: 'list', label: tr('fieldNav.performances'), accent: SECTION.performances.accent, active: section === 'performances', onPress: () => go('/(field)/performances') },

@@ -143,14 +143,23 @@
     "endShift": "Encerrar turno",
     "endShiftDone": "Turno encerrado",
     "endShiftHint": "Deslizar encerra o turno",
-    "endShiftError": "Não foi possível encerrar o turno"
+    "endShiftError": "Não foi possível encerrar o turno",
+    "shiftOn": "Turno em andamento",
+    "shiftOff": "Nenhum turno aberto",
+    "viewRoutes": "Ver rotas",
+    "continueRoute": "Continuar {{name}}",
+    "shortcuts": "Atalhos",
+    "statRoutes": "rotas",
+    "statStops": "paradas",
+    "statKm": "km"
   },
   "fieldNav": {
     "section": "Operação",
     "routes": "Rotas",
     "sites": "Sites",
     "performances": "Histórico de visitas",
-    "shiftSection": "Turno"
+    "shiftSection": "Turno",
+    "dashboard": "Início"
   },
   "common": {
     "continue": "Continuar",

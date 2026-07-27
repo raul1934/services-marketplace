@@ -87,7 +87,7 @@ function Gate() {
     // the (field) group (auth, the marketplace tabs, onboarding, pending) is sent
     // to the field home (today's routes).
     if (!flags.marketplace) {
-      if (segments[0] !== '(field)') router.replace('/(field)/routes');
+      if (segments[0] !== '(field)') router.replace('/(field)/dashboard');
       return;
     }
 

@@ -143,14 +143,23 @@
     "endShift": "End shift",
     "endShiftDone": "Shift ended",
     "endShiftHint": "Slide to end the shift",
-    "endShiftError": "Could not end the shift"
+    "endShiftError": "Could not end the shift",
+    "shiftOn": "Shift in progress",
+    "shiftOff": "No open shift",
+    "viewRoutes": "View routes",
+    "continueRoute": "Continue {{name}}",
+    "shortcuts": "Shortcuts",
+    "statRoutes": "routes",
+    "statStops": "stops",
+    "statKm": "km"
   },
   "fieldNav": {
     "section": "Operations",
     "routes": "Routes",
     "sites": "Sites",
     "performances": "Visit history",
-    "shiftSection": "Shift"
+    "shiftSection": "Shift",
+    "dashboard": "Home"
   },
   "common": {
     "continue": "Continue",

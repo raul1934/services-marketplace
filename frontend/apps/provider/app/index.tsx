@@ -5,5 +5,5 @@ import { flags } from '../src/flags';
 // the marketplace dashboard unconditionally flashed it (and fired 3 queries)
 // before the Gate bounced field-mode users to /(field)/routes — NAV-05.
 export default function Index() {
-  return <Redirect href={flags.marketplace ? '/(tabs)/dashboard' : '/(field)/routes'} />;
+  return <Redirect href={flags.marketplace ? '/(tabs)/dashboard' : '/(field)/dashboard'} />;
 }
