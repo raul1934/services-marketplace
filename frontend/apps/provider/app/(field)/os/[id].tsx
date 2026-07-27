@@ -349,7 +349,7 @@ export default function OS() {
             <View style={{ gap: 9 }}>
               <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text variant="label">{tr('field.visitServices')}</Text>
-                <Text variant="caption">{tr('field.servicesTotal', { n: os.services.length })}</Text>
+                <Text variant="caption">{tr('field.servicesTotal', { count: os.services.length })}</Text>
               </Row>
 
               {soloShift ? (

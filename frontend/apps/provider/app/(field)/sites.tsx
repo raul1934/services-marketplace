@@ -14,7 +14,7 @@ export default function Sites() {
   const { data: sites, loading, error, reload } = useAsync(() => fieldApi.sites(), []);
 
   return (
-    <FieldShell section="sites" title={tr('fieldNav.sites')} sub={sites ? tr('field.sitesCount', { n: sites.length }) : undefined}>
+    <FieldShell section="sites" title={tr('fieldNav.sites')} sub={sites ? tr('field.sitesCount', { count: sites.length }) : undefined}>
       {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
         <View style={{ gap: 10, paddingTop: 2 }}>
           {sites!.map((s) => (
@@ -44,8 +44,8 @@ export default function Sites() {
                     <Text style={{ fontSize: 11, fontWeight: '800' }} color={t.colors.accent}>{tr('field.statusDoing')}</Text>
                   </View>
                 ) : null}
-                <Badge label={tr('field.services', { n: s.servicesCount })} />
-                <Badge label={tr('field.required', { n: s.obrigCount })} tone="must" />
+                <Badge label={tr('field.services', { count: s.servicesCount })} />
+                <Badge label={tr('field.required', { count: s.obrigCount })} tone="must" />
               </Row>
             </Pressable>
           ))}

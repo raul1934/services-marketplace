@@ -42,7 +42,7 @@ export default function Performances() {
                 <Row gap={14}>
                   <Row gap={6} style={{ alignItems: 'center' }}>
                     <Icon name="check" size={14} color={t.colors.ink3} />
-                    <Text variant="caption">{tr('field.services', { n: p.services })}</Text>
+                    <Text variant="caption">{tr('field.services', { count: p.services })}</Text>
                   </Row>
                   <Row gap={6} style={{ alignItems: 'center' }}>
                     <Icon name="user" size={14} color={t.colors.ink3} />

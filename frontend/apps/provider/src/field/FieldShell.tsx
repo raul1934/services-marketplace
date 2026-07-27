@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +40,14 @@ export function FieldShell({ title, sub, section, children }: { title: string; s
     router.replace(path);
   };
 
+  // Logout is destructive to the shift context — confirm before dropping it (NAV-02).
+  const confirmLogout = () => {
+    Alert.alert(tr('drawer.logout'), tr('drawer.logoutConfirm'), [
+      { text: tr('common.cancel'), style: 'cancel' },
+      { text: tr('drawer.logout'), style: 'destructive', onPress: () => { setDrawer(false); logout(); } },
+    ]);
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: t.colors.bg }}>
       <SafeAreaView edges={['top']}>
@@ -76,7 +84,7 @@ export function FieldShell({ title, sub, section, children }: { title: string; s
             items: [{ icon: 'clock', label: tr('field.startTitle'), onPress: () => go('/(field)/shift') }],
           },
         ]}
-        footer={{ icon: 'power', label: tr('drawer.logout'), danger: true, onPress: logout }}
+        footer={{ icon: 'power', label: tr('drawer.logout'), danger: true, onPress: confirmLogout }}
       />
     </View>
   );

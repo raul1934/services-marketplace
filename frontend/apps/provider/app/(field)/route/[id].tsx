@@ -105,7 +105,7 @@ export default function RouteStops() {
           <ScrollView contentContainerStyle={{ paddingBottom: 20 }} showsVerticalScrollIndicator={false}>
             <View style={{ paddingHorizontal: 20, paddingBottom: 12 }}>
               <Text weight="800" style={{ fontSize: 24, letterSpacing: -0.4 }}>{route.name}</Text>
-              <Text variant="caption">{tr('field.stops', { n: route.stops.length })} · {route.km} km · {running ? tr('field.statusDoing') : tr('field.stopNext')}</Text>
+              <Text variant="caption">{tr('field.stops', { count: route.stops.length })} · {route.km} km · {running ? tr('field.statusDoing') : tr('field.stopNext')}</Text>
             </View>
 
             {region ? (

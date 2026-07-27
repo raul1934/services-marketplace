@@ -1,10 +1,10 @@
 import React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, ScrollView, View } from 'react-native';
 import MapView, { MapLabel, MapPin, Marker, Polygon } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { BackBar, Icon, Pulse, Row, Text, useTheme } from '@chamafacil/shared';
+import { ApiError, BackBar, Icon, Pulse, Row, Text, useTheme } from '@chamafacil/shared';
 import { fieldApi, Geo } from '../../../src/field/api';
 import { ErrorState, Loading, useAsync } from '../../../src/field/async';
 import { OpenInMaps } from '../../../src/field/OpenInMaps';
@@ -30,8 +30,16 @@ export default function SiteDetail() {
   const { data: s, loading, error, reload } = useAsync(() => fieldApi.site(id ?? 'rio-fortore'), [id]);
 
   const running = s?.status === 'running';
+  // Surface failures instead of swallowing them: starting a visit that fails
+  // must tell the operator, not silently do nothing (SITE-03).
   const confirm = async (fn: () => Promise<unknown>) => {
-    try { await fn(); } finally { reload(); }
+    try {
+      await fn();
+    } catch (e) {
+      Alert.alert(tr('field.startError'), e instanceof ApiError ? e.message : String((e as Error)?.message ?? e));
+    } finally {
+      reload();
+    }
   };
 
   return (
@@ -121,7 +129,7 @@ export default function SiteDetail() {
                       <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
                         <View style={{ flex: 1 }}>
                           <Text weight="700" style={{ fontSize: 13.5, fontVariant: ['tabular-nums'] }}>{h.time}</Text>
-                          <Text variant="caption">{tr('field.services', { n: h.services })}</Text>
+                          <Text variant="caption">{tr('field.services', { count: h.services })}</Text>
                         </View>
                         <View style={{ backgroundColor: doing ? t.colors.accentSoft : t.colors.okSoft, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 }}>
                           <Text style={{ fontSize: 11, fontWeight: '700' }} color={doing ? t.colors.accent : t.colors.ok}>{doing ? tr('field.statusDoing') : tr('field.statusDone')}</Text>

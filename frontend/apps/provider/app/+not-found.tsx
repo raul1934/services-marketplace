@@ -2,6 +2,7 @@ import React from 'react';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { NotFoundView } from '@chamafacil/shared';
+import { flags } from '../src/flags';
 
 /** Catch-all for unmatched routes. */
 export default function NotFound() {
@@ -13,7 +14,9 @@ export default function NotFound() {
       title={tr('notFound.route.title')}
       body={tr('notFound.route.body')}
       homeLabel={tr('notFound.home')}
-      onHome={() => router.replace('/(tabs)/dashboard')}
+      // Flag-aware home so field-mode 404s don't bounce through the dead
+      // marketplace dashboard (NAV-05).
+      onHome={() => router.replace(flags.marketplace ? '/(tabs)/dashboard' : '/(field)/routes')}
       backLabel={tr('common.back')}
       onBack={router.canGoBack() ? () => router.back() : undefined}
     />

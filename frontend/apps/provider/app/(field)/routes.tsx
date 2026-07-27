@@ -19,7 +19,7 @@ export default function Routes() {
   const dateLabel = `${WD[now.getDay()]}, ${now.getDate()} ${MO[now.getMonth()]}`;
 
   return (
-    <FieldShell section="routes" title={tr('field.routesToday')} sub={routes ? `${dateLabel} · ${tr('field.routesCount', { n: routes.length })}` : dateLabel}>
+    <FieldShell section="routes" title={tr('field.routesToday')} sub={routes ? `${dateLabel} · ${tr('field.routesCount', { count: routes.length })}` : dateLabel}>
       {loading ? <Loading /> : error ? <ErrorState error={error} onRetry={reload} /> : (
         <View style={{ gap: 12, paddingTop: 2 }}>
           {routes!.map((r) => {
@@ -40,7 +40,7 @@ export default function Routes() {
                     <Icon name="chevronsR" size={16} color={t.colors.ink3} />
                   </Row>
                 </Row>
-                <Text variant="caption">{tr('field.stops', { n: r.stops.length })} · {tr('field.required', { n: r.required })} · {r.km} km{r.performedTimes > 0 ? ` · ${tr('field.doneTimes', { n: r.performedTimes })}` : ''}</Text>
+                <Text variant="caption">{tr('field.stops', { count: r.stops.length })} · {tr('field.required', { count: r.required })} · {r.km} km{r.performedTimes > 0 ? ` · ${tr('field.doneTimes', { n: r.performedTimes })}` : ''}</Text>
                 <Row gap={6} style={{ flexWrap: 'wrap' }}>
                   {preview.map((name) => <Tag key={name} label={name} />)}
                   {r.stops.length > preview.length ? <Tag label={`+${r.stops.length - preview.length}`} muted /> : null}
