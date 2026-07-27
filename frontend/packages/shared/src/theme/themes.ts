@@ -60,6 +60,12 @@ export interface Theme {
   font: { body: string; head: string; mono: string };
   /** Heading font weight (RN expects a string). */
   headWeight: '700' | '800';
+  /**
+   * Global multiplier applied to every font size in `Text` — variant sizes AND
+   * inline `fontSize` overrides (all app text goes through `Text`). Lets an app
+   * dial overall legibility without touching each screen. Defaults to 1.
+   */
+  fontScale?: number;
 }
 
 export const customer: Theme = {
@@ -140,6 +146,8 @@ export const provider: Theme = {
   shadowSm: { shadowColor: '#0b1220', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 6, elevation: 2 },
   font: { body: 'Manrope', head: 'Manrope', mono: 'Space Mono' },
   headWeight: '700',
+  // Field app read at arm's length, often in sunlight — bump overall legibility.
+  fontScale: 1.12,
 };
 
 export const night: Theme = {

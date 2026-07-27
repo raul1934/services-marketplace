@@ -163,45 +163,63 @@ export default function OS() {
       <Row gap={10} style={{ paddingHorizontal: 12, paddingVertical: 10, alignItems: 'center' }}>
         <View style={{ flex: 1 }}>
           <Text weight="700" style={{ fontSize: 13.5 }}>{inst.name}</Text>
-          <Text variant="caption">
-            {inst.obrig ? tr('field.obrig') : tr('field.optional')}{hasRequires(inst.requires) ? `  ·  ${requiresText(inst.requires)}` : ''}
-          </Text>
+          <Text variant="caption">{inst.obrig ? tr('field.obrig') : tr('field.optional')}</Text>
         </View>
       </Row>
       {inst.resources.length || anyResourceBtn ? (
         <View style={{ marginLeft: 12, marginRight: 12, borderLeftWidth: 2, borderLeftColor: t.colors.line, paddingLeft: 11, gap: 6, paddingBottom: 6 }}>
-          {inst.resources.map((r) => (
-            <Row key={r.id} gap={8} style={{ alignItems: 'center' }}>
-              <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
-                <Text weight="600" style={{ fontSize: 12.5 }}>{r.name}</Text>{` · ${r.kind === 'equipment' ? tr('field.equipment') : tr('field.consumable')}`}
-              </Text>
-              <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={r.kind === 'consumable' ? (r.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.accent}>
-                {r.kind === 'equipment' ? (r.siteDuration ? tr('field.siteDuration') : fmtDur(r.minutes ?? 0)) : resourceValue(r)}
-              </Text>
-            </Row>
-          ))}
-          <Row gap={8} style={{ paddingTop: 4 }}>
-            {hasEquipment ? (
+          {/* Agrupado por tipo: cada secao tem seu cabecalho, seus itens e seu
+              botao de adicionar (Equipamentos, depois Consumiveis). */}
+          {(() => {
+            const resRow = (r: ServiceResource) => (
+              <Row key={r.id} gap={8} style={{ alignItems: 'center' }}>
+                <Text style={{ flex: 1, fontSize: 12.5 }} color={t.colors.ink2}>
+                  <Text weight="600" style={{ fontSize: 12.5 }}>{r.name}</Text>{` · ${r.kind === 'equipment' ? tr('field.equipment') : tr('field.consumable')}`}
+                </Text>
+                <Text style={{ fontSize: 10.5, fontWeight: '700' }} color={r.kind === 'consumable' ? (r.cost === 'charged' ? t.colors.warn : t.colors.ok) : t.colors.accent}>
+                  {r.kind === 'equipment' ? (r.siteDuration ? tr('field.siteDuration') : humanMin(r.minutes ?? 0)) : resourceValue(r)}
+                </Text>
+              </Row>
+            );
+            const addBtn = (kind: ResourceKind, label: string) => (
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={tr('field.addEquipment')}
-                onPress={() => openResources(inst, 'equipment')}
-                style={{ flex: 1, backgroundColor: t.colors.accentSoft, borderRadius: 10, paddingVertical: 10, alignItems: 'center' }}
+                accessibilityLabel={label}
+                onPress={() => openResources(inst, kind)}
+                style={{ backgroundColor: t.colors.accentSoft, borderRadius: 10, paddingVertical: 10, alignItems: 'center' }}
               >
-                <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addEquipment')}</Text>
+                <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{label}</Text>
               </Pressable>
-            ) : null}
-            {hasConsumable ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={tr('field.addConsumable')}
-                onPress={() => openResources(inst, 'consumable')}
-                style={{ flex: 1, backgroundColor: t.colors.accentSoft, borderRadius: 10, paddingVertical: 10, alignItems: 'center' }}
-              >
-                <Text weight="700" style={{ fontSize: 13 }} color={t.colors.accent}>{tr('field.addConsumable')}</Text>
-              </Pressable>
-            ) : null}
-          </Row>
+            );
+            const equip = inst.resources.filter((r) => r.kind === 'equipment');
+            const consum = inst.resources.filter((r) => r.kind === 'consumable');
+            const showEquip = hasEquipment || equip.length > 0;
+            const showConsum = hasConsumable || consum.length > 0;
+            return (
+              <>
+                {showEquip ? (
+                  <View style={{ gap: 6 }}>
+                    <Row gap={6} style={{ alignItems: 'center' }}>
+                      <Text variant="label" color={t.colors.ink3}>{tr('field.equipmentSection')}</Text>
+                      {inst.requires.equipment ? <Text style={{ fontSize: 10.5, fontWeight: '800' }} color={t.colors.warn}>{tr('field.obrig')}</Text> : null}
+                    </Row>
+                    {equip.map(resRow)}
+                    {hasEquipment ? addBtn('equipment', tr('field.addEquipment')) : null}
+                  </View>
+                ) : null}
+                {showConsum ? (
+                  <View style={showEquip ? { gap: 6, marginTop: 8 } : { gap: 6 }}>
+                    <Row gap={6} style={{ alignItems: 'center' }}>
+                      <Text variant="label" color={t.colors.ink3}>{tr('field.consumableSection')}</Text>
+                      {inst.requires.consumable ? <Text style={{ fontSize: 10.5, fontWeight: '800' }} color={t.colors.warn}>{tr('field.obrig')}</Text> : null}
+                    </Row>
+                    {consum.map(resRow)}
+                    {hasConsumable ? addBtn('consumable', tr('field.addConsumable')) : null}
+                  </View>
+                ) : null}
+              </>
+            );
+          })()}
         </View>
       ) : null}
     </View>
@@ -240,22 +258,27 @@ export default function OS() {
           style={{ backgroundColor: t.colors.surface, borderWidth: 1, borderColor: added ? t.colors.accent : t.colors.line, borderRadius: 11, padding: 11 }}
         >
           <Row gap={10} style={{ alignItems: 'center' }}>
-            <View style={{ width: 34, height: 34, borderRadius: 9, backgroundColor: t.colors.surface2, alignItems: 'center', justifyContent: 'center' }}>
-              <Icon name="wrench" size={17} color={t.colors.ink3} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text weight="600" style={{ fontSize: 13.5 }}>{m.name}</Text>
-              <Text variant="caption">{hasRequires(m.requires) ? requiresText(m.requires) : (m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit'))}</Text>
-            </View>
-            {/* Checkbox, not a "+": the row toggles a staged selection that the
-                footer commits — a "+" read as "add now" (OS-07). */}
+            {/* Checkbox in the icon's old spot — dropped the generic wrench (OS-08),
+                so selection state reads first. Row toggles a staged selection the
+                footer commits (OS-07). */}
             {added ? (
-              <View style={{ width: 22, height: 22, borderRadius: 7, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
-                <Icon name="check" size={14} color="#fff" />
+              <View style={{ width: 24, height: 24, borderRadius: 8, backgroundColor: t.colors.accent, alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name="check" size={15} color="#fff" />
               </View>
             ) : (
-              <View style={{ width: 22, height: 22, borderRadius: 7, borderWidth: 1.5, borderColor: t.colors.line }} />
+              <View style={{ width: 24, height: 24, borderRadius: 8, borderWidth: 1.5, borderColor: t.colors.line }} />
             )}
+            <View style={{ flex: 1 }}>
+              <Text weight="600" style={{ fontSize: 13.5 }}>{m.name}</Text>
+              {hasRequires(m.requires) ? (
+                <>
+                  {m.requires.equipment ? <Text variant="caption">{tr('field.reqEquipment')}</Text> : null}
+                  {m.requires.consumable ? <Text variant="caption">{tr('field.reqConsumable')}</Text> : null}
+                </>
+              ) : (
+                <Text variant="caption">{m.rate === 'hour' ? tr('field.rateHour') : tr('field.rateVisit')}</Text>
+              )}
+            </View>
           </Row>
         </Pressable>
       );

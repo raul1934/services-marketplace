@@ -31,6 +31,10 @@ interface Props extends TextProps {
 
 export function Text({ variant = 'body', color, weight, center, style, ...rest }: Props) {
   const t = useTheme();
+  // Global legibility multiplier (per-app, from the theme). Applied to the
+  // resolved size below so BOTH variant sizes and inline `fontSize` overrides
+  // grow together — all app text renders through this component.
+  const scale = t.fontScale ?? 1;
   const base = {
     h1: { fontSize: 28, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.5 },
     h2: { fontSize: 22, fontWeight: t.headWeight, color: t.colors.ink, letterSpacing: -0.3 },
@@ -52,10 +56,16 @@ export function Text({ variant = 'body', color, weight, center, style, ...rest }
   // $ bar and the comma tail, and ★ lost its points. Drop the inherited value
   // in that case and let the platform derive one from the actual font size.
   const flat = StyleSheet.flatten(style) as { fontSize?: number; lineHeight?: number } | undefined;
-  const resolved =
-    flat?.fontSize != null && flat?.lineHeight == null && 'lineHeight' in base
-      ? { ...base, lineHeight: undefined }
-      : base;
+  const baseLineHeight = 'lineHeight' in base ? (base as { lineHeight?: number }).lineHeight : undefined;
+  const rawSize = flat?.fontSize ?? base.fontSize;
+  const rawLineHeight = flat?.lineHeight ?? (flat?.fontSize == null ? baseLineHeight : undefined);
+  // Variant style minus its size — the scaled size is applied last so it wins
+  // over both the variant default and any inline `fontSize`.
+  const { fontSize: _bfs, lineHeight: _blh, ...baseRest } = base as Record<string, unknown>;
+  const scaledSize: { fontSize: number; lineHeight?: number } = {
+    fontSize: Math.round(rawSize * scale),
+    ...(rawLineHeight != null ? { lineHeight: Math.round(rawLineHeight * scale) } : {}),
+  };
 
   // Expose heading semantics (role + level) to assistive tech on web.
   const level = HEADING_LEVEL[variant];
@@ -68,7 +78,7 @@ export function Text({ variant = 'body', color, weight, center, style, ...rest }
       {...headingProps}
       {...rest}
       style={[
-        resolved,
+        baseRest,
         variant === 'mono'
           ? { fontFamily: Number(effWeight) >= 700 ? 'SpaceMono_700Bold' : 'SpaceMono_400Regular' }
           : { fontFamily: manropeFor(effWeight) },
@@ -76,6 +86,7 @@ export function Text({ variant = 'body', color, weight, center, style, ...rest }
         weight ? { fontWeight: weight } : null,
         center ? styles.center : null,
         style,
+        scaledSize,
       ]}
     />
   );
